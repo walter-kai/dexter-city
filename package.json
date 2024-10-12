@@ -1,0 +1,31 @@
+{
+  "name": "hs-nextdoor-server",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "http-proxy-middleware": "^3.0.2",
+    "morgan": "^1.10.0",
+    "node-fetch": "^2.7.0",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "start": "node dist/server.js",
+    "build": "tsc --project tsconfig.json",
+    "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
+    "dev-server": "ts-node src/server.ts",
+    "dev-client": "cd client && npm start",
+    "heroku-postbuild": "npm run build && cd client && npm install && npm run build"
+  },
+  "devDependencies": {
+    "@types/morgan": "^1.9.9",
+    "@types/node": "^22.5.5",
+    "@types/node-fetch": "^2.6.11",
+    "ts-node": "^10.9.2",
+    "concurrently": "^9.0.1"
+  }
+}

@@ -1,0 +1,37 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.btn-standard {
+  @apply bg-[#143059] text-white font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#1d416e] hover:shadow-md;
+}
+
+.btn-teal {
+  @apply bg-[#336d82] text-white font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#3e7b91] hover:shadow-sm ;
+}
+
+.btn-light {
+  @apply bg-[#eef1f2] border-none text-[#143059] font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#dce2e5] hover:text-[#1d416e] hover:ring-2 hover:ring-gray-300;
+}
+
+.btn-nav {
+  @apply text-black bg-transparent font-bold py-2 px-4 transition duration-200 hover:scale-125 hover:text-[#143059] hover:underline;
+}
+
+h1 {
+  @apply text-lg font-semibold !important;
+}
+
+.input-standard {
+  @apply h-fit p-2 border border-black rounded-none transition-colors duration-200 focus:border-[#336d82] !important;
+}
