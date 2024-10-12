@@ -9,25 +9,11 @@ body {
   @apply font-sourcesans;
   line-height: 1.6;
   margin: 0;
-  padding: 20px;
   background-color: #fdfdfd;
 }
 
 h1, h2 {
   color: #333;
-}
-
-form {
-  margin-bottom: 20px;
-}
-
-.form-row {
-  display: flex;
-  margin-bottom: 10px;
-}
-
-.form-row > * {
-  margin-right: 10px;
 }
 
 ul {

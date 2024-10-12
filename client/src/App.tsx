@@ -1,6 +1,6 @@
-import './styles/styles.css'
-import React, { useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import './styles/styles.css';
+import React, { useEffect, useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Search from './pages/Search';
 import Trending from './pages/Trending';
 import Share from './pages/Share';
@@ -9,87 +9,72 @@ import Support from './pages/Support';
 import NotFound from './pages/NotFound';
 import Quit from './pages/Quit';
 import Profile from './pages/Profile';
-import { useToken } from './services/TokenProvider';
-import { FaSearch, FaFileSignature, FaUser, FaStar } from 'react-icons/fa';
-import { Hootsuite } from './services/Hootsuite';
-import { useOAuth } from './services/OauthProvider';
-
+import NavBar from './components/NavBar';
+import OnboardForm from './pages/OnboardForm';
+import { getTelegram, defaultTelegramUser } from './services/Telegram';
 
 const App: React.FC = () => {
-  const navigate = useNavigate(); // Hook for navigation
-  const { privateToken, fetchPublicToken } = useToken();
+  const [telegramUser, setTelegramUser] = useState(defaultTelegramUser);
+  const [isOnboarding, setIsOnboarding] = useState(true);
+  const [loading, setLoading] = useState(true); // State for loading user data
+  const [error, setError] = useState<string | null>(null); // State for error handling
 
   useEffect(() => {
-    Hootsuite.init(); // Initialize Hootsuite SDK when the component mounts
-    fetchPublicToken();
+    async function fetchTelegramUser() {
+      setLoading(true); // Set loading state
+      try {
+        const telegramData = await getTelegram();
+        setTelegramUser(telegramData.user);
+      } catch (error) {
+        console.error("Error fetching Telegram user:", error);
+        setError("Failed to fetch Telegram user. Please try again."); // Set error state
+      } finally {
+        setLoading(false); // Reset loading state
+      }
+    }
+
+    fetchTelegramUser();
   }, []);
-
-  const { initiateOAuth } = useOAuth();  
-
+  
   const handleLogin = () => {
-    initiateOAuth();
+    // Add your logic here for handling Telegram login if needed
   };
 
+  const handleCompleteOnboarding = (chosenName: string, favoriteSport: string[]) => {
+    console.log("Onboarding complete with name:", chosenName, "and favorite sports:", favoriteSport);
+    setIsOnboarding(false);
+  };
+
+  if (loading) {
+    return <div>Loading...</div>; // Optional loading state
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>; // Show error message
+  }
+
   return (
-    <div className="max-w-[98%] mx-auto">
-      {/* Top Bar */}
-      <div className="fixed bg-[#fdfdfd] z-20 left-0 w-full top-0 flex py-2 items-center">
-        <button 
-          className="btn-nav" 
-          type="button" 
-          onClick={() => navigate('/profile')}
-        >
-          <FaUser className="text-xl" />
-        </button>
-        <button 
-          className="btn-nav" 
-          type="button" 
-          onClick={() => navigate('/trending')}
-        >
-          <FaStar className="text-xl" />
-        </button>
-        <button 
-          className="btn-nav" 
-          type="button" 
-          onClick={() => navigate('/')}
-        >
-          <FaSearch className="text-xl" />
-        </button>
-        <button 
-          className="btn-nav" 
-          type="button" 
-          onClick={() => navigate('/share')}
-        >
-          <FaFileSignature className="text-xl" />
-        </button>
-
-        {privateToken ? (
-          <div className="ml-auto pr-4 flex items-center space-x-2">
-            <span className="text-[#b8ec51e6] font-semibold">Connected</span>
-          </div>
-        ) : (
-          <div className="ml-auto pr-4 flex items-center space-x-2">
-          {/* <span className="text-[#FF4342] font-semibold">Log in</span> */}
-          <button type="button" onClick={handleLogin} className="btn-teal text-sm px-4 w-[100px]">
-            Log in
-          </button>
-        </div>
-        )}
-      </div>
-
-      {/* Main Routes */}
-      <div className="mt-[46px]">
-        <Routes>
-          <Route path="/" element={<Search />} />
-          <Route path="/trending" element={<Trending />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/share" element={<Share />} />
-          <Route path="/user-guide" element={<UserGuide />} />
-          <Route path="/support" element={<Support />} />
-          <Route path="/quit" element={<Quit />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
+    <div className="mx-auto">
+      {isOnboarding ? (
+        <OnboardForm 
+          telegramName={telegramUser.first_name} 
+          onComplete={handleCompleteOnboarding} 
+        />
+      ) : (
+        <>
+          <NavBar telegramUser={telegramUser} onLogin={handleLogin} />
+          <Routes>
+            <Route path="/" element={<Search />} />
+            <Route path="/trending" element={<Trending />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/share" element={<Share />} />
+            <Route path="/user-guide" element={<UserGuide />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/quit" element={<Quit />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </>
+      )}
     </div>
   );
 };

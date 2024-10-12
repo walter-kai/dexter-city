@@ -13,15 +13,16 @@ code {
 }
 
 .btn-standard {
-  @apply bg-[#143059] text-white font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#1d416e] hover:shadow-md;
+  @apply bg-[#143059] text-white font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#1d416e] hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
+
 .btn-teal {
-  @apply bg-[#336d82] text-white font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#3e7b91] hover:shadow-sm ;
+  @apply bg-[#336d82] text-white font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#3e7b91] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .btn-light {
-  @apply bg-[#eef1f2] border-none text-[#143059] font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#dce2e5] hover:text-[#1d416e] hover:ring-2 hover:ring-gray-300;
+  @apply bg-[#eef1f2] border-none text-[#143059] font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#dce2e5] hover:text-[#1d416e] hover:ring-2 hover:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed;
 }
 
 .btn-nav {
