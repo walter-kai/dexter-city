@@ -2,8 +2,8 @@ import React from 'react';
 
 interface Profile {
   id: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   profile_picture: string;
   status: string;
   account_creation_date: string;
@@ -41,10 +41,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ profile, onClose }) => {
         <div className="text-center">
           <img
             src={profile.profile_picture}
-            alt={`${profile.first_name} ${profile.last_name}`}
+            alt={`${profile.firstName} ${profile.lastName}`}
             className="w-24 h-24 rounded-full mx-auto"
           />
-          <h2 className="text-xl font-bold mt-2">{profile.first_name} {profile.last_name}</h2>
+          <h2 className="text-xl font-bold mt-2">{profile.firstName} {profile.lastName}</h2>
           <p className="text-gray-600">{profile.status}</p>
         </div>
         <div className="mt-4">

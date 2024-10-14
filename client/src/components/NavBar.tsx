@@ -2,9 +2,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaFileSignature, FaUser, FaStar } from 'react-icons/fa';
+import { TelegramUser } from '../models/User';
 
 interface NavBarProps {
-  telegramUser: { id: string; first_name: string };
+  telegramUser: TelegramUser;
   onLogin: () => void;
 }
 
@@ -46,13 +47,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser, onLogin }) => {
         <div className="ml-auto pr-4 flex items-center space-x-2">
           <span className="text-[#b8ec51e6] font-semibold">{telegramUser.first_name} Connected</span>
         </div>
-      ) : (
-        <div className="ml-auto pr-4 flex items-center space-x-2">
-          <button type="button" onClick={onLogin} className="btn-teal text-sm px-4 w-[100px]">
-            Log in
-          </button>
-        </div>
-      )}
+      ) : (<></>)}
     </div>
   );
 };

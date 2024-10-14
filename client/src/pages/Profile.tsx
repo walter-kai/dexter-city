@@ -2,9 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useOAuth } from '../services/OauthProvider';  
 import { useToken } from '../services/TokenProvider';
 // import { useNavigate } from 'react-router-dom';
-import { User } from '../types/User'; // Adjust the path as necessary
-import { Hootsuite } from '../services/Hootsuite';
-// import { FaUser } from 'react-icons/fa';
+import User from '../models/User'; // Adjust the path as necessary
 import { Loading } from '../components/Loading';
 
 const Profile: React.FC = () => {
@@ -35,9 +33,8 @@ const Profile: React.FC = () => {
     const fetchUserData = async () => {
       setLoading(true);
       try {
-
         const response = await fetch(`/api/me?token=${privateToken}`);
-        const data = await response.json();
+        const data: User = await response.json();
 
         setUserData(data);
       } catch (err) {
@@ -58,29 +55,20 @@ const Profile: React.FC = () => {
       {privateToken ? (
         <div>
           <h1 className="text-2xl font-bold mb-4">Profile</h1>
-          <button 
-            className="btn-standard" 
-            type="button" 
-            onClick={() => Hootsuite.getUser()} // Navigate to Search
-          >
-            Hootsuite User Info
-          </button>
           {userData ? (
             <div className="bg-white shadow-md rounded-lg p-4">
-              <img src={userData.profile_picture} alt={`${userData.first_name} ${userData.last_name}`} className="w-24 h-24 rounded-full mb-4" />
-              <h2 className="text-xl font-semibold">{userData.first_name} {userData.last_name}</h2>
-              <p><strong>Status:</strong> {userData.status}</p>
-              <p><strong>Account Creation Date:</strong> {new Date(userData.account_creation_date).toLocaleString()}</p>
-              <p><strong>Verified:</strong> {userData.verified ? 'Yes' : 'No'}</p>
-              <p><strong>Neighborhood:</strong> <a href={userData.neighborhood_url} target="_blank" rel="noopener noreferrer">{userData.neighborhood_name}</a></p>
-              <p><strong>City:</strong> {userData.city_name}</p>
-              {userData.is_business_profile && <p><strong>Business Name:</strong> {userData.business_name}</p>}
-              {userData.is_agency_profile && (
-                <div>
-                  <p><strong>Agency Name:</strong> {userData.agency_name}</p>
-                  <p><strong>Agency URL:</strong> <a href={userData.agency_url_at_nextdoor} target="_blank" rel="noopener noreferrer">{userData.agency_url_at_nextdoor}</a></p>
-                </div>
-              )}
+              <h2 className="text-xl font-semibold">{userData.firstname} {userData.lastname}</h2>
+              <p><strong>Handle:</strong> {userData.handle || 'N/A'}</p>
+              <p><strong>Date Created:</strong> {new Date(userData.dateCreated).toLocaleString()}</p>
+              <p><strong>Last Logged In:</strong> {new Date(userData.lastLoggedIn).toLocaleString()}</p>
+              <p><strong>Mission Score:</strong> {userData.missionScore}</p>
+              <p><strong>Pick Score:</strong> {userData.pickScore}</p>
+              <p><strong>Total Losses:</strong> {userData.totalLosses}</p>
+              <p><strong>Total Wins:</strong> {userData.totalWins}</p>
+              <p><strong>Total Score:</strong> {userData.totalScore}</p>
+              <p><strong>Referral:</strong> {userData.referral || 'N/A'}</p>
+              <p><strong>Favorite Sports:</strong> {userData.favoriteSports?.join(', ') || 'N/A'}</p>
+              <p><strong>Telegram ID:</strong> {userData.telegramid}</p>
             </div>
           ) : (
             <p>No user data available.</p>

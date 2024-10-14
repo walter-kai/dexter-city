@@ -4,6 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import fetch from 'node-fetch';
 import morgan from 'morgan'; 
+import routes from './routes';
 
 export interface Post {
   author: {
@@ -69,6 +70,7 @@ app.use(morgan('combined'));  // logs stuff
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client/build')));
+app.use("/api", routes);
 
 
 

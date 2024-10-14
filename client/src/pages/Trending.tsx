@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useToken } from '../services/TokenProvider';
 import PostList, { Post } from '../components/PostList';
-import { City } from '../types/City';
+import { City } from '../models/City';
 
 const Trending: React.FC = () => {
   const { publicToken, fetchPublicToken } = useToken();

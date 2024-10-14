@@ -1,23 +1,4 @@
-// import { webAppContext } from "@vkruglikov/react-telegram-web-app/lib/core";
-
-// import { setLeagueFilter } from "../pages/Games";
-// import { getLeagueFromString } from "../types/game";
-
-// Define types for Telegram User and WebApp
-export interface TelegramUser {
-  dateCreated?: string;  // Make optional
-  first_name: string;
-  handle: string;
-  lastLoggedIn?: string; // Make optional
-  last_name?: string;     // Make optional
-  id: string;            // Assuming it's always a string
-  referral?: string;     // Make optional
-  pickScore: number;
-  missionScore: number;
-  totalLosses: number;
-  totalWins: number;
-}
-
+import { TelegramUser } from "../models/User";
 
 export interface TelegramWebApp {
   initDataUnsafe?: {
@@ -31,7 +12,7 @@ export interface TelegramWebApp {
 export const defaultTelegramUser: TelegramUser = {
   dateCreated: "", // Add your default values here
   first_name: "TestUser",
-  handle: "", // Set handle to testname
+  handle: "testHandle", // Set handle to testname
   lastLoggedIn: "",
   last_name: "",
   id: "5030917144", // myid
