@@ -19,10 +19,12 @@ const serviceAccount = {
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-    databaseURL: "https://battlebet-22c4a.firebaseio.com"
+    databaseURL: "https://battlebet-22c4a.firebaseio.com",
+    storageBucket: 'gs://battlebet-22c4a.appspot.com'
   });
 }
 
 const db = admin.firestore();
+const bucket = admin.storage().bucket(); // Get the storage bucket
 
-export default db;
+export { db, bucket }; // Export both the Firestore db and the storage bucket

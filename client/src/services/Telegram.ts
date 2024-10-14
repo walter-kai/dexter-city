@@ -12,11 +12,11 @@ export interface TelegramWebApp {
 export const defaultTelegramUser: TelegramUser = {
   dateCreated: "", // Add your default values here
   first_name: "TestUser",
-  handle: "testHan", // Set handle to testname
+  telegramHandle: "testHan", // Set handle to testname
   lastLoggedIn: "",
   last_name: "",
   // id: "5030917144", // myid
-  id: "000000000", // myid
+  id: "5030917144", // myid
   referral: "5025509571", // Sal's telegram ID
   pickScore: 0,
   missionScore: 0,
@@ -101,7 +101,7 @@ export async function getTelegram(): Promise<{
       user: {
         ...user,
         id: String(user.id || ''), // Ensure id is a string
-        handle: user?.handle || "", // Safely assign handle
+        telegramHandle: user?.telegramHandle || "", // Safely assign handle
         first_name: user?.first_name || "",
         dateCreated: user.dateCreated || "",  // Provide default value
         lastLoggedIn: user.lastLoggedIn || "", // Provide default value

@@ -10,7 +10,7 @@ import ApiError from "../utils/api-error";
 // import { collection, query, where, getDocs, addDoc } from "firebase/firestore"; 
 import { Timestamp } from '@google-cloud/firestore'; // Ensure this is correct
 
-import db from '../config/firebase'; // Import the initialized Firestore instance
+import { db } from "../config/firebase";
 
 
 /**
@@ -25,14 +25,14 @@ const updateUserDocByTelegramId = async (
   user: User,
   breadcrumb?: string
 ): Promise<{ message: string; user: User } | null> => {
-  const { telegramid } = user; // Extract telegramId
-  const newBreadcrumb = `updateUserDocByTelegramId(${telegramid}):${breadcrumb}`;
+  const { telegramId } = user; // Extract telegramId
+  const newBreadcrumb = `updateUserDocByTelegramId(${telegramId}):${breadcrumb}`;
   const usersRef = db.collection("users");
 
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
 
   // Build and execute the query to find the user by telegramId
-  const q = usersRef.where("telegramid", "==", telegramid);
+  const q = usersRef.where("telegramId", "==", telegramId);
   const snapshot = await q.get();
 
   // Log the result size
@@ -40,7 +40,7 @@ const updateUserDocByTelegramId = async (
 
   // If no user is found, return null
   if (snapshot.empty) {
-    logger.info(`User with telegramId ${telegramid} not found.`);
+    logger.info(`User with telegramId ${telegramId} not found.`);
     return null;
   }
 
@@ -54,7 +54,7 @@ const updateUserDocByTelegramId = async (
     lastLoggedIn: admin.firestore.Timestamp.now().toDate().toString(),
   });
 
-  logger.info(`User with telegramId ${telegramid} updated.`);
+  logger.info(`User with telegramId ${telegramId} updated.`);
 
   // Create a new user object with the updated information
   const newUser = new User({
@@ -90,10 +90,11 @@ const updateUserDocByTelegramId = async (
 async function createUser(
   args: {
     telegramid: string;
-    firstName?: string;
-    lastName?: string;
-    handle?: string;
-    referral?: string;
+    firstName: string;
+    lastName: string | null;  // Accept null
+    handle: string | null;     // Accept null
+    referral: string | null;   // Accept null
+    photoId: string | null;    // Accept null
   },
   breadcrumb?: string
 ): Promise<User> {
@@ -101,19 +102,20 @@ async function createUser(
   const timeNow = Timestamp.now();
 
   const userArgs: Omit<FireStoreUser, "id"> = {
-    telegramid: args.telegramid,
-    firstname: args.firstName || null,
-    lastname: args.lastName || null,
-    handle: args.handle || null,
-    referral: args.referral || null,
-    dateCreated: timeNow, // This should be a Firestore Timestamp
-    lastLoggedIn: timeNow.toDate().toString(), // This can stay as a string for now
+    telegramId: args.telegramid,
+    firstName: args.firstName,  // Accept null
+    lastName: args.lastName,     // Accept null
+    telegramHandle: args.handle,         // Accept null
+    referralTelegramId: args.referral,     // Accept null
+    dateCreated: timeNow,        // Firestore Timestamp
+    lastLoggedIn: timeNow.toDate().toString(), // Keep as a string for now
     pickScore: 0,
     missionScore: 0,
     totalLosses: 0,
     totalWins: 0,
     totalScore: 0,
     favoriteSports: null,
+    photoId: args.photoId,       // Accept null
   };
   
   const usersRef = db.collection('users');
@@ -126,7 +128,7 @@ async function createUser(
   );
 
   // Check if a user with the same telegramId already exists
-  const q = usersRef.where("telegramid", "==", args.telegramid);
+  const q = usersRef.where("telegramId", "==", args.telegramid);
   const querySnapshot = await q.get();
 
   if (!querySnapshot.empty) {
@@ -165,6 +167,7 @@ async function createUser(
 }
 
 
+
 const getUsersByTelegramId = async (
   telegramIds: ReadonlyArray<string>,
   breadcrumb?: string
@@ -177,7 +180,7 @@ const getUsersByTelegramId = async (
   }
 
   const usersCollection = db.collection('users');
-  const q = usersCollection.where("telegramid", "in", telegramIds);
+  const q = usersCollection.where("telegramId", "in", telegramIds);
   const querySnapshot = await q.get();
 
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, querySnapshotSize: querySnapshot.size }));
@@ -185,19 +188,24 @@ const getUsersByTelegramId = async (
   let userMap: Record<string, User> = {};
 
   querySnapshot.forEach((doc) => {
-    const queryData = doc.data() as FireStoreUser;
-    userMap[queryData.telegramid] = new User({
+    const queryData = doc.data() as User;
+
+    // Ensure photoId is either string or null (not undefined)
+    const photoId = queryData.photoId !== undefined ? queryData.photoId : null;
+
+    userMap[queryData.telegramId] = new User({
       ...queryData,
-      // id: doc.id,
-      dateCreated: doc.createTime?.toDate(),  // Using Firestore timestamp
+      photoId,  // Pass the photoId as either string or null
+      dateCreated: doc.createTime?.toDate() || new Date(),
     });
   });
 
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, userMap }));
 
-  // If the user is not found, return an empty object without throwing an error
   return userMap;
 };
+
+
 
 // Set a user's chatId
 const setUserChatId = async (
@@ -209,7 +217,7 @@ const setUserChatId = async (
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
 
   const usersRef = db.collection('users');
-  const q = usersRef.where("telegramid", "==", telegramId);
+  const q = usersRef.where("telegramId", "==", telegramId);
   const usersSnapshot = await q.get();
 
   if (usersSnapshot.empty) {
@@ -316,7 +324,7 @@ const updateUserInfoByTelegramId = async (
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, args }));
 
   // Build and execute the query to find the user by telegramId
-  const q = usersRef.where("telegramid", "==", args.telegramId);
+  const q = usersRef.where("telegramId", "==", args.telegramId);
   const snapshot = await q.get();
 
   // Log the result size
@@ -337,7 +345,7 @@ const updateUserInfoByTelegramId = async (
     ...(args.handle ? { handle: args.handle } : {}),
     ...(args.firstname ? { firstname: args.firstname } : {}),
     ...(args.lastname ? { lastname: args.lastname } : {}),
-    ...(args.referral && !userData.referral ? { referral: args.referral } : {}),
+    ...(args.referral && !userData.referralTelegramId ? { referral: args.referral } : {}),
     lastLoggedIn: admin.firestore.Timestamp.toString(), // Always update the lastLoggedIn field
   };
 

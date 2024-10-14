@@ -10,7 +10,7 @@ import Quit from './pages/Quit';
 import Profile from './pages/Profile';
 import OnboardForm from './pages/OnboardForm';
 import Dashboard from './pages/Dashboard';
-import { login } from './services/user'; // Import newUser function
+import { login } from './services/user.services'; // Import newUser function
 import User from "./models/User";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -27,8 +27,7 @@ const App: React.FC = () => {
     async function fetchTelegramUser() {
       setLoading(true); // Set loading state
       try {
-        // const telegramData = await getTelegram();
-        // setTelegramUser(telegramData.user);
+
         
         // Try to get the current user using their Telegram ID
         const user = await login(); // Pass true to create user if it doesn't exist
@@ -67,11 +66,11 @@ const App: React.FC = () => {
     <UserContext.Provider value={currentUser}>
       <div className="mx-auto">
         {isOnboarding ? (
-              <DndProvider backend={HTML5Backend}>
-              <OnboardForm 
-                onComplete={handleCompleteOnboarding} 
-              />
-            </DndProvider>
+          <DndProvider backend={HTML5Backend}>
+            <OnboardForm 
+              onComplete={handleCompleteOnboarding} 
+            />
+          </DndProvider>
 
         ) : (
           <>

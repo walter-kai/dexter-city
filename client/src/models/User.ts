@@ -1,90 +1,79 @@
+// Define the UserProfilePhoto interface (add fields as needed)
+export interface UserProfilePhoto {
+  fileId: string; // Assuming this field represents the unique identifier of the photo
+  fileUniqueId: string; // Assuming this field represents a unique identifier for the file
+}
+
+// Update the TelegramUser interface
 export interface TelegramUser {
-  dateCreated?: string;  // Make optional
+  dateCreated?: string; // Make optional
   first_name: string;
-  handle?: string;
+  telegramHandle?: string; // Renamed from handle and made optional
   lastLoggedIn?: string; // Make optional
-  last_name?: string;     // Make optional
-  id: string;            // Assuming it's always a string
-  referral?: string;     // Make optional
+  last_name?: string; // Make optional
+  id: string; // Assuming it's always a string
+  referral?: string; // Make optional
   pickScore: number;
   missionScore: number;
   totalLosses: number;
   totalWins: number;
+  photoId?: UserProfilePhoto; // Changed to UserProfilePhoto type
 }
 
+// Updated UserArgs interface
 export interface UserArgs {
   readonly dateCreated: Date;
-  // TODO: rename to firstName in db
-  readonly firstname: string | null;
-  // TODO: rename to lastName in db
-  readonly lastname: string | null;
-  // TODO: rename to telegramHandle in db
-  readonly handle: string | null;
-  // Date UTC string
-  readonly lastLoggedIn: string;
+  readonly firstName: string; // Renamed from firstname
+  readonly lastName: string | null; // Renamed from lastname
+  readonly telegramHandle: string | null; // Renamed from handle
+  readonly lastLoggedIn: string; // Date UTC string
   readonly missionScore: number;
   readonly pickScore: number;
-  // Total score
-  readonly totalScore: number;
-  // TODO: Rename to referralTelegramId in db
-  readonly referral: string | null;
-  // TODO: rename to telegramId in db
-  readonly telegramid: string;
+  readonly totalScore: number; // Total score
+  readonly referralTelegramId: string | null; // Renamed from referral
+  readonly telegramId: string; // Renamed from telegramid
   readonly totalLosses: number;
   readonly totalWins: number;
   readonly favoriteSports: string[] | null;
+  readonly photoId: string | null;
 }
 
+// User class definition
 export default class User {
   dateCreated: Date;
-  firstname: string | null;
-  lastname: string | null;
-  handle: string | null;
+  firstName: string; // Changed from firstname
+  lastName: string | null; // Changed from lastname
+  telegramHandle: string | null; // Changed from handle
   lastLoggedIn: string;
   missionScore: number;
   pickScore: number;
-  referral: string | null;
-  telegramid: string;
+  referralTelegramId: string | null; // Changed from referral
+  telegramId: string; // Changed from telegramid
   totalLosses: number;
   totalWins: number;
   totalScore: number;
   favoriteSports: string[] | null;
+  photoId?: string | null;
 
   constructor(args: UserArgs) {
     this.dateCreated = args.dateCreated;
-    this.firstname = args.firstname;
-    this.lastname = args.lastname;
-    this.handle = args.handle;
+    this.firstName = args.firstName; // Changed to firstName
+    this.lastName = args.lastName; // Changed to lastName
+    this.telegramHandle = args.telegramHandle; // Changed to telegramHandle
     this.lastLoggedIn = args.lastLoggedIn;
     this.missionScore = args.missionScore;
     this.pickScore = args.pickScore;
-    this.referral = args.referral;
-    this.telegramid = args.telegramid;
+    this.referralTelegramId = args.referralTelegramId; // Changed to referralTelegramId
+    this.telegramId = args.telegramId; // Changed to telegramId
     this.totalLosses = args.totalLosses;
     this.totalWins = args.totalWins;
     this.totalScore = args.totalScore;
     this.favoriteSports = args.favoriteSports;
-  }
-
-  toJson(): UserArgs {
-    return {
-      dateCreated: this.dateCreated,
-      firstname: this.firstname || null,
-      lastname: this.lastname || null,
-      handle: this.handle || null,
-      lastLoggedIn: this.lastLoggedIn,
-      missionScore: this.missionScore,
-      pickScore: this.pickScore,
-      referral: this.referral || null,
-      telegramid: this.telegramid,
-      totalLosses: this.totalLosses,
-      totalWins: this.totalWins,
-      totalScore: this.totalScore,
-      favoriteSports: this.favoriteSports,
-    };
+    this.photoId = args.photoId;
   }
 }
 
+// FireStoreUser interface definition
 export interface FireStoreUser extends Omit<UserArgs, "dateCreated"> {
   readonly dateCreated: {
     readonly seconds: number;

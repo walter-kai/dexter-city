@@ -105,7 +105,7 @@ export const login = async (): Promise<User> => {
       id: telegramUser.id,
       first_name: telegramUser.first_name,
       last_name: telegramUser.last_name,
-      handle: telegramUser.handle || null,  // Optional field
+      handle: telegramUser.telegramHandle || null,  // Optional field
       pickScore: telegramUser.pickScore || null, // Optional field
       missionScore: telegramUser.missionScore || null, // Optional field
       totalWins: telegramUser.totalWins || null, // Optional field

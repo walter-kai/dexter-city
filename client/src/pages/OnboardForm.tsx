@@ -65,7 +65,7 @@ const SportItem = ({ sport, index, moveSport }: any) => {
 const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
   const currentUser = useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(0);
-  const [userName, setUserName] = useState(currentUser?.firstname || '');
+  const [userName, setUserName] = useState(currentUser?.firstName || '');
   const [favoriteSports, setFavoriteSports] = useState<Sport[]>(sportsOptions);
   const [scrolledToBottom, setScrolledToBottom] = useState(false); // Scrolling state
   const termsRef = useRef<HTMLDivElement>(null); // Ref for the scrollable container
