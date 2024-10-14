@@ -15,7 +15,8 @@ import { getTelegram, defaultTelegramUser } from './services/Telegram';
 import Dashboard from './pages/Dashboard';
 import { login } from './services/user'; // Import newUser function
 import User from "./models/User";
-
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 export const UserContext = createContext<User | null>(null);
 
 const App: React.FC = () => {
@@ -69,10 +70,12 @@ const App: React.FC = () => {
     <UserContext.Provider value={currentUser}>
       <div className="mx-auto">
         {isOnboarding ? (
-          <OnboardForm 
-            telegramName={currentUser?.firstname || ''} 
-            onComplete={handleCompleteOnboarding} 
-          />
+              <DndProvider backend={HTML5Backend}>
+              <OnboardForm 
+                onComplete={handleCompleteOnboarding} 
+              />
+            </DndProvider>
+
         ) : (
           <>
             <NavBar telegramUser={telegramUser} onLogin={handleLogin} />

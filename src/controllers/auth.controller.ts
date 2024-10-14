@@ -13,11 +13,10 @@ const login = catchAsync(async (req: Request, res: Response): Promise<Response> 
     throw new ApiError(400, "Missing TelegramUser in request params");
   }
 
-
   // Attempt to login the user, or create if they don't exist
   const user = await authService.loginOrCreate(userData);
 
-  return res.status(200).json({ user });
+  return res.status(200).json( user );
 });
 
 
