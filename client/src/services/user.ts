@@ -88,13 +88,10 @@ export const updateUser = async (
   return new User(user); // Return updated user
 };
 
-
 /**
- * Get the current user based on Telegram ID
+ * Log in the user based on their Telegram information.
  *
- * @param {string} telegramId - Telegram ID of the user to fetch
- * @param {boolean} createUserIfNoneExists - If true, creates a new user if none exists.
- * @returns {Promise<User>} Returns the user associated with the telegram ID.
+ * @returns {Promise<User>} The logged-in user.
  */
 export const login = async (): Promise<User> => {
   const telegramUser: TelegramUser = (await getTelegram()).user;
@@ -108,29 +105,32 @@ export const login = async (): Promise<User> => {
       id: telegramUser.id,
       first_name: telegramUser.first_name,
       last_name: telegramUser.last_name,
-      handle: telegramUser.handle,
-      pickScore: telegramUser.pickScore,
-      missionScore: telegramUser.missionScore,
-      totalWins: telegramUser.totalWins,
-      totalLosses: telegramUser.totalLosses,
+      handle: telegramUser.handle || null,  // Optional field
+      pickScore: telegramUser.pickScore || null, // Optional field
+      missionScore: telegramUser.missionScore || null, // Optional field
+      totalWins: telegramUser.totalWins || null, // Optional field
+      totalLosses: telegramUser.totalLosses || null, // Optional field
       // Add other optional fields if they exist
-      dateCreated: telegramUser.dateCreated,
-      lastLoggedIn: telegramUser.lastLoggedIn,
-      referral: telegramUser.referral,
+      dateCreated: telegramUser.dateCreated || null, // Optional field
+      lastLoggedIn: telegramUser.lastLoggedIn || null, // Optional field
+      referral: telegramUser.referral || null, // Optional field
     }),
   });
 
   // Handle response
   if (!res.ok) {
     // Handle error, create user logic in backend
-    // Alternatively, throw an error here if needed
     throw new Error('Login failed');
   }
 
-  const { user } = (await res.json()) as { user: User };
+  const { message, user } = (await res.json()) as { message: string, user: User };
 
-  return new User(user);
+  // You can log the message if needed
+  console.log(message); // Optional: log the message
+
+  return user; // Return the user directly
 };
+
 
 
 /**

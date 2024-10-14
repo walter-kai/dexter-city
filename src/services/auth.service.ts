@@ -1,6 +1,7 @@
 import userService from "./user.service";
 import { TelegramUser } from '../../client/src/models/User'; // Adjust path as necessary
 import ApiError from "../utils/api-error";
+import User from "../../client/src/models/User";
 
 /**
  * Get a test message
@@ -13,15 +14,15 @@ const getTestMessage = async (): Promise<string> => {
 /**
  * Login or create a user based on their telegramId.
  * @param {TelegramUser} userData - The user data to create the user if not found.
- * @returns {Promise<{ message: string, user: any }>} A message or user data.
+ * @returns {Promise<{ message: string, user: User | null }>} A message or user data.
  */
-const loginOrCreate = async (userData: TelegramUser): Promise<{ message: string, user: any }> => {
+const loginOrCreate = async (userData: TelegramUser): Promise<{ message: string, user: User | null }> => {
   try {
     // Fetch the user based on telegramId
     const users = await userService.getUsersByTelegramId([userData.id]);
 
     // Check if the user is found
-    const existingUser = users ? users[userData.id] : null;
+    const existingUser = users && users[userData.id] ? users[userData.id] : null;
 
     // If user is not found, create a new user
     if (!existingUser) {
@@ -45,15 +46,9 @@ const loginOrCreate = async (userData: TelegramUser): Promise<{ message: string,
       const updatedUser = await userService.updateUserDocByTelegramId(existingUser); // Pass the existing user to update
       return {
         message: "User updated",
-        user: updatedUser,
+        user: updatedUser?.user || null, // Ensure user can be null
       };
     }
-
-    // If user is found, return a success message or user data
-    return {
-      message: "User found",
-      user: existingUser,
-    };
   } catch (error) {
     if (error instanceof ApiError && error.statusCode === 404) {
       // User not found, proceed to create
