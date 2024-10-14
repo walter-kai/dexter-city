@@ -38,23 +38,6 @@ const getCurrentUser = catchAsync(async (req: Request, res: Response): Promise<R
     return res.status(404).json({ message: "User not found" });
   }
 
-  // Check if the request body differs from the existing user
-  const shouldUpdate = 
-    (handle && handle !== existingUser.handle) ||
-    (firstname && firstname !== existingUser.firstname) ||
-    (lastname && lastname !== existingUser.lastname) ||
-    (referral && referral !== existingUser.referral);
-
-  if (shouldUpdate) {
-    // Call updateUserInfoByTelegramId if any field differs
-    await userService.updateUserInfoByTelegramId(telegramId, {
-      handle: handle || existingUser.handle,
-      firstname: firstname || existingUser.firstname,
-      lastname: lastname || existingUser.lastname,
-      referral: referral || existingUser.referral,
-    });
-  }
-
   return res.json({ user: existingUser });
 });
 

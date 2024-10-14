@@ -22,17 +22,17 @@ import db from '../config/firebase'; // Import the initialized Firestore instanc
  * @returns {Promise<User | null>} - Returns the updated user object or null if not found.
  */
 const updateUserDocByTelegramId = async (
-  telegramId: string,
-  updateFields: Partial<FireStoreUser>,
+  user: User,
   breadcrumb?: string
-): Promise<User | null> => {
-  const newBreadcrumb = `updateUserDocByTelegramId(${telegramId}):${breadcrumb}`;
+): Promise<{ message: string; user: User } | null> => {
+  const { telegramid } = user; // Extract telegramId
+  const newBreadcrumb = `updateUserDocByTelegramId(${telegramid}):${breadcrumb}`;
   const usersRef = db.collection("users");
 
-  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, updateFields }));
+  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
 
   // Build and execute the query to find the user by telegramId
-  const q = usersRef.where("telegramid", "==", telegramId);
+  const q = usersRef.where("telegramid", "==", telegramid);
   const snapshot = await q.get();
 
   // Log the result size
@@ -40,7 +40,7 @@ const updateUserDocByTelegramId = async (
 
   // If no user is found, return null
   if (snapshot.empty) {
-    logger.info(`User with telegramId ${telegramId} not found.`);
+    logger.info(`User with telegramId ${telegramid} not found.`);
     return null;
   }
 
@@ -48,25 +48,30 @@ const updateUserDocByTelegramId = async (
   const userDoc = snapshot.docs[0];
   const userData = userDoc.data() as FireStoreUser;
 
-  // Always update the lastLoggedIn field
-  const updatedFields: Partial<FireStoreUser> = {
-    ...updateFields,
+  // Update the lastLoggedIn field and any other fields from the user object
+  await userDoc.ref.update({
+    ...user,
     lastLoggedIn: admin.firestore.Timestamp.now().toDate().toString(),
-  };
+  });
 
-  // Update the user document with the new fields
-  await userDoc.ref.update(updatedFields);
+  logger.info(`User with telegramId ${telegramid} updated.`);
 
-  logger.info(`User with telegramId ${telegramId} updated.`);
-
-  // Return the updated user object
-  return new User({
+  // Create a new user object with the updated information
+  const newUser = new User({
     ...userData,
-    ...updatedFields,
+    ...user, // Merge with the original user object
     id: userDoc.id,
     dateCreated: userDoc.createTime?.toDate(),
   });
+
+  // Return the updated user in the desired format
+  return {
+    message: "User updated successfully",
+    user: newUser,
+  };
 };
+
+
 
 
 
@@ -195,41 +200,6 @@ const getUsersByTelegramId = async (
   return userMap;
 };
 
-
-// Add handle or first name to user
-const addHandleOrFirstNameToUser = async (
-  telegramId: string,
-  handle?: string,
-  firstname?: string
-): Promise<void> => {
-  logger.info({ message: "addHandleOrFirstNameToUser", telegramId, handle, firstname });
-
-  if (!handle && !firstname) {
-    throw new ApiError(400, "Missing handle or firstname");
-  }
-
-  const userCollection = db.collection('users');
-  const q = userCollection.where("telegramid", "==", telegramId);
-  const snapshot = await q.get();
-
-  if (snapshot.empty) {
-    throw new ApiError(404, `User with telegramId ${telegramId} not found`);
-  }
-
-  const userDoc = snapshot.docs[0];
-  const userDocRef = userDoc.ref;
-  let userData = userDoc.data() as FireStoreUser;
-
-  if (handle) {
-    userData = { ...userData, handle };
-  }
-  if (firstname) {
-    userData = { ...userData, firstname };
-  }
-
-  await userDocRef.update({ ...userData });
-};
-
 // Set a user's chatId
 const setUserChatId = async (
   telegramId: string,
@@ -332,8 +302,8 @@ const getUsers = async (
  * @returns {Promise<User | null>} - Returns the updated user object or null if not found.
  */
 const updateUserInfoByTelegramId = async (
-  telegramId: string,
   args: {
+    telegramId: string,
     handle?: string;
     firstname?: string;
     lastname?: string;
@@ -341,13 +311,13 @@ const updateUserInfoByTelegramId = async (
   },
   breadcrumb?: string
 ): Promise<User | null> => {
-  const newBreadcrumb = `updateUserInfoByTelegramId(${telegramId}):${breadcrumb}`;
+  const newBreadcrumb = `updateUserInfoByTelegramId(${args.telegramId}):${breadcrumb}`;
   const usersRef = db.collection("users");
 
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, args }));
 
   // Build and execute the query to find the user by telegramId
-  const q = usersRef.where("telegramid", "==", telegramId);
+  const q = usersRef.where("telegramid", "==", args.telegramId);
   const snapshot = await q.get();
 
   // Log the result size
@@ -355,7 +325,7 @@ const updateUserInfoByTelegramId = async (
 
   // If no user is found, return null
   if (snapshot.empty) {
-    logger.info(`User with telegramId ${telegramId} not found.`);
+    logger.info(`User with telegramId ${args.telegramId} not found.`);
     return null;
   }
 
@@ -375,7 +345,7 @@ const updateUserInfoByTelegramId = async (
   // Update the user document with the new fields
   await userDoc.ref.update(updatedFields);
 
-  logger.info(`User with telegramId ${telegramId} updated.`);
+  logger.info(`User with telegramId ${args.telegramId} updated.`);
 
   // Return the updated user object
   return new User({
@@ -394,7 +364,6 @@ export default {
   getUsersByTelegramId,
   getAllUsers,
   getUsers,
-  addHandleOrFirstNameToUser,
   createUser,
   updateUserInfoByTelegramId,
   updateUserDocByTelegramId

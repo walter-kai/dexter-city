@@ -40,6 +40,13 @@ const loginOrCreate = async (userData: TelegramUser): Promise<{ message: string,
         message: "User created",
         user: newUser,
       };
+    } else {
+      // If user is found, update the user document
+      const updatedUser = await userService.updateUserDocByTelegramId(existingUser); // Pass the existing user to update
+      return {
+        message: "User updated",
+        user: updatedUser,
+      };
     }
 
     // If user is found, return a success message or user data
@@ -78,4 +85,3 @@ export default {
   getTestMessage,
   loginOrCreate,
 };
-

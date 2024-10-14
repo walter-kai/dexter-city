@@ -1,7 +1,6 @@
 import './styles/styles.css';
 import React, { createContext, useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Search from './pages/Search';
 import Trending from './pages/Trending';
 import Share from './pages/Share';
 import UserGuide from './pages/UserGuide';
@@ -9,9 +8,7 @@ import Support from './pages/Support';
 import NotFound from './pages/NotFound';
 import Quit from './pages/Quit';
 import Profile from './pages/Profile';
-import NavBar from './components/NavBar';
 import OnboardForm from './pages/OnboardForm';
-import { getTelegram, defaultTelegramUser } from './services/Telegram';
 import Dashboard from './pages/Dashboard';
 import { login } from './services/user'; // Import newUser function
 import User from "./models/User";
@@ -20,7 +17,7 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 export const UserContext = createContext<User | null>(null);
 
 const App: React.FC = () => {
-  const [telegramUser, setTelegramUser] = useState(defaultTelegramUser);
+
   const [isOnboarding, setIsOnboarding] = useState(true);
   const [loading, setLoading] = useState(true); // State for loading user data
   const [error, setError] = useState<string | null>(null); // State for error handling
@@ -30,8 +27,8 @@ const App: React.FC = () => {
     async function fetchTelegramUser() {
       setLoading(true); // Set loading state
       try {
-        const telegramData = await getTelegram();
-        setTelegramUser(telegramData.user);
+        // const telegramData = await getTelegram();
+        // setTelegramUser(telegramData.user);
         
         // Try to get the current user using their Telegram ID
         const user = await login(); // Pass true to create user if it doesn't exist
@@ -78,7 +75,7 @@ const App: React.FC = () => {
 
         ) : (
           <>
-            <NavBar telegramUser={telegramUser} onLogin={handleLogin} />
+            {/* <NavBar telegramUser={telegramUser} onLogin={handleLogin} /> */}
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/trending" element={<Trending />} />

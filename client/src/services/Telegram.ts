@@ -12,10 +12,11 @@ export interface TelegramWebApp {
 export const defaultTelegramUser: TelegramUser = {
   dateCreated: "", // Add your default values here
   first_name: "TestUser",
-  handle: "testHandle", // Set handle to testname
+  handle: "testHan", // Set handle to testname
   lastLoggedIn: "",
   last_name: "",
-  id: "5030917144", // myid
+  // id: "5030917144", // myid
+  id: "000000000", // myid
   referral: "5025509571", // Sal's telegram ID
   pickScore: 0,
   missionScore: 0,

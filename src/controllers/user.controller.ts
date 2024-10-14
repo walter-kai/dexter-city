@@ -115,20 +115,6 @@ const getUsersPickScores = catchAsync(async (req: Request, res: Response): Promi
   return res.json({ scores });
 });
 
-const addHandleOrFirstNameToUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  if (req.body.telegramId == null) {
-    throw new ApiError(400, "Missing telegramId in request params");
-  }
-
-  if (req.body.handle == null && req.body.firstname == null) {
-    throw new ApiError(400, "Missing handle or firstname in request body");
-  }
-
-  console.log(req.body);
-  return res.json({
-    user: await userService.addHandleOrFirstNameToUser(req.body.telegramId, req.body.handle, req.body.firstname),
-  });
-});
 
 const addUsersFavoriteSports = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   if (req.body.telegramId == null) {
@@ -156,6 +142,5 @@ export default {
   createUser,
   getUsers,
   getUsersPickScores,
-  addHandleOrFirstNameToUser,
   addUsersFavoriteSports,
 };
