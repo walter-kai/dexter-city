@@ -96,8 +96,9 @@ const Dashboard: React.FC = () => {
                 <h1 className="text-2xl font-bold mb-4">Welcome to Your Dashboard!</h1>
                 <div className="bg-white p-4 rounded shadow-md">
                   <h2 className="text-xl">Your Information</h2>
-                  <p><strong>Username:</strong> {user?.handle || user?.firstName}</p>
-                  <p><strong>Telegram ID:</strong> {user?.id}</p>
+                  <p><strong>Handle:</strong> {user?.handle || "Not set"}</p>
+                  <p><strong>FIrstname:</strong> {user.firstname}</p>
+                  <p><strong>Telegram ID:</strong> {user?.telegramid}</p>
                   <p><strong>Score:</strong> {user?.pickScore || 0}</p>
                 </div>
 

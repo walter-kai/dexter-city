@@ -60,12 +60,11 @@ const updateUserDocByTelegramId = async (
   const newUser = new User({
     ...userData,
     ...user, // Merge with the original user object
-    id: userDoc.id,
     dateCreated: userDoc.createTime?.toDate(),
   });
 
   // Return the updated user in the desired format
-  return {
+  return {  
     message: "User updated successfully",
     user: newUser,
   };
@@ -140,7 +139,7 @@ async function createUser(
     
     return new User({
       ...existingUserData,
-      id: existingUserDoc.id,
+      // id: existingUserDoc.id,
       dateCreated: tstamp, // Convert Firestore Timestamp to Date object
     });
   }
@@ -160,7 +159,7 @@ async function createUser(
 
   return new User({
     ...newUserData,
-    id: newUserSnapshot.id, // This will now be firstname:telegramid
+    // id: newUserSnapshot.id, // This will now be firstname:telegramid
     dateCreated: newTstamp,
   });
 }
@@ -189,7 +188,7 @@ const getUsersByTelegramId = async (
     const queryData = doc.data() as FireStoreUser;
     userMap[queryData.telegramid] = new User({
       ...queryData,
-      id: doc.id,
+      // id: doc.id,
       dateCreated: doc.createTime?.toDate(),  // Using Firestore timestamp
     });
   });
@@ -235,7 +234,7 @@ const getAllUsers = async (breadcrumb?: string): Promise<ReadonlyArray<User>> =>
     const firestoreUser = el.data() as FireStoreUser;
     return new User({
       ...firestoreUser,
-      id: el.id,
+      // id: el.id,
       dateCreated: el.createTime?.toDate(),  // Using Firestore timestamp
     });
   });
@@ -282,7 +281,7 @@ const getUsers = async (
     const firestoreUser = el.data() as FireStoreUser;
     return new User({
       ...firestoreUser,
-      id: el.id,
+      // id: el.id,
       dateCreated: el.createTime?.toDate(),  // Using Firestore timestamp
     });
   });
@@ -351,7 +350,7 @@ const updateUserInfoByTelegramId = async (
   return new User({
     ...userData,
     ...updatedFields,
-    id: userDoc.id,
+    // id: userDoc.id,
     dateCreated: userDoc.createTime?.toDate(),
   });
 };

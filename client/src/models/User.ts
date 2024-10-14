@@ -13,7 +13,6 @@ export interface TelegramUser {
 }
 
 export interface UserArgs {
-  readonly id: string;
   readonly dateCreated: Date;
   // TODO: rename to firstName in db
   readonly firstname: string | null;
@@ -37,7 +36,6 @@ export interface UserArgs {
 }
 
 export default class User {
-  readonly id: string;
   dateCreated: Date;
   firstname: string | null;
   lastname: string | null;
@@ -53,7 +51,6 @@ export default class User {
   favoriteSports: string[] | null;
 
   constructor(args: UserArgs) {
-    this.id = args.id;
     this.dateCreated = args.dateCreated;
     this.firstname = args.firstname;
     this.lastname = args.lastname;
@@ -71,7 +68,6 @@ export default class User {
 
   toJson(): UserArgs {
     return {
-      id: this.id,
       dateCreated: this.dateCreated,
       firstname: this.firstname || null,
       lastname: this.lastname || null,
