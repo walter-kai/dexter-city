@@ -94,23 +94,28 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
   const handleScroll = () => {
     const element = termsRef.current;
     if (element) {
-      const isBottom = 
-        element.scrollTop + element.clientHeight >= element.scrollHeight;
+      const isBottom = element.scrollTop + element.clientHeight >= element.scrollHeight-25;
       setScrolledToBottom(isBottom);
     }
   };
 
   useEffect(() => {
     const element = termsRef.current;
-    if (element) {
+  
+    if (currentPage === 2 && element) {
       element.addEventListener("scroll", handleScroll);
-    }
-    return () => {
-      if (element) {
+  
+      // Log to verify the ref
+      console.log("Scroll event listener added to termsRef.");
+  
+      // Cleanup function to remove the event listener
+      return () => {
         element.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, []);
+        console.log("Scroll event listener removed from termsRef.");
+      };
+    }
+  }, [currentPage]); // Add currentPage to the dependency array
+  
 
   return (
     <DndProvider backend={HTML5Backend}>
