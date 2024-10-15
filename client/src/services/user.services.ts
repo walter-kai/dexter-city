@@ -94,7 +94,7 @@ export const updateUser = async (
  * @returns {Promise<User>} The logged-in user.
  */
 export const login = async (): Promise<User> => {
-  const telegramUser: TelegramUser = (await getTelegram()).user;
+  const{ user: telegramUser, referral } = (await getTelegram());
 
   let res: Response = await fetch(`/api/auth/login/`, {
     method: 'POST',
@@ -105,15 +105,15 @@ export const login = async (): Promise<User> => {
       id: telegramUser.id,
       first_name: telegramUser.first_name,
       last_name: telegramUser.last_name,
-      handle: telegramUser.telegramHandle || null,  // Optional field
-      pickScore: telegramUser.pickScore || null, // Optional field
-      missionScore: telegramUser.missionScore || null, // Optional field
-      totalWins: telegramUser.totalWins || null, // Optional field
-      totalLosses: telegramUser.totalLosses || null, // Optional field
+      handle: telegramUser.username || null,  // Optional field
+      // pickScore: telegramUser.pickScore || null, // Optional field
+      // missionScore: telegramUser.missionScore || null, // Optional field
+      // totalWins: telegramUser.totalWins || null, // Optional field
+      // totalLosses: telegramUser.totalLosses || null, // Optional field
       // Add other optional fields if they exist
-      dateCreated: telegramUser.dateCreated || null, // Optional field
-      lastLoggedIn: telegramUser.lastLoggedIn || null, // Optional field
-      referral: telegramUser.referral || null, // Optional field
+      // dateCreated: telegramUser.dateCreated || null, // Optional field
+      // lastLoggedIn: telegramUser.lastLoggedIn || null, // Optional field
+      referral: referral || null, // Optional field
     }),
   });
 

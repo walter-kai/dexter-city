@@ -10,18 +10,10 @@ export interface TelegramWebApp {
 
 // Default user for testing purposes
 export const defaultTelegramUser: TelegramUser = {
-  dateCreated: "", // Add your default values here
   first_name: "TestUser",
-  telegramHandle: "testHan", // Set handle to testname
-  lastLoggedIn: "",
-  last_name: "",
-  // id: "5030917144", // myid
-  id: "5030917144", // myid
-  referral: "5025509571", // Sal's telegram ID
-  pickScore: 0,
-  missionScore: 0,
-  totalLosses: 0,
-  totalWins: 0,
+  username: "testHan", // Set handle to testname
+  id: "5030917144",
+  is_bot: false
 };
 
 export async function getTelegram(): Promise<{
@@ -53,7 +45,7 @@ export async function getTelegram(): Promise<{
         if (param.startsWith("league_")) {
           // leagueFilter = getLeagueFromString(param.split("_")[1]); // Extract the league filter enum
         } else if (param.startsWith("ref_")) {
-          referral = param.split("_")[1];
+          referral = webApp.initDataUnsafe? param.split("_")[1] : "5025509571";
         } else if (param.startsWith("mission_")) {
           jumpToMission = param.split("_")[1]; // Extract the mission name
         }
@@ -101,16 +93,12 @@ export async function getTelegram(): Promise<{
       user: {
         ...user,
         id: String(user.id || ''), // Ensure id is a string
-        telegramHandle: user?.telegramHandle || "", // Safely assign handle
+        username: user?.username || "", // Safely assign handle
         first_name: user?.first_name || "",
-        dateCreated: user.dateCreated || "",  // Provide default value
-        lastLoggedIn: user.lastLoggedIn || "", // Provide default value
+        // dateCreated: user.dateCreated || "",  // Provide default value
+        // lastLoggedIn: user.lastLoggedIn || "", // Provide default value
         last_name: user.last_name || "",          // Provide default value
-        referral: user.referral || "",          // Provide default value
-        pickScore: user.pickScore ?? 0,        // Fallback to default if not present
-        missionScore: user.missionScore ?? 0,  // Fallback to default if not present
-        totalLosses: user.totalLosses ?? 0,    // Fallback to default if not present
-        totalWins: user.totalWins ?? 0,        // Fallback to default if not present
+        is_bot: user.is_bot || true
       },
       referral,
       jumpToMission, // Include jumpToMission in the resolved object
@@ -120,7 +108,5 @@ export async function getTelegram(): Promise<{
       executeArgumentMethod,
       executeMethod,
     });
-    
   });
 }
-

@@ -95,6 +95,7 @@ async function createUser(
     handle: string | null;     // Accept null
     referral: string | null;   // Accept null
     photoId: string | null;    // Accept null
+    photoUrl: string | null;    // Accept null
   },
   breadcrumb?: string
 ): Promise<User> {
@@ -116,6 +117,7 @@ async function createUser(
     totalScore: 0,
     favoriteSports: null,
     photoId: args.photoId,       // Accept null
+    photoUrl: args.photoUrl,       // Accept null
   };
   
   const usersRef = db.collection('users');
@@ -192,10 +194,12 @@ const getUsersByTelegramId = async (
 
     // Ensure photoId is either string or null (not undefined)
     const photoId = queryData.photoId !== undefined ? queryData.photoId : null;
+    const photoUrl = queryData.photoUrl !== undefined ? queryData.photoUrl : null;
 
     userMap[queryData.telegramId] = new User({
       ...queryData,
       photoId,  // Pass the photoId as either string or null
+      photoUrl,
       dateCreated: doc.createTime?.toDate() || new Date(),
     });
   });

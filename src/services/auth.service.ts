@@ -4,7 +4,7 @@ import ApiError from "../utils/api-error";
 import User from "../../client/src/models/User";
 import { Telegraf } from 'telegraf';
 import admin from "firebase-admin"; // Import admin SDK
-
+import logger from "../config/logger";
 import * as fs from 'fs';
 import * as path from 'path';
 import { PassThrough } from 'stream';
@@ -71,6 +71,9 @@ const downloadAndUploadToFirebase = async (bot: Telegraf, fileId: string, userId
         fileUploadStream.on('finish', () => {
           // Get the public URL of the uploaded file
           const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/profilePics%2F${encodeURIComponent(fileName)}?alt=media`;
+
+          // Log successful upload
+          logger.info(`Successfully uploaded profile picture for userId: ${userId}, URL: ${publicUrl}`);
           resolve(publicUrl);
         });
         fileUploadStream.on('error', (error) => {
@@ -99,6 +102,11 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
     const users = await userService.getUsersByTelegramId([telegramUser.id]);
     const existingUser = users && users[telegramUser.id] ? users[telegramUser.id] : null;
 
+    // Log user activity
+    const breadcrumb = `Logging in user: ${telegramUser.id}`;
+    const newBreadcrumb = `loginOrCreate(${telegramUser.id}):${breadcrumb}`;
+    logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
+
     // Fetch the profile photo using Telegraf's bot.telegram
     const profilePhotos = await bot.telegram.getUserProfilePhotos(Number(telegramUser.id));
 
@@ -110,12 +118,13 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
 
     // Create or update the user
     const userPayload: UserArgs = {
-      telegramId: telegramUser.id,
+      telegramId: telegramUser.id.toString(),
       firstName: telegramUser.first_name,
       lastName: telegramUser.last_name || null,
-      telegramHandle: telegramUser.telegramHandle || null,
-      referralTelegramId: telegramUser.referral || null,
-      photoId: profilePicUrl || null, // Use the URL or null if not available
+      telegramHandle: telegramUser.username || null,
+      referralTelegramId: null,
+      photoId: profilePicId || null,
+      photoUrl: profilePicUrl || null,
       lastLoggedIn: new Date().toISOString(),
       missionScore: existingUser?.missionScore || 0,
       pickScore: existingUser?.pickScore || 0,
@@ -134,6 +143,7 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
       handle: userPayload.telegramHandle,
       referral: userPayload.referralTelegramId,
       photoId: userPayload.photoId,
+      photoUrl: userPayload.photoUrl,
     };
 
     if (!existingUser) {

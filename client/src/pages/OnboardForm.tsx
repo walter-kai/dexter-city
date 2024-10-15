@@ -94,20 +94,20 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
   const handleScroll = () => {
     const element = termsRef.current;
     if (element) {
-      const isBottom = element.scrollTop + element.clientHeight >= element.scrollHeight-25;
+      const isBottom = element.scrollTop + element.clientHeight >= element.scrollHeight - 25;
       setScrolledToBottom(isBottom);
     }
   };
 
   useEffect(() => {
     const element = termsRef.current;
-  
+
     if (currentPage === 2 && element) {
       element.addEventListener("scroll", handleScroll);
-  
+
       // Log to verify the ref
       console.log("Scroll event listener added to termsRef.");
-  
+
       // Cleanup function to remove the event listener
       return () => {
         element.removeEventListener("scroll", handleScroll);
@@ -115,7 +115,6 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
       };
     }
   }, [currentPage]); // Add currentPage to the dependency array
-  
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -124,6 +123,13 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
         {currentPage === 0 && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Welcome to the App! 🎉</h2>
+            {currentUser?.photoUrl && (
+              <img
+                src={currentUser.photoUrl}
+                alt="Profile"
+                className="w-24 h-24 rounded-full mb-4"
+              />
+            )}
             <p>Hello <strong>{userName}</strong>! 😊</p>
             <p>Would you like to use this name in the app or create a new one?</p>
             <input
