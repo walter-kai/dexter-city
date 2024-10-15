@@ -145,6 +145,8 @@ export interface GameArgs<T> {
   readonly cancelled: boolean;
 }
 
+
+
 export default class Game<T> {
   readonly id?: string;
   // Internal ID for the league
@@ -200,3 +202,33 @@ export default class Game<T> {
     return `${this.api}:${this.league}:${this.apiMatchId}`;
   }
 }
+
+// NBA specific metadata interface
+export interface NBAGameMetadata {
+  quarter: number; // Current quarter
+  timeRemaining: string; // Time remaining in the current quarter
+  homeScore: number; // Home team score
+  awayScore: number; // Away team score
+  // Add more NBA-specific metadata as needed
+}
+
+// NBA Game class
+// export class NBAGame implements GameArgs<NBAGameMetadata> {
+
+//   // You can add NBA-specific methods here if needed
+// }
+
+// NHL specific metadata interface
+export interface NHLGameMetadata {
+  period: number; // Current period
+  timeRemaining: string; // Time remaining in the current period
+  homeScore: number; // Home team score
+  awayScore: number; // Away team score
+  // Add more NHL-specific metadata as needed
+}
+
+// NHL Game class
+// export class NHLGame extends GameArgs<NHLGameMetadata> {
+
+//   // You can add NHL-specific methods here if needed
+// }

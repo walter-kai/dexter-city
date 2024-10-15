@@ -10,7 +10,7 @@ import Quit from './pages/Quit';
 import Profile from './pages/Profile';
 import OnboardForm from './pages/OnboardForm';
 import Dashboard from './pages/Dashboard';
-import { login } from './services/user.services'; // Import newUser function
+import { login } from './services/UserAuth'; // Import newUser function
 import User from "./models/User";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -45,9 +45,6 @@ const App: React.FC = () => {
   }, []);
   
 
-  const handleLogin = async () => {
-// leave this blank
-  };
 
   const handleCompleteOnboarding = (chosenName: string, favoriteSport: string[]) => {
     console.log("Onboarding complete with name:", chosenName, "and favorite sports:", favoriteSport);

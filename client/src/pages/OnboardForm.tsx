@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from "react";
 import { UserContext } from "../App";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { updateUser } from "../services/UserAuth";
 
 const ItemTypes = {
   SPORT: "sport",
@@ -10,15 +11,13 @@ const ItemTypes = {
 // Reorder function for drag-and-drop
 const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {
   const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
+  const [removed] = result.splice(startIndex, 1); 
   result.splice(endIndex, 0, removed);
   return result;
 };
 
-// Styles for draggable items and lists
 const grid = 8;
 
-// Sport options and OnboardForm component
 interface Sport {
   id: string;
   name: string;
@@ -66,13 +65,48 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
   const currentUser = useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(0);
   const [userName, setUserName] = useState(currentUser?.firstName || '');
-  const [favoriteSports, setFavoriteSports] = useState<Sport[]>(sportsOptions);
-  const [scrolledToBottom, setScrolledToBottom] = useState(false); // Scrolling state
-  const termsRef = useRef<HTMLDivElement>(null); // Ref for the scrollable container
+  const [favoriteSports, setFavoriteSports] = useState<Sport[]>([]);
+  const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const termsRef = useRef<HTMLDivElement>(null);
+
+
+  useEffect(() => {
+    // Check if favoriteSports contains items and skip onboarding
+    if (favoriteSports.length > 0) {
+      onComplete(userName, favoriteSports.map((sport) => sport.name));
+    } else{
+      setFavoriteSports(sportsOptions);
+    }
+  }, [ onComplete, userName]); // Dependencies include favoriteSports and onComplete
+
+
 
   const handleNext = () => {
-    if (currentPage === 2) {
+    if (currentPage === 1) {
+      if (favoriteSports.length === 0) {
+        const updatedSports = reorder(sportsOptions, 0, 0);
+        setFavoriteSports(updatedSports);
+      }
       onComplete(userName, favoriteSports.map((sport) => sport.name));
+      const updatedUser = {
+        ...currentUser,
+        firstName: currentUser?.firstName || userName,
+        dateCreated: currentUser?.dateCreated || new Date(),
+        favoriteSports: favoriteSports.map((sport) => sport.name),
+        lastLoggedIn: new Date(),
+        telegramId: currentUser?.telegramId || '',
+        lastName: currentUser?.lastName || '',
+        telegramHandle: currentUser?.telegramHandle || '',
+        referralTelegramId: currentUser?.referralTelegramId || '',
+        photoId: currentUser?.photoId || '',
+        photoUrl: currentUser?.photoUrl || '',
+        missionScore: currentUser?.missionScore || 0,
+        pickScore: currentUser?.pickScore || 0,
+        totalScore: currentUser?.totalScore || 0,
+        totalLosses: currentUser?.totalLosses || 0,
+        totalWins: currentUser?.totalWins || 0,
+      };
+      updateUser(updatedUser);
     } else {
       setCurrentPage((prev) => prev + 1);
     }
@@ -80,10 +114,6 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
 
   const handleBack = () => {
     setCurrentPage((prev) => prev - 1);
-  };
-
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setUserName(event.target.value);
   };
 
   const moveSport = (fromIndex: number, toIndex: number) => {
@@ -102,24 +132,17 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
   useEffect(() => {
     const element = termsRef.current;
 
-    if (currentPage === 2 && element) {
+    if (currentPage === 1 && element) {
       element.addEventListener("scroll", handleScroll);
-
-      // Log to verify the ref
-      console.log("Scroll event listener added to termsRef.");
-
-      // Cleanup function to remove the event listener
       return () => {
         element.removeEventListener("scroll", handleScroll);
-        console.log("Scroll event listener removed from termsRef.");
       };
     }
-  }, [currentPage]); // Add currentPage to the dependency array
+  }, [currentPage]);
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="max-w-md mx-auto p-4 mt-8 bg-white rounded-lg shadow-md">
-        {/* Page 1: Name */}
         {currentPage === 0 && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Welcome to the App! 🎉</h2>
@@ -131,22 +154,8 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
               />
             )}
             <p>Hello <strong>{userName}</strong>! 😊</p>
-            <p>Would you like to use this name in the app or create a new one?</p>
-            <input
-              type="text"
-              value={userName}
-              onChange={handleChange}
-              className="border border-gray-300 rounded w-full p-2 mb-4"
-              placeholder="Enter your name"
-            />
-          </div>
-        )}
-
-        {/* Page 2: Favorite Sports */}
-        {currentPage === 1 && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">What's your favorite sport? ⚽🏀🏈⚾</h2>
-            <p>Please rank your favorite sports:</p>
+            <h2 className="text-xl font-semibold mb-4">⚽🏀 Please rank your favorite sports 🏈⚾</h2>
+            <p>You can change this later in settings</p>
             <div>
               {favoriteSports.map((sport, index) => (
                 <SportItem key={sport.id} sport={sport} index={index} moveSport={moveSport} />
@@ -155,8 +164,7 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
           </div>
         )}
 
-        {/* Page 3: Rules, Terms, and Conditions */}
-        {currentPage === 2 && (
+        {currentPage === 1 && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Rules, Terms and Conditions 📜</h2>
             <p>Before completing your registration, please read and accept our rules:</p>
@@ -177,7 +185,6 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
           </div>
         )}
 
-        {/* Navigation Buttons */}
         <div className="mt-4">
           {currentPage > 0 && (
             <button
@@ -192,9 +199,9 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
             type="button"
             onClick={handleNext}
             className="btn-standard"
-            disabled={currentPage === 2 && !scrolledToBottom}
+            disabled={currentPage === 1 && !scrolledToBottom}
           >
-            {currentPage === 2 ? "Complete" : "Next"}
+            {currentPage === 1 ? "Complete" : "Next"}
           </button>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import userService from "../services/user.service";
 import ApiError from "../utils/api-error";
 import catchAsync from "../utils/catch-async";
+import { UserArgs } from "../../client/src/models/User";
 
 const setUserChatId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   if (req.params.telegramId == null) {
@@ -29,11 +30,61 @@ const getUsers = catchAsync(async (req: Request, res: Response): Promise<Respons
 });
 
 const updateUserDocByTelegramId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  if (req.body.telegramId == null) {
+  // Destructure the required fields from req.body based on UserArgs type
+  const { 
+    telegramId, 
+    firstName, 
+    lastName, 
+    telegramHandle, 
+    referralTelegramId, 
+    photoId, 
+    photoUrl, 
+    pickScore, 
+    missionScore, 
+    totalLosses, 
+    totalWins, 
+    totalScore, 
+    favoriteSports, 
+    lastLoggedIn,
+    dateCreated 
+    
+  }: UserArgs = req.body; // Assuming req.body is typed as UserArgs
+
+  if (!telegramId) {
     throw new ApiError(400, "Missing telegramId in request body");
   }
-  return res.json({ user: await userService.createUser(req.body) });
+
+  // Prepare the user data to be updated
+  const userData: UserArgs = {
+    telegramId, // Ensure this matches your UserArgs type definition
+    firstName: firstName || '',
+    lastName: lastName || '',
+    telegramHandle: telegramHandle || '',
+    referralTelegramId: referralTelegramId || '',
+    photoId: photoId || '',
+    photoUrl: photoUrl || '',
+    pickScore: pickScore || 0,
+    missionScore: missionScore || 0,
+    totalLosses: totalLosses || 0,
+    totalWins: totalWins || 0,
+    totalScore: totalScore || 0,
+    favoriteSports: favoriteSports || null,
+    lastLoggedIn: lastLoggedIn ? new Date(lastLoggedIn) : new Date(),
+    dateCreated: dateCreated ? new Date(dateCreated) : new Date(),
+  };
+
+  // Call the userService.updateUser method to update the user
+  const updatedUser = await userService.updateUser(userData);
+
+  if (!updatedUser) {
+    throw new ApiError(404, `User with telegramId ${telegramId} not found`);
+  }
+
+  // Return a success response with the updated user
+  return res.json({ message: "User updated successfully", user: updatedUser });
 });
+
+
 const createUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   if (req.body.telegramId == null) {
     throw new ApiError(400, "Missing telegramId in request body");

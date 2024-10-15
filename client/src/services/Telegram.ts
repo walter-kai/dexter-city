@@ -10,8 +10,9 @@ export interface TelegramWebApp {
 
 // Default user for testing purposes
 export const defaultTelegramUser: TelegramUser = {
-  first_name: "TestUser",
-  username: "testHan", // Set handle to testname
+  first_name: "Walter",
+  last_name: "Yaoza",
+  username: "kai", // Set handle to testname
   id: "5030917144",
   is_bot: false
 };

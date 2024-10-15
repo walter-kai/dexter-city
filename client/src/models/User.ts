@@ -28,7 +28,7 @@ export interface UserArgs {
   readonly firstName: string; // Renamed from firstname
   readonly lastName: string | null; // Renamed from lastname
   readonly telegramHandle: string | null; // Renamed from handle
-  readonly lastLoggedIn: string; // Date UTC string
+  readonly lastLoggedIn: Date; // Date UTC string
   readonly missionScore: number;
   readonly pickScore: number;
   readonly totalScore: number; // Total score
@@ -47,7 +47,7 @@ export default class User {
   firstName: string; // Changed from firstname
   lastName: string | null; // Changed from lastname
   telegramHandle: string | null; // Changed from handle
-  lastLoggedIn: string;
+  lastLoggedIn: Date;
   missionScore: number;
   pickScore: number;
   referralTelegramId: string | null; // Changed from referral

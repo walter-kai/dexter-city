@@ -17,7 +17,7 @@ const Dashboard: React.FC = () => {
       try {
         const gamesData = await getGames({
           occursBefore: new Date(new Date().getTime() + 14 * 24 * 60 * 60 * 1000),
-          occursAfter: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000),
+          occursAfter: new Date(new Date().getTime()),
         });
 
         // Filter the games based on the leagues after fetching the data
@@ -96,8 +96,8 @@ const Dashboard: React.FC = () => {
                 <h1 className="text-2xl font-bold mb-4">Welcome to Your Dashboard!</h1>
                 <div className="bg-white p-4 rounded shadow-md">
                   <h2 className="text-xl">Your Information</h2>
-                  <p><strong>Handle:</strong> {user?.handle || "Not set"}</p>
-                  <p><strong>FIrstname:</strong> {user.firstname}</p>
+                  <p><strong>Handle:</strong> {user?.username || "Not set"}</p>
+                  <p><strong>FIrstname:</strong> {user.firstName}</p>
                   <p><strong>Telegram ID:</strong> {user?.telegramid}</p>
                   <p><strong>Score:</strong> {user?.pickScore || 0}</p>
                 </div>

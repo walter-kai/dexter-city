@@ -125,7 +125,7 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
       referralTelegramId: null,
       photoId: profilePicId || null,
       photoUrl: profilePicUrl || null,
-      lastLoggedIn: new Date().toISOString(),
+      lastLoggedIn: new Date(),
       missionScore: existingUser?.missionScore || 0,
       pickScore: existingUser?.pickScore || 0,
       totalScore: existingUser?.totalScore || 0,
@@ -153,10 +153,10 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
         user: newUser,
       };
     } else {
-      const updatedUser = await userService.updateUserDocByTelegramId(userPayload);
+      const updatedUser = await userService.updateUser(userPayload);
       return {
         message: "User updated",
-        user: updatedUser?.user || null,
+        user: updatedUser || null,
       };
     }
   } catch (error) {

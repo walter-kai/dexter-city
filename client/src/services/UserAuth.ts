@@ -51,42 +51,50 @@ const newUser = async (): Promise<User> => {
 };
 
 /**
- * Get the current user based on Telegram ID
+ * Updates an existing user based on the provided User object.
  *
- * @param {string} telegramId - Telegram ID of the user to fetch
- * @param {boolean} createUserIfNoneExists - If true, creates a new user if none exists.
- * @returns {Promise<User>} Returns the user associated with the telegram ID.
+ * @param {User} user - The user object containing the updated user data.
+ * @returns {Promise<User>} - Returns the updated user.
  */
-export const updateUser = async (
-  telegramUser: { id: string; firstName?: string; lastName?: string; username?: string },
-  createUserIfNoneExists: boolean = false
-): Promise<User> => {
+export const updateUser = async (user: User): Promise<User> => {
+  // Map User object to the structure expected by userService
+  const userPayload: UserArgs = {
+    telegramId: user.telegramId,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    telegramHandle: user.telegramHandle,
+    referralTelegramId: user.referralTelegramId,
+    photoId: user.photoId || '',
+    photoUrl: user.photoUrl || '',
+    missionScore: user.missionScore,
+    pickScore: user.pickScore,
+    totalScore: user.totalScore,
+    totalLosses: user.totalLosses,
+    totalWins: user.totalWins,
+    favoriteSports: user.favoriteSports,
+    lastLoggedIn: user.lastLoggedIn,
+    dateCreated: user.dateCreated || new Date(),
+  };
+
   // This is the fetch request to update the user using PUT
-  let res: Response = await fetch(`/api/user/update`, {
-    method: "PUT", // Use PUT for updating existing user data
+  const res: Response = await fetch(`/api/user/update`, {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      telegramId: telegramUser.id,
-      firstname: telegramUser.firstName || null,
-      lastname: telegramUser.lastName || null,
-      handle: telegramUser.username || null,
-    }),
+    body: JSON.stringify(userPayload), // Send the full payload
   });
 
-  // If the update fails and the user doesn't exist, create a new one if the flag is set
+  // If the update fails, throw an error
   if (!res.ok) {
-    if (createUserIfNoneExists) {
-      return await newUser(); // Create a new user if none exists
-    }
-    throw new Error("Failed to update or fetch the current user.");
+    throw new Error("Failed to update the user.");
   }
 
-  // Parse the response and return the updated user
-  const { user } = (await res.json()) as { user: UserArgs };
-  return new User(user); // Return updated user
+  // Parse and return the updated user from the response
+  const { updatedUser } = (await res.json()) as { updatedUser: User };
+  return updatedUser;
 };
+
 
 /**
  * Log in the user based on their Telegram information.
@@ -102,18 +110,21 @@ export const login = async (): Promise<User> => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      id: telegramUser.id,
-      first_name: telegramUser.first_name,
-      last_name: telegramUser.last_name,
-      handle: telegramUser.username || null,  // Optional field
-      // pickScore: telegramUser.pickScore || null, // Optional field
-      // missionScore: telegramUser.missionScore || null, // Optional field
-      // totalWins: telegramUser.totalWins || null, // Optional field
-      // totalLosses: telegramUser.totalLosses || null, // Optional field
-      // Add other optional fields if they exist
-      // dateCreated: telegramUser.dateCreated || null, // Optional field
-      // lastLoggedIn: telegramUser.lastLoggedIn || null, // Optional field
-      referral: referral || null, // Optional field
+    id: telegramUser.id,
+    first_name: telegramUser.first_name,
+    last_name: telegramUser.last_name || undefined, // Optional field
+    username: telegramUser.username || undefined, // Optional field
+    // Optional fields from TelegramUser
+    is_bot: telegramUser.is_bot,
+    language_code: telegramUser.language_code,
+    is_premium: telegramUser.is_premium,
+    added_to_attachment_menu: telegramUser.added_to_attachment_menu,
+    can_join_groups: telegramUser.can_join_groups,
+    can_read_all_group_messages: telegramUser.can_read_all_group_messages,
+    supports_inline_queries: telegramUser.supports_inline_queries,
+    can_connect_to_business: telegramUser.can_connect_to_business,
+    has_main_web_app: telegramUser.has_main_web_app,
+    referral: referral || undefined, // Optional field
     }),
   });
 
