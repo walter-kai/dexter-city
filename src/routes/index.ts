@@ -2,6 +2,7 @@ import express from "express";
 import gameRoute from "./game.route";
 import authRoute from "./auth.route";
 import userRoute from "./user.route";
+import telegramRoute from "./telegram.route";
 
 
 const router = express.Router();
@@ -23,6 +24,10 @@ const defaultRoutes: ReadonlyArray<RouteObj> = [
   {
     path: "/auth",
     route: authRoute,
+  },
+  {
+    path: "/telegram",
+    route: telegramRoute,
   }
 ];
 

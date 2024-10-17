@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import LoadingScreenDots from "../components/LoadingScreenDots";
 import { UserContext } from "../App";
-import { getGames } from "../services/games";
+import { getGames } from "../services/FirestoreGames";
 import Game, { League, GameStatus } from "../models/Game";
 
 const Dashboard: React.FC = () => {
