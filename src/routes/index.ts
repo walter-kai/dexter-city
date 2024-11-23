@@ -3,6 +3,7 @@ import gameRoute from "./game.route";
 import authRoute from "./auth.route";
 import userRoute from "./user.route";
 import telegramRoute from "./telegram.route";
+import plaidRoute from "./plaid.route";
 
 
 const router = express.Router();
@@ -13,6 +14,10 @@ type RouteObj = {
 };
 
 const defaultRoutes: ReadonlyArray<RouteObj> = [
+  {
+    path: "/plaid",
+    route: plaidRoute,
+  },
   {
     path: "/game",
     route: gameRoute,

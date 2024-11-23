@@ -4,8 +4,7 @@
   "private": true,
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
-    "@lottiefiles/lottie-player": "^2.0.4",
-    "@lottiefiles/react-lottie-player": "^3.5.4",
+    "@lottiefiles/dotlottie-react": "^0.10.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
