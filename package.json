@@ -13,8 +13,6 @@
     "morgan": "^1.10.0",
     "node-fetch": "^2.7.0",
     "node-telegram-bot-api": "^0.66.0",
-    "plaid": "^30.0.0",
-    "react-plaid-link": "^3.6.1",
     "telegraf": "^4.16.3",
     "telegram-bot-sdk": "^0.3.1",
     "typescript": "^4.9.5",
