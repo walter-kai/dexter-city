@@ -39,12 +39,6 @@ const updateUserDocByTelegramId = catchAsync(async (req: Request, res: Response)
     referralTelegramId, 
     photoId, 
     photoUrl, 
-    pickScore, 
-    missionScore, 
-    totalLosses, 
-    totalWins, 
-    totalScore, 
-    favoriteSports, 
     lastLoggedIn,
     dateCreated 
     
@@ -63,12 +57,6 @@ const updateUserDocByTelegramId = catchAsync(async (req: Request, res: Response)
     referralTelegramId: referralTelegramId || '',
     photoId: photoId || '',
     photoUrl: photoUrl || '',
-    pickScore: pickScore || 0,
-    missionScore: missionScore || 0,
-    totalLosses: totalLosses || 0,
-    totalWins: totalWins || 0,
-    totalScore: totalScore || 0,
-    favoriteSports: favoriteSports || null,
     lastLoggedIn: lastLoggedIn ? new Date(lastLoggedIn) : new Date(),
     dateCreated: dateCreated ? new Date(dateCreated) : new Date(),
   };

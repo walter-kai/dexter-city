@@ -29,14 +29,8 @@ export interface UserArgs {
   readonly lastName: string | null; // Renamed from lastname
   readonly telegramHandle: string | null; // Renamed from handle
   readonly lastLoggedIn: Date; // Date UTC string
-  readonly missionScore: number;
-  readonly pickScore: number;
-  readonly totalScore: number; // Total score
   readonly referralTelegramId: string | null; // Renamed from referral
   readonly telegramId: string; // Renamed from telegramid
-  readonly totalLosses: number;
-  readonly totalWins: number;
-  readonly favoriteSports: string[] | null;
   readonly photoId: string | null;
   readonly photoUrl: string | null;
 }
@@ -48,14 +42,8 @@ export default class User {
   lastName: string | null; // Changed from lastname
   telegramHandle: string | null; // Changed from handle
   lastLoggedIn: Date;
-  missionScore: number;
-  pickScore: number;
   referralTelegramId: string | null; // Changed from referral
   telegramId: string; // Changed from telegramid
-  totalLosses: number;
-  totalWins: number;
-  totalScore: number;
-  favoriteSports: string[] | null;
   photoId?: string | null;
   photoUrl?: string | null;
 
@@ -65,14 +53,8 @@ export default class User {
     this.lastName = args.lastName; // Changed to lastName
     this.telegramHandle = args.telegramHandle; // Changed to telegramHandle
     this.lastLoggedIn = args.lastLoggedIn;
-    this.missionScore = args.missionScore;
-    this.pickScore = args.pickScore;
     this.referralTelegramId = args.referralTelegramId; // Changed to referralTelegramId
     this.telegramId = args.telegramId; // Changed to telegramId
-    this.totalLosses = args.totalLosses;
-    this.totalWins = args.totalWins;
-    this.totalScore = args.totalScore;
-    this.favoriteSports = args.favoriteSports;
     this.photoId = args.photoId;
     this.photoUrl = args.photoUrl;
   }

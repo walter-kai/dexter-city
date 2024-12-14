@@ -61,13 +61,13 @@ const Profile: React.FC = () => {
               <p><strong>Handle:</strong> {userData.telegramHandle || 'N/A'}</p>
               <p><strong>Date Created:</strong> {new Date(userData.dateCreated).toLocaleString()}</p>
               <p><strong>Last Logged In:</strong> {new Date(userData.lastLoggedIn).toLocaleString()}</p>
-              <p><strong>Mission Score:</strong> {userData.missionScore}</p>
+              {/* <p><strong>Mission Score:</strong> {userData.missionScore}</p>
               <p><strong>Pick Score:</strong> {userData.pickScore}</p>
               <p><strong>Total Losses:</strong> {userData.totalLosses}</p>
               <p><strong>Total Wins:</strong> {userData.totalWins}</p>
-              <p><strong>Total Score:</strong> {userData.totalScore}</p>
+              <p><strong>Total Score:</strong> {userData.totalScore}</p> */}
               <p><strong>Referral:</strong> {userData.referralTelegramId || 'N/A'}</p>
-              <p><strong>Favorite Sports:</strong> {userData.favoriteSports?.join(', ') || 'N/A'}</p>
+              {/* <p><strong>Favorite Sports:</strong> {userData.favoriteSports?.join(', ') || 'N/A'}</p> */}
               <p><strong>Telegram ID:</strong> {userData.telegramId}</p>
             </div>
           ) : (

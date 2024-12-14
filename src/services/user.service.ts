@@ -92,12 +92,6 @@ async function updateUser(
     telegramHandle: user.telegramHandle,      
     referralTelegramId: user.referralTelegramId,  
     lastLoggedIn: timeNow.toDate(), // Update the last logged-in time
-    pickScore: user.pickScore,
-    missionScore: user.missionScore,
-    totalLosses: user.totalLosses,
-    totalWins: user.totalWins,
-    totalScore: user.totalScore,
-    favoriteSports: user.favoriteSports || null,  // Allow favorite sports to be null
     photoId: user.photoId || '',        
     photoUrl: user.photoUrl || '',      
     dateCreated: user.dateCreated instanceof Date ? Timestamp.fromDate(user.dateCreated) : Timestamp.now(), // Handle Date or use current timestamp
@@ -180,12 +174,6 @@ async function createUser(
     referralTelegramId: args.referral,     // Accept null
     dateCreated: timeNow,        // Firestore Timestamp
     lastLoggedIn: timeNow.toDate(), // Keep as a string for now
-    pickScore: 0,
-    missionScore: 0,
-    totalLosses: 0,
-    totalWins: 0,
-    totalScore: 0,
-    favoriteSports: null,
     photoId: args.photoId,       // Accept null
     photoUrl: args.photoUrl,       // Accept null
   };

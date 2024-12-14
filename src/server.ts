@@ -5,6 +5,7 @@ import path from 'path';
 import fetch from 'node-fetch';
 import morgan from 'morgan'; 
 import routes from './routes';
+import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 
 export interface Post {
   author: {
@@ -61,6 +62,9 @@ interface Comment {
 // Load environment variables
 // config({ path: process.env.NODE_ENV === 'production' ? `.env.${process.env.NODE_ENV}` : '.env' });
 config({ path: '.env' });
+console.log('Loaded Telegram Token:', process.env.TELEGRAM_TOKEN)
+
+
 
 const app = express();
 const port = process.env.PORT || 3001;

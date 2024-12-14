@@ -66,12 +66,6 @@ export const updateUser = async (user: User): Promise<User> => {
     referralTelegramId: user.referralTelegramId,
     photoId: user.photoId || '',
     photoUrl: user.photoUrl || '',
-    missionScore: user.missionScore,
-    pickScore: user.pickScore,
-    totalScore: user.totalScore,
-    totalLosses: user.totalLosses,
-    totalWins: user.totalWins,
-    favoriteSports: user.favoriteSports,
     lastLoggedIn: user.lastLoggedIn,
     dateCreated: user.dateCreated || new Date(),
   };

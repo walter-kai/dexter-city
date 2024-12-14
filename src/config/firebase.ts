@@ -3,15 +3,15 @@ import admin from 'firebase-admin';
 // Service account details for Firebase Admin SDK
 const serviceAccount = {
   "type": "service_account",
-  "project_id": "battlebet-22c4a",
-  "private_key_id": "de7f56a710cc3e2cc048732a2ae32e1d40e310f3",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCs6OmBois4Wc0F\n7f48A8cfC12o8u2qobkS9dAivufBK8Un1kvhrgbc9w/EGxQGweIfJpe0uY7Cap4Y\naMohKjGzF8waCVJoh3KXxC57bXjJTuUYb64KkIDIolJRxscEVi0jirhsIMV9vWg7\n6VtC+9O4jZXVVO1kLJeLJT5IAsVgyG6LWIzWi37TWs68Mg2Z3blNH2YIujd60wxX\ne3LZNh/KSBiZcBAmvYZqeyJMTE/KFhx2x1C0h6TpWgNesqcnrgqukQE2ukj1bWFD\nV7nVHqc7+BWXNolt7yLxj6/K6hirxnUc9UMz2gUukqeda88A+hVorYn/XMt8j6HV\nzPo46qHVAgMBAAECgf902PDzqaOLcSQb3bjw1Zy6XfPtOD1kEeX/6h29XUVARVP2\nl9qvp+r7Z/o/jAz8hAlLA8mBV+QhfetYk3gE8X6kiHBlJ+eIu/+0j97ZiiEV6Tro\nSJBUk1J0Qz1eBfZ398SJQDVg3MSZNGY8FnaVzZhGH2ghwkKqb3f5kDGGeFjqDWq8\njG+6Bgz69slbOxWtPjiF9mD/ikStDJfUKUEj+qDy1URKMo0TMAwd56U6OUIMCPfj\nxC/tvuANSuZ496Y8Ak5l+z7Mz91NPmfoEbP1PEQqBwd26cRQXgBoJApUKDrxb134\nru/caeur0TiQ71sACCI5Z5UYVYswyzdszps4ZN0CgYEA6ZZvRmitnuewlIYJEoV9\nSVB6iTclXAsS6BQEakI8pnveH++X4BFlekwvjWyO1YbCJWTgo99tcNsACXQ2kyLd\nZUKIWeWX8eh8TLoqQ9nvSgLCXNu4vNRPiu788yAzou9hHWuO8F58zQR11L4R3azn\ntdBbepS+NiofNV/CZrRp2tcCgYEAvYAPfkDK95dL3f3nN+MPM6mBfiv3m3yZRP/C\nYO3vdPliQP2BHexMBzp7STXCraeExllSlZt9o1acovUJ9KUitpOP1v4urLV5ps+A\n5+IewUGnYLKyuoG/roqAUW2//bnugIZpay8cbspQxneJaUkj7sD1HvRchzpDbZ31\n0CXMHzMCgYEA4WPT6Ud2SD9dpmKS/HksBAMQybgZZ3AUBTXTcMiLB0W8dmpUzNNc\nbJ54v+jBBg4q5bQqAlXDn0LiDT1Cr8TThjKlqMCeVcCzt8FmqOPwPiTdcIZfAm2G\ndxPVpa8rxAthVOcFHLC/kX+9RtNEH/cH+eqbanN9+nu4c2L8DOgGwC8CgYEAmieP\n8vPAaPNiGz+OFY+XcT5mAf7AWXNdt5ybQoCseCra++V9YJs2KfcwDZk3Ok75GuXU\n4bFw3iv6FjJiG+suNvoJXCrAS20Bfmp1Aa2XuTywbWBRNpmQFevDgPpX4Y6cb19o\naHIVnibk2N6rIMQIABRmEv1UPAlwir6iFeZ5i7MCgYAREqftWr6F1/y9EMe38s1t\nNVUu+ubwywIcYCUWFWvzLKJU4na57G6ZJH4g1LDZt3vGH9Ni/B0OgT7nWdmAUqls\nJrTjLmboA5OpU9gLbExw1hCZoX0o4QFFCtRGMxFlJZHZCTm4Oosa36aeAYNnTR+N\nMTldjqsDcw5zIJZqpO5T4w==\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-tkrtd@battlebet-22c4a.iam.gserviceaccount.com",
-  "client_id": "104310522075952995363",
+  "project_id": "skylar-442701",
+  "private_key_id": "2a22aaf902965c24a181cc6f75241baf6132e929",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC3N0VgC7FFMKrm\nkFw1rduqaj21N2qt2prsyanY2B2cpBPgu3dtqdmWmr1D0pu/9pKYdNKXqrK6i9n9\nHdx+hNMyWLLqdrLa+YDpSbXEyzG9iO6CtwtDWINQ3G4qQ3Q7cOblQkVnEpRMgY68\nroIig9INLDiZpbb2z927zCtl7R3TcbDq6JHTdVrZdQbPYXVG0WfKTSP6Knt9vWoE\nTcP04Rtw9+59SXMUr56HXvhMqZm1K4CYq8KoX8piWQwrWTf1lM/Uugf72qq0l2Yj\nAkD4+wRlo8NdCPvm/RzlLwIkpOH9dB05NApa+qgXFgvc6ycLXcwt1/gkCRe+XISk\nJBWhzHnHAgMBAAECggEAWMK4I23GteR8BzNM2NyfnRHXT2HHlu5fO/P/CwS4Y9jB\noJBxrXkp5uKUarUvq3JDVwTRuZSC/gke1JeQ6OJkhvGdzCUxRRC3OU3yd6KROGeM\nVVtkY34QMC56WJNRTjLGSa8vfF3t5pqlkhdhCGOgca1IxncYCr5th7vEEp8rYfHS\nQ006QXWf+8nCw6QwznT9NKaL6JGGpfjHXQtxlkZLk2or9xhLRx8I7eutjxkR75s0\nYyynpg79T5t1ZY4Kc4qMeLnn+AhfGAd8qTg/R7LHu59LsNTP8okdvCM0mDzS7Yo3\nioY7Z9P0akJMWvpDlVog90fWlQ9gSG1uHnc/v8PJAQKBgQDkoZNCM6E0SFjYbm1V\nWKMFfLO0CUVbBuJ3EiOAGN+IECACLyW0sMroiO2Jj4qhf+M6DL+CfxZpi4kYbo9M\noNQzhnHRs6/FoQXHJ/s6G1f0duf21JNPSxrcnCTU/9zuB1HmfB5tIghqSTOlV/b/\nDRID4JfhMPFkBy34cyncRaIwQQKBgQDNJfDZhzivPUHMc1A7lMvnw8GmpcCj2MK/\nz9etxvJSXFSIlosPVMwFiSNGLPc6D6rWb4hgMqaTTwJalLAeHXsG30SLu+aoHfME\nMps8mRW9GzNlEVU9Fj07UxQi5FzJUkjPit60q0z/Gsywn8QpKFKZ5Vw7CEQuymgE\nJ0IxThMoBwKBgQCXSg/u48lNln4sIc55hmDB1cX4YZYiaQjcsAUL0+m+2KTFrTsv\nOTnb7Bf7Sh/7RGwxUpQ7nytOhkYfA7IRi+8/dTzF/jhW93miUuOcjNGD9FcE75/W\n/aT1zOFWjUU9wVxBv2pG3xlgc7YYOIA6QATmyezW2BM0FMgnutU9bFqpwQKBgFNg\ntD704mj2sKNzyowssaMEwNQGUgFFvAFRbAtI7Hvk4saQyPv2LuWhEyEWbXS/oWN9\n+SN/8ou0dPRzshDLUpE8dROFzv1NDtQJ7WX3ogo13/GX1dj6DPDrlyeHQN7h/o27\nl0A+zxBvx/mRNZy0sr2xpoanmW6a/SOTASgg31BJAoGBAKb7mDyKWxOHOSktpgbx\nIGS75cF8jUB24SaV2jklp62Pxz2rX7zw1uBSL0eGDZb/21lBdaXSzwD7eEvWSNY5\nGWHf1/JfAjQdSpgbeB4EuecEyEUPfw5gZAPLtHujN+iTp3jh+nd1bN2WkM/fgh+p\nPIEpcSofnAtcbXaDpUHWAsn5\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-qxets@skylar-442701.iam.gserviceaccount.com",
+  "client_id": "100197603718462720550",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
   "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-tkrtd%40battlebet-22c4a.iam.gserviceaccount.com",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-qxets%40skylar-442701.iam.gserviceaccount.com",
   "universe_domain": "googleapis.com"
 };
 
@@ -19,8 +19,8 @@ const serviceAccount = {
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-    databaseURL: "https://battlebet-22c4a.firebaseio.com",
-    storageBucket: 'gs://battlebet-22c4a.appspot.com'
+    databaseURL: "https://skylar-442701.firebaseio.com",
+    storageBucket: "gs://skylar-442701.firebasestorage.app"
   });
 }
 

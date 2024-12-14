@@ -126,12 +126,6 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
       photoId: profilePicId || null,
       photoUrl: profilePicUrl || null,
       lastLoggedIn: new Date(),
-      missionScore: existingUser?.missionScore || 0,
-      pickScore: existingUser?.pickScore || 0,
-      totalScore: existingUser?.totalScore || 0,
-      totalLosses: existingUser?.totalLosses || 0,
-      totalWins: existingUser?.totalWins || 0,
-      favoriteSports: existingUser?.favoriteSports || null,
       dateCreated: existingUser?.dateCreated || new Date(), // Keep original creation date if exists
     };
 

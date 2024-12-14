@@ -100,11 +100,6 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
         referralTelegramId: currentUser?.referralTelegramId || '',
         photoId: currentUser?.photoId || '',
         photoUrl: currentUser?.photoUrl || '',
-        missionScore: currentUser?.missionScore || 0,
-        pickScore: currentUser?.pickScore || 0,
-        totalScore: currentUser?.totalScore || 0,
-        totalLosses: currentUser?.totalLosses || 0,
-        totalWins: currentUser?.totalWins || 0,
       };
       updateUser(updatedUser);
     } else {
