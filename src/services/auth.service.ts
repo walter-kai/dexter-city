@@ -94,7 +94,7 @@ const downloadAndUploadToFirebase = async (bot: Telegraf, fileId: string, userId
  * @param {TelegramUser} telegramUser - The user data to create the user if not found.
  * @returns {Promise<{ message: string, user: User | null }>} A message or user data.
  */
-const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: string, user: User | null }> => {
+const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: string, user: User | null, newUser: boolean | null}> => {
   try {
     const bot = new Telegraf(process.env.TELEGRAM_TOKEN as string);
 
@@ -145,12 +145,14 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
       return {
         message: "User created",
         user: newUser,
+        newUser: true
       };
     } else {
       const updatedUser = await userService.updateUser(userPayload);
       return {
         message: "User updated",
         user: updatedUser || null,
+        newUser: false
       };
     }
   } catch (error) {
@@ -158,6 +160,7 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
     return {
       message: "An error occurred",
       user: null,
+      newUser: null
     };
   }
 };

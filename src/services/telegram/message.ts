@@ -77,6 +77,6 @@ export function showMenu(chatId: number): void {
       }
     };
 
-    skylarBot.sendMessage(chatId, '', options)
+    skylarBot.sendMessage(chatId, 'Home', options)
     .catch((err: any) => console.error('Error sending /start message with photo:', err));
   }

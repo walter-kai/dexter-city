@@ -23,15 +23,15 @@ interface Sport {
   name: string;
 }
 
-const sportsOptions: Sport[] = [
-  { id: "soccer", name: "Soccer" },
-  { id: "basketball", name: "Basketball" },
-  { id: "football", name: "Football" },
-  { id: "baseball", name: "Baseball" },
-  { id: "hockey", name: "Hockey" },
-  { id: "tennis", name: "Tennis" },
-  { id: "golf", name: "Golf" },
-  { id: "rugby", name: "Rugby" },
+const tokenPairs: { id: string; name: string }[] = [
+  { id: "BTCUSDT", name: "Bitcoin/USDT" },
+  { id: "ETHUSDT", name: "Ethereum/USDT" },
+  { id: "BNBUSDT", name: "Binance Coin/USDT" },
+  { id: "ADAUSDT", name: "Cardano/USDT" },
+  { id: "XRPUSDT", name: "XRP/USDT" },
+  { id: "SOLUSDT", name: "Solana/USDT" },
+  { id: "DOTUSDT", name: "Polkadot/USDT" },
+  { id: "DOGEUSDT", name: "Dogecoin/USDT" },
 ];
 
 interface OnboardFormProps {
@@ -75,7 +75,7 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
     if (favoriteSports.length > 0) {
       onComplete(userName, favoriteSports.map((sport) => sport.name));
     } else{
-      setFavoriteSports(sportsOptions);
+      setFavoriteSports(tokenPairs);
     }
   }, [ onComplete, userName]); // Dependencies include favoriteSports and onComplete
 
@@ -84,7 +84,7 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
   const handleNext = () => {
     if (currentPage === 1) {
       if (favoriteSports.length === 0) {
-        const updatedSports = reorder(sportsOptions, 0, 0);
+        const updatedSports = reorder(tokenPairs, 0, 0);
         setFavoriteSports(updatedSports);
       }
       onComplete(userName, favoriteSports.map((sport) => sport.name));
@@ -149,7 +149,7 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
               />
             )}
             <p>Hello <strong>{userName}</strong>! 😊</p>
-            <h2 className="text-xl font-semibold mb-4">⚽🏀 Please rank your favorite sports 🏈⚾</h2>
+            <h2 className="text-xl font-semibold mb-4">🩴🍶🧼 Pick your pairs 👾🌮👽</h2>
             <p>You can change this later in settings</p>
             <div>
               {favoriteSports.map((sport, index) => (

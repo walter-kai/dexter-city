@@ -95,7 +95,7 @@ export const updateUser = async (user: User): Promise<User> => {
  *
  * @returns {Promise<User>} The logged-in user.
  */
-export const login = async (): Promise<User> => {
+export const login = async (): Promise<{ newUser: boolean; user: User }> => {
   const{ user: telegramUser, referral } = (await getTelegram());
 
   let res: Response = await fetch(`/api/auth/login/`, {
@@ -128,12 +128,12 @@ export const login = async (): Promise<User> => {
     throw new Error('Login failed');
   }
 
-  const { message, user } = (await res.json()) as { message: string, user: User };
+  const { newUser, user } = (await res.json()) as { newUser: boolean, user: User };
 
   // You can log the message if needed
-  console.log(message); // Optional: log the message
+  console.log(newUser); // Optional: log the message
 
-  return user; // Return the user directly
+  return { newUser, user }; // Return the user directly
 };
 
 

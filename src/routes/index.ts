@@ -3,6 +3,7 @@ import gameRoute from "./game.route";
 import authRoute from "./auth.route";
 import userRoute from "./user.route";
 import telegramRoute from "./telegram.route";
+import binanceRoute from "./binance.route"
 
 
 const router = express.Router();
@@ -28,6 +29,10 @@ const defaultRoutes: ReadonlyArray<RouteObj> = [
   {
     path: "/telegram",
     route: telegramRoute,
+  },
+  {
+    path: "/binance",
+    route: binanceRoute,
   }
 ];
 

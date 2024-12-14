@@ -30,9 +30,10 @@ const App: React.FC = () => {
 
         
         // Try to get the current user using their Telegram ID
-        const user = await login(); // Pass true to create user if it doesn't exist
+        const { newUser, user } = await login(); // Pass true to create user if it doesn't exist
 
         setCurrentUser(user); // Set the current user state
+        setIsOnboarding(newUser);
       } catch (error) {
         console.error("Error fetching Telegram user:", error);
         setError("Failed to fetch Telegram user. Please try again."); // Set error state

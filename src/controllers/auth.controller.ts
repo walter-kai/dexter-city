@@ -14,9 +14,9 @@ const login = catchAsync(async (req: Request, res: Response): Promise<Response> 
   }
 
   // Attempt to login the user, or create if they don't exist
-  const user = await authService.loginOrCreate(userData);
+  const {user, newUser} = await authService.loginOrCreate(userData);
 
-  return res.status(200).json( user );
+  return res.status(200).json( {user, newUser} );
 });
 
 
