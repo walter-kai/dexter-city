@@ -39,13 +39,13 @@ const TokenPairDropdown: React.FC = () => {
     setSearchQuery(pair.symbol); // Set the search bar to the selected symbol
   };
 
-  return (
-    <>
-      {loading ? (
-        <div className="h-[270px]">
+  if (loading) return (
+    <div className="h-[270px]">
           <LoadingScreenDots />
         </div>
-      ) : (
+  )
+
+  return (
         <div className="flex flex-col items-center animate-fadeIn">
           <div className="relative w-full">
             <div className="p-1 font-bold w-full">
@@ -99,8 +99,6 @@ const TokenPairDropdown: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-    </>
   );
 };
 

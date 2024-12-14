@@ -37,53 +37,106 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 // Import Binance MainClient
-var binance_1 = require("binance");
+var crypto_1 = require("crypto"); // For HMAC SHA256 signature generation
 // Binance API credentials
 var API_KEY = 'phDMYGRMJtNdHl3wdVsSfYU2q8EYBUFjMdgOOvLEU0UPPS2M6imGvo4S6WY47CrA';
 var API_SECRET = '0zdO18SGLCi11YEcEkvHXlkRKEv9DuPwfeSUtrxBkVNoE24M32uDMldovqCmaTB1';
-// Initialize Binance client for Testnet
-var client = new binance_1.MainClient({
-    api_key: API_KEY,
-    api_secret: API_SECRET,
-    baseUrl: 'https://testnet.binance.vision'
-});
+// Base URL for Binance Testnet
+var BASE_URL = 'https://testnet.binance.vision';
+// Fetch server timestamp
+function serverTimestamp() {
+    return __awaiter(this, void 0, Promise, function () {
+        var url, response, data;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    url = BASE_URL + "/api/v3/time";
+                    return [4 /*yield*/, fetch(url)];
+                case 1:
+                    response = _a.sent();
+                    return [4 /*yield*/, response.json()];
+                case 2:
+                    data = _a.sent();
+                    return [2 /*return*/, data.serverTime];
+            }
+        });
+    });
+}
+// Generate HMAC SHA256 signature
+function generateSignature(queryString) {
+    return crypto_1["default"].createHmac('sha256', API_SECRET).update(queryString).digest('hex');
+}
 // Fetch account trade list
 var getAccountTradeList = function (symbol) { return __awaiter(void 0, void 0, Promise, function () {
-    var result, err_1;
+    var timestamp, params_1, queryString, signature, signedQueryString, url, response, result, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, client.getAccountTradeList({ symbol: symbol })];
+                _a.trys.push([0, 4, , 5]);
+                return [4 /*yield*/, serverTimestamp()];
             case 1:
-                result = _a.sent();
-                console.log('getAccountTradeList result: ', result);
-                return [2 /*return*/, result];
+                timestamp = _a.sent();
+                params_1 = {
+                    symbol: symbol,
+                    timestamp: timestamp
+                };
+                queryString = Object.keys(params_1)
+                    .map(function (key) { return key + "=" + encodeURIComponent(params_1[key]); })
+                    .join('&');
+                signature = generateSignature(queryString);
+                signedQueryString = queryString + "&signature=" + signature;
+                url = BASE_URL + "/api/v3/myTrades?" + signedQueryString;
+                return [4 /*yield*/, fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'X-MBX-APIKEY': API_KEY
+                        }
+                    })];
             case 2:
+                response = _a.sent();
+                if (!response.ok) {
+                    throw new Error("HTTP error! status: " + response.status);
+                }
+                return [4 /*yield*/, response.json()];
+            case 3:
+                result = _a.sent();
+                return [2 /*return*/, result];
+            case 4:
                 err_1 = _a.sent();
                 console.error('getAccountTradeList error: ', err_1);
                 throw err_1;
-            case 3: return [2 /*return*/];
+            case 5: return [2 /*return*/];
         }
     });
 }); };
 // Fetch exchange information
 var getExchangeInfo = function () { return __awaiter(void 0, void 0, Promise, function () {
-    var result, err_2;
+    var url, response, result, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, client.getExchangeInfo()];
+                _a.trys.push([0, 3, , 4]);
+                url = BASE_URL + "/api/v3/exchangeInfo";
+                return [4 /*yield*/, fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'X-MBX-APIKEY': API_KEY
+                        }
+                    })];
             case 1:
-                result = _a.sent();
-                // console.log('getExchangeInfo result: ', result);
-                return [2 /*return*/, result];
+                response = _a.sent();
+                if (!response.ok) {
+                    throw new Error("HTTP error! status: " + response.status);
+                }
+                return [4 /*yield*/, response.json()];
             case 2:
+                result = _a.sent();
+                return [2 /*return*/, result];
+            case 3:
                 err_2 = _a.sent();
                 console.error('getExchangeInfo error: ', err_2);
                 throw err_2;
-            case 3: return [2 /*return*/];
+            case 4: return [2 /*return*/];
         }
     });
 }); };

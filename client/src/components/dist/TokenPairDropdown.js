@@ -82,8 +82,10 @@ var TokenPairDropdown = function () {
         setSelectedPairInfo(pair);
         setSearchQuery(pair.symbol); // Set the search bar to the selected symbol
     };
-    return (react_1["default"].createElement(react_1["default"].Fragment, null, loading ? (react_1["default"].createElement("div", { className: "h-[270px]" },
-        react_1["default"].createElement(LoadingScreenDots_1["default"], null))) : (react_1["default"].createElement("div", { className: "flex flex-col items-center animate-fadeIn" },
+    if (loading)
+        return (react_1["default"].createElement("div", { className: "h-[270px]" },
+            react_1["default"].createElement(LoadingScreenDots_1["default"], null)));
+    return (react_1["default"].createElement("div", { className: "flex flex-col items-center animate-fadeIn" },
         react_1["default"].createElement("div", { className: "relative w-full" },
             react_1["default"].createElement("div", { className: "p-1 font-bold w-full" },
                 react_1["default"].createElement("div", { className: "px-4 py-1 text-center" },
@@ -120,6 +122,6 @@ var TokenPairDropdown = function () {
                         react_1["default"].createElement("p", null,
                             react_1["default"].createElement("strong", null, "Iceberg Allowed:"),
                             " ",
-                            selectedPairInfo.icebergAllowed ? 'Yes' : 'No'))))))))));
+                            selectedPairInfo.icebergAllowed ? 'Yes' : 'No'))))))));
 };
 exports["default"] = TokenPairDropdown;
