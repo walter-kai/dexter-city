@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import LoadingScreenDots from "../components/LoadingScreenDots";
+import TokenPairDropdown from "../components/TokenPairDropdown";
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [accountTrades, setAccountTrades] = useState<any[]>([]); // Adjust type based on actual response
-  const [exchangeInfo, setExchangeInfo] = useState<any>(null); // Adjust type based on actual response
+  const [accountTrades, setAccountTrades] = useState<any[]>([]);
+  const [exchangeInfo, setExchangeInfo] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedPairInfo, setSelectedPairInfo] = useState<any | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch account trades
-        const tradesResponse = await fetch("/api/binance/trades?symbol=BTCUSDT"); // Example symbol, adjust as needed
+        const tradesResponse = await fetch("/api/binance/trades?symbol=BTCUSDT");
         if (!tradesResponse.ok) throw new Error("Failed to fetch trades");
         const trades = await tradesResponse.json();
 
-        // Fetch exchange info
         const exchangeResponse = await fetch("/api/binance/exchangeInfo");
         if (!exchangeResponse.ok) throw new Error("Failed to fetch exchange info");
         const exchangeData = await exchangeResponse.json();
 
-        // Set state with fetched data
         setAccountTrades(trades);
-        setExchangeInfo(exchangeData);
+        setExchangeInfo(exchangeData.data.symbols);
       } catch (error) {
         console.error("Error fetching Binance data:", error);
       } finally {
@@ -31,6 +31,17 @@ const Dashboard: React.FC = () => {
 
     fetchData();
   }, []);
+
+  // Filter exchange info based on search query
+  const filteredPairs = exchangeInfo.filter((pair) =>
+    pair.symbol.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Handle selection of a trading pair
+  const handlePairSelect = (pair: any) => {
+    setSelectedPairInfo(pair);
+    setSearchQuery(pair.symbol); // Set the search bar to the selected symbol
+  };
 
   return (
     <>
@@ -63,20 +74,7 @@ const Dashboard: React.FC = () => {
                     <p>No trades found.</p>
                   )}
                 </div>
-
-                {/* Exchange Info */}
-                <div className="bg-white p-4 rounded shadow-md">
-                  <h2 className="text-xl">Exchange Information</h2>
-                  {exchangeInfo ? (
-                    <div>
-                      <p><strong>Timezone:</strong> {exchangeInfo.timezone}</p>
-                      <p><strong>Server Time:</strong> {new Date(exchangeInfo.serverTime).toLocaleString()}</p>
-                      <p><strong>Symbols:</strong> {exchangeInfo.symbols.length} available trading pairs</p>
-                    </div>
-                  ) : (
-                    <p>No exchange info available.</p>
-                  )}
-                </div>
+                  <TokenPairDropdown />
               </div>
             </div>
           </div>

@@ -9,14 +9,14 @@ const API_SECRET: string = '0zdO18SGLCi11YEcEkvHXlkRKEv9DuPwfeSUtrxBkVNoE24M32uD
 const client = new MainClient({
   api_key: API_KEY,
   api_secret: API_SECRET,
-  baseUrl: 'https://testnet.binance.vision/api', // Testnet REST API base URL
+  baseUrl: 'https://testnet.binance.vision', // Testnet REST API base URL
 });
 
 
 // Fetch account trade list
 const getAccountTradeList = async (symbol: string): Promise<any> => {
   try {
-    const result = await client.getAccountTradeList({ symbol });
+    const result = await client.getAccountTradeList({ symbol: symbol })
     console.log('getAccountTradeList result: ', result);
     return result;
   } catch (err) {
@@ -29,7 +29,7 @@ const getAccountTradeList = async (symbol: string): Promise<any> => {
 const getExchangeInfo = async (): Promise<any> => {
   try {
     const result = await client.getExchangeInfo();
-    console.log('getExchangeInfo result: ', result);
+    // console.log('getExchangeInfo result: ', result);
     return result;
   } catch (err) {
     console.error('getExchangeInfo error: ', err);

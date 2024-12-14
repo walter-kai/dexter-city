@@ -32,8 +32,9 @@ const getAccountTradeList = catchAsync(async (req: Request, res: Response): Prom
 
 // Express route to receive updates
 const getExchangeInfo = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  BinanceService.getExchangeInfo();
-  return res.sendStatus(200);
+  const exchangeInfo = await BinanceService.getExchangeInfo();
+  return res.status(200).json({ success: true, data: exchangeInfo });
+
 });
 
 
