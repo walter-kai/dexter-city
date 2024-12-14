@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var react_1 = require("react");
 var LoadingScreenDots_1 = require("./LoadingScreenDots");
-var TokenPairDropdown = function () {
+var SearchExchangeInfo = function () {
     var _a = react_1.useState(true), loading = _a[0], setLoading = _a[1];
     var _b = react_1.useState([]), exchangeInfo = _b[0], setExchangeInfo = _b[1];
     var _c = react_1.useState(""), searchQuery = _c[0], setSearchQuery = _c[1];
@@ -124,4 +124,4 @@ var TokenPairDropdown = function () {
                             " ",
                             selectedPairInfo.icebergAllowed ? 'Yes' : 'No'))))))));
 };
-exports["default"] = TokenPairDropdown;
+exports["default"] = SearchExchangeInfo;

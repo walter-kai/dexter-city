@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import LoadingScreenDots from "./LoadingScreenDots";
 
-const TokenPairDropdown: React.FC = () => {
+const SearchExchangeInfo: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   const [exchangeInfo, setExchangeInfo] = useState<any[]>([]);
@@ -102,4 +102,4 @@ const TokenPairDropdown: React.FC = () => {
   );
 };
 
-export default TokenPairDropdown;
+export default SearchExchangeInfo;

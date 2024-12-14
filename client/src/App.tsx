@@ -1,5 +1,5 @@
 import './styles/styles.css';
-import React, { createContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Trending from './pages/Trending';
 import Share from './pages/Share';
@@ -14,10 +14,9 @@ import { login } from './services/FirestoreUser'; // Import newUser function
 import User from "./models/User";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-export const UserContext = createContext<User | null>(null);
+import LoadingScreenDots from './components/LoadingScreenDots';
 
 const App: React.FC = () => {
-
   const [isOnboarding, setIsOnboarding] = useState(true);
   const [loading, setLoading] = useState(true); // State for loading user data
   const [error, setError] = useState<string | null>(null); // State for error handling
@@ -27,10 +26,11 @@ const App: React.FC = () => {
     async function fetchTelegramUser() {
       setLoading(true); // Set loading state
       try {
-
-        
         // Try to get the current user using their Telegram ID
         const { newUser, user } = await login(); // Pass true to create user if it doesn't exist
+        
+        // Store the user in sessionStorage
+        sessionStorage.setItem('currentUser', JSON.stringify(user));
 
         setCurrentUser(user); // Set the current user state
         setIsOnboarding(newUser);
@@ -41,11 +41,17 @@ const App: React.FC = () => {
         setLoading(false); // Reset loading state
       }
     }
-  
-    fetchTelegramUser();
-  }, []);
-  
 
+    // Check if user exists in sessionStorage
+    const storedUser = sessionStorage.getItem('currentUser');
+    if (storedUser) {
+      setCurrentUser(JSON.parse(storedUser)); // Set the stored user from sessionStorage
+      setIsOnboarding(false); // Skip onboarding if user exists
+      setLoading(false); // Set loading to false
+    } else {
+      fetchTelegramUser(); // Fetch user if not found in sessionStorage
+    }
+  }, []);
 
   const handleCompleteOnboarding = (chosenName: string, favoriteSport: string[]) => {
     console.log("Onboarding complete with name:", chosenName, "and favorite sports:", favoriteSport);
@@ -53,7 +59,7 @@ const App: React.FC = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>; // Optional loading state
+    return <LoadingScreenDots />; // Optional loading state
   }
 
   if (error) {
@@ -61,32 +67,26 @@ const App: React.FC = () => {
   }
 
   return (
-    <UserContext.Provider value={currentUser}>
-      <div className="mx-auto">
-        {isOnboarding ? (
-          <DndProvider backend={HTML5Backend}>
-            <OnboardForm 
-              onComplete={handleCompleteOnboarding} 
-            />
-          </DndProvider>
-
-        ) : (
-          <>
-            {/* <NavBar telegramUser={telegramUser} onLogin={handleLogin} /> */}
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/trending" element={<Trending />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/share" element={<Share />} />
-              <Route path="/user-guide" element={<UserGuide />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/quit" element={<Quit />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </>
-        )}
-      </div>
-    </UserContext.Provider>
+    <div className="mx-auto">
+      {isOnboarding ? (
+        <DndProvider backend={HTML5Backend}>
+          <OnboardForm onComplete={handleCompleteOnboarding} />
+        </DndProvider>
+      ) : (
+        <>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/trending" element={<Trending />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/share" element={<Share />} />
+            <Route path="/user-guide" element={<UserGuide />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/quit" element={<Quit />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </>
+      )}
+    </div>
   );
 };
 
