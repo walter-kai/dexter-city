@@ -1,113 +1,164 @@
 import { TelegramUser } from "../models/User";
+import { postEvent, MethodNameWithRequiredParams } from "@telegram-apps/sdk";
 
+export interface BiometricRequestAccessParams {
+  reason: string; // Reason for requesting biometric access
+}
+
+export interface BiometricAuthenticateParams {
+  reason: string; // Reason for biometric authentication
+}
+
+export type BiometricCallback = (success: boolean, error?: string) => void;
+
+export interface BiometricManager {
+  isInited: boolean;
+  isBiometricAvailable: boolean;
+  biometricType: "finger" | "face" | "unknown";
+  isAccessRequested: boolean;
+  isAccessGranted: boolean;
+  isBiometricTokenSaved: boolean;
+  deviceId: string;
+
+  init(callback?: BiometricCallback): void;
+  requestAccess(
+    params: BiometricRequestAccessParams,
+    callback?: BiometricCallback
+  ): void;
+  authenticate(
+    params: BiometricAuthenticateParams,
+    callback?: (success: boolean, token?: string, error?: string) => void
+  ): void;
+  updateBiometricToken(
+    token: string,
+    callback?: BiometricCallback
+  ): void;
+  openSettings(): void;
+}
+
+
+// Define the TelegramWebApp interface
 export interface TelegramWebApp {
   initDataUnsafe?: {
     user?: Partial<TelegramUser>;
     start_param?: string;
   };
   showAlert: (message: string) => void;
+  BiometricManager: BiometricManager;
 }
 
-// Default user for testing purposes
+// Default user object
 export const defaultTelegramUser: TelegramUser = {
   first_name: "Walter",
   last_name: "Yaoza",
-  username: "kai", // Set handle to testname
+  username: "kai", // Set handle to test name
   id: "5030917144",
-  is_bot: false
+  is_bot: false,
 };
 
-export async function getTelegram(): Promise<{
-  webApp: TelegramWebApp;
-  user: TelegramUser;
-  referral: string | null;
-  jumpToMission: string | null;
-  onArgumentResult: (functionName: string, argument: string, result: string) => void;
-  onResult: (functionName: string, result: string) => void;
-  onReceivedEvent: (event: string, data: any) => void;
-  executeArgumentMethod: (methodName: string, argument: string, method: () => any, ignoreAlert?: boolean) => void;
-  executeMethod: (methodName: string, method: () => any, ignoreAlert?: boolean) => void;
-}> {
-  return new Promise((resolve, reject) => {
-    const webApp = (window as any).Telegram.WebApp as TelegramWebApp;
+// TelegramApp class implementation
+export class TelegramApp {
+  private webApp!: TelegramWebApp; // Definite assignment operator
+  private biometricManager: BiometricManager;
+  private user: TelegramUser;
+  private referral: string | null;
 
-    // Get the user information from Telegram or use the default user
-    const user = webApp.initDataUnsafe?.user || defaultTelegramUser;
-    const startParam = webApp.initDataUnsafe?.start_param;
+  constructor() {
+    this.webApp = (window as any).Telegram.WebApp as TelegramWebApp;
+    this.user = this.getUser();
+    this.biometricManager = this.getBiometricManager();
+    this.referral = this.getReferral();
+  }
 
+  private getBiometricManager(): BiometricManager {
+    const biometricManager: Partial<BiometricManager> = this.webApp.BiometricManager;
+
+    // Provide default implementations for missing properties
+    return {
+      isInited: biometricManager.isInited || false,
+      isBiometricAvailable: biometricManager.isBiometricAvailable || (() => false),
+      biometricType: biometricManager.biometricType || "none",
+      isAccessRequested: biometricManager.isAccessRequested || (() => false),
+      requestAccess: biometricManager.requestAccess || (() => this.biometricManager),
+      ...biometricManager, // Spread existing properties
+    } as BiometricManager;
+  }
+
+  private getUser(): TelegramUser {
+    const user = this.webApp.initDataUnsafe?.user || defaultTelegramUser;
+    return {
+      ...user,
+      id: String(user.id || ""), // Ensure id is a string
+      username: user?.username || "",
+      first_name: user?.first_name || "",
+      last_name: user?.last_name || "",
+      is_bot: user.is_bot || true,
+    };
+  }
+
+  private getReferral(): string | null {
+    const startParam = this.webApp.initDataUnsafe?.start_param;
     let referral: string | null = null;
-    let jumpToMission: string | null = null; // Initialize the jumpToMission variable
 
-    // Check if startParam is defined and parse the parameters
     if (startParam) {
       const params = startParam.split("-");
-
       params.forEach((param) => {
-        if (param.startsWith("league_")) {
-          // leagueFilter = getLeagueFromString(param.split("_")[1]); // Extract the league filter enum
-        } else if (param.startsWith("ref_")) {
-          referral = webApp.initDataUnsafe? param.split("_")[1] : "5025509571";
-        } else if (param.startsWith("mission_")) {
-          jumpToMission = param.split("_")[1]; // Extract the mission name
+        if (param.startsWith("ref_")) {
+          referral = param.split("_")[1] || "5025509571"; // Default to fallback referral ID
         }
       });
     }
 
-    // Function to show alert with the result of a method call
-    const onArgumentResult = (functionName: string, argument: string, result: string) => {
-      webApp.showAlert(`${functionName}(${argument}) returned ${result}`);
+    return referral;
+  }
+
+  biometricTrigger(): void {
+    // console.log("heool", this.biometricManager.biometricType);
+
+    if (!this.biometricManager.isBiometricAvailable) {
+      console.error("Biometric authentication is not available");
+      this.showAlert("Biometric authentication is not available on this device.");
+      return;
+    }
+
+    this.biometricManager.init();
+
+    const params: BiometricRequestAccessParams = {
+      reason: "Authenticate to continue", // Example reason message
     };
 
-    const onResult = (functionName: string, result: string) => {
-      onArgumentResult(functionName, "", result);
-    };
-
-    const onReceivedEvent = (event: string, data: any) => {
-      webApp.showAlert(`received event(${event}) with data(${data})`);
-    };
-
-    // Function to execute a method with an argument and handle errors
-    const executeArgumentMethod = (
-      methodName: string,
-      argument: string,
-      method: () => any,
-      ignoreAlert = false
-    ) => {
-      try {
-        const result = method();
-        if (!ignoreAlert) {
-          const wrappedResult = `Result: ${result}`;
-          onArgumentResult(methodName, argument, wrappedResult);
-        }
-      } catch (error: any) {
-        onArgumentResult(methodName, argument, error.toString());
+    this.biometricManager.requestAccess(params, (success, error) => {
+      if (success) {
+        console.log("Biometric access granted");
+        this.showAlert("Biometric access granted!");
+      } else {
+        console.error("Biometric access denied:", error);
+        this.showAlert("Biometric access denied. Please try again.");
       }
-    };
-
-    // Function to execute a method without arguments
-    const executeMethod = (methodName: string, method: () => any, ignoreAlert = false) => {
-      executeArgumentMethod(methodName, "", method, ignoreAlert);
-    };
-
-    resolve({
-      webApp,
-      user: {
-        ...user,
-        id: String(user.id || ''), // Ensure id is a string
-        username: user?.username || "", // Safely assign handle
-        first_name: user?.first_name || "",
-        // dateCreated: user.dateCreated || "",  // Provide default value
-        // lastLoggedIn: user.lastLoggedIn || "", // Provide default value
-        last_name: user.last_name || "",          // Provide default value
-        is_bot: user.is_bot || true
-      },
-      referral,
-      jumpToMission, // Include jumpToMission in the resolved object
-      onArgumentResult,
-      onResult,
-      onReceivedEvent,
-      executeArgumentMethod,
-      executeMethod,
     });
-  });
+  }
+
+  showAlert(message: string): void {
+    this.webApp.showAlert(message);
+  }
+
+  emitEvent(method: MethodNameWithRequiredParams, params: Record<string, any>): void {
+    try {
+      postEvent(method, params);
+      console.log(`Event "${method}" posted successfully`, params);
+    } catch (error) {
+      console.error(`Failed to post event "${method}":`, error);
+    }
+  }
+
+  getUserDetails() {
+    return {
+      user: this.user,
+      referral: this.referral,
+    };
+  }
 }
+
+// Export the instance of TelegramApp
+const telegramAppInstance = new TelegramApp();
+export default telegramAppInstance;

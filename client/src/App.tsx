@@ -15,67 +15,20 @@ import User from "./models/User";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import LoadingScreenDots from './components/LoadingScreenDots';
+import Login from './pages/Login';
 
 const App: React.FC = () => {
-  const [isOnboarding, setIsOnboarding] = useState(true);
-  const [loading, setLoading] = useState(true); // State for loading user data
-  const [error, setError] = useState<string | null>(null); // State for error handling
-  const [currentUser, setCurrentUser] = useState<User | null>(null); // State for current user
 
-  useEffect(() => {
-    async function fetchTelegramUser() {
-      setLoading(true); // Set loading state
-      try {
-        // Try to get the current user using their Telegram ID
-        const { newUser, user } = await login(); // Pass true to create user if it doesn't exist
-        
-        // Store the user in sessionStorage
-        sessionStorage.setItem('currentUser', JSON.stringify(user));
 
-        setCurrentUser(user); // Set the current user state
-        setIsOnboarding(newUser);
-      } catch (error) {
-        console.error("Error fetching Telegram user:", error);
-        setError("Failed to fetch Telegram user. Please try again."); // Set error state
-      } finally {
-        setLoading(false); // Reset loading state
-      }
-    }
 
-    // Check if user exists in sessionStorage
-    const storedUser = sessionStorage.getItem('currentUser');
-    if (storedUser) {
-      setCurrentUser(JSON.parse(storedUser)); // Set the stored user from sessionStorage
-      setIsOnboarding(false); // Skip onboarding if user exists
-      setLoading(false); // Set loading to false
-    } else {
-      fetchTelegramUser(); // Fetch user if not found in sessionStorage
-    }
-  }, []);
-
-  const handleCompleteOnboarding = (chosenName: string, favoriteSport: string[]) => {
-    console.log("Onboarding complete with name:", chosenName, "and favorite sports:", favoriteSport);
-    setIsOnboarding(false); // Update the onboarding state
-  };
-
-  if (loading) {
-    return <LoadingScreenDots />; // Optional loading state
-  }
-
-  if (error) {
-    return <div className="text-red-500">{error}</div>; // Show error message
-  }
 
   return (
     <div className="mx-auto">
-      {isOnboarding ? (
-        <DndProvider backend={HTML5Backend}>
-          <OnboardForm onComplete={handleCompleteOnboarding} />
-        </DndProvider>
-      ) : (
+
         <>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Login />} />
+            <Route path="/dash" element={<Dashboard />} />
             <Route path="/trending" element={<Trending />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/share" element={<Share />} />
@@ -85,7 +38,7 @@ const App: React.FC = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </>
-      )}
+      
     </div>
   );
 };

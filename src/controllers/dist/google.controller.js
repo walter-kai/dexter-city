@@ -36,72 +36,52 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var google_service_1 = require("../services/google.service");
 var catch_async_1 = require("../utils/catch-async");
-var api_error_1 = require("../utils/api-error");
-var binance_service_1 = require("../services/binance.service");
-// Instantiate BinanceAPI with the API credentials
-var binanceAPI = new binance_service_1["default"]();
-// Function to generate the authorization URL
-var authorize = catch_async_1["default"](function (req, res) { return __awaiter(void 0, void 0, Promise, function () {
-    var _a, clientId, redirectUri, state, scope, url;
-    return __generator(this, function (_b) {
-        _a = req.query, clientId = _a.clientId, redirectUri = _a.redirectUri, state = _a.state, scope = _a.scope;
-        // Validate query parameters
-        if (!clientId || !redirectUri || !scope) {
-            throw new api_error_1["default"](400, "Missing required query parameters: clientId, redirectUri, or scope");
-        }
-        url = binanceAPI.authorize(clientId, redirectUri, state, scope);
-        // Return the authorization URL
-        return [2 /*return*/, res.status(200).json({ success: true, data: url })];
-    });
-}); });
-// Express route to receive account trade list
-var getAccountTradeList = catch_async_1["default"](function (req, res) { return __awaiter(void 0, void 0, Promise, function () {
-    var symbol, tradeList, error_1;
+/**
+ * Google Login Controller
+ * @param {Request} req - Express request object.
+ * @param {Response} res - Express response object.
+ */
+var googleLogin = catch_async_1["default"](function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var credential, user, error_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                symbol = req.query.symbol;
-                // Validate symbol query parameter
-                if (!symbol || typeof symbol !== "string") {
-                    throw new api_error_1["default"](400, "Missing or invalid 'symbol' in request query");
+                credential = req.body.credential;
+                // Validate the presence of a credential
+                if (!credential) {
+                    return [2 /*return*/, res.status(400).json({ message: "Missing Google credential" })];
                 }
                 _a.label = 1;
             case 1:
                 _a.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, binanceAPI.getAccountTradeList(symbol)];
+                return [4 /*yield*/, google_service_1["default"].googleLoginOrCreate(credential)];
             case 2:
-                tradeList = _a.sent();
-                return [2 /*return*/, res.status(200).json({ success: true, data: tradeList })];
+                user = _a.sent();
+                if (!user) {
+                    console.error("Invalid Google credential received:", credential); // Log invalid credentials
+                    return [2 /*return*/, res.status(401).json({ message: "Invalid Google credential" })];
+                }
+                // Create a secure session token
+                // // Set the session token in an HTTP-only, secure cookie
+                // res.cookie("session", sessionToken, {
+                //   httpOnly: true, // Prevent client-side access to the cookie
+                //   secure: process.env.NODE_ENV === "production", // Use HTTPS in production
+                //   sameSite: "strict", // Prevent CSRF
+                //   maxAge: Number(process.env.SESSION_COOKIE_MAX_AGE) || 24 * 60 * 60 * 1000, // 1 day default
+                //   path: "/", // Available to all paths on the domain
+                // });
+                // Destructure and return the allowed user data
+                return [2 /*return*/, res.status(200).json(user)];
             case 3:
                 error_1 = _a.sent();
-                console.error("Error fetching trade list:", error_1);
-                throw new api_error_1["default"](500, "Failed to fetch account trade list");
+                console.error("Error during Google login:", error_1);
+                return [2 /*return*/, res.status(500).json({ message: "Internal server error" })];
             case 4: return [2 /*return*/];
         }
     });
 }); });
-// Express route to get exchange info
-var getExchangeInfo = catch_async_1["default"](function (req, res) { return __awaiter(void 0, void 0, Promise, function () {
-    var exchangeInfo, error_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, binanceAPI.getExchangeInfo()];
-            case 1:
-                exchangeInfo = _a.sent();
-                return [2 /*return*/, res.status(200).json({ success: true, data: exchangeInfo })];
-            case 2:
-                error_2 = _a.sent();
-                console.error("Error fetching exchange info:", error_2);
-                throw new api_error_1["default"](500, "Failed to fetch exchange info");
-            case 3: return [2 /*return*/];
-        }
-    });
-}); });
 exports["default"] = {
-    authorize: authorize,
-    getAccountTradeList: getAccountTradeList,
-    getExchangeInfo: getExchangeInfo
+    googleLogin: googleLogin
 };

@@ -1,16 +1,28 @@
 import { Request, Response } from "express";
-import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 import catchAsync from "../utils/catch-async";
 import ApiError from "../utils/api-error";
+import BinanceAPI from "../services/binance.service";
 
-import { db } from "../config/firebase";
+// Instantiate BinanceAPI with the API credentials
+const binanceAPI = new BinanceAPI();
 
-// import { Timestamp, collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore/lite";
-// import { getGamePrompts, getGamePromptsPickCounts, getGames, getGamesPickCounts } from "../hooks/backendGames";
-import BinanceService from "../services/binance.service";
+// Function to generate the authorization URL
+const authorize = catchAsync(async (req: Request, res: Response): Promise<Response> => {
+  const { clientId, redirectUri, state, scope } = req.query;
 
+  // Validate query parameters
+  if (!clientId || !redirectUri || !scope) {
+    throw new ApiError(400, "Missing required query parameters: clientId, redirectUri, or scope");
+  }
 
-// Express route to receive updates
+  // Call the authorize method from the BinanceAPI class
+  const url = binanceAPI.authorize(clientId as string, redirectUri as string, state as string, scope as string);
+
+  // Return the authorization URL
+  return res.status(200).json({ success: true, data: url });
+});
+
+// Express route to receive account trade list
 const getAccountTradeList = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   const { symbol } = req.query;
 
@@ -20,8 +32,8 @@ const getAccountTradeList = catchAsync(async (req: Request, res: Response): Prom
   }
 
   try {
-    // Call BinanceService to fetch account trade list
-    const tradeList = await BinanceService.getAccountTradeList(symbol);
+    // Call BinanceAPI to fetch account trade list
+    const tradeList = await binanceAPI.getAccountTradeList(symbol as string);
     return res.status(200).json({ success: true, data: tradeList });
   } catch (error) {
     console.error("Error fetching trade list:", error);
@@ -29,17 +41,20 @@ const getAccountTradeList = catchAsync(async (req: Request, res: Response): Prom
   }
 });
 
-
-// Express route to receive updates
+// Express route to get exchange info
 const getExchangeInfo = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  const exchangeInfo = await BinanceService.getExchangeInfo();
-  return res.status(200).json({ success: true, data: exchangeInfo });
-
+  try {
+    // Call BinanceAPI to get exchange info
+    const exchangeInfo = await binanceAPI.getExchangeInfo();
+    return res.status(200).json({ success: true, data: exchangeInfo });
+  } catch (error) {
+    console.error("Error fetching exchange info:", error);
+    throw new ApiError(500, "Failed to fetch exchange info");
+  }
 });
 
-
-
 export default {
+  authorize,
   getAccountTradeList,
   getExchangeInfo
 };

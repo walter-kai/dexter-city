@@ -1,16 +1,16 @@
-import express from "express";
-import userController from "../controllers/user.controller";
-const router = express.Router();
-
+"use strict";
+exports.__esModule = true;
+var express_1 = require("express");
+var user_controller_1 = require("../controllers/user.controller");
+var router = express_1["default"].Router();
 // router.route("/:telegramId/picks").get(userController.getUsersPicks);
 // router.route("/scores").get(userController.getUsersPickScores);
 // router.route("/:telegramId/missions").get(userController.getUsersMissions);
 // router.route("/").get(userController.getAllUsers);
-router.route("/").get(userController.getUser);
-router.route("/").post(userController.createUser);
-router.route("/").put(userController.updateUser);
+router.route("/").get(user_controller_1["default"].getUser);
+router.route("/").post(user_controller_1["default"].createUser);
+router.route("/").put(user_controller_1["default"].updateUser);
 // router.route("/:telegramId/score").post(userController.processUsersScore);
 // router.route("/score").post(userController.processAllUsersScore);
 // router.route("/new").post(userController.createUser);
-
-export default router;
+exports["default"] = router;

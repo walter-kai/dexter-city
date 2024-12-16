@@ -1,5 +1,5 @@
-// Import Binance MainClient
 import crypto from 'crypto'; // For HMAC SHA256 signature generation
+import { Request, Response } from "express";
 
 // Binance API credentials
 const API_KEY: string = 'phDMYGRMJtNdHl3wdVsSfYU2q8EYBUFjMdgOOvLEU0UPPS2M6imGvo4S6WY47CrA';
@@ -8,83 +8,75 @@ const API_SECRET: string = '0zdO18SGLCi11YEcEkvHXlkRKEv9DuPwfeSUtrxBkVNoE24M32uD
 // Base URL for Binance Testnet
 const BASE_URL = 'https://testnet.binance.vision';
 
-// Fetch server timestamp
-async function serverTimestamp(): Promise<number> {
-  const url = `${BASE_URL}/api/v3/time`;
-  const response = await fetch(url);
-  const data = await response.json();
-  return data.serverTime;
-}
+class BinanceAPI {
+  private apiKey: string;
+  private apiSecret: string;
 
-// Generate HMAC SHA256 signature
-function generateSignature(queryString: string): string {
-  return crypto.createHmac('sha256', API_SECRET).update(queryString).digest('hex');
-}
+  constructor(apiKey: string = API_KEY, apiSecret: string = API_SECRET) {
+    this.apiKey = apiKey;
+    this.apiSecret = apiSecret;
+  }
 
-// Fetch account trade list
-const getAccountTradeList = async (symbol: string): Promise<any> => {
-  try {
-    // Add server timestamp to the request
-    const timestamp = await serverTimestamp();
+  // Generate HMAC SHA256 signature
+  private generateSignature(queryString: string): string {
+    return crypto.createHmac('sha256', this.apiSecret).update(queryString).digest('hex');
+  }
+
+  // Fetch server timestamp
+  private async serverTimestamp(): Promise<number> {
+    const url = `${BASE_URL}/api/v3/time`;
+    const response = await fetch(url);
+    const data = await response.json();
+    return data.serverTime;
+  }
+
+  // Get account trade list
+  public async getAccountTradeList(symbol: string): Promise<any> {
+    const timestamp = await this.serverTimestamp();
     const params = {
       symbol,
       timestamp,
     } as Record<string, string | number>;
-
-    // Create query string
     const queryString = Object.keys(params)
       .map((key) => `${key}=${encodeURIComponent(params[key])}`)
       .join('&');
-
-    // Generate signature
-    const signature = generateSignature(queryString);
-
-    // Append signature to query string
+    
+    const signature = this.generateSignature(queryString);
     const signedQueryString = `${queryString}&signature=${signature}`;
-
-    // Make the API call using fetch
+    
     const url = `${BASE_URL}/api/v3/myTrades?${signedQueryString}`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'X-MBX-APIKEY': API_KEY,
+        'X-MBX-APIKEY': this.apiKey,
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (err) {
-    console.error('getAccountTradeList error: ', err);
-    throw err;
+    
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    return response.json();
   }
-};
 
-// Fetch exchange information
-const getExchangeInfo = async (): Promise<any> => {
-  try {
+  // Get exchange information
+  public async getExchangeInfo(): Promise<any> {
     const url = `${BASE_URL}/api/v3/exchangeInfo`;
     const response = await fetch(url, {
       method: 'GET',
       headers: {
-        'X-MBX-APIKEY': API_KEY,
+        'X-MBX-APIKEY': this.apiKey,
       },
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result;
-  } catch (err) {
-    console.error('getExchangeInfo error: ', err);
-    throw err;
+    
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    return response.json();
   }
-};
 
-// Export functions for use in other modules
-export default { getAccountTradeList, getExchangeInfo };
+  // Generate authorization URL
+  public authorize(clientId: string, redirectUri: string, state: string = '', scope: string): string {
+    const url = `https://accounts.binance.com/en/oauth/authorize?response_type=code&client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(state)}&scope=${encodeURIComponent(scope)}`;
+    return url;
+  }
+}
+
+export default BinanceAPI;

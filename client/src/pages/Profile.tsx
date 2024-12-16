@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import User from '../models/User'; // Adjust the path as necessary
-import { Loading } from '../components/Loading';
 import LoadingScreenDots from '../components/LoadingScreenDots';
 
 const Profile: React.FC = () => {
@@ -35,11 +34,13 @@ const Profile: React.FC = () => {
         <h1 className="text-2xl font-bold mb-4">Profile</h1>
         {userData ? (
           <div className="bg-white shadow-md rounded-lg p-4">
-            <h2 className="text-xl font-semibold">{userData.firstName} {userData.lastName}</h2>
-            <p><strong>Handle:</strong> {userData.telegramHandle || 'N/A'}</p>
+            <h2 className="text-xl flex font-semibold">{userData.username}
+              <div className="text-base">@{userData.telegramId || 'N/A'}</div>
+            </h2>
+           
             <p><strong>Date Created:</strong> {new Date(userData.dateCreated).toLocaleString()}</p>
             <p><strong>Last Logged In:</strong> {new Date(userData.lastLoggedIn).toLocaleString()}</p>
-            <p><strong>Referral:</strong> {userData.referralTelegramId || 'N/A'}</p>
+            <p><strong>Referral:</strong> {userData.referralId || 'N/A'}</p>
             <p><strong>Telegram ID:</strong> {userData.telegramId}</p>
           </div>
         ) : (
