@@ -41,23 +41,51 @@ var user_service_1 = require("../services/user.service");
 var api_error_1 = require("../utils/api-error");
 var catch_async_1 = require("../utils/catch-async");
 // Get a user by Telegram ID
-var getUser = catch_async_1["default"](function (req, res) { return __awaiter(void 0, void 0, Promise, function () {
-    var _a, walletId, telegramId, wallet, telegram, user;
+// Get a user by Telegram ID
+var getUserByWalletId = catch_async_1["default"](function (req, res) { return __awaiter(void 0, void 0, Promise, function () {
+    var walletId, wallet, user;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                walletId = req.query.walletId;
+                wallet = walletId ? String(walletId) : '';
+                // If neither walletId nor telegramId are provided, return a 400 error
+                if (!walletId) {
+                    throw new api_error_1["default"](400, "Missing walletId to get user");
+                }
+                return [4 /*yield*/, user_service_1["default"].getUserByWalletId(wallet)];
+            case 1:
+                user = _a.sent();
+                // If user is not found, return a 404 error
+                if (!user) {
+                    return [2 /*return*/, res.status(404).json({ error: "User not found" })];
+                }
+                // Return the found user
+                return [2 /*return*/, res.json({ user: user })];
+        }
+    });
+}); });
+// Get a user by Telegram ID
+var getUserByTelegramId = catch_async_1["default"](function (req, res) { return __awaiter(void 0, void 0, Promise, function () {
+    var _a, telegramId, username, telegram, name, user;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _a = req.query, walletId = _a.walletId, telegramId = _a.telegramId;
-                wallet = walletId ? String(walletId) : '';
+                _a = req.query, telegramId = _a.telegramId, username = _a.username;
                 telegram = telegramId ? String(telegramId) : '';
-                if (!telegramId && !walletId) {
-                    throw new api_error_1["default"](400, "Missing params to get user");
+                name = username ? String(username) : '';
+                // If neither walletId nor telegramId are provided, return a 400 error
+                if (!telegramId) {
+                    throw new api_error_1["default"](400, "Missing telegramId to get user");
                 }
-                return [4 /*yield*/, user_service_1["default"].getUser(wallet, telegram)];
+                return [4 /*yield*/, user_service_1["default"].getUserByTelegramId(telegram, name)];
             case 1:
                 user = _b.sent();
+                // If user is not found, return a 404 error
                 if (!user) {
-                    throw new api_error_1["default"](404, "User with telegramId " + telegramId + " not found");
+                    return [2 /*return*/, res.status(404).json({ error: "User not found" })];
                 }
+                // Return the found user
                 return [2 /*return*/, res.json({ user: user })];
         }
     });
@@ -81,7 +109,7 @@ var updateUser = catch_async_1["default"](function (req, res) { return __awaiter
             case 1:
                 updatedUser = _b.sent();
                 if (!updatedUser) {
-                    throw new api_error_1["default"](404, "User with telegramId " + telegramId + " or walletId " + walletId + " not found");
+                    return [2 /*return*/, res.status(404).json({ error: "User not found" })];
                 }
                 return [2 /*return*/, res.json({ message: "User updated successfully", user: updatedUser })];
         }
@@ -105,7 +133,8 @@ var createUser = catch_async_1["default"](function (req, res) { return __awaiter
     });
 }); });
 exports["default"] = {
-    getUser: getUser,
+    getUserByWalletId: getUserByWalletId,
+    getUserByTelegramId: getUserByTelegramId,
     updateUser: updateUser,
     createUser: createUser
 };

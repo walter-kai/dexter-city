@@ -32,6 +32,7 @@ const App: React.FC = () => {
             <Route path="/trending" element={<Trending />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/share" element={<Share />} />
+            <Route path="/howitworks" element={<UserGuide />} />
             <Route path="/user-guide" element={<UserGuide />} />
             <Route path="/support" element={<Support />} />
             <Route path="/quit" element={<Quit />} />

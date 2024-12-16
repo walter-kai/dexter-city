@@ -16,9 +16,9 @@ export interface TelegramUser {
 
 // Define the UserArgs interface
 export interface UserArgs {
-  readonly walletId: string;         // Unique wallet identifier
+  readonly walletId?: string | null;         // Unique wallet identifier
   readonly username: string; // Optional username
-  readonly telegramId?: string | null; // Optional Telegram ID
+  readonly telegramId: string; // Optional Telegram ID
   readonly referralId?: string | null; // Optional Telegram ID
   readonly dateCreated: Date;         // Account creation date
   readonly lastLoggedIn: Date;        // Last login timestamp
@@ -26,17 +26,17 @@ export interface UserArgs {
 
 // Simplified User class definition
 export default class User {
-  walletId: string;         
+  walletId: string | null;         
   username: string;  
-  telegramId: string | null;
+  telegramId: string;
   referralId: string | null;
   dateCreated: Date;        
   lastLoggedIn: Date;       
 
   constructor(args: UserArgs) {
-    this.walletId = args.walletId;
+    this.walletId = args.walletId || null;
     this.username = args.username;
-    this.telegramId = args.telegramId || null;
+    this.telegramId = args.telegramId;
     this.referralId = args.referralId || null;
     this.dateCreated = args.dateCreated;
     this.lastLoggedIn = args.lastLoggedIn;

@@ -37,7 +37,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var react_1 = require("react");
-var Profile_1 = require("./Profile");
 var FirestoreUser_1 = require("../services/FirestoreUser");
 var react_router_dom_1 = require("react-router-dom");
 var LoadingScreenDots_1 = require("../components/LoadingScreenDots");
@@ -59,7 +58,7 @@ var Login = function () {
                             _a.label = 1;
                         case 1:
                             _a.trys.push([1, 3, 4, 5]);
-                            return [4 /*yield*/, FirestoreUser_1.getCurrentUser()];
+                            return [4 /*yield*/, FirestoreUser_1.getTelegramUser()];
                         case 2:
                             user = _a.sent();
                             if (user) {
@@ -93,7 +92,7 @@ var Login = function () {
         else {
             fetchTelegramUser(); // Fetch user if not found in sessionStorage
         }
-    }, []);
+    }, [navigate]);
     var handleCompleteOnboarding = function (chosenName, favoriteSport) {
         console.log("Onboarding complete with name:", chosenName, "and favorite sports:", favoriteSport);
         setIsOnboarding(false); // Update the onboarding state
@@ -104,23 +103,56 @@ var Login = function () {
     if (error) {
         return react_1["default"].createElement("div", { className: "text-red-500" }, error); // Show error message
     }
-    var handleBiometricLogin = function () {
+    var handleHowitworks = function () {
         // Call the function to trigger biometric login
+        navigate('/howitworks');
     };
-    var handleMetamaskLogin = function () {
-        // Logic for Metamask connection
-    };
+    var handleMetamaskLogin = function () { return __awaiter(void 0, void 0, void 0, function () {
+        var accounts, walletId, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    if (!window.ethereum) return [3 /*break*/, 5];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
+                    return [4 /*yield*/, window.ethereum.request({
+                            method: "eth_requestAccounts"
+                        })];
+                case 2:
+                    accounts = _a.sent();
+                    if (accounts && accounts.length > 0) {
+                        walletId = accounts[0];
+                        sessionStorage.setItem("walletId", walletId);
+                        // Optionally, store the user's walletId in your backend or update the user state
+                        setCurrentUser({ walletId: walletId }); // Assuming the User model has a walletId property
+                        navigate("/dash"); // Navigate to the dashboard after successful login
+                    }
+                    else {
+                        setError("No wallet accounts found.");
+                    }
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_2 = _a.sent();
+                    console.error("Error connecting to Metamask:", error_2);
+                    setError("Failed to connect to Metamask. Please try again.");
+                    return [3 /*break*/, 4];
+                case 4: return [3 /*break*/, 6];
+                case 5:
+                    setError("Metamask is not installed.");
+                    _a.label = 6;
+                case 6: return [2 /*return*/];
+            }
+        });
+    }); };
     if (isOnboarding) {
         return (react_1["default"].createElement(OnboardForm_1["default"], { onComplete: handleCompleteOnboarding }));
     }
-    return (react_1["default"].createElement("div", { className: "flex flex-col items-center justify-center h-screen animate-fadeIn" },
-        react_1["default"].createElement("h1", { className: "text-2xl font-bold mb-4" }, "Login with Biometric"),
-        react_1["default"].createElement(Profile_1["default"], null),
-        currentUser ? (
-        // If user is logged in, this part won't be shown
-        react_1["default"].createElement("div", null, "Redirecting to dashboard...")) : (react_1["default"].createElement(react_1["default"].Fragment, null,
-            react_1["default"].createElement("button", { onClick: handleBiometricLogin, className: "bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300" }, "Login with Biometrics"),
-            react_1["default"].createElement("div", { className: "mt-4" },
-                react_1["default"].createElement("button", { onClick: handleMetamaskLogin, className: "bg-yellow-500 text-white font-bold py-2 px-4 rounded hover:bg-yellow-700 transition duration-300" }, "Connect with Metamask"))))));
+    return (react_1["default"].createElement("div", { className: "flex flex-col items-center justify-center h-screen animate-fadeIn" }, currentUser ? (
+    // If user is logged in, this part won't be shown
+    react_1["default"].createElement("div", null, "Redirecting to dashboard...")) : (react_1["default"].createElement(react_1["default"].Fragment, null,
+        react_1["default"].createElement("button", { onClick: handleHowitworks, className: "bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300" }, "How it works"),
+        react_1["default"].createElement("div", { className: "mt-4" },
+            react_1["default"].createElement("button", { onClick: handleMetamaskLogin, className: "bg-yellow-500 text-white font-bold py-2 px-4 rounded hover:bg-yellow-700 transition duration-300" }, "Connect with Metamask"))))));
 };
 exports["default"] = Login;

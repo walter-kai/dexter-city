@@ -21,6 +21,7 @@ var App = function () {
                 react_1["default"].createElement(react_router_dom_1.Route, { path: "/trending", element: react_1["default"].createElement(Trending_1["default"], null) }),
                 react_1["default"].createElement(react_router_dom_1.Route, { path: "/profile", element: react_1["default"].createElement(Profile_1["default"], null) }),
                 react_1["default"].createElement(react_router_dom_1.Route, { path: "/share", element: react_1["default"].createElement(Share_1["default"], null) }),
+                react_1["default"].createElement(react_router_dom_1.Route, { path: "/howitworks", element: react_1["default"].createElement(UserGuide_1["default"], null) }),
                 react_1["default"].createElement(react_router_dom_1.Route, { path: "/user-guide", element: react_1["default"].createElement(UserGuide_1["default"], null) }),
                 react_1["default"].createElement(react_router_dom_1.Route, { path: "/support", element: react_1["default"].createElement(Support_1["default"], null) }),
                 react_1["default"].createElement(react_router_dom_1.Route, { path: "/quit", element: react_1["default"].createElement(Quit_1["default"], null) }),

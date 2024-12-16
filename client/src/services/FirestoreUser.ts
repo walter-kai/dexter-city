@@ -52,9 +52,9 @@ const newUser = async (): Promise<User> => {
 export const updateUser = async (user: User): Promise<User> => {
   // Map User object to the structure expected by userService
   const userPayload: UserArgs = {
-    walletId: user.walletId,              // Assuming `walletId` is required
+    walletId: user.walletId || null,              // Assuming `walletId` is required
     username: user.username,       // Optional username
-    telegramId: user.telegramId || null,   // Optional telegramId
+    telegramId: user.telegramId,   // Optional telegramId
     referralId: user.referralId || null,   // Optional referralId
     dateCreated: user.dateCreated || new Date(), // Fallback to current date if not provided
     lastLoggedIn: user.lastLoggedIn,       // Last login timestamp
@@ -101,17 +101,6 @@ export const login = async (): Promise<{ newUser: boolean; user: User }> => {
     first_name: telegramUser.first_name,
     last_name: telegramUser.last_name || undefined, // Optional field
     username: telegramUser.username || undefined, // Optional field
-    // Optional fields from TelegramUser
-    is_bot: telegramUser.is_bot,
-    language_code: telegramUser.language_code,
-    is_premium: telegramUser.is_premium,
-    added_to_attachment_menu: telegramUser.added_to_attachment_menu,
-    can_join_groups: telegramUser.can_join_groups,
-    can_read_all_group_messages: telegramUser.can_read_all_group_messages,
-    supports_inline_queries: telegramUser.supports_inline_queries,
-    can_connect_to_business: telegramUser.can_connect_to_business,
-    has_main_web_app: telegramUser.has_main_web_app,
-    referral: referral || undefined, // Optional field
     }),
   });
 
@@ -130,37 +119,68 @@ export const login = async (): Promise<{ newUser: boolean; user: User }> => {
 };
 
 
-
 /**
- * Get the current user based on Telegram ID and optional wallet ID
+ * Fetch the user based on their Telegram ID.
  *
- * @param {boolean} createUserIfNoneExists - If true, creates a new user if none exists.
- * @returns {Promise<User | null>} Returns the user associated with the telegram ID or null if not found.
+ * @returns {Promise<User | null>} Returns the user associated with the Telegram ID or null if not found.
  */
-export const getCurrentUser = async (): Promise<User | null> => {
+export const getTelegramUser = async (): Promise<User | null> => {
   const { user: telegramUser } = TelegramApp.getUserDetails();
 
-  // Check sessionStorage for walletId
-  const walletId = sessionStorage.getItem("walletId");
+  if (!telegramUser.id) {
+    console.warn("Telegram ID is missing");
+    return null;
+  }
 
-  // Prepare the URL with query parameters (walletId and telegramId)
-  const url = new URL(`/api/user`, window.location.origin);
-  if (walletId) {
-    url.searchParams.append("walletId", walletId);
-  }
-  if (telegramUser.id) {
-    url.searchParams.append("telegramId", telegramUser.id);
-  }
+  // Prepare the URL with the Telegram ID as a query parameter
+  const url = new URL(`/api/user/telegram`, window.location.origin);
+  url.searchParams.append("telegramId", telegramUser.id);
+  url.searchParams.append("username", telegramUser.first_name);
 
   // Send GET request
-  let res: Response = await fetch(url.toString(), {
+  const res: Response = await fetch(url.toString(), {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
   });
 
-  // Check if the response status is 404 and return null if so
+  // If the user is not found, return null
+  if (res.status === 404) {
+    return null;
+  }
+
+  // If the response is successful, extract and return the user data
+  const { user } = (await res.json()) as { user: UserArgs };
+  return new User(user);
+};
+
+/**
+ * Fetch the user based on their Wallet ID (from sessionStorage).
+ *
+ * @returns {Promise<User | null>} Returns the user associated with the Wallet ID or null if not found.
+ */
+export const getWalletUser = async (): Promise<User | null> => {
+  const walletId = sessionStorage.getItem("walletId");
+
+  if (!walletId) {
+    console.warn("Wallet ID is missing in sessionStorage");
+    return null;
+  }
+
+  // Prepare the URL with the Wallet ID as a query parameter
+  const url = new URL(`/api/user/wallet`, window.location.origin);
+  url.searchParams.append("walletId", walletId);
+
+  // Send GET request
+  const res: Response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  // If the user is not found, return null
   if (res.status === 404) {
     return null;
   }

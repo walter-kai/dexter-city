@@ -25,7 +25,7 @@
   },
   "scripts": {
     "start": "node dist/src/server.js",
-    "build": "rimraf dist && tsc --project tsconfig.json",
+    "build": "tsc --project tsconfig.json",
     "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
     "dev-server": "ts-node src/server.ts",
     "dev-client": "cd client && npm start",

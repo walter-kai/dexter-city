@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { TelegramBiometric } from "../components/TelegramBiometric";
 import Profile from "./Profile";
-import { getCurrentUser } from "../services/FirestoreUser";
+import { getTelegramUser, getWalletUser } from "../services/FirestoreUser";
 import { useNavigate } from "react-router-dom";
 import User from "../models/User";
 import LoadingScreenDots from "../components/LoadingScreenDots";
 import OnboardForm from "./OnboardForm";
+
+declare global {
+  interface Window {
+    ethereum: any; // Declare the ethereum property
+  }
+}
+
 
 const Login: React.FC = () => {
   const [currentUser, setCurrentUser] = useState<User | null>(null); // State to store user information
@@ -21,7 +28,7 @@ const Login: React.FC = () => {
       try {
         // Try to get the current user using their Telegram ID
         
-        const user = await getCurrentUser(); // Await the result of getCurrentUser()
+        const user = await getTelegramUser(); // Await the result of getCurrentUser()
         if (user) {
           // If a user is logged in, navigate to the dashboard
           sessionStorage.setItem('currentUser', JSON.stringify(user)); 
@@ -48,7 +55,7 @@ const Login: React.FC = () => {
     } else {
       fetchTelegramUser(); // Fetch user if not found in sessionStorage
     }
-  }, []);
+  }, [navigate]);
 
   const handleCompleteOnboarding = (chosenName: string, favoriteSport: string[]) => {
     console.log("Onboarding complete with name:", chosenName, "and favorite sports:", favoriteSport);
@@ -64,12 +71,35 @@ const Login: React.FC = () => {
   }
 
 
-  const handleBiometricLogin = () => {
+  const handleHowitworks = () => {
     // Call the function to trigger biometric login
+    navigate('/howitworks')
   };
 
-  const handleMetamaskLogin = () => {
-    // Logic for Metamask connection
+  const handleMetamaskLogin = async () => {
+    if (window.ethereum) {
+      try {
+        // Request the user to connect their wallet
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts"
+        });
+        if (accounts && accounts.length > 0) {
+          // If accounts are returned, store the wallet address and navigate
+          const walletId = accounts[0];
+          sessionStorage.setItem("walletId", walletId);
+          // Optionally, store the user's walletId in your backend or update the user state
+          setCurrentUser({ walletId } as User); // Assuming the User model has a walletId property
+          navigate("/dash"); // Navigate to the dashboard after successful login
+        } else {
+          setError("No wallet accounts found.");
+        }
+      } catch (error) {
+        console.error("Error connecting to Metamask:", error);
+        setError("Failed to connect to Metamask. Please try again.");
+      }
+    } else {
+      setError("Metamask is not installed.");
+    }
   };
 
   if(isOnboarding){
@@ -80,8 +110,6 @@ const Login: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen animate-fadeIn">
-      <h1 className="text-2xl font-bold mb-4">Login with Biometric</h1>
-      <Profile />
       {currentUser ? (
         // If user is logged in, this part won't be shown
         <div>Redirecting to dashboard...</div>
@@ -89,10 +117,10 @@ const Login: React.FC = () => {
         <>
           {/* Biometric login button */}
           <button
-            onClick={handleBiometricLogin}
+            onClick={handleHowitworks}
             className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 transition duration-300"
           >
-            Login with Biometrics
+            How it works
           </button>
           <div className="mt-4">
             {/* Metamask login button */}

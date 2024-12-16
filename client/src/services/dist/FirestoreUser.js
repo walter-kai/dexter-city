@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.getCurrentUser = exports.login = exports.updateUser = void 0;
+exports.getWalletUser = exports.getTelegramUser = exports.login = exports.updateUser = void 0;
 var User_1 = require("../models/User");
 var Telegram_1 = require("./Telegram");
 /**
@@ -90,9 +90,9 @@ exports.updateUser = function (user) { return __awaiter(void 0, void 0, Promise,
         switch (_a.label) {
             case 0:
                 userPayload = {
-                    walletId: user.walletId,
+                    walletId: user.walletId || null,
                     username: user.username,
-                    telegramId: user.telegramId || null,
+                    telegramId: user.telegramId,
                     referralId: user.referralId || null,
                     dateCreated: user.dateCreated || new Date(),
                     lastLoggedIn: user.lastLoggedIn
@@ -137,18 +137,7 @@ exports.login = function () { return __awaiter(void 0, void 0, Promise, function
                             id: telegramUser.id,
                             first_name: telegramUser.first_name,
                             last_name: telegramUser.last_name || undefined,
-                            username: telegramUser.username || undefined,
-                            // Optional fields from TelegramUser
-                            is_bot: telegramUser.is_bot,
-                            language_code: telegramUser.language_code,
-                            is_premium: telegramUser.is_premium,
-                            added_to_attachment_menu: telegramUser.added_to_attachment_menu,
-                            can_join_groups: telegramUser.can_join_groups,
-                            can_read_all_group_messages: telegramUser.can_read_all_group_messages,
-                            supports_inline_queries: telegramUser.supports_inline_queries,
-                            can_connect_to_business: telegramUser.can_connect_to_business,
-                            has_main_web_app: telegramUser.has_main_web_app,
-                            referral: referral || undefined
+                            username: telegramUser.username || undefined
                         })
                     })];
             case 1:
@@ -168,25 +157,23 @@ exports.login = function () { return __awaiter(void 0, void 0, Promise, function
     });
 }); };
 /**
- * Get the current user based on Telegram ID and optional wallet ID
+ * Fetch the user based on their Telegram ID.
  *
- * @param {boolean} createUserIfNoneExists - If true, creates a new user if none exists.
- * @returns {Promise<User | null>} Returns the user associated with the telegram ID or null if not found.
+ * @returns {Promise<User | null>} Returns the user associated with the Telegram ID or null if not found.
  */
-exports.getCurrentUser = function () { return __awaiter(void 0, void 0, Promise, function () {
-    var telegramUser, walletId, url, res, user;
+exports.getTelegramUser = function () { return __awaiter(void 0, void 0, Promise, function () {
+    var telegramUser, url, res, user;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 telegramUser = Telegram_1["default"].getUserDetails().user;
-                walletId = sessionStorage.getItem("walletId");
-                url = new URL("/api/user", window.location.origin);
-                if (walletId) {
-                    url.searchParams.append("walletId", walletId);
+                if (!telegramUser.id) {
+                    console.warn("Telegram ID is missing");
+                    return [2 /*return*/, null];
                 }
-                if (telegramUser.id) {
-                    url.searchParams.append("telegramId", telegramUser.id);
-                }
+                url = new URL("/api/user/telegram", window.location.origin);
+                url.searchParams.append("telegramId", telegramUser.id);
+                url.searchParams.append("username", telegramUser.first_name);
                 return [4 /*yield*/, fetch(url.toString(), {
                         method: "GET",
                         headers: {
@@ -195,7 +182,43 @@ exports.getCurrentUser = function () { return __awaiter(void 0, void 0, Promise,
                     })];
             case 1:
                 res = _a.sent();
-                // Check if the response status is 404 and return null if so
+                // If the user is not found, return null
+                if (res.status === 404) {
+                    return [2 /*return*/, null];
+                }
+                return [4 /*yield*/, res.json()];
+            case 2:
+                user = (_a.sent()).user;
+                return [2 /*return*/, new User_1["default"](user)];
+        }
+    });
+}); };
+/**
+ * Fetch the user based on their Wallet ID (from sessionStorage).
+ *
+ * @returns {Promise<User | null>} Returns the user associated with the Wallet ID or null if not found.
+ */
+exports.getWalletUser = function () { return __awaiter(void 0, void 0, Promise, function () {
+    var walletId, url, res, user;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                walletId = sessionStorage.getItem("walletId");
+                if (!walletId) {
+                    console.warn("Wallet ID is missing in sessionStorage");
+                    return [2 /*return*/, null];
+                }
+                url = new URL("/api/user/wallet", window.location.origin);
+                url.searchParams.append("walletId", walletId);
+                return [4 /*yield*/, fetch(url.toString(), {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    })];
+            case 1:
+                res = _a.sent();
+                // If the user is not found, return null
                 if (res.status === 404) {
                     return [2 /*return*/, null];
                 }
