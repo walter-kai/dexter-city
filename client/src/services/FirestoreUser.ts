@@ -1,5 +1,5 @@
 import User, { UserArgs, TelegramUser,  } from "../models/User";
-import TelegramApp from "./Telegram";
+import { getTelegram } from "./Telegram";
 import { Timestamp } from "firebase-admin/firestore"; // Firestore's Timestamp object
 
 
@@ -9,16 +9,23 @@ import { Timestamp } from "firebase-admin/firestore"; // Firestore's Timestamp o
  * @returns {Promise<User>} The newly created User.
  */
 const newUser = async (): Promise<User> => {
+  // Fetch Telegram user data
+  const telegramUserData = (await getTelegram()) as {
+    user: {
+      id: string;
+      firstName?: string; // Optional
+      lastName?: string; // Optional
+      username?: string; // Optional
+    };
+  };
 
-
-  // const { user: telegramUser } = telegramUserData;
-  const { user: telegramUser } = TelegramApp.getUserDetails();
+  const { user: telegramUser } = telegramUserData;
 
   // Prepare the request body to create a new user
   const requestBody = {
     telegramid: telegramUser.id,
-    firstname: telegramUser.first_name || null,
-    lastname: telegramUser.last_name || null,
+    firstname: telegramUser.firstName || null,
+    lastname: telegramUser.lastName || null,
     handle: telegramUser.username || null,
     referral: null, // Set to null or provide referral logic
     firstTime: true, // Set firstTime to true for new users
@@ -52,14 +59,17 @@ const newUser = async (): Promise<User> => {
 export const updateUser = async (user: User): Promise<User> => {
   // Map User object to the structure expected by userService
   const userPayload: UserArgs = {
-    walletId: user.walletId || null,              // Assuming `walletId` is required
-    username: user.username,       // Optional username
-    telegramId: user.telegramId,   // Optional telegramId
-    referralId: user.referralId || null,   // Optional referralId
-    dateCreated: user.dateCreated || new Date(), // Fallback to current date if not provided
-    lastLoggedIn: user.lastLoggedIn,       // Last login timestamp
+    telegramId: user.telegramId,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    telegramHandle: user.telegramHandle,
+    referralTelegramId: user.referralTelegramId,
+    photoId: user.photoId || '',
+    photoUrl: user.photoUrl || '',
+    favoriteTokens: user.favoriteTokens,
+    lastLoggedIn: user.lastLoggedIn,
+    dateCreated: user.dateCreated || new Date(),
   };
-  
 
   // This is the fetch request to update the user using PUT
   const res: Response = await fetch(`/api/user/update`, {
@@ -86,10 +96,8 @@ export const updateUser = async (user: User): Promise<User> => {
  *
  * @returns {Promise<User>} The logged-in user.
  */
-export const login = async (): Promise<{ newUser: boolean; user: User }> => {
-
-  const { user: telegramUser, referral } = TelegramApp.getUserDetails();
-
+export const login = async (): Promise<User> => {
+  const{ user: telegramUser, referral } = (await getTelegram());
 
   let res: Response = await fetch(`/api/auth/login/`, {
     method: 'POST',
@@ -101,6 +109,17 @@ export const login = async (): Promise<{ newUser: boolean; user: User }> => {
     first_name: telegramUser.first_name,
     last_name: telegramUser.last_name || undefined, // Optional field
     username: telegramUser.username || undefined, // Optional field
+    // Optional fields from TelegramUser
+    is_bot: telegramUser.is_bot,
+    language_code: telegramUser.language_code,
+    is_premium: telegramUser.is_premium,
+    added_to_attachment_menu: telegramUser.added_to_attachment_menu,
+    can_join_groups: telegramUser.can_join_groups,
+    can_read_all_group_messages: telegramUser.can_read_all_group_messages,
+    supports_inline_queries: telegramUser.supports_inline_queries,
+    can_connect_to_business: telegramUser.can_connect_to_business,
+    has_main_web_app: telegramUser.has_main_web_app,
+    referral: referral || undefined, // Optional field
     }),
   });
 
@@ -110,83 +129,74 @@ export const login = async (): Promise<{ newUser: boolean; user: User }> => {
     throw new Error('Login failed');
   }
 
-  const { newUser, user } = (await res.json()) as { newUser: boolean, user: User };
+  const { message, user } = (await res.json()) as { message: string, user: User };
 
   // You can log the message if needed
-  console.log(newUser); // Optional: log the message
+  console.log(message); // Optional: log the message
 
-  return { newUser, user }; // Return the user directly
+  return user; // Return the user directly
 };
 
 
-/**
- * Fetch the user based on their Telegram ID.
- *
- * @returns {Promise<User | null>} Returns the user associated with the Telegram ID or null if not found.
- */
-export const getTelegramUser = async (): Promise<User | null> => {
-  const { user: telegramUser } = TelegramApp.getUserDetails();
 
-  if (!telegramUser.id) {
-    console.warn("Telegram ID is missing");
-    return null;
+/**
+ * Get the current user based on Telegram ID
+ *
+ * @param {string} telegramId - Telegram ID of the user to fetch
+ * @param {boolean} createUserIfNoneExists - If true, creates a new user if none exists.
+ * @returns {Promise<User>} Returns the user associated with the telegram ID.
+ */
+export const getCurrentUser = async (
+  telegramId?: string,
+  createUserIfNoneExists: boolean = false
+): Promise<User> => {
+  const telegramUserData = (await getTelegram()) as {
+    user: {
+      id: string;
+    };
+  };
+  const { user: telegramUser } = telegramUserData;
+
+  let res: Response = await fetch(`/api/auth/me`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      telegramId: telegramUser.id,
+    }),
+  });
+
+  if (!res.ok) {
+    if (createUserIfNoneExists) {
+      return await newUser(); // Create a new user if none exists
+    }
+    throw new Error("Failed to fetch the current user.");
   }
 
-  // Prepare the URL with the Telegram ID as a query parameter
-  const url = new URL(`/api/user/telegram`, window.location.origin);
-  url.searchParams.append("telegramId", telegramUser.id);
-  url.searchParams.append("username", telegramUser.first_name);
+  const { user } = (await res.json()) as { user: UserArgs };
 
-  // Send GET request
-  const res: Response = await fetch(url.toString(), {
+  return new User(user);
+};
+
+/**
+ * Get all users in the DB.
+ *
+ * @returns {Promise<ReadonlyArray<User>>} All Users in the DB
+ */
+export const getUsers = async (): Promise<ReadonlyArray<User>> => {
+  const req = await fetch(`/api/users`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
     },
   });
 
-  // If the user is not found, return null
-  if (res.status === 404) {
-    return null;
+  if (!req.ok) {
+    throw new Error("There was an error fetching the users.");
   }
 
-  // If the response is successful, extract and return the user data
-  const { user } = (await res.json()) as { user: UserArgs };
-  return new User(user);
+  const { users } = (await req.json()) as { users: UserArgs[] };
+
+  return users.map((user) => new User(user));
 };
-
-/**
- * Fetch the user based on their Wallet ID (from sessionStorage).
- *
- * @returns {Promise<User | null>} Returns the user associated with the Wallet ID or null if not found.
- */
-export const getWalletUser = async (): Promise<User | null> => {
-  const walletId = sessionStorage.getItem("walletId");
-
-  if (!walletId) {
-    console.warn("Wallet ID is missing in sessionStorage");
-    return null;
-  }
-
-  // Prepare the URL with the Wallet ID as a query parameter
-  const url = new URL(`/api/user/wallet`, window.location.origin);
-  url.searchParams.append("walletId", walletId);
-
-  // Send GET request
-  const res: Response = await fetch(url.toString(), {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  // If the user is not found, return null
-  if (res.status === 404) {
-    return null;
-  }
-
-  // If the response is successful, extract and return the user data
-  const { user } = (await res.json()) as { user: UserArgs };
-  return new User(user);
-};
-

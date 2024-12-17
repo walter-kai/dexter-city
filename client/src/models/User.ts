@@ -1,3 +1,10 @@
+// Define the UserProfilePhoto interface (add fields as needed)
+export interface UserProfilePhoto {
+  fileId: string; // Assuming this field represents the unique identifier of the photo
+  fileUniqueId: string; // Assuming this field represents a unique identifier for the file
+}
+
+// Update the TelegramUser interface
 export interface TelegramUser {
   id: string;                      // Unique identifier for this user or bot
   is_bot: boolean;                 // True, if this user is a bot
@@ -14,36 +21,49 @@ export interface TelegramUser {
   has_main_web_app?: boolean;     // Optional. True, if the bot has a main Web App
 }
 
-// Define the UserArgs interface
+
+// Updated UserArgs interface
 export interface UserArgs {
-  readonly walletId?: string | null;         // Unique wallet identifier
-  readonly username: string; // Optional username
-  readonly telegramId: string; // Optional Telegram ID
-  readonly referralId?: string | null; // Optional Telegram ID
-  readonly dateCreated: Date;         // Account creation date
-  readonly lastLoggedIn: Date;        // Last login timestamp
+  readonly dateCreated: Date;
+  readonly firstName: string; // Renamed from firstname
+  readonly lastName: string | null; // Renamed from lastname
+  readonly telegramHandle: string | null; // Renamed from handle
+  readonly lastLoggedIn: Date; // Date UTC string
+  readonly referralTelegramId: string | null; // Renamed from referral
+  readonly telegramId: string; // Renamed from telegramid
+  readonly favoriteTokens: string[] | null;
+  readonly photoId: string | null;
+  readonly photoUrl: string | null;
 }
 
-// Simplified User class definition
+// User class definition
 export default class User {
-  walletId: string | null;         
-  username: string;  
-  telegramId: string;
-  referralId: string | null;
-  dateCreated: Date;        
-  lastLoggedIn: Date;       
+  dateCreated: Date;
+  firstName: string; // Changed from firstname
+  lastName: string | null; // Changed from lastname
+  telegramHandle: string | null; // Changed from handle
+  lastLoggedIn: Date;
+  referralTelegramId: string | null; // Changed from referral
+  telegramId: string; // Changed from telegramid
+  favoriteTokens: string[] | null;
+  photoId?: string | null;
+  photoUrl?: string | null;
 
   constructor(args: UserArgs) {
-    this.walletId = args.walletId || null;
-    this.username = args.username;
-    this.telegramId = args.telegramId;
-    this.referralId = args.referralId || null;
     this.dateCreated = args.dateCreated;
+    this.firstName = args.firstName; // Changed to firstName
+    this.lastName = args.lastName; // Changed to lastName
+    this.telegramHandle = args.telegramHandle; // Changed to telegramHandle
     this.lastLoggedIn = args.lastLoggedIn;
+    this.referralTelegramId = args.referralTelegramId; // Changed to referralTelegramId
+    this.telegramId = args.telegramId; // Changed to telegramId
+    this.favoriteTokens = args.favoriteTokens;
+    this.photoId = args.photoId;
+    this.photoUrl = args.photoUrl;
   }
 }
 
-// FireStoreUser interface for Firestore compatibility
+// FireStoreUser interface definition
 export interface FireStoreUser extends Omit<UserArgs, "dateCreated"> {
   readonly dateCreated: {
     readonly seconds: number;

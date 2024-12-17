@@ -6,6 +6,8 @@ import reportWebVitals from './reportWebVitals';
 import { TokenProvider } from './services/TokenProvider';
 import { OAuthProvider } from './services/OauthProvider';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { MetaMaskProvider } from "@metamask/sdk-react"
+
 
 
 // import { Post } from './components/PostList';
@@ -15,6 +17,16 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   // <React.StrictMode>
+  <MetaMaskProvider
+  sdkOptions={{
+    dappMetadata: {
+      name: "Example React Dapp",
+      url: window.location.href,
+    },
+    infuraAPIKey: process.env.INFURA_API_KEY,
+    // Other options.
+  }}
+>
     <TokenProvider>
       <OAuthProvider>
         <Router>
@@ -22,6 +34,8 @@ root.render(
         </Router>  
       </OAuthProvider>
     </TokenProvider>
+</MetaMaskProvider>
+
   // </React.StrictMode>
 );
 

@@ -1,97 +1,132 @@
-// Import necessary dependencies
+import { Request, Response } from "express";
 import userService from "../services/user.service";
 import ApiError from "../utils/api-error";
 import catchAsync from "../utils/catch-async";
-import { Request, Response } from "express";
+import { UserArgs } from "../../client/src/models/User";
 
-// Get a user by Telegram ID
-// Get a user by Telegram ID
-const getUserByWalletId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  const { walletId } = req.query;
-
-  const wallet: string = walletId ? String(walletId) : '';
-
-  // If neither walletId nor telegramId are provided, return a 400 error
-  if (!walletId) {
-    throw new ApiError(400, "Missing walletId to get user");
+const setUserChatId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
+  if (req.params.telegramId == null) {
+    throw new ApiError(400, "Missing telegramId in request params");
+  } else if (req.params.chatId == null) {
+    throw new ApiError(400, "Missing chatId in request params");
   }
-
-  // Otherwise, search for the user by walletId and telegramId
-  const user = await userService.getUserByWalletId(wallet);
-
-  // If user is not found, return a 404 error
-  if (!user) {
-    return res.status(404).json({ error: `User not found` });
-  }
-
-  // Return the found user
-  return res.json({ user });
+  return res.json({ chatId: await userService.setUserChatId(req.params.telegramId, req.params.chatId) });
 });
 
-// Get a user by Telegram ID
-const getUserByTelegramId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  const { telegramId, username } = req.query;
 
-  const telegram: string = telegramId ? String(telegramId) : '';
-  const name: string = username ? String(username) : '';
+const getAllUsers = catchAsync(async (req: Request, res: Response): Promise<Response> => {
+  return res.json({ users: await userService.getAllUsers() });
+});
 
-  // If neither walletId nor telegramId are provided, return a 400 error
+const getUsers = catchAsync(async (req: Request, res: Response): Promise<Response> => {
+  if (req.query.telegramIds == null || typeof req.query.telegramIds != "string") {
+    throw new ApiError(400, "Missing telegramIds in request query");
+  }
+  const telegramIds = req.query.telegramIds.split(",");
+  if (telegramIds.length > 30) {
+    throw new ApiError(400, "Too many telegramIds, max is 30.");
+  }
+  return res.json({ users: await userService.getUsersByTelegramId(telegramIds) });
+});
+
+const updateUserDocByTelegramId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
+  // Destructure the required fields from req.body based on UserArgs type
+  const { 
+    telegramId, 
+    firstName, 
+    lastName, 
+    telegramHandle, 
+    referralTelegramId, 
+    photoId, 
+    photoUrl, 
+    favoriteTokens: favoriteSports, 
+    lastLoggedIn,
+    dateCreated 
+    
+  }: UserArgs = req.body; // Assuming req.body is typed as UserArgs
+
   if (!telegramId) {
-    throw new ApiError(400, "Missing telegramId to get user");
+    throw new ApiError(400, "Missing telegramId in request body");
   }
 
-  // Otherwise, search for the user by walletId and telegramId
-  const user = await userService.getUserByTelegramId(telegram, name);
+  // Prepare the user data to be updated
+  const userData: UserArgs = {
+    telegramId, // Ensure this matches your UserArgs type definition
+    firstName: firstName || '',
+    lastName: lastName || '',
+    telegramHandle: telegramHandle || '',
+    referralTelegramId: referralTelegramId || '',
+    photoId: photoId || '',
+    photoUrl: photoUrl || '',
+    favoriteTokens: favoriteSports || null,
+    lastLoggedIn: lastLoggedIn ? new Date(lastLoggedIn) : new Date(),
+    dateCreated: dateCreated ? new Date(dateCreated) : new Date(),
+  };
 
-  // If user is not found, return a 404 error
-  if (!user) {
-    return res.status(404).json({ error: `User not found` });
-  }
-
-  // Return the found user
-  return res.json({ user });
-});
-
-// Update a user's document by Telegram ID
-const updateUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  const { telegramId, walletId, updateData } = req.body;
-
-  // Ensure at least one of walletId or telegramId is provided
-  if (!telegramId && !walletId) {
-    throw new ApiError(400, "Missing telegramId or walletId in request body");
-  }
-
-  // Ensure updateData is provided
-  if (!updateData || Object.keys(updateData).length === 0) {
-    throw new ApiError(400, "Missing update data in request body");
-  }
-
-  // Call the updateUser service
-  const updatedUser = await userService.updateUser(walletId, telegramId, updateData);
+  // Call the userService.updateUser method to update the user
+  const updatedUser = await userService.updateUser(userData);
 
   if (!updatedUser) {
-    return res.status(404).json({ error: `User not found` });
+    throw new ApiError(404, `User with telegramId ${telegramId} not found`);
   }
 
+  // Return a success response with the updated user
   return res.json({ message: "User updated successfully", user: updatedUser });
 });
 
 
-// Create a new user
 const createUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  const { walletId, telegramId } = req.body;
+  if (req.body.telegramId == null) {
+    throw new ApiError(400, "Missing telegramId in request body");
+  }
+  return res.json({ user: await userService.createUser(req.body) });
+});
 
-  if (!walletId || !telegramId) {
-    throw new ApiError(400, "Missing walletId or telegramId in request body");
+const getUsersPickScores = catchAsync(async (req: Request, res: Response): Promise<Response> => {
+  if (req.query.telegramIds == null || typeof req.query.telegramIds !== "string") {
+    throw new ApiError(400, "Missing telegramIds in request query");
   }
 
-  const newUser = await userService.createUser(req.body);
-  return res.json({ message: "User created successfully", user: newUser });
+  const telegramIds = req.query.telegramIds.split(",");
+  if (telegramIds.length > 30) {
+    throw new ApiError(400, "Too many telegramIds, max is 30.");
+  }
+
+  if (req.query.timeFrame == null || typeof req.query.timeFrame !== "string") {
+    throw new ApiError(400, "Missing timeFrame in request query");
+  }
+
+  if (req.query.date != null && typeof req.query.date !== "string") {
+    throw new ApiError(400, "date must be of type string");
+  }
+
+  const scores = 0;
+  return res.json({ scores });
+});
+
+
+const addUsersFavoriteSports = catchAsync(async (req: Request, res: Response): Promise<Response> => {
+  if (req.body.telegramId == null) {
+    throw new ApiError(400, "Missing telegramId in request params");
+  }
+
+  if (req.body.favoriteSports == null || !Array.isArray(req.body.favoriteSports)) {
+    throw new ApiError(400, "Missing favoriteSports in request body");
+  }
+
+
+  return res.json({ success: true });
 });
 
 export default {
-  getUserByWalletId,
-  getUserByTelegramId,
-  updateUser,
+  setUserChatId,
+  // getUsersPicks,
+  getAllUsers,
+  // getUsersMissions,
+  // processUsersScore,
+  updateUserDocByTelegramId,
   createUser,
+  getUsers,
+  getUsersPickScores,
+  addUsersFavoriteSports,
 };

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
+import { UserContext } from "../App";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { updateUser } from "../services/FirestoreUser";
@@ -10,7 +11,7 @@ const ItemTypes = {
 // Reorder function for drag-and-drop
 const reorder = (list: any[], startIndex: number, endIndex: number): any[] => {
   const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
+  const [removed] = result.splice(startIndex, 1); 
   result.splice(endIndex, 0, removed);
   return result;
 };
@@ -22,15 +23,15 @@ interface Sport {
   name: string;
 }
 
-const tokenPairs: { id: string; name: string }[] = [
-  { id: "BTCUSDT", name: "Bitcoin/USDT" },
-  { id: "ETHUSDT", name: "Ethereum/USDT" },
-  { id: "BNBUSDT", name: "Binance Coin/USDT" },
-  { id: "ADAUSDT", name: "Cardano/USDT" },
-  { id: "XRPUSDT", name: "XRP/USDT" },
-  { id: "SOLUSDT", name: "Solana/USDT" },
-  { id: "DOTUSDT", name: "Polkadot/USDT" },
-  { id: "DOGEUSDT", name: "Dogecoin/USDT" },
+const sportsOptions: Sport[] = [
+  { id: "soccer", name: "Soccer" },
+  { id: "basketball", name: "Basketball" },
+  { id: "football", name: "Football" },
+  { id: "baseball", name: "Baseball" },
+  { id: "hockey", name: "Hockey" },
+  { id: "tennis", name: "Tennis" },
+  { id: "golf", name: "Golf" },
+  { id: "rugby", name: "Rugby" },
 ];
 
 interface OnboardFormProps {
@@ -61,66 +62,45 @@ const SportItem = ({ sport, index, moveSport }: any) => {
 };
 
 const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
+  const currentUser = useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(0);
-  const [userName, setUserName] = useState<string>("");
-  const [favoriteSports, setFavoriteSports] = useState<Sport[]>([]);
+  const [userName, setUserName] = useState(currentUser?.firstName || '');
+  const [favoriteTokens, setFavoriteTokens] = useState<Sport[]>([]);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const termsRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Retrieve user data from sessionStorage
-    const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
-    if (userData && userData.firstName) {
-      setUserName(userData.firstName);
-    }
-    
-    // Retrieve favorite sports from sessionStorage
-    const storedSports = sessionStorage.getItem('favoriteSports');
-    if (storedSports) {
-      setFavoriteSports(JSON.parse(storedSports));
-    } else {
-      setFavoriteSports(tokenPairs);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Save favoriteSports to sessionStorage whenever it changes
-    if (favoriteSports.length > 0) {
-      sessionStorage.setItem('favoriteSports', JSON.stringify(favoriteSports));
-    }
-  }, [favoriteSports]);
 
   useEffect(() => {
     // Check if favoriteSports contains items and skip onboarding
-    if (favoriteSports.length > 0) {
-      onComplete(userName, favoriteSports.map((sport) => sport.name));
+    if (favoriteTokens.length > 0) {
+      onComplete(userName, favoriteTokens.map((sport) => sport.name));
+    } else{
+      setFavoriteTokens(sportsOptions);
     }
-  }, [favoriteSports, onComplete, userName]); // Dependencies include favoriteSports and onComplete
+  }, [favoriteTokens, onComplete, userName]); // Dependencies include favoriteSports and onComplete
+
+
 
   const handleNext = () => {
     if (currentPage === 1) {
-      if (favoriteSports.length === 0) {
-        const updatedSports = reorder(tokenPairs, 0, 0);
-        setFavoriteSports(updatedSports);
+      if (favoriteTokens.length === 0) {
+        const updatedSports = reorder(sportsOptions, 0, 0);
+        setFavoriteTokens(updatedSports);
       }
-      onComplete(userName, favoriteSports.map((sport) => sport.name));
-      
-      // Retrieve user data from sessionStorage to update the user
-      const userData = JSON.parse(sessionStorage.getItem("user") || "{}");
+      onComplete(userName, favoriteTokens.map((sport) => sport.name));
       const updatedUser = {
-        ...userData,
-        firstName: userData?.firstName || userName,
-        dateCreated: userData?.dateCreated || new Date(),
-        favoriteSports: favoriteSports.map((sport) => sport.name),
+        ...currentUser,
+        firstName: currentUser?.firstName || userName,
+        dateCreated: currentUser?.dateCreated || new Date(),
+        favoriteTokens: favoriteTokens.map((sport) => sport.name),
         lastLoggedIn: new Date(),
-        telegramId: userData?.telegramId || '',
-        lastName: userData?.lastName || '',
-        telegramHandle: userData?.telegramHandle || '',
-        referralTelegramId: userData?.referralTelegramId || '',
-        photoId: userData?.photoId || '',
-        photoUrl: userData?.photoUrl || '',
+        telegramId: currentUser?.telegramId || '',
+        lastName: currentUser?.lastName || '',
+        telegramHandle: currentUser?.telegramHandle || '',
+        referralTelegramId: currentUser?.referralTelegramId || '',
+        photoId: currentUser?.photoId || '',
+        photoUrl: currentUser?.photoUrl || '',
       };
-      sessionStorage.setItem("user", JSON.stringify(updatedUser));  // Update user in sessionStorage
       updateUser(updatedUser);
     } else {
       setCurrentPage((prev) => prev + 1);
@@ -132,8 +112,8 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
   };
 
   const moveSport = (fromIndex: number, toIndex: number) => {
-    const updatedSports = reorder(favoriteSports, fromIndex, toIndex);
-    setFavoriteSports(updatedSports);
+    const updatedTokens = reorder(favoriteTokens, fromIndex, toIndex);
+    setFavoriteTokens(updatedTokens);
   };
 
   const handleScroll = () => {
@@ -161,11 +141,18 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
         {currentPage === 0 && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Welcome to the App! 🎉</h2>
+            {currentUser?.photoUrl && (
+              <img
+                src={currentUser.photoUrl}
+                alt="Profile"
+                className="w-24 h-24 rounded-full mb-4"
+              />
+            )}
             <p>Hello <strong>{userName}</strong>! 😊</p>
-            <h2 className="text-xl font-semibold mb-4">🩴🍶🧼 Pick your pairs 👾🌮👽</h2>
+            <h2 className="text-xl font-semibold mb-4">⚽🏀 Please rank your favorite sports 🏈⚾</h2>
             <p>You can change this later in settings</p>
             <div>
-              {favoriteSports.map((sport, index) => (
+              {favoriteTokens.map((sport, index) => (
                 <SportItem key={sport.id} sport={sport} index={index} moveSport={moveSport} />
               ))}
             </div>
