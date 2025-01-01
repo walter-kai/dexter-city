@@ -168,7 +168,7 @@ async function createUser(
       existingUserData.dateCreated.seconds,
       existingUserData.dateCreated.nanoseconds
     ).toDate();
-
+    
     return new User({
       ...existingUserData,
       dateCreated: existingDateCreated, // Keep the original creation date
@@ -296,7 +296,7 @@ const getUserByWalletId = async (
   breadcrumb?: string
 ): Promise<User | null> => {
   const newBreadcrumb = `getUserByWalletId(${walletId}):${breadcrumb}`;
-  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
+  // logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
 
   if (!walletId) {
     throw new ApiError(400, `Invalid walletId provided. ${newBreadcrumb}`);
@@ -306,7 +306,7 @@ const getUserByWalletId = async (
   const q = usersCollection.where("walletId", "==", walletId).limit(1);
   const querySnapshot = await q.get();
 
-  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, querySnapshotSize: querySnapshot.size }));
+  // logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, querySnapshotSize: querySnapshot.size }));
 
   if (querySnapshot.empty) {
     logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, message: "No user found." }));
@@ -329,7 +329,7 @@ const getUserByWalletId = async (
 
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, user }));
 
-  return user;
+  return user;    
 };
 
 

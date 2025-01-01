@@ -134,10 +134,7 @@ export const login = async (walletId: string): Promise<User> => {
     throw new Error('Login failed');
   }
 
-  const { message, user } = (await res.json()) as { message: string, user: User };
-
-  // You can log the message if needed
-  console.log(message); // Optional: log the message
+  const user = (await res.json()) as User;
 
   return user; // Return the user directly
 };

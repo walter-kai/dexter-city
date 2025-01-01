@@ -23,11 +23,11 @@ const Home: React.FC = () => {
         if (accounts && accounts.length > 0) {
           const walletId = accounts[0];
           console.log("Connected account:", walletId);
-          setAccount(walletId);
           fetchBalances(walletId);
-    
+
           const user = await login(walletId); // Pass true to create user if it doesn't exist
           sessionStorage.setItem("currentUser", JSON.stringify(user)); // Store user in session storage
+          setAccount(walletId);
         } else {
           console.log("No accounts found.");
           setAccount(null);
@@ -68,7 +68,7 @@ const Home: React.FC = () => {
   return (
     <div className="flex flex-col items-center bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen">
       {/* <NavBar telegramUser={currentUser} /> */}
-      {connected ? (
+      {connected && account ? (
         <Dashboard />
       ) : (
         <div className="font-montserrat flex flex-col items-center justify-center h-full space-y-4">

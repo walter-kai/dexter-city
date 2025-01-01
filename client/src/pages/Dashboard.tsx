@@ -1,24 +1,59 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog } from "react-icons/fa";
 import LoadingScreenDots from "../components/LoadingScreenDots";
-import { UserContext } from "../App";
 import NavBar from "../components/NavBar";
 import { useSDK } from "@metamask/sdk-react";
 
 const Dashboard: React.FC = () => {
-  const currentUser = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null); // Adjust this based on your actual user type
   const { sdk, connected, connecting } = useSDK();
-  
+  const [balances, setBalances] = useState<{ balance: string, currency: string }[]>([]);
 
+  const fetchBalances = async (walletId: string) => {
+    try {
+      const provider = sdk?.getProvider();
+      if (!provider) {
+        console.error("Ethereum provider not available.");
+        return;
+      }
+  
+      // Fetch ETH balance
+      const ethBalance = await provider.request({
+        method: "eth_getBalance",
+        params: [walletId, "latest"],
+      }) as string;
+  
+      console.log("Fetched ETH balance in wei:", ethBalance);
+  
+      // Convert balance from wei (BigInt) to ETH
+      const ethBalanceInEth = parseFloat((parseInt(ethBalance, 16) / 1e18).toFixed(4));
+      console.log("ETH balance in ETH:", ethBalanceInEth);
+  
+      setBalances([{ balance: ethBalanceInEth.toFixed(4), currency: "ETH" }]);
+  
+      // You can add support for fetching token balances (ERC-20) here if needed.
+    } catch (err) {
+      console.error("Error fetching balances:", err);
+    }
+  };
+  
   useEffect(() => {
-    if (currentUser) {
-      setUser(currentUser);
+    // Check if the user is in sessionStorage
+    const storedUser = sessionStorage.getItem("currentUser");
+    if (storedUser && storedUser !== 'undefined') {
+      setUser(JSON.parse(storedUser)); // Parse and set user from sessionStorage
     }
     setLoading(false); // Ensure loading ends when user data is set
-  }, [currentUser]);
+  }, []);
+
+  useEffect(() => {
+    // Fetch balances once the account is available and connected
+    if (connected && user) {
+      fetchBalances(user.walletId);
+    }
+  }, [connected, user]); // Fetch balances when connected or user changes
 
   const features = [
     { title: "Bot Shop", description: "Sell, explore and purchase pre-built bots.", icon: <FaShopify />, link: "/bot-shop" },
@@ -38,8 +73,8 @@ const Dashboard: React.FC = () => {
       ) : connected ? (
         <div className="flex flex-col items-center animate-fadeIn bg-gradient-to-bl from-[#343949] to-[#7c8aaf]">
           <NavBar telegramUser={user} />
-          <div 
-            className="relative w-full" 
+          <div
+            className="relative w-full"
             style={{
               backgroundImage: "url('./bg.jpeg')",
               backgroundSize: "cover",
@@ -53,7 +88,23 @@ const Dashboard: React.FC = () => {
                   <p><strong>Handle:</strong> {user?.username || "Not set"}</p>
                   <p><strong>Firstname:</strong> {user?.firstName}</p>
                   <p><strong>Telegram ID:</strong> {user?.telegramid}</p>
-                  <p><strong>Score:</strong> {user?.pickScore || 0}</p>
+                  <p><strong>Balance:</strong> {user?.pickScore || 0}</p>
+                  {balances.length > 0 && (
+                    <div className="text-green-500 font-semibold">
+                      {balances.map((balance, index) => (
+                        <div key={index}>
+                          {balance.balance} {balance.currency}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {/* Refresh Button */}
+                  <button
+                    className="mt-4 px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition"
+                    onClick={() => fetchBalances(user.walletId)}
+                  >
+                    Refresh Balance
+                  </button>
                 </div>
               </div>
             </div>
@@ -87,8 +138,8 @@ const Dashboard: React.FC = () => {
       ) : (
         <>
           <NavBar telegramUser={user} />
-          <div 
-            className="absolute top w-full blur-sm" 
+          <div
+            className="absolute top w-full blur-sm"
             style={{
               backgroundImage: "url('./bg.jpeg')",
               backgroundSize: "cover",
@@ -97,17 +148,17 @@ const Dashboard: React.FC = () => {
           >
           </div>
 
-            <div className="p-1 font-bold w-full ">
-              <div className="px-4 py-1 text-center">
-                <div className="bg-black/50 mt-16 rounded shadow-md text-left text-white">
-                  <div className="text-xl blur-none">Your Information</div>
-                  <p><strong>Handle:</strong> {user?.username || "Not set"}</p>
-                  <p><strong>Firstname:</strong> {user?.firstName}</p>
-                  <p><strong>Telegram ID:</strong> {user?.telegramid}</p>
-                  <p><strong>Score:</strong> {user?.pickScore || 0}</p>
-                </div>
+          <div className="p-1 font-bold w-full ">
+            <div className="px-4 py-1 text-center">
+              <div className="bg-black/50 mt-16 rounded shadow-md text-left text-white">
+                <div className="text-xl blur-none">Your Information</div>
+                <p><strong>Handle:</strong> {user?.username || "Not set"}</p>
+                <p><strong>Firstname:</strong> {user?.firstName}</p>
+                <p><strong>Telegram ID:</strong> {user?.telegramid}</p>
+                <p><strong>Score:</strong> {user?.pickScore || 0}</p>
               </div>
             </div>
+          </div>
         </>
       )}
     </>

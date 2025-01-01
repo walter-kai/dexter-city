@@ -17,34 +17,6 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
   const [updatedUser, setUpdatedUser] = useState<TelegramUser | null>(null);
   const [updateUserError, setUpdateUserError] = useState<string | null>(null);
 
-  const connectWallet = async () => {
-    try {
-      if (!sdk) {
-        console.error("MetaMask SDK not initialized.");
-        return;
-      }
-      const accounts = await sdk.connect();
-      if (accounts && accounts.length > 0) {
-        const walletId = accounts[0];
-        console.log("Connected account:", walletId);
-        setAccount(walletId);
-        fetchBalances(walletId);
-
-        if (telegramUser) {
-          await updateUserWalletId(walletId);
-          const user = await login(walletId); // Pass true to create user if it doesn't exist
-          setCurrentUser(user); // Set the current user state
-          
-        }
-      } else {
-        console.log("No accounts found.");
-        setAccount(null);
-      }
-    } catch (err) {
-      console.error("Failed to connect MetaMask:", err);
-    }
-  };
-
   const fetchBalances = async (walletId: string) => {
     try {
       const provider = sdk?.getProvider();
@@ -69,62 +41,79 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
     }
   };
 
+
+  const connectWallet = async () => {
+    try {
+      if (!sdk) {
+        console.error("MetaMask SDK not initialized.");
+        return;
+      }
+      const accounts = await sdk.connect();
+      if (accounts && accounts.length > 0) {
+        const walletId = accounts[0];
+        console.log("Connected account:", walletId);
+        setAccount(walletId);
+        fetchBalances(walletId);
+
+        if (telegramUser && walletId) {
+          // await updateUserWalletId(walletId);
+          const user = await login(walletId); // Pass true to create user if it doesn't exist
+          sessionStorage.setItem("currentUser", JSON.stringify(user)); // Store user in session storage
+          
+        }
+      } else {
+        console.log("No accounts found.");
+        setAccount(null);
+      }
+    } catch (err) {
+      console.error("Failed to connect MetaMask:", err);
+    }
+  };
+
+
   const disconnectWallet = () => {
     sdk?.disconnect();
-    updateUserWalletId(null);
+    // updateUserWalletId(null);
     setAccount(null);
     setBalances([]);
     console.log("Wallet disconnected");
   };
 
-  const updateUserWalletId = async (walletId: string | null) => {
-    if (telegramUser) {
-      try {
-        const userDataToUpdate = {
-          ...telegramUser,
-          lastLoggedIn: new Date().toISOString(),
-          walletId,
-        };
+  // const updateUserWalletId = async (walletId: string | null) => {
+  //   if (telegramUser) {
+  //     try {
+  //       const userDataToUpdate = {
+  //         ...telegramUser,
+  //         lastLoggedIn: new Date().toISOString(),
+  //         walletId,
+  //       };
 
-        const response = await fetch('/api/user', {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(userDataToUpdate),
-        });
+  //       const response = await fetch('/api/user', {
+  //         method: 'PUT',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify(userDataToUpdate),
+  //       });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          const errorMessage = errorData?.message || `Update failed with status ${response.status}`;
-          throw new Error(errorMessage);
-        }
+  //       if (!response.ok) {
+  //         const errorData = await response.json();
+  //         const errorMessage = errorData?.message || `Update failed with status ${response.status}`;
+  //         throw new Error(errorMessage);
+  //       }
 
-        const data = await response.json();
-        setUpdatedUser(data.user);
-        setUpdateUserError(null);
-      } catch (error: any) {
-        console.error("Error updating user:", error);
-        setUpdateUserError(error.message);
-      }
-    }
-  };
+  //       const data = await response.json();
+  //       setUpdatedUser(data.user);
+  //       setUpdateUserError(null);
+  //     } catch (error: any) {
+  //       console.error("Error updating user:", error);
+  //       setUpdateUserError(error.message);
+  //     }
+  //   }
+  // };
 
   useEffect(() => {
-    const handleAccountsChanged = (accounts: string[]) => {
-      if (accounts.length === 0) {
-        disconnectWallet();
-      } else {
-        setAccount(accounts[0]);
-        fetchBalances(accounts[0]);
-      }
-    };
-
-    sdk?.on("accountsChanged" as any, handleAccountsChanged);
-
-    return () => {
-      sdk?.off("accountsChanged" as any, handleAccountsChanged);
-    };
+    connectWallet();
   }, [sdk]);
 
 
@@ -173,7 +162,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
             </span>
           </div>
         )}
-        {balances.length > 0 && (
+        {/* {balances.length > 0 && (
           <div className="text-green-500 font-semibold">
             {balances.map((balance, index) => (
               <div key={index}>
@@ -181,7 +170,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
               </div>
             ))}
           </div>
-        )}
+        )} */}
         {updateUserError && (
           <span className="text-red-500 font-semibold">Error: {updateUserError}</span>
         )}
