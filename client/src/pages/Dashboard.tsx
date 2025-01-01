@@ -4,11 +4,14 @@ import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog } from "react
 import LoadingScreenDots from "../components/LoadingScreenDots";
 import { UserContext } from "../App";
 import NavBar from "../components/NavBar";
+import { useSDK } from "@metamask/sdk-react";
 
 const Dashboard: React.FC = () => {
   const currentUser = useContext(UserContext);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null); // Adjust this based on your actual user type
+  const { sdk, connected, connecting } = useSDK();
+  
 
   useEffect(() => {
     if (currentUser) {
@@ -32,16 +35,21 @@ const Dashboard: React.FC = () => {
         <div className="h-[270px]">
           <LoadingScreenDots />
         </div>
-      ) : (
+      ) : connected ? (
         <div className="flex flex-col items-center animate-fadeIn bg-gradient-to-bl from-[#343949] to-[#7c8aaf]">
           <NavBar telegramUser={user} />
-          <div className="relative w-full">
+          <div 
+            className="relative w-full" 
+            style={{
+              backgroundImage: "url('./bg.jpeg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
             <div className="p-1 font-bold w-full">
-              <div className="absolute h-[265px] w-full blur-sm"></div>
               <div className="px-4 py-1 text-center">
-                <h1 className="text-2xl font-bold mb-4">Welcome to Dexter City!</h1>
-                <div className="bg-black/20 p-4 rounded shadow-md text-left">
-                  <h2 className="text-xl">Your Information</h2>
+                <div className="bg-black/50 mt-16 rounded shadow-md text-left text-white">
+                  <div className="text-xl">Your Information</div>
                   <p><strong>Handle:</strong> {user?.username || "Not set"}</p>
                   <p><strong>Firstname:</strong> {user?.firstName}</p>
                   <p><strong>Telegram ID:</strong> {user?.telegramid}</p>
@@ -76,6 +84,31 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      ) : (
+        <>
+          <NavBar telegramUser={user} />
+          <div 
+            className="absolute top w-full blur-sm" 
+            style={{
+              backgroundImage: "url('./bg.jpeg')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+          </div>
+
+            <div className="p-1 font-bold w-full ">
+              <div className="px-4 py-1 text-center">
+                <div className="bg-black/50 mt-16 rounded shadow-md text-left text-white">
+                  <div className="text-xl blur-none">Your Information</div>
+                  <p><strong>Handle:</strong> {user?.username || "Not set"}</p>
+                  <p><strong>Firstname:</strong> {user?.firstName}</p>
+                  <p><strong>Telegram ID:</strong> {user?.telegramid}</p>
+                  <p><strong>Score:</strong> {user?.pickScore || 0}</p>
+                </div>
+              </div>
+            </div>
+        </>
       )}
     </>
   );

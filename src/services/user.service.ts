@@ -11,6 +11,8 @@ import ApiError from "../utils/api-error";
 import { Timestamp } from '@google-cloud/firestore'; // Ensure this is correct
 
 import { db } from "../config/firebase";
+import { Telegraf } from "telegraf";
+import { PassThrough } from "stream";
 
 
 // /**
@@ -79,37 +81,26 @@ import { db } from "../config/firebase";
  * @returns {Promise<User>} The updated user object.
  */
 async function updateUser(user: User, breadcrumb?: string): Promise<User> {
-  const newBreadcrumb = `updateUser(${user.telegramId}):${breadcrumb}`;
-  const timeNow = Timestamp.now();
+  const newBreadcrumb = `updateUser(${user.walletId}):${breadcrumb}`;
+  // const timeNow = Timestamp.now();
 
   const usersRef = db.collection('users');
 
   // Update data directly in the update call
   try {
-    const q = usersRef.where("telegramId", "==", user.telegramId);
+    const q = usersRef.where("walletId", "==", user.walletId);
     const querySnapshot = await q.get();
 
     if (querySnapshot.empty) {
-      throw new ApiError(404, `User with telegramId ${user.telegramId} not found.`);
+      throw new ApiError(404, `User with walletId ${user.walletId} not found.`);
     }
 
     const existingUserDoc = querySnapshot.docs[0];
     const existingUserRef = usersRef.doc(existingUserDoc.id);
 
     await existingUserRef.update({
-      telegramId: user.telegramId,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      telegramHandle: user.telegramHandle,
-      walletId: user.walletId,
-      referralTelegramId: user.referralTelegramId || null,
-      lastLoggedIn: timeNow, // Store as Firestore Timestamp
-      favoriteTokens: user.favoriteTokens || null,
-      photoId: user.photoId || '',
-      photoUrl: user.photoUrl || '',
-      dateCreated: user.dateCreated instanceof Date
-        ? Timestamp.fromDate(user.dateCreated)
-        : Timestamp.now(),
+      ...user
+      // lastLoggedIn: timeNow, // Store as Firestore Timestamp
     });
 
     logger.info(`Updated user with telegramId ${user.telegramId}.`);
@@ -152,31 +143,18 @@ async function createUser(
   const newBreadcrumb = `createUser(${args.telegramId}):${breadcrumb}`;
   const timeNow = Timestamp.now();
 
-  const userArgs: Omit<FireStoreUser, "id"> = {
-    telegramId: args.telegramId,
-    walletId: args.walletId,
-    firstName: args.firstName,  // Accept null
-    lastName: args.lastName,     // Accept null
-    telegramHandle: args.telegramHandle,         // Accept null
-    referralTelegramId: args.referralTelegramId,     // Accept null
-    dateCreated: timeNow,        // Firestore Timestamp
-    lastLoggedIn: timeNow.toDate(), // Keep as a string for now
-    favoriteTokens: null,
-    photoId: args.photoId,       // Accept null
-    photoUrl: args.photoUrl,       // Accept null
-  };
-  
   const usersRef = db.collection('users');
+  const bot = new Telegraf(process.env.TELEGRAM_TOKEN as string);
 
   logger.info(
     JSON.stringify({
       breadcrumb: newBreadcrumb,
-      userArgs,
+      args,
     })
   );
 
-  // Check if a user with the same telegramId already exists
-  const q = usersRef.where("telegramId", "==", args.telegramId);
+  // Check if a user with the same walletId already exists
+  const q = usersRef.where("walletId", "==", args.walletId);
   const querySnapshot = await q.get();
 
   if (!querySnapshot.empty) {
@@ -184,76 +162,176 @@ async function createUser(
     const existingUserDoc = querySnapshot.docs[0];
     const existingUserData = existingUserDoc.data() as FireStoreUser;
 
-    logger.info(`User with telegramId ${args.telegramId} already exists.`);
-    const tstamp = new Timestamp(existingUserData.dateCreated.seconds, existingUserData.dateCreated.nanoseconds).toDate();
-    
+    logger.info(`User with walletId ${args.walletId} already exists.`);
+
+    const existingDateCreated = new Timestamp(
+      existingUserData.dateCreated.seconds,
+      existingUserData.dateCreated.nanoseconds
+    ).toDate();
+
     return new User({
       ...existingUserData,
-      // id: existingUserDoc.id,
-      dateCreated: tstamp, // Convert Firestore Timestamp to Date object
+      dateCreated: existingDateCreated, // Keep the original creation date
     });
   }
 
-  // Create a new user since no existing user was found
-  const documentId = `${args.telegramId}`; // Format the ID as firstname:telegramid
-  await usersRef.doc(documentId).set(userArgs); // Use set method with the specified document ID
-  
-  logger.info(`Created new user with telegramId ${args.telegramId}.`);
+  // Fetch the profile photo using Telegraf's bot.telegram
+  const profilePhotos = await bot.telegram.getUserProfilePhotos(Number(args.telegramId));
 
-  // Get the newly created user's data
+  // Safely handle the response and fetch profilePicId
+  const profilePicId = profilePhotos?.photos?.[0]?.[0]?.file_id || null;
+
+  // Download and upload the profile picture
+  const profilePicUrl = profilePicId
+    ? await downloadAndUploadToFirebase(bot, profilePicId, args.telegramId)
+    : null;
+
+  // Set the `dateCreated` to the current timestamp for new users
+  const userPayload: FireStoreUser = {
+    ...args,
+    dateCreated: timeNow, // Set current timestamp for new user creation
+    lastLoggedIn: timeNow.toDate(),
+    photoId: profilePicId || null,
+    photoUrl: profilePicUrl || null,
+    favoriteTokens: null, // Ensure null for favoriteTokens
+  };
+
+  // Create a new user with the specified document ID
+  const documentId = `${args.walletId}`; // Format the ID as walletId
+  await usersRef.doc(documentId).set(userPayload); // Use set method with the specified document ID
+
+  logger.info(`Created new user with walletId ${args.walletId}.`);
+
+  // Retrieve the newly created user's data
   const newUserSnapshot = await usersRef.doc(documentId).get();
   const newUserData = newUserSnapshot.data() as FireStoreUser;
 
-  // Convert Firestore Timestamp to Date object for dateCreated
-  const newTstamp = new Timestamp(newUserData.dateCreated.seconds, newUserData.dateCreated.nanoseconds).toDate();
+  // Convert Firestore Timestamp to Date object for `dateCreated`
+  const newDateCreated = new Timestamp(
+    newUserData.dateCreated.seconds,
+    newUserData.dateCreated.nanoseconds
+  ).toDate();
 
   return new User({
     ...newUserData,
-    // id: newUserSnapshot.id, // This will now be firstname:telegramid
-    dateCreated: newTstamp,
+    dateCreated: newDateCreated,
   });
 }
 
 
+/**
+ * Download the file from Telegram and upload it to Firebase Storage.
+ * @param {Telegraf} bot - The Telegraf bot instance.
+ * @param {string} fileId - The file ID to fetch the image.
+ * @param {string} userId - The user's Telegram ID to create a unique filename.
+ * @returns {Promise<string | null>} The download URL in Firebase Storage or null if not successful.
+ */
+const downloadAndUploadToFirebase = async (bot: Telegraf, fileId: string, userId: string): Promise<string | null> => {
+  try {
+    const file = await bot.telegram.getFile(fileId);
+    if (file && file.file_path) {
+      const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_TOKEN}/${file.file_path}`;
 
-const getUsersByTelegramId = async (
-  telegramIds: ReadonlyArray<string>,
+      // Download the image
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error('Failed to fetch file from Telegram');
+
+      // Create a reference to the Firestore Storage bucket
+      const bucket = admin.storage().bucket(); // Initialize the storage bucket
+      const fileName = `${userId}.jpg`; // Create a unique filename
+      const fileUploadStream = bucket.file(`profilePics/${fileName}`).createWriteStream({
+        metadata: {
+          contenttype: response.headers.get('content-type'), // Correct property name
+        },
+      });
+
+      // Convert the ReadableStream from fetch to a Node.js stream
+      const passThroughStream = new PassThrough();
+      const reader = response.body?.getReader();
+
+      // Read the stream and push chunks to PassThrough
+      const pump = async () => {
+        while (true) {
+          const result = await reader?.read(); // Read the next chunk
+          if (result?.done) break; // Exit loop if done
+
+          // Push the chunk into the PassThrough stream
+          passThroughStream.write(result?.value);
+        }
+        passThroughStream.end(); // End the PassThrough stream
+      };
+
+      pump().catch(err => {
+        console.error('Error reading response stream:', err);
+        passThroughStream.destroy(err); // Handle errors and destroy stream
+      });
+
+      // Pipe PassThrough to the upload stream
+      passThroughStream.pipe(fileUploadStream);
+
+      return new Promise((resolve, reject) => {
+        fileUploadStream.on('finish', () => {
+          // Get the public URL of the uploaded file
+          const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/profilePics%2F${encodeURIComponent(fileName)}?alt=media`;
+
+          // Log successful upload
+          logger.info(`Successfully uploaded profile picture for userId: ${userId}, URL: ${publicUrl}`);
+          resolve(publicUrl);
+        });
+        fileUploadStream.on('error', (error) => {
+          console.error('Error uploading file to Firestore Storage:', error);
+          reject(null);
+        });
+      });
+    }
+    return null;
+  } catch (error) {
+    console.error("Error downloading or uploading file:", error);
+    return null;
+  }
+};
+
+const getUserByWalletId = async (
+  walletId: string,
   breadcrumb?: string
-): Promise<Record<string, User>> => {
-  const newBreadcrumb = `getUsersByTelegramId(${telegramIds}):${breadcrumb}`;
+): Promise<User | null> => {
+  const newBreadcrumb = `getUserByWalletId(${walletId}):${breadcrumb}`;
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
 
-  if (telegramIds.length > 30) {
-    throw new ApiError(400, `Too many telegramIds, max 30. ${newBreadcrumb}`);
+  if (!walletId) {
+    throw new ApiError(400, `Invalid walletId provided. ${newBreadcrumb}`);
   }
 
-  const usersCollection = db.collection('users');
-  const q = usersCollection.where("telegramId", "in", telegramIds);
+  const usersCollection = db.collection("users");
+  const q = usersCollection.where("walletId", "==", walletId).limit(1);
   const querySnapshot = await q.get();
 
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, querySnapshotSize: querySnapshot.size }));
 
-  let userMap: Record<string, User> = {};
+  if (querySnapshot.empty) {
+    logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, message: "No user found." }));
+    return null;
+  }
 
-  querySnapshot.forEach((doc) => {
-    const queryData = doc.data() as User;
+  const doc = querySnapshot.docs[0];
+  const queryData = doc.data() as User;
 
-    // Ensure photoId is either string or null (not undefined)
-    const photoId = queryData.photoId !== undefined ? queryData.photoId : null;
-    const photoUrl = queryData.photoUrl !== undefined ? queryData.photoUrl : null;
+  // Ensure photoId and photoUrl are defined or null
+  const photoId = queryData.photoId !== undefined ? queryData.photoId : null;
+  const photoUrl = queryData.photoUrl !== undefined ? queryData.photoUrl : null;
 
-    userMap[queryData.telegramId] = new User({
-      ...queryData,
-      photoId,  // Pass the photoId as either string or null
-      photoUrl,
-      dateCreated: doc.createTime?.toDate() || new Date(),
-    });
+  const user = new User({
+    ...queryData,
+    photoId, // Pass the photoId as either string or null
+    photoUrl,
+    dateCreated: doc.createTime?.toDate() || new Date(),
   });
 
-  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, userMap }));
+  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, user }));
 
-  return userMap;
+  return user;
 };
+
 
 
 
@@ -346,84 +424,16 @@ const getUsers = async (
 };
 
 
-/**
- * Updates a user's information by their Telegram ID, using a query-based approach.
- * 
- * @param {string} telegramId - The Telegram ID of the user to update.
- * @param {Object} args - Fields to update (handle, firstname, lastname, referral).
- * @param {string} [args.handle] - The Telegram handle/username to update.
- * @param {string} [args.firstname] - The first name to update.
- * @param {string} [args.lastname] - The last name to update.
- * @param {string} [args.referral] - The telegramId of the user who referred this user.
- * @param {string} [breadcrumb] - Optional breadcrumb for logging.
- * @returns {Promise<User | null>} - Returns the updated user object or null if not found.
- */
-const updateUserInfoByTelegramId = async (
-  args: {
-    telegramId: string,
-    handle?: string;
-    firstname?: string;
-    lastname?: string;
-    referral?: string;
-  },
-  breadcrumb?: string
-): Promise<User | null> => {
-  const newBreadcrumb = `updateUserInfoByTelegramId(${args.telegramId}):${breadcrumb}`;
-  const usersRef = db.collection("users");
-
-  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, args }));
-
-  // Build and execute the query to find the user by telegramId
-  const q = usersRef.where("telegramId", "==", args.telegramId);
-  const snapshot = await q.get();
-
-  // Log the result size
-  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, snapshotSize: snapshot.size }));
-
-  // If no user is found, return null
-  if (snapshot.empty) {
-    logger.info(`User with telegramId ${args.telegramId} not found.`);
-    return null;
-  }
-
-  // Get the first matching document (assuming telegramId is unique)
-  const userDoc = snapshot.docs[0];
-  const userData = userDoc.data() as FireStoreUser;
-
-  // Prepare fields to update
-  const updatedFields: Partial<FireStoreUser> = {
-    ...(args.handle ? { handle: args.handle } : {}),
-    ...(args.firstname ? { firstname: args.firstname } : {}),
-    ...(args.lastname ? { lastname: args.lastname } : {}),
-    ...(args.referral && !userData.referralTelegramId ? { referral: args.referral } : {}),
-    lastLoggedIn: admin.firestore.Timestamp.now().toDate(), // Always update the lastLoggedIn field
-  };
-
-  // Update the user document with the new fields
-  await userDoc.ref.update(updatedFields);
-
-  logger.info(`User with telegramId ${args.telegramId} updated.`);
-
-  // Return the updated user object
-  return new User({
-    ...userData,
-    ...updatedFields,
-    // id: userDoc.id,
-    dateCreated: userDoc.createTime?.toDate(),
-  });
-};
 
 
 
 // Exporting functions
 export default {
   setUserChatId,
-  getUsersByTelegramId,
+  getUserByWalletId,
   getAllUsers,
   getUsers,
   createUser,
   updateUser,
-  // updateUserInfoByTelegramId,
-  // updateUserDocByTelegramId
 
 };

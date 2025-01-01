@@ -9,7 +9,7 @@ import NotFound from './pages/NotFound';
 import Quit from './pages/Quit';
 import Profile from './pages/Profile';
 import OnboardForm from './pages/OnboardForm';
-import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import { login } from './services/FirestoreUser'; // Import newUser function
 import User from "./models/User";
 import { DndProvider } from 'react-dnd';
@@ -19,30 +19,28 @@ export const UserContext = createContext<User | null>(null);
 const App: React.FC = () => {
 
   const [isOnboarding, setIsOnboarding] = useState(true);
-  const [loading, setLoading] = useState(true); // State for loading user data
-  const [error, setError] = useState<string | null>(null); // State for error handling
-  const [currentUser, setCurrentUser] = useState<User | null>(null); // State for current user
 
-  useEffect(() => {
-    async function fetchTelegramUser() {
-      setLoading(true); // Set loading state
-      try {
+
+  // useEffect(() => {
+  //   async function fetchTelegramUser() {
+  //     setLoading(true); // Set loading state
+  //     try {
 
         
-        // Try to get the current user using their Telegram ID
-        const user = await login(); // Pass true to create user if it doesn't exist
+  //       // Try to get the current user using their Telegram ID
+  //       // const user = await login(); // Pass true to create user if it doesn't exist
 
-        setCurrentUser(user); // Set the current user state
-      } catch (error) {
-        console.error("Error fetching Telegram user:", error);
-        setError("Failed to fetch Telegram user. Please try again."); // Set error state
-      } finally {
-        setLoading(false); // Reset loading state
-      }
-    }
+  //       // setCurrentUser(user); // Set the current user state
+  //     } catch (error) {
+  //       console.error("Error fetching Telegram user:", error);
+  //       setError("Failed to fetch Telegram user. Please try again."); // Set error state
+  //     } finally {
+  //       setLoading(false); // Reset loading state
+  //     }
+  //   }
   
-    fetchTelegramUser();
-  }, []);
+  //   fetchTelegramUser();
+  // }, []);
   
 
 
@@ -51,16 +49,10 @@ const App: React.FC = () => {
     setIsOnboarding(false); // Update the onboarding state
   };
 
-  if (loading) {
-    return <div>Loading...</div>; // Optional loading state
-  }
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>; // Show error message
-  }
 
   return (
-    <UserContext.Provider value={currentUser}>
+    // <UserContext.Provider value={currentUser}>
       <div className="mx-auto">
         {isOnboarding ? (
           <DndProvider backend={HTML5Backend}>
@@ -73,7 +65,7 @@ const App: React.FC = () => {
           <>
             {/* <NavBar telegramUser={telegramUser} onLogin={handleLogin} /> */}
             <Routes>
-              <Route path="/" element={<Dashboard />} />
+              <Route path="/" element={<Home />} />
               <Route path="/trending" element={<Trending />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/share" element={<Share />} />
@@ -85,7 +77,7 @@ const App: React.FC = () => {
           </>
         )}
       </div>
-    </UserContext.Provider>
+    // </UserContext.Provider>
   );
 };
 

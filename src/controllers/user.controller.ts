@@ -13,17 +13,6 @@ const setUserChatId = catchAsync(async (req: Request, res: Response): Promise<Re
   return res.json({ chatId: await userService.setUserChatId(req.params.telegramId, req.params.chatId) });
 });
 
-const getUsers = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  if (req.query.telegramIds == null || typeof req.query.telegramIds != "string") {
-    throw new ApiError(400, "Missing telegramIds in request query");
-  }
-  const telegramIds = req.query.telegramIds.split(",");
-  if (telegramIds.length > 30) {
-    throw new ApiError(400, "Too many telegramIds, max is 30.");
-  }
-  return res.json({ users: await userService.getUsersByTelegramId(telegramIds) });
-});
-
 const updateUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   // Directly use the data from req.body, assuming it's of type User
   const userData: User = req.body;
@@ -58,47 +47,8 @@ const createUser = catchAsync(async (req: Request, res: Response): Promise<Respo
   return res.json({ user: await userService.createUser(req.body) });
 });
 
-const getUsersPickScores = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  if (req.query.telegramIds == null || typeof req.query.telegramIds !== "string") {
-    throw new ApiError(400, "Missing telegramIds in request query");
-  }
-
-  const telegramIds = req.query.telegramIds.split(",");
-  if (telegramIds.length > 30) {
-    throw new ApiError(400, "Too many telegramIds, max is 30.");
-  }
-
-  if (req.query.timeFrame == null || typeof req.query.timeFrame !== "string") {
-    throw new ApiError(400, "Missing timeFrame in request query");
-  }
-
-  if (req.query.date != null && typeof req.query.date !== "string") {
-    throw new ApiError(400, "date must be of type string");
-  }
-
-  const scores = 0;
-  return res.json({ scores });
-});
-
-
-const addUsersFavoriteSports = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  if (req.body.telegramId == null) {
-    throw new ApiError(400, "Missing telegramId in request params");
-  }
-
-  if (req.body.favoriteSports == null || !Array.isArray(req.body.favoriteSports)) {
-    throw new ApiError(400, "Missing favoriteSports in request body");
-  }
-
-
-  return res.json({ success: true });
-});
-
 export default {
   setUserChatId,
   updateUser,
   createUser,
-  getUsers,
-  getUsersPickScores,
-  addUsersFavoriteSports,
 };

@@ -29,9 +29,9 @@ export interface UserArgs {
   readonly lastName: string | null; // Renamed from lastname
   readonly telegramHandle: string | null; // Renamed from handle
   readonly lastLoggedIn: Date; // Date UTC string
-  readonly referralTelegramId: string | null; // Renamed from referral
+  readonly referralId: string | null; // Renamed from referral
   readonly telegramId: string; // Renamed from telegramid
-  readonly walletId: string | null; // Renamed from telegramid
+  readonly walletId: string; // Renamed from telegramid
   readonly favoriteTokens: string[] | null;
   readonly photoId: string | null;
   readonly photoUrl: string | null;
@@ -44,9 +44,9 @@ export default class User {
   lastName: string | null; // Changed from lastname
   telegramHandle: string | null; // Changed from handle
   lastLoggedIn: Date;
-  referralTelegramId: string | null; // Changed from referral
+  referralId: string | null; // Changed from referral
   telegramId: string; // Changed from telegramid
-  walletId: string | null;
+  walletId: string;
   favoriteTokens: string[] | null;
   photoId?: string | null;
   photoUrl?: string | null;
@@ -57,7 +57,7 @@ export default class User {
     this.lastName = args.lastName; // Changed to lastName
     this.telegramHandle = args.telegramHandle; // Changed to telegramHandle
     this.lastLoggedIn = args.lastLoggedIn;
-    this.referralTelegramId = args.referralTelegramId; // Changed to referralTelegramId
+    this.referralId = args.referralId; // Changed to referralId
     this.telegramId = args.telegramId; // Changed to telegramId
     this.walletId = args.walletId; // Changed to telegramId
     this.favoriteTokens = args.favoriteTokens;

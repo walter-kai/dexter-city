@@ -98,7 +98,7 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
         walletId: currentUser?.walletId || '',
         lastName: currentUser?.lastName || '',
         telegramHandle: currentUser?.telegramHandle || '',
-        referralTelegramId: currentUser?.referralTelegramId || '',
+        referralId: currentUser?.referralId || '',
         photoId: currentUser?.photoId || '',
         photoUrl: currentUser?.photoUrl || '',
       };

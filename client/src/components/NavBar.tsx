@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaFileSignature, FaUser, FaStar } from 'react-icons/fa';
-import { TelegramUser } from '../models/User';
+import User, { TelegramUser } from '../models/User';
 import { useSDK } from "@metamask/sdk-react";
+import { login } from '../services/FirestoreUser';
 
 interface NavBarProps {
   telegramUser: TelegramUser | null;
@@ -31,6 +32,9 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
 
         if (telegramUser) {
           await updateUserWalletId(walletId);
+          const user = await login(walletId); // Pass true to create user if it doesn't exist
+          setCurrentUser(user); // Set the current user state
+          
         }
       } else {
         console.log("No accounts found.");
@@ -130,7 +134,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
   };
 
   return (
-    <div className="fixed bg-transparent z-20 left-0 w-full top-0 flex py-2 items-center justify-between px-4">
+    <div className="fixed bg-black/50 z-20 left-0 w-full top-0 flex py-2 items-center justify-between px-4">
       <div className="flex">
         <button className="btn-nav" type="button" onClick={() => navigate('/profile')}>
           <FaUser className="text-xl" />
@@ -145,6 +149,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
           <FaFileSignature className="text-xl" />
         </button>
       </div>
+      <div className="text-2xl font-bold text-white">Welcome to Dexter City!</div>
       <div className="flex items-center space-x-4">
         {!connected ? (
           <button
@@ -186,3 +191,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
 };
 
 export default NavBar;
+function setCurrentUser(user: User) {
+  throw new Error('Function not implemented.');
+}
+

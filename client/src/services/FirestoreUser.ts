@@ -64,7 +64,7 @@ export const updateUser = async (user: User): Promise<User> => {
     firstName: user.firstName,
     lastName: user.lastName,
     telegramHandle: user.telegramHandle,
-    referralTelegramId: user.referralTelegramId,
+    referralId: user.referralId,
     photoId: user.photoId || '',
     photoUrl: user.photoUrl || '',
     favoriteTokens: user.favoriteTokens,
@@ -97,7 +97,9 @@ export const updateUser = async (user: User): Promise<User> => {
  *
  * @returns {Promise<User>} The logged-in user.
  */
-export const login = async (): Promise<User> => {
+
+export const login = async (walletId: string): Promise<User> => {
+
   const{ user: telegramUser, referral } = (await getTelegram());
 
   let res: Response = await fetch(`/api/auth/login/`, {
@@ -106,20 +108,22 @@ export const login = async (): Promise<User> => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-    id: telegramUser.id,
-    first_name: telegramUser.first_name,
-    last_name: telegramUser.last_name || undefined, // Optional field
-    username: telegramUser.username || undefined, // Optional field
-    // Optional fields from TelegramUser
-    is_bot: telegramUser.is_bot,
-    language_code: telegramUser.language_code,
-    is_premium: telegramUser.is_premium,
-    added_to_attachment_menu: telegramUser.added_to_attachment_menu,
-    can_join_groups: telegramUser.can_join_groups,
-    can_read_all_group_messages: telegramUser.can_read_all_group_messages,
-    supports_inline_queries: telegramUser.supports_inline_queries,
-    can_connect_to_business: telegramUser.can_connect_to_business,
-    has_main_web_app: telegramUser.has_main_web_app,
+    telegramId: telegramUser.id,
+    firstName: telegramUser.first_name,
+    lastName: telegramUser.last_name || undefined, // Optional field
+    telegramHandle: telegramUser.username || undefined, // Optional field
+    referralId: referral,
+    // // Optional fields from TelegramUser
+    // is_bot: telegramUser.is_bot,
+    // language_code: telegramUser.language_code,
+    // is_premium: telegramUser.is_premium,
+    // added_to_attachment_menu: telegramUser.added_to_attachment_menu,
+    // can_join_groups: telegramUser.can_join_groups,
+    // can_read_all_group_messages: telegramUser.can_read_all_group_messages,
+    // supports_inline_queries: telegramUser.supports_inline_queries,
+    // can_connect_to_business: telegramUser.can_connect_to_business,
+    // has_main_web_app: telegramUser.has_main_web_app,
+    walletId: walletId,
     referral: referral || undefined, // Optional field
     }),
   });
