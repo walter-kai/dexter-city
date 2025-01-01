@@ -20,10 +20,10 @@ root.render(
   <MetaMaskProvider
   sdkOptions={{
     dappMetadata: {
-      name: "Example React Dapp",
+      name: "Dexter",
       url: window.location.href,
     },
-    infuraAPIKey: process.env.INFURA_API_KEY,
+    // infuraAPIKey: process.env.INFURA_API_KEY,
     // Other options.
   }}
 >

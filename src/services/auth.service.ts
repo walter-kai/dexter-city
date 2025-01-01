@@ -118,6 +118,7 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
     // Create or update the user
     const userPayload: UserArgs = {
       telegramId: telegramUser.id.toString(),
+      walletId: null,
       firstName: telegramUser.first_name,
       lastName: telegramUser.last_name || null,
       telegramHandle: telegramUser.username || null,
@@ -129,19 +130,8 @@ const loginOrCreate = async (telegramUser: TelegramUser): Promise<{ message: str
       dateCreated: existingUser?.dateCreated || new Date(), // Keep original creation date if exists
     };
 
-    // Map UserArgs to the structure expected by userService (createUser or updateUserDocByTelegramId)
-    const mappedPayload = {
-      telegramid: userPayload.telegramId,
-      firstName: userPayload.firstName,
-      lastName: userPayload.lastName,
-      handle: userPayload.telegramHandle,
-      referral: userPayload.referralTelegramId,
-      photoId: userPayload.photoId,
-      photoUrl: userPayload.photoUrl,
-    };
-
     if (!existingUser) {
-      const newUser = await userService.createUser(mappedPayload);
+      const newUser = await userService.createUser(userPayload);
       return {
         message: "User created",
         user: newUser,

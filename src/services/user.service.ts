@@ -1,5 +1,5 @@
 import admin from "firebase-admin"; // Import admin SDK
-import User, { FireStoreUser} from "../../client/src/models/User";
+import User, { FireStoreUser, UserArgs} from "../../client/src/models/User";
 
 import logger from "../config/logger";
 import ApiError from "../utils/api-error";
@@ -78,66 +78,59 @@ import { db } from "../config/firebase";
  * @param {string | undefined} [breadcrumb] - Optional breadcrumb for logging.
  * @returns {Promise<User>} The updated user object.
  */
-async function updateUser(
-  user: User,
-  breadcrumb?: string
-): Promise<User> {
+async function updateUser(user: User, breadcrumb?: string): Promise<User> {
   const newBreadcrumb = `updateUser(${user.telegramId}):${breadcrumb}`;
   const timeNow = Timestamp.now();
 
-  const updatedUserArgs: Omit<FireStoreUser, "id"> = {
-    telegramId: user.telegramId,
-    firstName: user.firstName,  
-    lastName: user.lastName,    
-    telegramHandle: user.telegramHandle,      
-    referralTelegramId: user.referralTelegramId,  
-    lastLoggedIn: timeNow.toDate(), // Update the last logged-in time
-    favoriteTokens: user.favoriteTokens || null,  // Allow favorite sports to be null
-    photoId: user.photoId || '',        
-    photoUrl: user.photoUrl || '',      
-    dateCreated: user.dateCreated instanceof Date ? Timestamp.fromDate(user.dateCreated) : Timestamp.now(), // Handle Date or use current timestamp
-  };
-
   const usersRef = db.collection('users');
 
-  logger.info(
-    JSON.stringify({
-      breadcrumb: newBreadcrumb,
-      updatedUserArgs,
-    })
-  );
+  // Update data directly in the update call
+  try {
+    const q = usersRef.where("telegramId", "==", user.telegramId);
+    const querySnapshot = await q.get();
 
-  // Check if the user exists by their telegramId
-  const q = usersRef.where("telegramId", "==", user.telegramId);
-  const querySnapshot = await q.get();
+    if (querySnapshot.empty) {
+      throw new ApiError(404, `User with telegramId ${user.telegramId} not found.`);
+    }
 
-  if (querySnapshot.empty) {
-    throw new ApiError(404, `User with telegramId ${user.telegramId} not found.`);
+    const existingUserDoc = querySnapshot.docs[0];
+    const existingUserRef = usersRef.doc(existingUserDoc.id);
+
+    await existingUserRef.update({
+      telegramId: user.telegramId,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      telegramHandle: user.telegramHandle,
+      walletId: user.walletId,
+      referralTelegramId: user.referralTelegramId || null,
+      lastLoggedIn: timeNow, // Store as Firestore Timestamp
+      favoriteTokens: user.favoriteTokens || null,
+      photoId: user.photoId || '',
+      photoUrl: user.photoUrl || '',
+      dateCreated: user.dateCreated instanceof Date
+        ? Timestamp.fromDate(user.dateCreated)
+        : Timestamp.now(),
+    });
+
+    logger.info(`Updated user with telegramId ${user.telegramId}.`);
+
+    const updatedUserSnapshot = await existingUserRef.get();
+    const updatedUserData = updatedUserSnapshot.data() as FireStoreUser;
+
+    // Convert Firestore Timestamp to Date object for dateCreated and lastLoggedIn
+    const dateCreated = (updatedUserData.dateCreated instanceof Timestamp) ? updatedUserData.dateCreated.toDate() : new Date();
+    const lastLoggedIn = (updatedUserData.lastLoggedIn instanceof Timestamp) ? updatedUserData.lastLoggedIn.toDate() : new Date();
+
+    return new User({
+      ...updatedUserData,
+      dateCreated,
+      lastLoggedIn,
+    });
+  } catch (error) {
+    logger.error(`Error updating user: ${error}, breadcrumb: ${newBreadcrumb}`);
+    throw error; // Re-throw the error after logging
   }
-
-  const existingUserDoc = querySnapshot.docs[0];
-  const existingUserRef = usersRef.doc(existingUserDoc.id);
-
-  // Update the existing user's data
-  await existingUserRef.update(updatedUserArgs);
-  
-  logger.info(`Updated user with telegramId ${user.telegramId}.`);
-
-  // Fetch the updated user data
-  const updatedUserSnapshot = await existingUserRef.get();
-  const updatedUserData = updatedUserSnapshot.data() as FireStoreUser;
-
-  // Convert Firestore Timestamp to Date object for dateCreated
-  const tstamp = new Timestamp(updatedUserData.dateCreated.seconds, updatedUserData.dateCreated.nanoseconds).toDate();
-
-  return new User({
-    ...updatedUserData,
-    // id: updatedUserSnapshot.id,
-    dateCreated: tstamp, // Convert Firestore Timestamp to Date object
-  });
 }
-
-
 
 /**
  * Creates a new user or returns the existing user if found.
@@ -153,26 +146,19 @@ async function updateUser(
  */
 
 async function createUser(
-  args: {
-    telegramid: string;
-    firstName: string;
-    lastName: string | null;  // Accept null
-    handle: string | null;     // Accept null
-    referral: string | null;   // Accept null
-    photoId: string | null;    // Accept null
-    photoUrl: string | null;    // Accept null
-  },
+  args: UserArgs,
   breadcrumb?: string
 ): Promise<User> {
-  const newBreadcrumb = `createUser(${args.telegramid}):${breadcrumb}`;
+  const newBreadcrumb = `createUser(${args.telegramId}):${breadcrumb}`;
   const timeNow = Timestamp.now();
 
   const userArgs: Omit<FireStoreUser, "id"> = {
-    telegramId: args.telegramid,
+    telegramId: args.telegramId,
+    walletId: args.walletId,
     firstName: args.firstName,  // Accept null
     lastName: args.lastName,     // Accept null
-    telegramHandle: args.handle,         // Accept null
-    referralTelegramId: args.referral,     // Accept null
+    telegramHandle: args.telegramHandle,         // Accept null
+    referralTelegramId: args.referralTelegramId,     // Accept null
     dateCreated: timeNow,        // Firestore Timestamp
     lastLoggedIn: timeNow.toDate(), // Keep as a string for now
     favoriteTokens: null,
@@ -190,7 +176,7 @@ async function createUser(
   );
 
   // Check if a user with the same telegramId already exists
-  const q = usersRef.where("telegramId", "==", args.telegramid);
+  const q = usersRef.where("telegramId", "==", args.telegramId);
   const querySnapshot = await q.get();
 
   if (!querySnapshot.empty) {
@@ -198,7 +184,7 @@ async function createUser(
     const existingUserDoc = querySnapshot.docs[0];
     const existingUserData = existingUserDoc.data() as FireStoreUser;
 
-    logger.info(`User with telegramId ${args.telegramid} already exists.`);
+    logger.info(`User with telegramId ${args.telegramId} already exists.`);
     const tstamp = new Timestamp(existingUserData.dateCreated.seconds, existingUserData.dateCreated.nanoseconds).toDate();
     
     return new User({
@@ -209,10 +195,10 @@ async function createUser(
   }
 
   // Create a new user since no existing user was found
-  const documentId = `${args.telegramid}`; // Format the ID as firstname:telegramid
+  const documentId = `${args.telegramId}`; // Format the ID as firstname:telegramid
   await usersRef.doc(documentId).set(userArgs); // Use set method with the specified document ID
   
-  logger.info(`Created new user with telegramId ${args.telegramid}.`);
+  logger.info(`Created new user with telegramId ${args.telegramId}.`);
 
   // Get the newly created user's data
   const newUserSnapshot = await usersRef.doc(documentId).get();

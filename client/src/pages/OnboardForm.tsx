@@ -95,6 +95,7 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
         favoriteTokens: favoriteTokens.map((sport) => sport.name),
         lastLoggedIn: new Date(),
         telegramId: currentUser?.telegramId || '',
+        walletId: currentUser?.walletId || '',
         lastName: currentUser?.lastName || '',
         telegramHandle: currentUser?.telegramHandle || '',
         referralTelegramId: currentUser?.referralTelegramId || '',

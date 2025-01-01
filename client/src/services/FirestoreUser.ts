@@ -60,6 +60,7 @@ export const updateUser = async (user: User): Promise<User> => {
   // Map User object to the structure expected by userService
   const userPayload: UserArgs = {
     telegramId: user.telegramId,
+    walletId: user.walletId,
     firstName: user.firstName,
     lastName: user.lastName,
     telegramHandle: user.telegramHandle,

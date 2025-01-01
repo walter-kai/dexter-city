@@ -31,6 +31,7 @@ export interface UserArgs {
   readonly lastLoggedIn: Date; // Date UTC string
   readonly referralTelegramId: string | null; // Renamed from referral
   readonly telegramId: string; // Renamed from telegramid
+  readonly walletId: string | null; // Renamed from telegramid
   readonly favoriteTokens: string[] | null;
   readonly photoId: string | null;
   readonly photoUrl: string | null;
@@ -45,6 +46,7 @@ export default class User {
   lastLoggedIn: Date;
   referralTelegramId: string | null; // Changed from referral
   telegramId: string; // Changed from telegramid
+  walletId: string | null;
   favoriteTokens: string[] | null;
   photoId?: string | null;
   photoUrl?: string | null;
@@ -57,6 +59,7 @@ export default class User {
     this.lastLoggedIn = args.lastLoggedIn;
     this.referralTelegramId = args.referralTelegramId; // Changed to referralTelegramId
     this.telegramId = args.telegramId; // Changed to telegramId
+    this.walletId = args.walletId; // Changed to telegramId
     this.favoriteTokens = args.favoriteTokens;
     this.photoId = args.photoId;
     this.photoUrl = args.photoUrl;
