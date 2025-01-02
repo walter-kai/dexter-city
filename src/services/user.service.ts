@@ -135,7 +135,6 @@ async function updateUser(user: User, breadcrumb?: string): Promise<User> {
  * @param {string | undefined} [breadcrumb] - Optional breadcrumb for logging.
  * @returns {Promise<User>} The created or found user object.
  */
-
 async function createUser(
   args: UserArgs,
   breadcrumb?: string
@@ -143,7 +142,7 @@ async function createUser(
   const newBreadcrumb = `createUser(${args.telegramId}):${breadcrumb}`;
   const timeNow = Timestamp.now();
 
-  const usersRef = db.collection('users');
+  const usersRef = db.collection("users");
   const bot = new Telegraf(process.env.TELEGRAM_TOKEN as string);
 
   logger.info(
@@ -168,7 +167,7 @@ async function createUser(
       existingUserData.dateCreated.seconds,
       existingUserData.dateCreated.nanoseconds
     ).toDate();
-    
+
     return new User({
       ...existingUserData,
       dateCreated: existingDateCreated, // Keep the original creation date
@@ -176,7 +175,9 @@ async function createUser(
   }
 
   // Fetch the profile photo using Telegraf's bot.telegram
-  const profilePhotos = await bot.telegram.getUserProfilePhotos(Number(args.telegramId));
+  const profilePhotos = await bot.telegram.getUserProfilePhotos(
+    Number(args.telegramId)
+  );
 
   // Safely handle the response and fetch profilePicId
   const profilePicId = profilePhotos?.photos?.[0]?.[0]?.file_id || null;
@@ -196,14 +197,13 @@ async function createUser(
     favoriteTokens: null, // Ensure null for favoriteTokens
   };
 
-  // Create a new user with the specified document ID
-  const documentId = `${args.walletId}`; // Format the ID as walletId
-  await usersRef.doc(documentId).set(userPayload); // Use set method with the specified document ID
+  // Add a new document with an auto-generated ID
+  const newUserRef = await usersRef.add(userPayload);
 
-  logger.info(`Created new user with walletId ${args.walletId}.`);
+  logger.info(`Created new user with auto-generated ID: ${newUserRef.id}.`);
 
   // Retrieve the newly created user's data
-  const newUserSnapshot = await usersRef.doc(documentId).get();
+  const newUserSnapshot = await newUserRef.get();
   const newUserData = newUserSnapshot.data() as FireStoreUser;
 
   // Convert Firestore Timestamp to Date object for `dateCreated`

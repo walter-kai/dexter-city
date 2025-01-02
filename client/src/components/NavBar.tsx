@@ -14,7 +14,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
   const [account, setAccount] = useState<string | null>(null);
   const [balances, setBalances] = useState<{ balance: string; currency: string }[]>([]);
   const { sdk, connected, connecting } = useSDK();
-  const [updatedUser, setUpdatedUser] = useState<TelegramUser | null>(null);
+  // const [updatedUser, setUpdatedUser] = useState<TelegramUser | null>(null);
   const [updateUserError, setUpdateUserError] = useState<string | null>(null);
 
   const fetchBalances = async (walletId: string) => {
@@ -77,46 +77,12 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
     setAccount(null);
     setBalances([]);
     console.log("Wallet disconnected");
+    navigate('/');
   };
 
-  // const updateUserWalletId = async (walletId: string | null) => {
-  //   if (telegramUser) {
-  //     try {
-  //       const userDataToUpdate = {
-  //         ...telegramUser,
-  //         lastLoggedIn: new Date().toISOString(),
-  //         walletId,
-  //       };
-
-  //       const response = await fetch('/api/user', {
-  //         method: 'PUT',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify(userDataToUpdate),
-  //       });
-
-  //       if (!response.ok) {
-  //         const errorData = await response.json();
-  //         const errorMessage = errorData?.message || `Update failed with status ${response.status}`;
-  //         throw new Error(errorMessage);
-  //       }
-
-  //       const data = await response.json();
-  //       setUpdatedUser(data.user);
-  //       setUpdateUserError(null);
-  //     } catch (error: any) {
-  //       console.error("Error updating user:", error);
-  //       setUpdateUserError(error.message);
-  //     }
-  //   }
-  // };
-
-  useEffect(() => {
-    connectWallet();
-  }, [sdk]);
-
-
+  // useEffect(() => {
+  //   connectWallet();
+  // }, [sdk]);
 
   const truncateAddress = (address: string) => {
     return address ? `${address.slice(0, 6)}...${address.slice(-4)}`: "";
@@ -124,32 +90,27 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
 
   return (
     <div className="fixed bg-black/50 z-20 left-0 w-full top-0 flex py-2 items-center justify-between px-4">
-      <div className="flex">
-        <button className="btn-nav" type="button" onClick={() => navigate('/profile')}>
-          <FaUser className="text-xl" />
-        </button>
-        <button className="btn-nav" type="button" onClick={() => navigate('/trending')}>
-          <FaStar className="text-xl" />
-        </button>
-        <button className="btn-nav" type="button" onClick={() => navigate('/')}>
-          <FaSearch className="text-xl" />
-        </button>
-        <button className="btn-nav" type="button" onClick={() => navigate('/share')}>
-          <FaFileSignature className="text-xl" />
-        </button>
-      </div>
-      <div className="text-2xl font-bold text-white">Welcome to Dexter City!</div>
-      <div className="flex items-center space-x-4">
-        {!connected ? (
-          <button
-            onClick={connectWallet}
-            disabled={connecting}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          >
-            {connecting ? "Connecting..." : "Connect Wallet"}
-          </button>
 
-        ) : (
+
+          <div className="flex">
+            <button className="btn-nav" type="button" onClick={() => navigate('/profile')}>
+              <FaUser className="text-xl" />
+            </button>
+            <button className="btn-nav" type="button" onClick={() => navigate('/trending')}>
+              <FaStar className="text-xl" />
+            </button>
+            <button className="btn-nav" type="button" onClick={() => navigate('/')}>
+              <FaSearch className="text-xl" />
+            </button>
+            <button className="btn-nav" type="button" onClick={() => navigate('/share')}>
+              <FaFileSignature className="text-xl" />
+            </button>
+          </div>
+        
+
+      <div className="text-2xl font-bold text-white x-auto">Welcome to Dexter City!</div>
+      <div className="flex items-center space-x-4">
+
           <div className="flex items-center space-x-4">
             <button
               onClick={disconnectWallet}
@@ -161,7 +122,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
               {truncateAddress(account!)}
             </span>
           </div>
-        )}
+        
         {/* {balances.length > 0 && (
           <div className="text-green-500 font-semibold">
             {balances.map((balance, index) => (

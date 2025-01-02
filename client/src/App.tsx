@@ -1,83 +1,49 @@
-import './styles/styles.css';
-import React, { createContext, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Trending from './pages/Trending';
-import Share from './pages/Share';
-import UserGuide from './pages/UserGuide';
-import Support from './pages/Support';
-import NotFound from './pages/NotFound';
-import Quit from './pages/Quit';
-import Profile from './pages/Profile';
+import { routes } from './models/Routes'; // Import routes
+import './styles/styles.css';
 import OnboardForm from './pages/OnboardForm';
-import Home from './pages/Home';
-import { login } from './services/FirestoreUser'; // Import newUser function
-import User from "./models/User";
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-export const UserContext = createContext<User | null>(null);
+import NavBar from './components/NavBar';
+import { useSDK } from '@metamask/sdk-react';
 
 const App: React.FC = () => {
-
   const [isOnboarding, setIsOnboarding] = useState(true);
-
-
-  // useEffect(() => {
-  //   async function fetchTelegramUser() {
-  //     setLoading(true); // Set loading state
-  //     try {
-
-        
-  //       // Try to get the current user using their Telegram ID
-  //       // const user = await login(); // Pass true to create user if it doesn't exist
-
-  //       // setCurrentUser(user); // Set the current user state
-  //     } catch (error) {
-  //       console.error("Error fetching Telegram user:", error);
-  //       setError("Failed to fetch Telegram user. Please try again."); // Set error state
-  //     } finally {
-  //       setLoading(false); // Reset loading state
-  //     }
-  //   }
-  
-  //   fetchTelegramUser();
-  // }, []);
-  
-
+  const [user, setUser] = useState<any>(null); // Adjust this based on your actual user type
+  const { connected } = useSDK(); // Use the SDK's connection status
 
   const handleCompleteOnboarding = (chosenName: string, favoriteSport: string[]) => {
-    console.log("Onboarding complete with name:", chosenName, "and favorite sports:", favoriteSport);
+    console.log('Onboarding complete with name:', chosenName, 'and favorite sports:', favoriteSport);
     setIsOnboarding(false); // Update the onboarding state
   };
 
-
+  useEffect(() => {
+    // Check if the user is in sessionStorage
+    const storedUser = sessionStorage.getItem('currentUser');
+    if (storedUser && storedUser !== 'undefined') {
+      setUser(JSON.parse(storedUser)); // Parse and set user from sessionStorage
+    }
+  }, []);
 
   return (
-    // <UserContext.Provider value={currentUser}>
+    <div className="bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen">
+      {connected && <NavBar telegramUser={user} />}
       <div className="mx-auto">
         {isOnboarding ? (
           <DndProvider backend={HTML5Backend}>
-            <OnboardForm 
-              onComplete={handleCompleteOnboarding} 
-            />
+            <OnboardForm onComplete={handleCompleteOnboarding} />
           </DndProvider>
-
         ) : (
-          <>
-            {/* <NavBar telegramUser={telegramUser} onLogin={handleLogin} /> */}
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/trending" element={<Trending />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/share" element={<Share />} />
-              <Route path="/user-guide" element={<UserGuide />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/quit" element={<Quit />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </>
+          <Routes>
+            {routes.map(({ path, component }) => {
+              const Component = require(`./pages/${component}`).default;
+              return <Route key={path} path={path} element={<Component />} />;
+            })}
+          </Routes>
         )}
       </div>
-    // </UserContext.Provider>
+    </div>
   );
 };
 

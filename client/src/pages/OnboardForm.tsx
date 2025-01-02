@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
-import { UserContext } from "../App";
+// import { UserContext } from "../App";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { updateUser } from "../services/FirestoreUser";
@@ -62,9 +62,9 @@ const SportItem = ({ sport, index, moveSport }: any) => {
 };
 
 const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
-  const currentUser = useContext(UserContext);
+  // const currentUser = useContext(UserContext);
   const [currentPage, setCurrentPage] = useState(0);
-  const [userName, setUserName] = useState(currentUser?.firstName || '');
+  const [userName, setUserName] = useState('');
   const [favoriteTokens, setFavoriteTokens] = useState<Sport[]>([]);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
   const termsRef = useRef<HTMLDivElement>(null);
@@ -88,21 +88,21 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
         setFavoriteTokens(updatedSports);
       }
       onComplete(userName, favoriteTokens.map((sport) => sport.name));
-      const updatedUser = {
-        ...currentUser,
-        firstName: currentUser?.firstName || userName,
-        dateCreated: currentUser?.dateCreated || new Date(),
-        favoriteTokens: favoriteTokens.map((sport) => sport.name),
-        lastLoggedIn: new Date(),
-        telegramId: currentUser?.telegramId || '',
-        walletId: currentUser?.walletId || '',
-        lastName: currentUser?.lastName || '',
-        telegramHandle: currentUser?.telegramHandle || '',
-        referralId: currentUser?.referralId || '',
-        photoId: currentUser?.photoId || '',
-        photoUrl: currentUser?.photoUrl || '',
-      };
-      updateUser(updatedUser);
+      // const updatedUser = {
+      //   ...currentUser,
+      //   firstName: currentUser?.firstName || userName,
+      //   dateCreated: currentUser?.dateCreated || new Date(),
+      //   favoriteTokens: favoriteTokens.map((sport) => sport.name),
+      //   lastLoggedIn: new Date(),
+      //   telegramId: currentUser?.telegramId || '',
+      //   walletId: currentUser?.walletId || '',
+      //   lastName: currentUser?.lastName || '',
+      //   telegramHandle: currentUser?.telegramHandle || '',
+      //   referralId: currentUser?.referralId || '',
+      //   photoId: currentUser?.photoId || '',
+      //   photoUrl: currentUser?.photoUrl || '',
+      // };
+      // updateUser(updatedUser);
     } else {
       setCurrentPage((prev) => prev + 1);
     }
@@ -142,13 +142,13 @@ const OnboardForm: React.FC<OnboardFormProps> = ({ onComplete }) => {
         {currentPage === 0 && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Welcome to the App! 🎉</h2>
-            {currentUser?.photoUrl && (
+            {/* {currentUser?.photoUrl && (
               <img
-                src={currentUser.photoUrl}
+                src={currentUser.}
                 alt="Profile"
                 className="w-24 h-24 rounded-full mb-4"
               />
-            )}
+            )} */}
             <p>Hello <strong>{userName}</strong>! 😊</p>
             <h2 className="text-xl font-semibold mb-4">⚽🏀 Please rank your favorite sports 🏈⚾</h2>
             <p>You can change this later in settings</p>
