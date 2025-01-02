@@ -65,7 +65,7 @@ const Dashboard: React.FC = () => {
     { title: "How this works", description: "How to and getting started guides.", icon: <FaReact />, link: "/guide" },
     { title: "Bot Shop", description: "Sell, explore and purchase pre-built bots.", icon: <FaShopify />, link: "/shop" },
     { title: "Build a Bot", description: "Design and customize your own bot with easy-to-use tools.", icon: <FaRobot />, link: "/build" },
-    { title: "My Bots", description: "View, edit, and manage all the bots you've created.", icon: <FaTools />, link: "/me" },
+    { title: "My Bots", description: "View, edit, and manage all the bots you've created.", icon: <FaTools />, link: "/bots" },
     { title: "Stats", description: "Analyze and track the performance and activity of your bots.", icon: <FaChartLine />, link: "/stats" },
     { title: "Leaderboard", description: "View rankings and compare your bot's performance!", icon: <FaTrophy />, link: "/leaderboard" },
     { title: "Settings", description: "Manage your account and bot configurations.", icon: <FaCog />, link: "/settings" },
@@ -98,30 +98,31 @@ const Dashboard: React.FC = () => {
           <div
             className="relative w-full"
             style={{
-              backgroundImage: "url('./bg.jpeg')",
+              backgroundImage: "url('./bg-new.jpg')",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           >
-            <div className="p-1 font-bold w-full">
-              <div className="px-4 py-1 text-center">
-                <div className="bg-black/50 mt-16 rounded shadow-md text-left text-white">
-                <div className="text-xl">Your Information</div>
-                <p><strong>Handle:</strong> {user?.telegramHandle || "Not set"}</p>
-                <p><strong>Firstname:</strong> {user?.firstName}</p>
-                <p><strong>Telegram ID:</strong> {user?.telegramId}</p>
-                <p><strong>Balance:</strong>
-                  {balances.length > 0 && (
-                    <div className="text-green-500 font-semibold">
-                      {balances.map((balance, index) => (
-                        <div key={index}>
-                          {balance.balance} {balance.currency}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </p>
-                <p><strong>Last Logged In:</strong> {user?.lastLoggedIn ? timeSince(user.lastLoggedIn) : "Unknown"}</p>
+            <div className="pt-16 font-bold w-full">
+              <div className="m-3 text-center">
+                <div className="bg-black/50 p-3 rounded shadow-md text-left text-white">
+                  <div className="text-xl">Your Information</div>
+                  <img src={user?.photoUrl} className="h-10" alt="your icon" />
+                  <p><strong>Handle:</strong> {user?.telegramHandle || "Not set"}</p>
+                  <p><strong>Firstname:</strong> {user?.firstName}</p>
+                  <p><strong>Telegram ID:</strong> {user?.telegramId}</p>
+                  <p><strong>Balance:</strong>
+                    {balances.length > 0 && (
+                      <div className="text-green-500 font-semibold">
+                        {balances.map((balance, index) => (
+                          <div key={index}>
+                            {balance.balance} {balance.currency}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </p>
+                  <p><strong>Last Logged In:</strong> {user?.lastLoggedIn ? timeSince(user.lastLoggedIn) : "Unknown"}</p>
 
                   {/* Refresh Button */}
                   <button
@@ -138,7 +139,6 @@ const Dashboard: React.FC = () => {
           {/* Features Section */}
           <div className="flex flex-col justify-start items-center self-stretch flex-grow gap-3 p-2 mt-6">
             <div className="flex justify-center items-center flex-grow-0 flex-shrink-0 w-[191px] relative">
-              <img src="dexter.png" className="h-16" alt="DexterCity" />
               {/* <p className="flex-grow-0 flex-shrink-0 text-xl text-left text-[#ededed]">DexterCity</p> */}
             </div>
             <div className="flex flex-wrap justify-center items-start gap-5">
@@ -162,28 +162,7 @@ const Dashboard: React.FC = () => {
         </div>
       ) : (
         <>
-          {/* <NavBar telegramUser={user} /> */}
-          <div
-            className="absolute top w-full blur-sm"
-            style={{
-              backgroundImage: "url('./bg.jpeg')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
-          </div>
-
-          <div className="p-1 font-bold w-full ">
-            <div className="px-4 py-1 text-center">
-              <div className="bg-black/50 mt-16 rounded shadow-md text-left text-white">
-                <div className="text-xl blur-none">Your Information</div>
-                <p><strong>Handle:</strong> {user?.username || "Not set"}</p>
-                <p><strong>Firstname:</strong> {user?.firstName}</p>
-                <p><strong>Telegram ID:</strong> {user?.telegramid}</p>
-                <p><strong>Score:</strong> {user?.pickScore || 0}</p>
-              </div>
-            </div>
-          </div>
+          
         </>
       )}
     </>

@@ -1,37 +1,44 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Bot } from '../models/Bot';
+import { BotForSale } from '../models/Bot';
 import ShopDetail from './ShopDetail';
 
-const bots: Bot[] = [
+const defaultBots: BotForSale[] = [
   {
     id: '1',
     name: 'Crypto Bot',
     description: 'Automates cryptocurrency trades with advanced strategies.',
     price: 299,
-    image: '/images/crypto-bot.jpg',
+    image: `https://robohash.org/crypto-bot`,
   },
   {
     id: '2',
     name: 'Stock Bot',
     description: 'Optimizes stock trades for maximum gains.',
     price: 399,
-    image: '/images/stock-bot.jpg',
+    image: `https://robohash.org/stock-bot`,
   },
   {
     id: '3',
     name: 'Fantasy Football Bot',
     description: 'Manage your fantasy football league like a pro.',
     price: 199,
-    image: '/images/fantasy-bot.jpg',
+    image: `https://robohash.org/fantasy-football-bot`,
   },
 ];
 
-const Shop: React.FC = () => {
+// interface ShopProps {
+//   initialBots?: BotForSale[]; // Optionally provide a custom set of bots
+// }
+
+const Shop = () => {
   const { botId } = useParams<{ botId?: string }>(); // Get the botId from the URL
   const navigate = useNavigate();
 
-  const selectedBot = bots.find((bot) => bot.id === botId); // Find the bot corresponding to the botId
+  // Use initialBots if provided; otherwise, fall back to defaultBots
+  const [bots, setBots] = useState<BotForSale[]>(defaultBots);
+
+  const selectedBot = bots.find((bot) => bot.id === botId);
 
   const handleCloseModal = () => {
     navigate('/shop'); // Navigate back to /shop to close the modal
@@ -50,7 +57,7 @@ const Shop: React.FC = () => {
             key={bot.id}
             className="border border-gray-200 rounded-lg shadow hover:shadow-lg transition-shadow"
           >
-            <img src={bot.image} alt={bot.name} className="w-full h-40 object-cover rounded-t-lg" />
+            <img src={bot.image} alt={bot.name} className="w-full rounded-t-lg" />
             <div className="p-4">
               <h2 className="text-xl font-semibold mb-2">{bot.name}</h2>
               <p className="text-gray-700 mb-4">{bot.description}</p>

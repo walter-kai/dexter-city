@@ -99,8 +99,8 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
             <button className="btn-nav" type="button" onClick={() => navigate('/trending')}>
               <FaStar className="text-xl" />
             </button> */}
-            <button className="btn-nav" type="button" onClick={() => navigate('/')}>
-              <FaHome className="text-xl text-white" />
+            <button className="btn-nav" type="button" onClick={() => navigate('/dash')}>
+              <img src="dexter.png" className="h-10 -my-4" alt="DexterCity" />
             </button>
             {/* <button className="btn-nav" type="button" onClick={() => navigate('/share')}>
               <FaFileSignature className="text-xl" />

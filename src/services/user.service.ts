@@ -14,65 +14,6 @@ import { db } from "../config/firebase";
 import { Telegraf } from "telegraf";
 import { PassThrough } from "stream";
 
-
-// /**
-//  * Updates a user's Firestore document by their Telegram ID.
-//  * 
-//  * @param {string} telegramId - The Telegram ID of the user to update.
-//  * @param {Partial<FireStoreUser>} updateFields - Object containing the fields to update.
-//  * @param {string | undefined} [breadcrumb] - Optional breadcrumb for logging.
-//  * @returns {Promise<User | null>} - Returns the updated user object or null if not found.
-//  */
-// const updateUserDocByTelegramId = async (
-//   user: User,
-//   breadcrumb?: string
-// ): Promise<{ message: string; user: User } | null> => {
-//   const { telegramId } = user; // Extract telegramId
-//   const newBreadcrumb = `updateUserDocByTelegramId(${telegramId}):${breadcrumb}`;
-//   const usersRef = db.collection("users");
-
-//   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
-
-//   // Build and execute the query to find the user by telegramId
-//   const q = usersRef.where("telegramId", "==", telegramId);
-//   const snapshot = await q.get();
-
-//   // Log the result size
-//   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, snapshotSize: snapshot.size }));
-
-//   // If no user is found, return null
-//   if (snapshot.empty) {
-//     logger.info(`User with telegramId ${telegramId} not found.`);
-//     return null;
-//   }
-
-//   // Get the first matching document (assuming telegramId is unique)
-//   const userDoc = snapshot.docs[0];
-//   const userData = userDoc.data() as FireStoreUser;
-
-//   // Update the lastLoggedIn field and any other fields from the user object
-//   await userDoc.ref.update({
-//     ...user,
-//     lastLoggedIn: admin.firestore.Timestamp.now().toDate().toString(),
-//   });
-
-//   logger.info(`User with telegramId ${telegramId} updated.`);
-
-//   // Create a new user object with the updated information
-//   const newUser = new User({
-//     ...userData,
-//     ...user, // Merge with the incoming user object
-//     dateCreated: userDoc.createTime?.toDate(),
-//   });
-
-//   // Return the updated user in the desired format
-//   return {  
-//     message: "User updated successfully",
-//     user: newUser,
-//   };
-// };
-
-
 /**
  * Updates an existing user in the Firestore database by their Telegram ID.
  *
@@ -218,6 +159,46 @@ async function createUser(
   });
 }
 
+const getUserByWalletId = async (
+  walletId: string,
+  breadcrumb?: string
+): Promise<User | null> => {
+  const newBreadcrumb = `getUserByWalletId(${walletId}):${breadcrumb}`;
+  // logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
+
+  if (!walletId) {
+    throw new ApiError(400, `Invalid walletId provided. ${newBreadcrumb}`);
+  }
+
+  const usersCollection = db.collection("users");
+  const q = usersCollection.where("walletId", "==", walletId).limit(1);
+  const querySnapshot = await q.get();
+
+  // logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, querySnapshotSize: querySnapshot.size }));
+
+  if (querySnapshot.empty) {
+    logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, message: "No user found." }));
+    return null;
+  }
+
+  const doc = querySnapshot.docs[0];
+  const queryData = doc.data() as User;
+
+  // Ensure photoId and photoUrl are defined or null
+  const photoId = queryData.photoId !== undefined ? queryData.photoId : null;
+  const photoUrl = queryData.photoUrl !== undefined ? queryData.photoUrl : null;
+
+  const user = new User({
+    ...queryData,
+    photoId, // Pass the photoId as either string or null
+    photoUrl,
+    dateCreated: doc.createTime?.toDate() || new Date(),
+  });
+
+  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, user }));
+
+  return user;    
+};
 
 /**
  * Download the file from Telegram and upload it to Firebase Storage.
@@ -290,50 +271,6 @@ const downloadAndUploadToFirebase = async (bot: Telegraf, fileId: string, userId
     return null;
   }
 };
-
-const getUserByWalletId = async (
-  walletId: string,
-  breadcrumb?: string
-): Promise<User | null> => {
-  const newBreadcrumb = `getUserByWalletId(${walletId}):${breadcrumb}`;
-  // logger.info(JSON.stringify({ breadcrumb: newBreadcrumb }));
-
-  if (!walletId) {
-    throw new ApiError(400, `Invalid walletId provided. ${newBreadcrumb}`);
-  }
-
-  const usersCollection = db.collection("users");
-  const q = usersCollection.where("walletId", "==", walletId).limit(1);
-  const querySnapshot = await q.get();
-
-  // logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, querySnapshotSize: querySnapshot.size }));
-
-  if (querySnapshot.empty) {
-    logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, message: "No user found." }));
-    return null;
-  }
-
-  const doc = querySnapshot.docs[0];
-  const queryData = doc.data() as User;
-
-  // Ensure photoId and photoUrl are defined or null
-  const photoId = queryData.photoId !== undefined ? queryData.photoId : null;
-  const photoUrl = queryData.photoUrl !== undefined ? queryData.photoUrl : null;
-
-  const user = new User({
-    ...queryData,
-    photoId, // Pass the photoId as either string or null
-    photoUrl,
-    dateCreated: doc.createTime?.toDate() || new Date(),
-  });
-
-  logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, user }));
-
-  return user;    
-};
-
-
-
 
 // Set a user's chatId
 const setUserChatId = async (

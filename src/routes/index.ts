@@ -1,5 +1,5 @@
 import express from "express";
-import gameRoute from "./game.route";
+import botRoute from "./bot.route";
 import authRoute from "./auth.route";
 import userRoute from "./user.route";
 import telegramRoute from "./telegram.route";
@@ -14,8 +14,8 @@ type RouteObj = {
 
 const defaultRoutes: ReadonlyArray<RouteObj> = [
   {
-    path: "/game",
-    route: gameRoute,
+    path: "/bot",
+    route: botRoute,
   },
   {
     path: "/user",

@@ -1,37 +1,43 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import { useSDK } from "@metamask/sdk-react";
+import { BotConfig } from "../models/Bot";
 
 const CreateDCABot: React.FC = () => {
-  const [formData, setFormData] = useState({
-    botName: "",
-    tradingPair: "ETH/USDT",
-    startingBalance: "",
-    initialOrderSize: "",
-    priceDeviation: "",
-    safetyOrders: "",
-    safetyOrderMultiplier: "",
-    maxTradeSize: "",
-    stopLoss: "",
-    takeProfit: "",
-    trailingTakeProfit: "",
-    maxDrawdown: "",
-    orderType: "Market",
-    cooldownPeriod: "",
-    minTradeSize: "",
-    notifications: false,
+  const [user, setUser] = useState<any>(null); // Adjust this based on your actual user type
+  const [formData, setFormData] = useState<BotConfig>({
+    creator: "", // Initialize as empty
+    botName: "TestBot", // Default bot name for testing
+    tradingPair: "ETH/USDT", // Default trading pair
+    startingBalance: "1000", // Starting balance for testing
+    initialOrderSize: "50", // Default order size for testing
+    priceDeviation: "0.5", // Example deviation percentage
+    safetyOrders: "8", // Example number of safety orders
+    safetyOrderMultiplier: "1.2", // Example safety order multiplier
+    maxTradeSize: "500", // Example max trade size
+    stopLoss: "10", // Example stop loss percentage
+    takeProfit: "5", // Example take profit percentage
+    trailingTakeProfit: "1", // Example trailing take profit
+    maxDrawdown: "20", // Example max drawdown percentage
+    orderType: "Market", // Default order type
+    cooldownPeriod: "60", // Example cooldown period in seconds
+    minTradeSize: "10", // Example minimum trade size
+    notifications: true, // Default notifications enabled
   });
 
+  const [botNameError, setBotNameError] = useState<string | null>(null); // To store bot name availability error message
+  const [formError, setFormError] = useState<string | null>(null); // To store general form error messages
+
   const generateLogoHash = (name: string) => {
-    return `https://www.gravatar.com/avatar/${btoa(name).substring(0, 8)}`;
+    return `https://www.robohash.org/dexter/${btoa(name).substring(0, 8)}`;
   };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-  
+
     // Handle checkbox inputs specifically
     if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
       setFormData({
@@ -46,16 +52,102 @@ const CreateDCABot: React.FC = () => {
       });
     }
   };
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form Data:", formData);
-    // Handle form submission logic here
+
+    // Ensure all required fields are filled
+    for (const key in formData) {
+      if (formData[key as keyof BotConfig] === "") {
+        setFormError("Please fill in all the fields.");
+        return;
+      }
+    }
+
+    // Ensure the user and walletId exist
+    if (!user || !user.walletId) {
+      alert("User wallet ID is missing. Please log in to create a bot.");
+      return;
+    }
+
+    // Check if the bot name is unique before submitting
+    if (botNameError !== null) {
+      setFormError("Please choose a unique bot name.");
+      return;
+    }
+
+    // Add walletId to the formData
+    const payload = { ...formData, creator: user.walletId };
+
+    try {
+      const response = await fetch("/api/bot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.error("Error:", error);
+        alert(`Failed to create bot: ${error.message || "Unknown error"}`);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("Success:", data);
+      alert("DCA Bot created successfully!");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred while creating the bot.");
+    }
   };
+
+  // Check bot name availability whenever it changes
+  useEffect(() => {
+    const checkBotNameAvailability = async () => {
+      if (formData.botName.length > 0) {
+        try {
+          const response = await fetch(`/api/bot?botName=${formData.botName}`);
+          if (response.ok) {
+            throw new Error("Bot name exists");
+          }
+          const data = await response.json();
+          if (data.exists) {
+            setBotNameError("This bot name is already in use.");
+          } else {
+            setBotNameError(null); // Bot name is available
+          }
+        } catch (error) {
+          console.error(error);
+          setBotNameError("Bot name is taken.");
+        }
+      } else {
+        setBotNameError(null); // No bot name provided
+      }
+    };
+
+    checkBotNameAvailability();
+  }, [formData.botName]);
+
+  useEffect(() => {
+    // Check if the user is in sessionStorage
+    const storedUser = sessionStorage.getItem("currentUser");
+    if (storedUser && storedUser !== 'undefined') {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser); // Parse and set user from sessionStorage
+
+      // Set the creator to the user's first name once the user is loaded
+      setFormData((prevData) => ({
+        ...prevData,
+        creator: parsedUser.firstName, // Set creator to user's firstName
+      }));
+    }
+  }, []);
 
   return (
     <div className="flex flex-col items-center animate-fadeIn bg-gradient-to-bl from-[#343949] to-[#7c8aaf]">
-      {/* <NavBar telegramUser={null} /> */}
       <div className="relative w-full">
         <div className="p-4 font-bold w-full text-white">
           <h1 className="text-center text-2xl mb-4">Create a DCA Bot</h1>
@@ -75,6 +167,9 @@ const CreateDCABot: React.FC = () => {
                     placeholder="Enter a unique name"
                   />
                 </label>
+                {botNameError && (
+                  <p className="text-red-500 text-sm">{botNameError}</p>
+                )}
                 <img
                   src={generateLogoHash(formData.botName)}
                   alt="Generated Logo"
@@ -150,7 +245,7 @@ const CreateDCABot: React.FC = () => {
                   />
                 </label>
                 <label className="block">
-                  Number of Safety Orders:
+                  Safety Orders:
                   <input
                     type="number"
                     name="safetyOrders"
@@ -160,146 +255,22 @@ const CreateDCABot: React.FC = () => {
                     placeholder="e.g., 8"
                   />
                 </label>
-                <label className="block">
-                  Safety Order Volume Multiplier:
-                  <input
-                    type="number"
-                    name="safetyOrderMultiplier"
-                    value={formData.safetyOrderMultiplier}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="e.g., 1.2"
-                  />
-                </label>
-                <label className="block">
-                  Max Trade Size:
-                  <input
-                    type="number"
-                    name="maxTradeSize"
-                    value={formData.maxTradeSize}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="e.g., 500"
-                  />
-                </label>
               </div>
             </section>
 
-            {/* Risk Management */}
-            <section>
-              <h2 className="text-xl mb-2">Risk Management</h2>
-              <div className="space-y-2">
-                <label className="block">
-                  Stop-Loss (%):
-                  <input
-                    type="number"
-                    name="stopLoss"
-                    value={formData.stopLoss}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="e.g., 10"
-                  />
-                </label>
-                <label className="block">
-                  Take-Profit (%):
-                  <input
-                    type="number"
-                    name="takeProfit"
-                    value={formData.takeProfit}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="e.g., 5"
-                  />
-                </label>
-                <label className="block">
-                  Trailing Take-Profit (%):
-                  <input
-                    type="number"
-                    name="trailingTakeProfit"
-                    value={formData.trailingTakeProfit}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="e.g., 1"
-                  />
-                </label>
-                <label className="block">
-                  Max Drawdown Limit:
-                  <input
-                    type="number"
-                    name="maxDrawdown"
-                    value={formData.maxDrawdown}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="e.g., 20"
-                  />
-                </label>
-              </div>
-            </section>
+            {/* Submit Button */}
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white p-3 rounded w-full hover:bg-blue-700"
+              >
+                Create Bot
+              </button>
+            </div>
 
-            {/* Order Settings */}
-            <section>
-              <h2 className="text-xl mb-2">Order Settings</h2>
-              <div className="space-y-2">
-                <label className="block">
-                  Order Type:
-                  <select
-                    name="orderType"
-                    value={formData.orderType}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                  >
-                    <option value="Market">Market</option>
-                    <option value="Limit">Limit</option>
-                  </select>
-                </label>
-                <label className="block">
-                  Cooldown Period (seconds):
-                  <input
-                    type="number"
-                    name="cooldownPeriod"
-                    value={formData.cooldownPeriod}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="e.g., 60"
-                  />
-                </label>
-                <label className="block">
-                  Minimum Trade Size:
-                  <input
-                    type="number"
-                    name="minTradeSize"
-                    value={formData.minTradeSize}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="e.g., 10"
-                  />
-                </label>
-              </div>
-            </section>
-
-            {/* Monitoring and Alerts */}
-            <section>
-              <h2 className="text-xl mb-2">Monitoring and Alerts</h2>
-              <div className="space-y-2">
-                <label className="block flex items-center">
-                  <input
-                    type="checkbox"
-                    name="notifications"
-                    checked={formData.notifications}
-                    onChange={handleInputChange}
-                    className="mr-2"
-                  />
-                  Enable Notifications
-                </label>
-              </div>
-            </section>
-
-            <button
-              type="submit"
-              className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 w-full"
-            >
-              Create Bot
-            </button>
+            {formError && (
+              <p className="text-red-500 text-sm text-center mt-2">{formError}</p>
+            )}
           </form>
         </div>
       </div>

@@ -5,7 +5,7 @@ export const routes = [
     { path: "/shop", component: "Shop" },
     { path: '/shop/:botId', component: 'Shop' },
     { path: "/build", component: "Build" },
-    { path: "/trending", component: "Trending" },
+    { path: "/bots", component: "MyBots" },
     { path: "/profile", component: "Profile" },
     { path: "/share", component: "Share" },
     { path: "/guide", component: "UserGuide" },

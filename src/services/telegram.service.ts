@@ -1,5 +1,5 @@
 // import { usersCollection } from "../controllers/telegram.controller";
-import { GetGamePromptArgs, getGames }from '../../client/src/services/FirestoreGames'; // Adjust path as necessary
+// import { GetGamePromptArgs, getGames }from '../../client/src/services/FirestoreGames'; // Adjust path as necessary
 
 import { getDocs } from "firebase/firestore/lite";
 import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
@@ -344,38 +344,6 @@ bot.on('callback_query', async (callbackQuery: CallbackQuery) => {
     });
   } else if (callbackQuery.data === 'show_games') {
     try {
-      // Fetch the games and game prompts
-      const [games, ] = await Promise.all([
-        getGames({
-          occursBefore: new Date(new Date().getTime() + 2 * 24 * 60 * 60 * 1000),
-          occursAfter: new Date(new Date().getTime() - 2 * 24 * 60 * 60 * 1000),
-        }),
-        // getGamePrompts({
-        //   dateStarts: new Date().toISOString(),
-        //   dateExpires: new Date(new Date().getTime() - 0.5 * 60 * 60 * 1000).toISOString(),
-        // }),
-      ]);
-
-      // Transform the games data
-      // const gameList = games.map((game, index) => ({
-      //   index: index + 1,
-      //   apiMatchId: game.apiMatchId,
-      //   apiLeagueId: game.apiLeagueId,
-      //   date: game.date,
-      //   teamAway: game.teamADetails.name,
-      //   teamHome: game.teamBDetails.name,
-      //   time: new Date(game.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      // }));
-
-      // Create the string to send
-      // const gameListString = gameList.map(game => `${game.index}. ${game.teamAway} vs ${game.teamHome} on ${new Date(game.date).toLocaleDateString()} at ${game.time}`
-      // ).join('\n');
-
-      // const finalMessage = `Show games\nPlease type the index of the game:\n${gameListString}`;
-
-      // Send the message
-      // await bot.sendMessage(responseChatId, finalMessage)
-      //   .catch((err: any) => console.error('Error sending notification prompt:', err));
 
       bot.once('message', async (msg: Message) => {
         if (msg.chat.id === responseChatId) {

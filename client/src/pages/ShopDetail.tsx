@@ -1,8 +1,8 @@
 import React from 'react';
-import { Bot } from '../models/Bot';
+import { BotForSale } from '../models/Bot';
 
 interface ShopDetailProps {
-  bot: Bot;
+  bot: BotForSale;
 }
 
 const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {

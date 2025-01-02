@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSDK } from "@metamask/sdk-react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 // import NavBar from "../components/NavBar";
@@ -6,8 +6,12 @@ import { login } from "../services/FirestoreUser";
 
 const Home: React.FC = () => {
   const { sdk, connected, connecting } = useSDK();
-  const [account, setAccount] = useState<string | null>(null);
+  // const [account, setAccount] = useState<string | null>(null);
   const navigate = useNavigate(); // Initialize the navigate hook
+
+    useEffect(() => {
+      connectWallet();
+    }, []);
 
   const connectWallet = async () => {
     try {
@@ -19,49 +23,49 @@ const Home: React.FC = () => {
       if (accounts && accounts.length > 0) {
         const walletId = accounts[0];
         console.log("Connected account:", walletId);
-        fetchBalances(walletId);
+        // fetchBalances(walletId);
 
         const user = await login(walletId); // Pass true to create user if it doesn't exist
         sessionStorage.setItem("currentUser", JSON.stringify(user)); // Store user in session storage
-        setAccount(walletId);
+        // setAccount(walletId);
 
         // Navigate to the /dash route
         navigate("/dash");
       } else {
         console.log("No accounts found.");
-        setAccount(null);
+        // setAccount(null);
       }
     } catch (err) {
       console.error("Failed to connect MetaMask:", err);
     }
   };
 
-  const fetchBalances = async (walletId: string) => {
-    try {
-      const provider = sdk?.getProvider();
-      if (!provider) {
-        console.error("Ethereum provider not available.");
-        return;
-      }
+  // const fetchBalances = async (walletId: string) => {
+  //   try {
+  //     const provider = sdk?.getProvider();
+  //     if (!provider) {
+  //       console.error("Ethereum provider not available.");
+  //       return;
+  //     }
 
-      // Fetch ETH balance
-      const ethBalance = await provider.request({
-        method: "eth_getBalance",
-        params: [walletId, "latest"],
-      }) as string;
+  //     // Fetch ETH balance
+  //     const ethBalance = await provider.request({
+  //       method: "eth_getBalance",
+  //       params: [walletId, "latest"],
+  //     }) as string;
 
-      // Convert balance from wei to ETH
-      const ethBalanceInEth = parseFloat((parseInt(ethBalance, 16) / 1e18).toFixed(4));
-      const balances = [{ balance: ethBalanceInEth.toString(), currency: "ETH" }];
+  //     // Convert balance from wei to ETH
+  //     const ethBalanceInEth = parseFloat((parseInt(ethBalance, 16) / 1e18).toFixed(4));
+  //     const balances = [{ balance: ethBalanceInEth.toString(), currency: "ETH" }];
 
-      // Store balances in sessionStorage
-      sessionStorage.setItem("balances", JSON.stringify(balances));
+  //     // Store balances in sessionStorage
+  //     sessionStorage.setItem("balances", JSON.stringify(balances));
 
-      // You can add support for fetching token balances (ERC-20) here if needed.
-    } catch (err) {
-      console.error("Error fetching balances:", err);
-    }
-  };
+  //     // You can add support for fetching token balances (ERC-20) here if needed.
+  //   } catch (err) {
+  //     console.error("Error fetching balances:", err);
+  //   }
+  // };
 
   return (
     <div className="flex flex-col items-center h-screen">
