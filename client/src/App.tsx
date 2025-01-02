@@ -27,7 +27,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen">
+    <div className="bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen pt-12">
       {connected && <NavBar telegramUser={user} />}
       <div className="mx-auto">
         {isOnboarding ? (

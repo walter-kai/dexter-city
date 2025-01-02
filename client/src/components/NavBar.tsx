@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaFileSignature, FaUser, FaStar } from 'react-icons/fa';
+import { FaSearch, FaFileSignature, FaUser, FaStar, FaHome } from 'react-icons/fa';
 import User, { TelegramUser } from '../models/User';
 import { useSDK } from "@metamask/sdk-react";
 import { login } from '../services/FirestoreUser';
@@ -92,23 +92,23 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
     <div className="fixed bg-black/50 z-20 left-0 w-full top-0 flex py-2 items-center justify-between px-4">
 
 
-          <div className="flex">
-            <button className="btn-nav" type="button" onClick={() => navigate('/profile')}>
+          <div className="flex w-full">
+            {/* <button className="btn-nav" type="button" onClick={() => navigate('/profile')}>
               <FaUser className="text-xl" />
             </button>
             <button className="btn-nav" type="button" onClick={() => navigate('/trending')}>
               <FaStar className="text-xl" />
-            </button>
+            </button> */}
             <button className="btn-nav" type="button" onClick={() => navigate('/')}>
-              <FaSearch className="text-xl" />
+              <FaHome className="text-xl text-white" />
             </button>
-            <button className="btn-nav" type="button" onClick={() => navigate('/share')}>
+            {/* <button className="btn-nav" type="button" onClick={() => navigate('/share')}>
               <FaFileSignature className="text-xl" />
-            </button>
+            </button> */}
           </div>
         
 
-      <div className="text-2xl font-bold text-white x-auto">Welcome to Dexter City!</div>
+      <div className="text-2xl text-white w-full">DexterCity</div>
       <div className="flex items-center space-x-4">
 
           <div className="flex items-center space-x-4">

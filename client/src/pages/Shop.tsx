@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import React from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Bot } from '../models/Bot';
 import ShopDetail from './ShopDetail';
 
@@ -28,17 +28,17 @@ const bots: Bot[] = [
 ];
 
 const Shop: React.FC = () => {
-  const [selectedBot, setSelectedBot] = useState<Bot | null>(null); // State to track the selected bot
+  const { botId } = useParams<{ botId?: string }>(); // Get the botId from the URL
   const navigate = useNavigate();
 
+  const selectedBot = bots.find((bot) => bot.id === botId); // Find the bot corresponding to the botId
+
   const handleCloseModal = () => {
-    setSelectedBot(null); // Close the modal by resetting the selected bot
-    navigate('/shop'); // Ensure the URL reflects the modal state
+    navigate('/shop'); // Navigate back to /shop to close the modal
   };
 
-  const handleOpenModal = (bot: Bot) => {
-    setSelectedBot(bot); // Set the selected bot for the modal
-    navigate(`/shop/${bot.id}`); // Update the URL
+  const handleOpenModal = (botId: string) => {
+    navigate(`/shop/${botId}`); // Navigate to /shop/:botId to open the modal
   };
 
   return (
@@ -57,7 +57,7 @@ const Shop: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-lg font-bold text-green-600">${bot.price}</span>
                 <button
-                  onClick={() => handleOpenModal(bot)}
+                  onClick={() => handleOpenModal(bot.id)}
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
                 >
                   View
