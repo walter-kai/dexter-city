@@ -7,7 +7,9 @@ export interface BotForSale {
 }
 
 export interface BotConfig {
-  creator: string;
+  status: string;
+  creatorName: string;
+  creatorWalletId: string;
   botName: string;
   tradingPair: string;
   startingBalance: string;
@@ -24,4 +26,5 @@ export interface BotConfig {
   cooldownPeriod: string;
   minTradeSize: string;
   notifications: boolean;
+  createdAt: Date;
 }

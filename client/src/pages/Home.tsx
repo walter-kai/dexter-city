@@ -40,36 +40,8 @@ const Home: React.FC = () => {
     }
   };
 
-  // const fetchBalances = async (walletId: string) => {
-  //   try {
-  //     const provider = sdk?.getProvider();
-  //     if (!provider) {
-  //       console.error("Ethereum provider not available.");
-  //       return;
-  //     }
-
-  //     // Fetch ETH balance
-  //     const ethBalance = await provider.request({
-  //       method: "eth_getBalance",
-  //       params: [walletId, "latest"],
-  //     }) as string;
-
-  //     // Convert balance from wei to ETH
-  //     const ethBalanceInEth = parseFloat((parseInt(ethBalance, 16) / 1e18).toFixed(4));
-  //     const balances = [{ balance: ethBalanceInEth.toString(), currency: "ETH" }];
-
-  //     // Store balances in sessionStorage
-  //     sessionStorage.setItem("balances", JSON.stringify(balances));
-
-  //     // You can add support for fetching token balances (ERC-20) here if needed.
-  //   } catch (err) {
-  //     console.error("Error fetching balances:", err);
-  //   }
-  // };
-
   return (
     <div className="flex flex-col items-center h-screen">
-      {/* <NavBar telegramUser={currentUser} /> */}
       <div className="flex flex-col items-center justify-center h-full space-y-4">
         <h1 className="text-white text-2xl font-bold">Welcome to Dexter City</h1>
         <h2 className="text-white text-md">Start your journey</h2>

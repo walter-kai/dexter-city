@@ -53,20 +53,94 @@ const createBot = async (req: Request, res: Response): Promise<Response> => {
     // Ensure walletId and botConfig are provided in the request body
     const botConfig = req.body;
 
-    if (!botConfig.creator) {
-      return res.status(400).json({ error: "walletId is required" });
+    if (!botConfig.creatorWalletId) {
+      return res.status(400).json({ error: "creatorWalletId is required" });
     }
 
-    if (!botConfig || typeof botConfig !== 'object') {
-      return res.status(400).json({ error: "botConfig is required and must be an object" });
+    if (!botConfig.creatorName) {
+      return res.status(400).json({ error: "creatorName is required" });
     }
 
     // Create a new bot with the provided walletId and botConfig
     const newBot = await botService.create(botConfig);
 
-    return res.status(201).json(newBot);
+    if (newBot){
+      return res.status(201).json(newBot);
+    } else {
+      return res.status(409).json(botConfig);
+    }
+
   } catch (error) {
     console.error("Error creating bot:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const killBot = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    // Ensure botName is provided in the request query
+    const { botName } = req.query;
+
+    if (!botName) {
+      return res.status(400).json({ error: "botName is required" });
+    }
+
+    // Kill the bot by setting its alive flag to false
+    const result = await botService.kill(botName as string);
+
+    if (!result) {
+      return res.status(404).json({ error: "Bot not found or already killed" });
+    }
+
+    return res.status(200).json({ message: `Bot ${botName} successfully killed.` });
+  } catch (error) {
+    console.error("Error killing bot:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const startBot = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    // Ensure botName is provided in the request query
+    const { botName } = req.query;
+
+    if (!botName) {
+      return res.status(400).json({ error: "botName is required" });
+    }
+
+    // Start the bot by setting its status to running
+    const result = await botService.start(botName as string);
+
+    if (!result) {
+      return res.status(404).json({ error: "Bot not found or already running" });
+    }
+
+    return res.status(200).json({ message: `Bot ${botName} successfully started.` });
+  } catch (error) {
+    console.error("Error starting bot:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const stopBot = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    // Ensure botName is provided in the request query
+    const { botName } = req.query;
+
+    if (!botName) {
+      return res.status(400).json({ error: "botName is required" });
+    }
+
+    // Stop the bot by setting its status to stopped
+    const result = await botService.stop(botName as string);
+
+    if (!result) {
+      return res.status(404).json({ error: "Bot not found or already stopped" });
+    }
+
+    return res.status(200).json({ message: `Bot ${botName} successfully stopped.` });
+  } catch (error) {
+    console.error("Error stopping bot:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -74,5 +148,8 @@ const createBot = async (req: Request, res: Response): Promise<Response> => {
 export default {
   getBot,
   createBot,
-  getMyBots
+  getMyBots,
+  killBot,
+  startBot,
+  stopBot
 };
