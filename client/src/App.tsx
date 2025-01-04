@@ -48,7 +48,7 @@ const App: React.FC = () => {
     <div className="bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen">
       {/* Show NavBar only if not on the "/" route */}
       {location.pathname !== '/' && <NavBar telegramUser={user} />}
-      <div className="mx-auto">
+      <div className="mx-auto pt-12">
         <Routes>
           {routes.map(({ path, component }) => {
             const Component = require(`./pages/${component}`).default;

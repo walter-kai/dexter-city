@@ -4,6 +4,7 @@ import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog, FaReact } fr
 import LoadingScreenDots from "../components/LoadingScreenDots";
 import NavBar from "../components/NavBar";
 import { useSDK } from "@metamask/sdk-react";
+import WrappedTokenTable from "../components/TokenTable";
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -64,8 +65,7 @@ const Dashboard: React.FC = () => {
   const features = [
     { title: "How this works", description: "How to and getting started guides.", icon: <FaReact />, link: "/guide" },
     { title: "Bot Shop", description: "Sell, explore and purchase pre-built bots.", icon: <FaShopify />, link: "/shop" },
-    { title: "Build a Bot", description: "Design and customize your own bot with easy-to-use tools.", icon: <FaRobot />, link: "/build" },
-    { title: "My Bots", description: "View, edit, and manage all the bots you've created.", icon: <FaTools />, link: "/bots" },
+    { title: "Bot Garage", description: "Build, view, edit, and manage all the bots you've created.", icon: <FaTools />, link: "/bots" },
     { title: "Stats", description: "Analyze and track the performance and activity of your bots.", icon: <FaChartLine />, link: "/stats" },
     { title: "Leaderboard", description: "View rankings and compare your bot's performance!", icon: <FaTrophy />, link: "/leaderboard" },
     { title: "Settings", description: "Manage your account and bot configurations.", icon: <FaCog />, link: "/settings" },
@@ -103,7 +103,7 @@ const Dashboard: React.FC = () => {
               backgroundPosition: "center",
             }}
           >
-            <div className="pt-16 font-bold w-full">
+            <div className="mt-8 font-bold w-full">
               <div className="m-3 text-center">
                 <div className="bg-black/50 p-3 rounded shadow-md text-left text-white">
                   <div className="text-xl">Your Information</div>
@@ -132,6 +132,9 @@ const Dashboard: React.FC = () => {
                     Refresh Balance
                   </button>
                 </div>
+
+<WrappedTokenTable />
+
               </div>
             </div>
           </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useToken } from '../services/TokenProvider';
 import { BotConfig } from '../models/Bot';
+import CreateDCABot from './Build';
 
 const MyBots = () => {
   const { botId } = useParams<{ botId?: string }>();
@@ -13,6 +14,7 @@ const MyBots = () => {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ walletId: string } | null>(null);
   const [selectedBotId, setSelectedBotId] = useState<string | null>(null);
+  const [triggerBuildModal, setBuildModal] = useState<boolean | null>(null);
   const [botToDelete, setBotToDelete] = useState<string | null>(null);
 
   const selectedBot = bots.find((bot) => bot.botName === selectedBotId);
@@ -66,6 +68,10 @@ const MyBots = () => {
       // Navigate to /build with the bot config as state
       navigate('/build', { state: { botConfig: editBot } });
     }
+  };
+
+  const handleTriggerBuildModal = () => {
+    setBuildModal(!triggerBuildModal);
   };
 
   const handleCloseModal = () => {
@@ -169,8 +175,7 @@ const MyBots = () => {
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-4xl font-bold text-center mb-8">My Bots</h1>
+    <div className="py-12 h-full">
 
       {loading && <p className="text-center">Loading your bots...</p>}
 
@@ -182,6 +187,19 @@ const MyBots = () => {
 
       {!loading && !error && bots.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Create Bot Tile */}
+                    <div
+            onClick={handleTriggerBuildModal}
+            className="flex flex-col items-center justify-center border border-gray-200 rounded-lg shadow hover:shadow-lg transition-shadow bg-white cursor-pointer"
+          >
+            <div className="p-4 text-center">
+              <div className="w-16 h-16 bg-blue-500 text-white text-4xl font-bold rounded-full flex items-center justify-center mx-auto mb-4">
+                +
+              </div>
+              <h2 className="text-lg font-semibold">Create Bot</h2>
+            </div>
+          </div>
+
           {bots.map((bot) => (
             <div
               key={bot.botName}
@@ -195,7 +213,7 @@ const MyBots = () => {
                 />
                 <h2 className="text-xl font-semibold text-center">{bot.botName}</h2>
                 {renderBotStats(bot)}
-                <div className="flex justify-between my-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-1 justify-between my-4">
                   {bot.status !== 'Running' ? (
                     <button
                       onClick={() => handleStartBot(bot.botName)}
@@ -233,6 +251,19 @@ const MyBots = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Build Modal */}
+      {triggerBuildModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                      <button
+              onClick={handleTriggerBuildModal}
+              className="absolute top-4 right-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300"
+            >
+              ✕
+            </button>
+          <CreateDCABot />
         </div>
       )}
 
