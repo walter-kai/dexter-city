@@ -3,6 +3,7 @@ import botRoute from "./bot.route";
 import authRoute from "./auth.route";
 import userRoute from "./user.route";
 import telegramRoute from "./telegram.route";
+import chainRoute from "./chain.route";
 
 
 const router = express.Router();
@@ -13,6 +14,10 @@ type RouteObj = {
 };
 
 const defaultRoutes: ReadonlyArray<RouteObj> = [
+  {
+    path: "/chain",
+    route: chainRoute,
+  },
   {
     path: "/bot",
     route: botRoute,

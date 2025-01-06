@@ -1,99 +1,100 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../models/Bot";
+import { DEX_TRADING_PAIRS } from "../models/Dex";
+// import { useUniswapPairsQuery } from "../services/SubGraph";
+// import PairDetails from "../components/PairDetails";
 
-const CreateDCABot: React.FC = () => {
-  const [user, setUser] = useState<any>(null); // Adjust this based on your actual user type
+const BuildBot: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
   const [formData, setFormData] = useState<BotConfig>({
-    creatorName: "Kaii",
-    creatorWalletId: "Wallet",
-    botName: "TestBot",
+    status: "Stopped",
+    creatorName: "",
+    creatorWalletId: "",
+    botName: "",
+    dex: "Uniswap",
     tradingPair: "ETH/USDT",
-    startingBalance: "1000",
-    initialOrderSize: "50",
-    priceDeviation: "0.5",
-    safetyOrders: "8",
-    safetyOrderMultiplier: "1.2",
-    maxTradeSize: "500",
-    stopLoss: "10",
-    takeProfit: "5",
-    trailingTakeProfit: "1",
-    maxDrawdown: "20",
+    triggerType: "RSA",
     orderType: "Market",
-    cooldownPeriod: "60",
-    minTradeSize: "10",
+    takeProfit: 1,
+    trailingTakeProfit: 0,
+    cooldownPeriod: 60,
+    initialOrderSize: 50,
+    priceDeviation: 0.5,
+    safetyOrders: 8,
+    safetyOrderGapMultiplier: 1.0,
+    safetyOrderSizeMultiplier: 1.0,
     notifications: true,
-    status: "inactive",
     createdAt: new Date(),
   });
 
+  const [botNameError, setBotNameError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [availablePairs, setAvailablePairs] = useState<string[]>([]);
+
+  const navigate = useNavigate();
   const location = useLocation();
-  const { state } = location; // This is where the state from navigate is passed
-  const { botConfig } = state || {}; // Extract botConfig from state, if available
+  const { state } = location;
+  const { botConfig } = state || {};
 
   useEffect(() => {
     if (botConfig) {
-      setFormData(botConfig); // Prepopulate form with botConfig if available
+      setFormData(botConfig);
     }
-  }, [botConfig]);
 
-  const [botNameError, setBotNameError] = useState<string | null>(null);
-  const [formError, setFormError] = useState<string | null>(null);
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedUser = sessionStorage.getItem('currentUser');
-    if (storedUser && storedUser !== 'undefined') {
+    const storedUser = sessionStorage.getItem("currentUser");
+    if (storedUser && storedUser !== "undefined") {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
     }
     checkBotNameAvailability(formData.botName);
+  }, [botConfig]);
 
-  }, []);
-
-  const generateLogoHash = (name: string) => {
-    return `https://www.robohash.org/dexter/${name}`;
-  };
+  useEffect(() => {
+    const tradingPairs = DEX_TRADING_PAIRS[formData.dex];
+    if (tradingPairs) {
+      setAvailablePairs(tradingPairs);
+    } else {
+      setAvailablePairs([]);
+    }
+  }, [formData.dex]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+    let updatedValue: string | boolean = value;
+  
+    if (type === "checkbox") {
+      const { checked } = e.target as HTMLInputElement;
+      updatedValue = checked.toString();
+    } else if (type === "number") {
+      updatedValue = value || "";
+    }
 
-    if (e.target instanceof HTMLInputElement && e.target.type === "checkbox") {
-      setFormData({
-        ...formData,
-        [name]: e.target.checked,
-      });
-    } else {
-      let sanitizedValue = value;
-      if (name === "botName") {
-        sanitizedValue = value.replace(/ /g, "");
-      }
+    setFormData({
+      ...formData,
+      [name]: updatedValue,
+    });
 
-      setFormData({
-        ...formData,
-        [name]: sanitizedValue,
-      });
-
-      if (name === "botName") {
-        const botName = sanitizedValue.trim();
-        checkBotNameAvailability(botName);
-      }
+    if (name === "botName") {
+      const sanitizedValue = value.trim();
+      checkBotNameAvailability(sanitizedValue);
     }
   };
 
   const checkBotNameAvailability = async (botName: string) => {
     if (botName.length > 0) {
-      const response = await fetch(`/api/bot?botName=${botName}`);
-
-      if (response.status !== 404) {
+      try {
+        const response = await fetch(`/api/bot?botName=${botName}`);
+        if (response.status !== 404) {
+          setBotNameError("Bot name is already taken.");
+        } else {
+          setBotNameError(null);
+        }
+      } catch (error) {
         console.error("Error checking bot name availability:", error);
-        setBotNameError("Bot name is taken.");
-      } else {
-        setBotNameError(null);
+        setBotNameError("Unable to verify bot name.");
       }
     } else {
       setBotNameError(null);
@@ -104,7 +105,10 @@ const CreateDCABot: React.FC = () => {
     e.preventDefault();
 
     for (const key in formData) {
-      if (formData[key as keyof BotConfig] === "") {
+      if (
+        formData[key as keyof BotConfig] === "" ||
+        formData[key as keyof BotConfig] === undefined
+      ) {
         setFormError("Please fill in all the fields.");
         return;
       }
@@ -115,13 +119,13 @@ const CreateDCABot: React.FC = () => {
       return;
     }
 
-    if (botNameError !== null) {
+    if (botNameError) {
       setFormError("Please choose a unique bot name.");
       return;
     }
 
-    const payload = { 
-      ...formData, 
+    const payload = {
+      ...formData,
       creatorName: user.firstName,
       creatorWalletId: user.walletId,
       createdAt: new Date(),
@@ -139,18 +143,15 @@ const CreateDCABot: React.FC = () => {
       if (!response.ok) {
         const errorData = await response.json();
         if (response.status === 409) {
-          alert(`Bot exists already: ${errorData.botName}`); 
+          alert(`Bot already exists: ${errorData.botName}`);
         } else {
-          console.error("Error:", errorData);
-          alert(`Failed to create bot: ${errorData.botName || "Unknown error"}`);
+          alert(`Failed to create bot: ${errorData.message || "Unknown error"}`);
         }
         return;
       }
 
-      const data = await response.json();
-      console.log("Success:", data);
-      navigate("/dash");
       alert("DCA Bot created successfully!");
+      navigate("/dash");
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while creating the bot.");
@@ -158,112 +159,154 @@ const CreateDCABot: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center animate-fadeIn bg-gradient-to-bl from-[#343949] to-[#7c8aaf]">
-      <div className="relative w-full">
-        <div className="p-4 font-bold w-full text-white">
-          <h1 className="text-center text-2xl mb-4">Create a DCA Bot</h1>
-          <form onSubmit={handleSubmit} className="space-y-6 bg-black/50 p-6 rounded shadow-md max-w-lg mx-auto">
-            <section>
-              <h2 className="text-xl text-white mb-2">General Configuration</h2>
-              <div className="space-y-2">
-                <label className="block">
-                  Bot Name:
-                  <input
-                    type="text"
-                    name="botName"
-                    value={formData.botName}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                    placeholder="Enter a unique name"
-                  />
-                </label>
-                {botNameError && (
-                  <p className="text-red-500 text-sm">{botNameError}</p>
-                )}
-                <img
-                  src={generateLogoHash(formData.botName)}
-                  alt="Generated Logo"
-                  className="h-16 w-16 mx-auto mt-4"
-                />
-              </div>
-            </section>
+    <div className="flex flex-col items-center bg-gradient-to-bl from-[#343949] to-[#7c8aaf] p-6">
+      <div className="w-full max-w-xl bg-black/50 p-6 rounded shadow-md">
+        <h1 className="text-2xl text-center text-white mb-4">Create a DCA Bot</h1>
+        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
+          {/* General Configuration */}
+          <div className="col-span-2">
+            <label className="block text-white">Bot Name:</label>
+              <input
+                type="text"
+                name="botName"
+                value={formData.botName}
+                onChange={handleInputChange}
+                className="w-full p-2 bg-gray-800 text-white rounded"
+                placeholder="Enter a unique name"
+              />
+              {botNameError && <p className="text-red-500">{botNameError}</p>}
+          </div>
 
-            <section>
-              <div className="space-y-2">
-                <label className="block">
-                  Trading Pair:
-                  <input
-                    type="text"
-                    name="tradingPair"
-                    value={formData.tradingPair}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                  />
-                </label>
-              </div>
-            </section>
+          <div>
+            <label className="block text-white">DEX:</label>
+            <select
+              name="dex"
+              value={formData.dex}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+            >
+              <option value="Uniswap">Uniswap</option>
+              <option value="Raydium">Raydium</option>
+            </select>
+          </div>
 
-            <section>
-              <div className="space-y-2">
-                <label className="block">
-                  Starting Balance:
-                  <input
-                    type="text"
-                    name="startingBalance"
-                    value={formData.startingBalance}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                  />
-                </label>
-              </div>
-            </section>
+          <div>
+            <label className="block text-white">Trading Pair:</label>
+            <select
+              name="tradingPair"
+              value={formData.tradingPair}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+            >
+              {availablePairs.map((pair) => (
+                <option key={pair} value={pair}>
+                  {pair}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            <section>
+          {/* Live price display */}
+          <div className="col-span-2 bg-gray-800 p-4 mt-4 rounded">
+            {/* <PairDetails tradingPair={formData.tradingPair} /> */}
+          </div>
 
-              <div className="space-y-2">
-                <label className="block">
-                  Initial Order Size:
-                  <input
-                    type="text"
-                    name="initialOrderSize"
-                    value={formData.initialOrderSize}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                  />
-                </label>
-              </div>
-            </section>
+          {/* DCA Configuration */}
+          {/* <div>
+            <label className="block text-white">Take Profit (%):</label>
+            <input
+              type="number"
+              name="takeProfit"
+              value={formData.takeProfit}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+              step="0.1"
+            />
+          </div> */}
 
-            <section>
-              <div className="space-y-2">
-                <label className="block">
-                  Price Deviation:
-                  <input
-                    type="text"
-                    name="priceDeviation"
-                    value={formData.priceDeviation}
-                    onChange={handleInputChange}
-                    className="w-full p-2 rounded bg-gray-800 text-white"
-                  />
-                </label>
-              </div>
-            </section>
+          <div>
+            <label className="block text-white">Trailing Take Profit (%):</label>
+            <input
+              type="number"
+              name="trailingTakeProfit"
+              value={formData.trailingTakeProfit}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+              step="0.1"
+            />
+          </div>
 
-            <section className="text-center mt-4">
-              {formError && <p className="text-red-500">{formError}</p>}
-              <button
-                type="submit"
-                className="w-full p-2 rounded bg-blue-500 text-white hover:bg-blue-700"
-                disabled={loading}
-              >
-                {loading ? "Creating Bot..." : "Create Bot"}
-              </button>
-            </section>
-          </form>
-        </div>
+          <div>
+            <label className="block text-white">Price Deviation (%):</label>
+            <input
+              type="number"
+              name="priceDeviation"
+              value={formData.priceDeviation}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+              step="0.1"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white">Cooldown Period (seconds):</label>
+            <input
+              type="number"
+              name="cooldownPeriod"
+              value={formData.cooldownPeriod}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white">Safety Orders:</label>
+            <input
+              type="number"
+              name="safetyOrders"
+              value={formData.safetyOrders}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white">Safety Order Gap Multiplier:</label>
+            <input
+              type="number"
+              name="safetyOrderGapMultiplier"
+              value={formData.safetyOrderGapMultiplier}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+              step="0.1"
+            />
+          </div>
+
+          <div>
+            <label className="block text-white">Safety Order Size Multiplier:</label>
+            <input
+              type="number"
+              name="safetyOrderSizeMultiplier"
+              value={formData.safetyOrderSizeMultiplier}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+              step="0.1"
+            />
+          </div>
+
+          <div className="col-span-2 text-center mt-4">
+            <button
+              type="submit"
+              className="bg-blue-600 text-white p-2 w-full rounded"
+            >
+              Create Bot
+            </button>
+            {formError && <p className="text-red-500 mt-2">{formError}</p>}
+          </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default CreateDCABot;
+export default BuildBot;

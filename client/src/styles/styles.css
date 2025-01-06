@@ -6,7 +6,7 @@
 
 
 body {
-  @apply font-sourcesans;
+  font-family: 'Lato';
   line-height: 1.6;
   margin: 0;
   background-color: #fdfdfd;

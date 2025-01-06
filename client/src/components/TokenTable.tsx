@@ -1,44 +1,24 @@
 import React from 'react';
-import { cacheExchange, createClient, fetchExchange, Provider, useQuery } from 'urql';
+import { useTokensQuery } from '../services/SubGraph';
 
-const client = createClient({
-    url: 'https://gateway.thegraph.com/api/cf949c81dc1152037b34ecdea916c0a8/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV',
-    exchanges: [cacheExchange, fetchExchange],
-});
+const LoadingSpinner: React.FC = () => (
+  <div className="flex justify-center items-center mt-10">
+    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-500"></div>
+    <p className="ml-4 text-gray-600">Loading...</p>
+  </div>
+);
 
-const QUERY = `{
-  tokens(first: 15, orderBy: volumeUSD, orderDirection: desc) {
-    id
-    name
-    symbol
-    derivedETH
-    volumeUSD
-    txCount
-  }
-
-  bundles(first: 1) {
-    ethPriceUSD
-  }
-}`;
+const ErrorMessage: React.FC<{ message: string }> = ({ message }) => (
+  <p className="text-center text-red-500 mt-10">{`Error: ${message}`}</p>
+);
 
 const TokenTable: React.FC = () => {
-  const [result] = useQuery({ query: QUERY });
-  const { data, fetching, error } = result;
+  const [{ data, fetching, error }] = useTokensQuery();
 
-  if (fetching) {
-    return (
-      <div className="flex justify-center items-center mt-10">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-500"></div>
-        <p className="ml-4 text-gray-600">Loading...</p>
-      </div>
-    );
-  }
+  if (fetching) return <LoadingSpinner />;
+  if (error) return <ErrorMessage message={error.message} />;
 
-  if (error) {
-    return <p className="text-center text-red-500 mt-10">Error: {error.message}</p>;
-  }
-
-  const ethPriceUSD = data.bundles[0].ethPriceUSD;
+  const ethPriceUSD = data?.bundles[0]?.ethPriceUSD;
 
   return (
     <div className="overflow-x-auto mt-10 bg-black/70 text-white">
@@ -54,13 +34,13 @@ const TokenTable: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {data.tokens.map((token: any, index: number) => (
+          {data?.tokens.map((token, index) => (
             <tr key={token.id} className="hover:bg-gray-50">
               <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
               <td className="border border-gray-300 px-4 py-2">{token.name}</td>
               <td className="border border-gray-300 px-4 py-2">{token.symbol}</td>
               <td className="border border-gray-300 px-4 py-2">
-                ${(token.derivedETH * ethPriceUSD).toFixed(2)}
+                ${(parseFloat(token.derivedETH) * parseFloat(ethPriceUSD || '0')).toFixed(2)}
               </td>
               <td className="border border-gray-300 px-4 py-2">
                 ${parseFloat(token.volumeUSD).toLocaleString()}
@@ -74,10 +54,8 @@ const TokenTable: React.FC = () => {
   );
 };
 
-const WrappedTokenTable: React.FC = () => (
-  <Provider value={client}>
-    <TokenTable />
-  </Provider>
-);
 
-export default WrappedTokenTable;
+
+const WrappedTokenTable: React.FC = () => <TokenTable />;
+
+export { WrappedTokenTable };

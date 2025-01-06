@@ -7,24 +7,24 @@ export interface BotForSale {
 }
 
 export interface BotConfig {
-  status: string;
+  status: "Running" | "Stopped";
   creatorName: string;
   creatorWalletId: string;
   botName: string;
+  dex: "Uniswap" | "Raydium";
   tradingPair: string;
-  startingBalance: string;
-  initialOrderSize: string;
-  priceDeviation: string;
-  safetyOrders: string;
-  safetyOrderMultiplier: string;
-  maxTradeSize: string;
-  stopLoss: string;
-  takeProfit: string;
-  trailingTakeProfit: string;
-  maxDrawdown: string;
+  triggerType: "RSA" | string;
   orderType: "Market" | string;  // Assuming there may be other order types
-  cooldownPeriod: string;
-  minTradeSize: string;
+  takeProfit: number;
+  trailingTakeProfit: number;
+  cooldownPeriod: number;
+  
+  initialOrderSize: number;
+  priceDeviation: number;
+  safetyOrders: number;
+  safetyOrderGapMultiplier: number;
+  safetyOrderSizeMultiplier: number;
+  
   notifications: boolean;
   createdAt: Date;
 }

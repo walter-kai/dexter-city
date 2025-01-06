@@ -42,35 +42,6 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
   };
 
 
-  const connectWallet = async () => {
-    try {
-      if (!sdk) {
-        console.error("MetaMask SDK not initialized.");
-        return;
-      }
-      const accounts = await sdk.connect();
-      if (accounts && accounts.length > 0) {
-        const walletId = accounts[0];
-        console.log("Connected account:", walletId);
-        setAccount(walletId);
-        fetchBalances(walletId);
-
-        if (telegramUser && walletId) {
-          // await updateUserWalletId(walletId);
-          const user = await login(walletId); // Pass true to create user if it doesn't exist
-          sessionStorage.setItem("currentUser", JSON.stringify(user)); // Store user in session storage
-          
-        }
-      } else {
-        console.log("No accounts found.");
-        setAccount(null);
-      }
-    } catch (err) {
-      console.error("Failed to connect MetaMask:", err);
-    }
-  };
-
-
   const disconnectWallet = () => {
     sdk?.disconnect();
     // updateUserWalletId(null);
@@ -79,10 +50,6 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
     console.log("Wallet disconnected");
     navigate('/');
   };
-
-  // useEffect(() => {
-  //   connectWallet();
-  // }, [sdk]);
 
   const truncateAddress = (address: string) => {
     return address ? `${address.slice(0, 6)}...${address.slice(-4)}`: "";

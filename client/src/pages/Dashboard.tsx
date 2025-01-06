@@ -4,7 +4,7 @@ import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog, FaReact } fr
 import LoadingScreenDots from "../components/LoadingScreenDots";
 import NavBar from "../components/NavBar";
 import { useSDK } from "@metamask/sdk-react";
-import WrappedTokenTable from "../components/TokenTable";
+import { WrappedTokenTable } from "../components/TokenTable";
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -133,7 +133,7 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
 
-<WrappedTokenTable />
+{/* <WrappedTokenTable /> */}
 
               </div>
             </div>

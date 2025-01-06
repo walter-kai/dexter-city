@@ -6,6 +6,8 @@ import NavBar from './components/NavBar';
 import { useSDK } from '@metamask/sdk-react';
 import { login } from './services/FirestoreUser';
 import { useNavigate } from 'react-router-dom';
+import { client } from './services/SubGraph';
+import { Provider } from 'urql';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<any>(null); // Adjust based on your actual user type
@@ -45,6 +47,8 @@ const App: React.FC = () => {
   };
 
   return (
+      <Provider value={client}>
+    
     <div className="bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen">
       {/* Show NavBar only if not on the "/" route */}
       {location.pathname !== '/' && <NavBar telegramUser={user} />}
@@ -57,6 +61,7 @@ const App: React.FC = () => {
         </Routes>
       </div>
     </div>
+    </Provider>
   );
 };
 

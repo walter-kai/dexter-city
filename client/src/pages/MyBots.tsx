@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useToken } from '../services/TokenProvider';
 import { BotConfig } from '../models/Bot';
-import CreateDCABot from './Build';
+import BuildBot from './Build';
+import BotDetails from '../components/BotDetail';
+import { generateLogoHash } from '../components/BotDetail';
 
 const MyBots = () => {
   const { botId } = useParams<{ botId?: string }>();
@@ -148,9 +150,7 @@ const MyBots = () => {
     }
   };
 
-  const generateLogoHash = (name: string) => {
-    return `https://www.robohash.org/dexter/${name}`;
-  };
+
 
   const renderBotStats = (bot: BotConfig) => {
     return (
@@ -175,7 +175,7 @@ const MyBots = () => {
   };
 
   return (
-    <div className="py-12 h-full">
+    <div className="py-12 h-full font-lato">
 
       {loading && <p className="text-center">Loading your bots...</p>}
 
@@ -263,34 +263,13 @@ const MyBots = () => {
             >
               ✕
             </button>
-          <CreateDCABot />
+          <BuildBot />
         </div>
       )}
 
       {/* View Modal */}
       {selectedBot && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white w-full max-w-4xl rounded-lg p-8 relative">
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-4 right-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-            >
-              ✕
-            </button>
-            <h2 className="text-2xl font-bold mb-4 text-center">{selectedBot.botName}</h2>
-            <img
-              src={generateLogoHash(selectedBot.botName)}
-              alt={selectedBot.botName}
-              className="w-32 h-32 mx-auto rounded-full mb-6"
-            />
-            {renderBotStats(selectedBot)}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-gray-700 mt-6">
-              <div><strong>Cooldown Period:</strong> {selectedBot.cooldownPeriod} seconds</div>
-              <div><strong>Max Transactions (1D):</strong>5</div>
-              <div><strong>Max Earnings (1D):</strong> 53</div>
-            </div>
-          </div>
-        </div>
+        <BotDetails bot={selectedBot} onClose={handleCloseModal}  />
       )}
 
       {/* Delete Modal */}

@@ -1,0 +1,32 @@
+export namespace coinmarketcap {
+    export interface Platform {
+      id: number;
+      name: string;
+      slug: string;
+      symbol: string;
+      token_address: string;
+    }
+  
+    export interface CryptoAsset {
+      circulating_supply: number;
+      cmc_rank: number;
+      date_added: string;  // ISO 8601 format string
+      id: number;
+      infinite_supply: boolean;
+      lastUpdated: string;  // Timestamp string (ISO 8601)
+      last_updated: string;  // ISO 8601 format string
+      max_supply: number | null;
+      name: string;
+      num_market_pairs: number;
+      platform: Platform;
+      self_reported_circulating_supply: number;
+      self_reported_market_cap: number;
+      slug: string;
+      symbol: string;
+      tags: string[];
+      total_supply: number;
+      tvl_ratio: number | null;
+    }
+
+  }
+  
