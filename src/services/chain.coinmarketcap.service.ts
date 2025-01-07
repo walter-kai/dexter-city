@@ -2,35 +2,135 @@ import { db } from "../config/firebase";
 import admin from "firebase-admin";
 import { Timestamp } from "@google-cloud/firestore";
 import logger from "../config/logger";
-import {coinmarketcap} from "../../client/src/models/Token"
+import { coinmarketcap } from "../../client/src/models/Token"
 
 // Define the API base URL and endpoint
 const BASE_URL = "https://pro-api.coinmarketcap.com";
 const API_KEY = "f669f32d-181b-495b-865c-97eb53373232"; // Your API key
 
-interface Cryptocurrency {
-  id: number;
-  name: string;
-  symbol: string;
-  cmc_rank: number;
-  last_updated: string;
-  price: string;
-}
 
-interface ApiResponse {
-  data: Cryptocurrency[];
-  status: {
-    timestamp: string;
-    error_code: number;
-    error_message: string | null;
-  };
-}
+const reloadDexs = async (): Promise<void> => {
+  const endpoint = "/v4/dex/listings/quotes";
 
-const reload = async (
+  try {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      headers: {
+        "X-CMC_PRO_API_KEY": API_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const json = await response.json();
+
+    logger.info(`Fetched ${json.data.length} cryptocurrency entries.`);
+
+    const tokensCollection = db.collection("dexs-cmc");
+    const batchWrite = db.batch();
+
+    json.data.forEach((token: any) => {
+      const modifiedName = token.slug;
+      const tokenRef = tokensCollection.doc(token.id.toString() + ":" + modifiedName);
+
+      batchWrite.set(tokenRef, {
+        ...token,
+        lastUpdated: Timestamp.now(),
+      }, { merge: true });
+    });
+
+    await batchWrite.commit();
+    logger.info("Batch write completed for current batch.");
+  } catch (err) {
+    logger.error(
+      `Error fetching cryptocurrency data: ${err instanceof Error ? err.message : "An error occurred"}`
+    );
+  }
+  logger.info("Successfully updated tokens:cmc collection.");
+};
+
+const reloadPairs = async (network: string): Promise<boolean> => {
+  const endpoint = "/v4/dex/spot-pairs/latest";
+  let hasMoreData = true;
+  let start: number = 1;
+  let limit: number = 1000;
+
+  while (hasMoreData) {
+    const queryParams = new URLSearchParams({
+      network_slug: network,
+      // start: start.toString(),
+      // limit: limit.toString(),
+    });
+
+    try {
+      const response = await fetch(`${BASE_URL}${endpoint}?${queryParams.toString()}`, {
+        headers: {
+          "X-CMC_PRO_API_KEY": API_KEY,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const json = await response.json();
+
+      if (json.status.error_code !== '0') {
+        throw new Error(json.status.error_message || "Unknown API error");
+      }
+
+      logger.info(`Fetched ${json.data.length} cryptocurrency entries.`);
+
+      if (!json.data || json.data.length === 0) {
+        logger.warn("No data returned from the API.");
+        break;
+      }
+
+      const tokensCollection = db.collection("pairs-cmc");
+      const batchWrite = db.batch();
+
+      json.data.forEach((token: any) => {
+        const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
+        const modifiedSymbol = token.base_asset_symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
+
+        const tokenRef = tokensCollection.doc(
+          `${token.network_slug}:${modifiedSymbol}:${modifiedName}`
+        );
+
+        const tokenData = {
+          ...token,
+          lastUpdated: Timestamp.now(),
+        };
+
+        batchWrite.set(tokenRef, tokenData, { merge: true });
+      });
+
+      await batchWrite.commit();
+      logger.info("Batch write completed for current batch.");
+
+      if (json.data.length < limit) {
+        hasMoreData = false;
+      } else {
+        start += limit;
+      }
+    } catch (err) {
+      logger.error(
+        `Error fetching cryptocurrency data: ${err instanceof Error ? err.message : "An error occurred"}`
+      );
+      return false;
+    }
+  }
+
+  logger.info("Successfully updated tokens:cmc collection.");
+  return true;
+};
+
+const reloadTokens = async (
   start: number = 1,
-  limit: number = 1000, // Reduced limit per request
+  limit: number = 1000,
   sortDir: string = "desc",
-): Promise<Cryptocurrency[] | null> => {
+): Promise<void> => {
   const endpoint = "/v1/cryptocurrency/listings/latest";
   let hasMoreData = true;
 
@@ -52,24 +152,24 @@ const reload = async (
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const json: ApiResponse = await response.json();
+      const json = await response.json();
 
-      if (json.status.error_code !== 0) {
+      if (json.status.error_code !== '0') {
         throw new Error(json.status.error_message || "Unknown API error");
       }
 
-      // Log the response data
       logger.info(`Fetched ${json.data.length} cryptocurrency entries.`);
 
-      // Clear and update the Firestore collection with the fetched data for this batch
       const tokensCollection = db.collection("tokens-cmc");
       const batchWrite = db.batch();
 
-      json.data.forEach((token) => {
+      json.data.forEach((token: any) => {
         const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
         const modifiedSymbol = token.symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
 
-        const tokenRef = tokensCollection.doc(token.id.toString() + ":" + modifiedSymbol + ":" + modifiedName);
+        const tokenRef = tokensCollection.doc(
+          token.id.toString() + ":" + modifiedSymbol + ":" + modifiedName
+        );
 
         batchWrite.set(tokenRef, {
           ...token,
@@ -77,40 +177,30 @@ const reload = async (
         }, { merge: true });
       });
 
-      // Commit the batch write for the current fetch
       await batchWrite.commit();
       logger.info("Batch write completed for current batch.");
 
-      // Check if there is more data to fetch
       if (json.data.length < limit) {
-        hasMoreData = false; // No more data to fetch
+        hasMoreData = false;
       } else {
-        start += limit; // Increase the start parameter for the next request
+        start += limit;
       }
     } catch (err) {
       logger.error(
-        `Error fetching cryptocurrency data: ${
-          err instanceof Error ? err.message : "An error occurred"
-        }`
+        `Error fetching cryptocurrency data: ${err instanceof Error ? err.message : "An error occurred"}`
       );
-      return null;
     }
   }
 
   logger.info("Successfully updated tokens:cmc collection.");
-  return null;
 };
 
-
-
-// Create a new function get that accepts a symbol and returns the id
-const get = async (symbols: string[]): Promise<coinmarketcap.CryptoAsset[] | null> => {
+// Function to get tokens based on symbol
+const getTokens = async (symbols: string[]): Promise<coinmarketcap.Token[] | null> => {
   try {
     const tokensCollection = db.collection("tokens-cmc");
-    // Convert all symbols to uppercase (standardize case)
     const upperCaseSymbols = symbols.map(symbol => symbol.toUpperCase());
 
-    // Query the collection where symbol is in the provided uppercase symbols array
     const tokenSnapshot = await tokensCollection
       .where("symbol", "in", upperCaseSymbols)
       .get();
@@ -120,26 +210,70 @@ const get = async (symbols: string[]): Promise<coinmarketcap.CryptoAsset[] | nul
       return [];
     }
 
-    // Extract the full CryptoAsset objects for the tokens that match the symbols
-    const cryptoAssets: coinmarketcap.CryptoAsset[] = tokenSnapshot.docs.map((doc) => {
-      const token = doc.data() as coinmarketcap.CryptoAsset;
-      return token;
-    });
+    const tokens: coinmarketcap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as coinmarketcap.Token);
 
-    return cryptoAssets;
+    return tokens;
   } catch (err) {
     logger.error(
-      `Error fetching tokens by symbols: ${symbols.join(", ")}. ${
-        err instanceof Error ? err.message : "An error occurred"
-      }`
+      `Error fetching tokens by symbols: ${symbols.join(", ")}. ${err instanceof Error ? err.message : "An error occurred"}`
     );
     return null;
   }
 };
 
+// Function to get pairs based on symbols
+const getPairs = async (symbols: string[]): Promise<coinmarketcap.Token[] | null> => {
+  try {
+    const tokensCollection = db.collection("pairs-cmc");
+    const upperCaseSymbols = symbols.map(symbol => symbol.toUpperCase());
 
+    const tokenSnapshot = await tokensCollection
+      .where("symbol", "in", upperCaseSymbols)
+      .get();
+
+    if (tokenSnapshot.empty) {
+      logger.warn(`No tokens found for symbols: ${symbols.join(", ")}`);
+      return [];
+    }
+
+    const tokens: coinmarketcap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as coinmarketcap.Token);
+
+    return tokens;
+  } catch (err) {
+    logger.error(
+      `Error fetching tokens by symbols: ${symbols.join(", ")}. ${err instanceof Error ? err.message : "An error occurred"}`
+    );
+    return null;
+  }
+};
+
+// Function to get all DEXs
+const getDexs = async (): Promise<any[] | null> => {
+  try {
+    const tokensCollection = db.collection("dexs-cmc");
+    const tokenSnapshot = await tokensCollection.get();
+
+    if (tokenSnapshot.empty) {
+      logger.warn("No tokens found in the collection.");
+      return [];
+    }
+
+    const tokens: any[] = tokenSnapshot.docs.map((doc) => doc.data());
+
+    return tokens;
+  } catch (err) {
+    logger.error(
+      `Error fetching all tokens from the collection. ${err instanceof Error ? err.message : "An error occurred"}`
+    );
+    return null;
+  }
+};
 
 export default {
-  reload,
-  get,
+  reloadDexs,
+  reloadPairs,
+  reloadTokens,
+  getTokens,
+  getPairs,
+  getDexs
 };
