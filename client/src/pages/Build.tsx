@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../models/Bot";
 import websocketService from "../services/WebSocket";
-import { coinmarketcap } from "@/models/Token";
+import { CoinMarketCap } from "@/models/Token";
 
 import PairDetails from "../components/PairDetails";
 
@@ -31,8 +31,9 @@ const BuildBot: React.FC = () => {
 
   const [botNameError, setBotNameError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [availablePairs, setAvailablePairs] = useState<coinmarketcap.TradingPair[]>([]);
+  const [availablePairs, setAvailablePairs] = useState<CoinMarketCap.TradingPair[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [tradingPair, setTradingPair] = useState<CoinMarketCap.TradingPair | undefined>(undefined);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -60,6 +61,11 @@ const BuildBot: React.FC = () => {
       setAvailablePairs(pairsArray);
     }
   }, [botConfig]);
+
+  useEffect(() => {
+    setTradingPair(availablePairs.find((pair) => pair.name === formData.tradingPair));
+
+  }, [availablePairs, formData.tradingPair]);
   
   
   const handleInputChange = (
@@ -162,7 +168,6 @@ const BuildBot: React.FC = () => {
   };
 
 
-
   return (
 
 
@@ -218,7 +223,7 @@ const BuildBot: React.FC = () => {
 
     {/* Live price display */}
     <div className="col-span-2 bg-gray-800 p-4 mt-4 rounded">
-      <PairDetails tradingPair={availablePairs.find((pair) => pair.name === formData.tradingPair)} />
+      <PairDetails tradingPair={tradingPair} />
     </div>
 
     {/* DCA Configuration */}

@@ -1,4 +1,4 @@
-export namespace coinmarketcap {
+export namespace CoinMarketCap {
   export interface Platform {
     id: number;
     name: string;
@@ -73,5 +73,21 @@ export namespace coinmarketcap {
       quote_asset_symbol: string;
     }>;
   }
+
+  export interface Trades
+    {
+        date: Date,
+        type: "sell" | "buy",
+        quote: [
+            {
+                price: number,
+                total: number,
+                convert_id: string,
+                price_by_quote_asset: number,
+                amount_base_asset: number,
+                amount_quote_asset: number
+            }
+        ]
+    }
   
 }

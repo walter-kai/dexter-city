@@ -1,12 +1,12 @@
 import PairDetails from "@/components/PairDetails";
-import { coinmarketcap } from "../models/Token";
+import { CoinMarketCap } from "../models/Token";
 
-type PairUpdateCallback = (pairDetails: coinmarketcap.TradingPair) => void;
+type PairUpdateCallback = (pairDetails: CoinMarketCap.TradingPair) => void;
 type ErrorCallback = (error: string) => void;
 
 class WebSocketService {
   private websocket: WebSocket | null = null;
-  private pairDetails: Record<string, coinmarketcap.TradingPair> = {};
+  private pairDetails: Record<string, CoinMarketCap.TradingPair> = {};
   private callbacks: Record<string, PairUpdateCallback[]> = {};
   private errorCallback: ErrorCallback | null = null;
 
@@ -19,7 +19,7 @@ class WebSocketService {
       const message = JSON.parse(event.data);
 
       if (message.type === "pairUpdate") {
-        message.data.forEach((pair: coinmarketcap.TradingPair) => {
+        message.data.forEach((pair: CoinMarketCap.TradingPair) => {
           this.pairDetails[pair.name] = pair;
 
           // Notify all subscribers for this pair
@@ -54,7 +54,7 @@ class WebSocketService {
     this.callbacks[tradingPair].push(callback);
   }
 
-  public getAll(): Record<string, coinmarketcap.TradingPair> {
+  public getAll(): Record<string, CoinMarketCap.TradingPair> {
     return this.pairDetails;
   }
 

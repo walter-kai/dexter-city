@@ -115,11 +115,39 @@ const getPairs = async (req: Request, res: Response): Promise<Response> => {
   }
 };
 
+
+const getTrades = async (req: Request, res: Response): Promise<Response> => {
+  const { network, contractAddress } = req.query; // Extract network and contractAddress from query parameters
+
+  try {
+    // Check if the required parameters are provided
+    if (!network || !contractAddress) {
+      return res.status(400).json({ error: "Missing required parameters: network and contractAddress" });
+    }
+
+    // Fetch the cryptocurrency data using the service's getTrades method
+    const tradesList = await coinMarketCapService.getTrades(network as string, contractAddress as string);
+
+    // Check if the dexList is null
+    if (!tradesList) {
+      return res.status(404).json({ error: "Dex list not found" });
+    }
+
+    // Return the fetched data
+    return res.json({ data: tradesList });
+  } catch (error) {
+    console.error("Error fetching trades:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
 export default {
   reloadDexs,
   reloadTokens,
   reloadPairs,
   getTokenBySymbol,
   getDexs,
-  getPairs
+  getPairs,
+  getTrades
 };

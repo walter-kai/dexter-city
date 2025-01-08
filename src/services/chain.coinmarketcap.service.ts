@@ -2,11 +2,89 @@ import { db } from "../config/firebase";
 import admin from "firebase-admin";
 import { Timestamp } from "@google-cloud/firestore";
 import logger from "../config/logger";
-import { coinmarketcap } from "../../client/src/models/Token"
+import { CoinMarketCap } from "../../client/src/models/Token"
 
 // Define the API base URL and endpoint
 const BASE_URL = "https://pro-api.coinmarketcap.com";
 const API_KEY = "f669f32d-181b-495b-865c-97eb53373232"; // Your API key
+
+const getTrades = async (
+  network: string,
+  contractAddress: string
+): Promise<CoinMarketCap.Trades[]> => {
+  const endpoint = "/v4/dex/pairs/trade/latest";
+  const tokensCollection = db.collection("pairs-cmc");
+  const tokenRef = tokensCollection.doc(`${network}:${contractAddress}`);
+
+  try {
+    // Fetch the existing document from Firestore
+    const tokenDoc = await tokenRef.get();
+
+    if (tokenDoc.exists) {
+      const tokenData = tokenDoc.data();
+
+      if (tokenData) {
+        const lastUpdated = new Date(tokenData.lastUpdated)
+        const currentTime = new Date();
+
+        // Check if lastUpdated is within 10 seconds
+        if (currentTime.getTime() - lastUpdated.getTime() < 10000) {
+          logger.info("Data was updated within the last 10 seconds. Returning cached data.");
+          return tokenData.trades as CoinMarketCap.Trades[];
+        }
+      }
+    }
+
+    // Prepare query parameters for the API call
+    const queryParams = new URLSearchParams({
+      network_slug: network,
+      contract_address: contractAddress,
+    });
+
+    // Make the API request
+    const response = await fetch(`${BASE_URL}${endpoint}?${queryParams.toString()}`, {
+      headers: {
+        "X-CMC_PRO_API_KEY": API_KEY,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const json = await response.json();
+
+    if (json.status.error_code !== "0") {
+      throw new Error(json.status.error_message || "Unknown API error");
+    }
+
+    logger.info(`Fetched ${json.data[0].trades.length} trade entries.`);
+
+    if (!json.data || json.data[0].trades.length === 0) {
+      logger.warn("No data returned from the API.");
+      return [];
+    }
+
+    // Save the fetched data to Firestore
+    const tradeData = {
+      // network_slug: network,
+      // contract_address: contractAddress,
+      trades: json.data[0].trades,
+      lastUpdated: json.status.timestamp,
+    };
+
+    await tokenRef.set(tradeData, { merge: true });
+    logger.info("Trade data successfully updated in Firestore.");
+
+    return json.data[0].trades;
+  } catch (err) {
+    logger.error(
+      `Error fetching trade data: ${err instanceof Error ? err.message : "An error occurred"}`
+    );
+    return [];
+  }
+};
+
 
 
 const reloadDexs = async (): Promise<void> => {
@@ -91,11 +169,11 @@ const reloadPairs = async (network: string): Promise<boolean> => {
       const batchWrite = db.batch();
 
       json.data.forEach((token: any) => {
-        const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
-        const modifiedSymbol = token.base_asset_symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
+        // const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
+        // const modifiedSymbol = token.base_asset_symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
 
         const tokenRef = tokensCollection.doc(
-          `${token.network_slug}:${modifiedSymbol}:${modifiedName}`
+          `${token.network_slug}:${token.contract_address}`
         );
 
         const tokenData = {
@@ -196,7 +274,7 @@ const reloadTokens = async (
 };
 
 // Function to get tokens based on symbol
-const getTokens = async (symbols: string[]): Promise<coinmarketcap.Token[] | null> => {
+const getTokens = async (symbols: string[]): Promise<CoinMarketCap.Token[] | null> => {
   try {
     const tokensCollection = db.collection("tokens-cmc");
     const upperCaseSymbols = symbols.map(symbol => symbol.toUpperCase());
@@ -210,7 +288,7 @@ const getTokens = async (symbols: string[]): Promise<coinmarketcap.Token[] | nul
       return [];
     }
 
-    const tokens: coinmarketcap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as coinmarketcap.Token);
+    const tokens: CoinMarketCap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as CoinMarketCap.Token);
 
     return tokens;
   } catch (err) {
@@ -222,7 +300,7 @@ const getTokens = async (symbols: string[]): Promise<coinmarketcap.Token[] | nul
 };
 
 // Function to get pairs based on symbols
-const getPairs = async (): Promise<coinmarketcap.Token[] | null> => {
+const getPairs = async (): Promise<CoinMarketCap.Token[] | null> => {
   try {
     const tokensCollection = db.collection("pairs-cmc");
 
@@ -233,7 +311,7 @@ const getPairs = async (): Promise<coinmarketcap.Token[] | null> => {
       return [];
     }
 
-    const tokens: coinmarketcap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as coinmarketcap.Token);
+    const tokens: CoinMarketCap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as CoinMarketCap.Token);
 
     return tokens;
   } catch (err) {
@@ -275,5 +353,6 @@ export default {
   reloadTokens,
   getTokens,
   getPairs,
-  getDexs
+  getDexs,
+  getTrades
 };
