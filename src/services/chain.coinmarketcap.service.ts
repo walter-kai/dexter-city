@@ -222,17 +222,14 @@ const getTokens = async (symbols: string[]): Promise<coinmarketcap.Token[] | nul
 };
 
 // Function to get pairs based on symbols
-const getPairs = async (symbols: string[]): Promise<coinmarketcap.Token[] | null> => {
+const getPairs = async (): Promise<coinmarketcap.Token[] | null> => {
   try {
     const tokensCollection = db.collection("pairs-cmc");
-    const upperCaseSymbols = symbols.map(symbol => symbol.toUpperCase());
 
-    const tokenSnapshot = await tokensCollection
-      .where("symbol", "in", upperCaseSymbols)
-      .get();
+    const tokenSnapshot = await tokensCollection.get();
 
     if (tokenSnapshot.empty) {
-      logger.warn(`No tokens found for symbols: ${symbols.join(", ")}`);
+      logger.warn("No tokens found in the collection.");
       return [];
     }
 
@@ -241,11 +238,14 @@ const getPairs = async (symbols: string[]): Promise<coinmarketcap.Token[] | null
     return tokens;
   } catch (err) {
     logger.error(
-      `Error fetching tokens by symbols: ${symbols.join(", ")}. ${err instanceof Error ? err.message : "An error occurred"}`
+      `Error fetching tokens from the collection. ${
+        err instanceof Error ? err.message : "An error occurred"
+      }`
     );
     return null;
   }
 };
+
 
 // Function to get all DEXs
 const getDexs = async (): Promise<any[] | null> => {

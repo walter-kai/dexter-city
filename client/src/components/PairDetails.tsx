@@ -1,46 +1,34 @@
 import React, { useEffect, useState } from "react";
-// import { useSpotPairs } from "../services/CoinMarketCap";
+import { coinmarketcap } from "../models/Token";
 
 interface PairDetailsProps {
-  tradingPair: string; // Example: "ETH/USDT"
+  tradingPair: coinmarketcap.TradingPair | undefined; // Example: "DGE/WETH"
 }
 
+
 const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
-  const [livePrice, setLivePrice] = useState<number | null>(null);
-
-  const [token0Symbol, token1Symbol] = tradingPair.split("/");
-
-  // Fetch spot pairs using the custom hook
-  // const { data: spotPairsData, error: spotPairsError, loading: spotPairsLoading } = useSpotPairs();
-
-  // // Effect to find the live price based on the trading pair
-  // useEffect(() => {
-  //   if (spotPairsData && spotPairsData.length > 0) {
-  //     const matchingPair = spotPairsData.find(
-  //       (pair) =>
-  //         pair.base_currency_symbol === token0Symbol && pair.quote_currency_symbol === token1Symbol
-  //     );
-
-  //     if (matchingPair) {
-  //       setLivePrice(parseFloat(matchingPair.price));
-  //     } else {
-  //       setLivePrice(null); // No matching pair found
-  //     }
-  //   }
-  // }, [spotPairsData, token0Symbol, token1Symbol]);
+  // const [tradingPair, setPairDetails] = useState<coinmarketcap.TradingPair | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   return (
     <div className="text-white">
-      {/* <h3>Live Price for {tradingPair}</h3>
-      {spotPairsLoading ? (
-        <p>Loading...</p>
-      ) : spotPairsError ? (
-        <p>Error: {spotPairsError}</p>
-      ) : livePrice !== null ? (
-        <p>Current Price: {livePrice} {token0Symbol}</p>
+      <h3>Details for {tradingPair?.name}</h3>
+      {error ? (
+        <p>Error: {error}</p>
+      ) : tradingPair ? (
+        <div>
+          <p><strong>Base Asset:</strong> {tradingPair.base_asset_name} ({tradingPair.base_asset_symbol})</p>
+          <p><strong>Quote Asset:</strong> {tradingPair.quote[0].quote_asset_name} ({tradingPair.quote[0].quote_asset_symbol})</p>
+          <p><strong>Price:</strong> {tradingPair.quote[0].price} {tradingPair.quote[0].quote_asset_symbol}</p>
+          <p><strong>Volume (24h):</strong> {tradingPair.quote[0].volume_24h}</p>
+          <p><strong>Liquidity:</strong> {tradingPair.quote[0].liquidity}</p>
+          <p><strong>24h Price Change:</strong> {tradingPair.quote[0].percent_change_price_24h}%</p>
+          <p><strong>1h Price Change:</strong> {tradingPair.quote[0].percent_change_price_1h}%</p>
+          <p><strong>Last Updated:</strong> {new Date(tradingPair.lastUpdated).toLocaleString()}</p>
+        </div>
       ) : (
-        <p>No data available for the trading pair.</p>
-      )} */}
+        <p>Loading...</p>
+      )}
     </div>
   );
 };

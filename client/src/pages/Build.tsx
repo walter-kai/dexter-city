@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../models/Bot";
-import { DEX_TRADING_PAIRS } from "../models/Dex";
-// import { useUniswapPairsQuery } from "../services/SubGraph";
-// import PairDetails from "../components/PairDetails";
+import websocketService from "../services/WebSocket";
+import { coinmarketcap } from "@/models/Token";
+
+import PairDetails from "../components/PairDetails";
 
 const BuildBot: React.FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -12,8 +13,8 @@ const BuildBot: React.FC = () => {
     creatorName: "",
     creatorWalletId: "",
     botName: "",
-    dex: "Uniswap",
-    tradingPair: "ETH/USDT",
+    network: "Ethereum",
+    tradingPair: "",
     triggerType: "RSA",
     orderType: "Market",
     takeProfit: 1,
@@ -30,7 +31,8 @@ const BuildBot: React.FC = () => {
 
   const [botNameError, setBotNameError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [availablePairs, setAvailablePairs] = useState<string[]>([]);
+  const [availablePairs, setAvailablePairs] = useState<coinmarketcap.TradingPair[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -41,30 +43,31 @@ const BuildBot: React.FC = () => {
     if (botConfig) {
       setFormData(botConfig);
     }
-
+  
     const storedUser = sessionStorage.getItem("currentUser");
     if (storedUser && storedUser !== "undefined") {
       const parsedUser = JSON.parse(storedUser);
       setUser(parsedUser);
     }
+  
     checkBotNameAvailability(formData.botName);
-  }, [botConfig]);
-
-  useEffect(() => {
-    const tradingPairs = DEX_TRADING_PAIRS[formData.dex];
-    if (tradingPairs) {
-      setAvailablePairs(tradingPairs);
-    } else {
-      setAvailablePairs([]);
+  
+    // Load available pairs
+    const pairs = websocketService.getAll();
+  
+    if (pairs) {
+      const pairsArray = Object.entries(pairs).map(([key, value]) => (value));
+      setAvailablePairs(pairsArray);
     }
-  }, [formData.dex]);
-
+  }, [botConfig]);
+  
+  
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
     let updatedValue: string | boolean = value;
-  
+
     if (type === "checkbox") {
       const { checked } = e.target as HTMLInputElement;
       updatedValue = checked.toString();
@@ -158,154 +161,161 @@ const BuildBot: React.FC = () => {
     }
   };
 
+
+
   return (
-    <div className="flex flex-col items-center bg-gradient-to-bl from-[#343949] to-[#7c8aaf] p-6">
-      <div className="w-full max-w-xl bg-black/50 p-6 rounded shadow-md">
-        <h1 className="text-2xl text-center text-white mb-4">Create a DCA Bot</h1>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
-          {/* General Configuration */}
-          <div className="col-span-2">
-            <label className="block text-white">Bot Name:</label>
-              <input
-                type="text"
-                name="botName"
-                value={formData.botName}
-                onChange={handleInputChange}
-                className="w-full p-2 bg-gray-800 text-white rounded"
-                placeholder="Enter a unique name"
-              />
-              {botNameError && <p className="text-red-500">{botNameError}</p>}
-          </div>
 
-          <div>
-            <label className="block text-white">DEX:</label>
-            <select
-              name="dex"
-              value={formData.dex}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-            >
-              <option value="Uniswap">Uniswap</option>
-              <option value="Raydium">Raydium</option>
-            </select>
-          </div>
 
-          <div>
-            <label className="block text-white">Trading Pair:</label>
-            <select
-              name="tradingPair"
-              value={formData.tradingPair}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-            >
-              {availablePairs.map((pair) => (
-                <option key={pair} value={pair}>
-                  {pair}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Live price display */}
-          <div className="col-span-2 bg-gray-800 p-4 mt-4 rounded">
-            {/* <PairDetails tradingPair={formData.tradingPair} /> */}
-          </div>
-
-          {/* DCA Configuration */}
-          {/* <div>
-            <label className="block text-white">Take Profit (%):</label>
-            <input
-              type="number"
-              name="takeProfit"
-              value={formData.takeProfit}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
-            />
-          </div> */}
-
-          <div>
-            <label className="block text-white">Trailing Take Profit (%):</label>
-            <input
-              type="number"
-              name="trailingTakeProfit"
-              value={formData.trailingTakeProfit}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">Price Deviation (%):</label>
-            <input
-              type="number"
-              name="priceDeviation"
-              value={formData.priceDeviation}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">Cooldown Period (seconds):</label>
-            <input
-              type="number"
-              name="cooldownPeriod"
-              value={formData.cooldownPeriod}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">Safety Orders:</label>
-            <input
-              type="number"
-              name="safetyOrders"
-              value={formData.safetyOrders}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">Safety Order Gap Multiplier:</label>
-            <input
-              type="number"
-              name="safetyOrderGapMultiplier"
-              value={formData.safetyOrderGapMultiplier}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
-            />
-          </div>
-
-          <div>
-            <label className="block text-white">Safety Order Size Multiplier:</label>
-            <input
-              type="number"
-              name="safetyOrderSizeMultiplier"
-              value={formData.safetyOrderSizeMultiplier}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
-            />
-          </div>
-
-          <div className="col-span-2 text-center mt-4">
-            <button
-              type="submit"
-              className="bg-blue-600 text-white p-2 w-full rounded"
-            >
-              Create Bot
-            </button>
-            {formError && <p className="text-red-500 mt-2">{formError}</p>}
-          </div>
-        </form>
-      </div>
+<div className="flex flex-col items-center bg-gradient-to-bl from-[#343949] to-[#7c8aaf] p-6">
+<div className="w-full max-w-xl bg-black/50 p-6 rounded shadow-md">
+  <h1 className="text-2xl text-center text-white mb-4">Create a DCA Bot</h1>
+  <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-6">
+    {/* General Configuration */}
+    <div className="col-span-2">
+      <label className="block text-white">Bot Name:</label>
+        <input
+          type="text"
+          name="botName"
+          value={formData.botName}
+          onChange={handleInputChange}
+          className="w-full p-2 bg-gray-800 text-white rounded"
+          placeholder="Enter a unique name"
+        />
+        {botNameError && <p className="text-red-500">{botNameError}</p>}
     </div>
+
+    <div>
+            <label className="block text-white">Network:</label>
+            <select
+              name="network"
+              value={formData.network}
+              onChange={handleInputChange}
+              className="w-full p-2 bg-gray-800 text-white rounded"
+            >
+              <option value="Ethereum">Ethereum</option>
+              <option value="Solana">Solana</option>
+            </select>
+          </div>
+
+          <div>
+  <label className="block text-white">Trading Pair:</label>
+  <select
+    name="tradingPair"
+    value={formData.tradingPair}
+    onChange={handleInputChange}
+    className="w-full p-2 bg-gray-800 text-white rounded"
+  >
+    {availablePairs
+      .filter((pair) => pair.network_slug === formData.network)
+      .map((pair) => (
+        <option key={pair.name} value={pair.name}>
+          {pair.name}
+        </option>
+      ))}
+  </select>
+</div>
+
+
+    {/* Live price display */}
+    <div className="col-span-2 bg-gray-800 p-4 mt-4 rounded">
+      <PairDetails tradingPair={availablePairs.find((pair) => pair.name === formData.tradingPair)} />
+    </div>
+
+    {/* DCA Configuration */}
+    {/* <div>
+      <label className="block text-white">Take Profit (%):</label>
+      <input
+        type="number"
+        name="takeProfit"
+        value={formData.takeProfit}
+        onChange={handleInputChange}
+        className="w-full p-2 bg-gray-800 text-white rounded"
+        step="0.1"
+      />
+    </div> */}
+
+    <div>
+      <label className="block text-white">Trailing Take Profit (%):</label>
+      <input
+        type="number"
+        name="trailingTakeProfit"
+        value={formData.trailingTakeProfit}
+        onChange={handleInputChange}
+        className="w-full p-2 bg-gray-800 text-white rounded"
+        step="0.1"
+      />
+    </div>
+
+    <div>
+      <label className="block text-white">Price Deviation (%):</label>
+      <input
+        type="number"
+        name="priceDeviation"
+        value={formData.priceDeviation}
+        onChange={handleInputChange}
+        className="w-full p-2 bg-gray-800 text-white rounded"
+        step="0.1"
+      />
+    </div>
+
+    <div>
+      <label className="block text-white">Cooldown Period (seconds):</label>
+      <input
+        type="number"
+        name="cooldownPeriod"
+        value={formData.cooldownPeriod}
+        onChange={handleInputChange}
+        className="w-full p-2 bg-gray-800 text-white rounded"
+      />
+    </div>
+
+    <div>
+      <label className="block text-white">Safety Orders:</label>
+      <input
+        type="number"
+        name="safetyOrders"
+        value={formData.safetyOrders}
+        onChange={handleInputChange}
+        className="w-full p-2 bg-gray-800 text-white rounded"
+      />
+    </div>
+
+    <div>
+      <label className="block text-white">Safety Order Gap Multiplier:</label>
+      <input
+        type="number"
+        name="safetyOrderGapMultiplier"
+        value={formData.safetyOrderGapMultiplier}
+        onChange={handleInputChange}
+        className="w-full p-2 bg-gray-800 text-white rounded"
+        step="0.1"
+      />
+    </div>
+
+    <div>
+      <label className="block text-white">Safety Order Size Multiplier:</label>
+      <input
+        type="number"
+        name="safetyOrderSizeMultiplier"
+        value={formData.safetyOrderSizeMultiplier}
+        onChange={handleInputChange}
+        className="w-full p-2 bg-gray-800 text-white rounded"
+        step="0.1"
+      />
+    </div>
+
+    <div className="col-span-2 text-center mt-4">
+      <button
+        type="submit"
+        className="bg-blue-600 text-white p-2 w-full rounded"
+      >
+        Create Bot
+      </button>
+      {formError && <p className="text-red-500 mt-2">{formError}</p>}
+    </div>
+  </form>
+</div>
+</div>
   );
 };
 

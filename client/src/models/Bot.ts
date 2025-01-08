@@ -11,7 +11,7 @@ export interface BotConfig {
   creatorName: string;
   creatorWalletId: string;
   botName: string;
-  dex: "Uniswap" | "Raydium";
+  network: "Ethereum" | "Solana";
   tradingPair: string;
   triggerType: "RSA" | string;
   orderType: "Market" | string;  // Assuming there may be other order types

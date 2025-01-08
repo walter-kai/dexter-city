@@ -43,4 +43,35 @@ export namespace coinmarketcap {
     price_change_24h: number;
     last_updated: string;  // ISO 8601 format string
   }
+
+  export interface TradingPair {
+    base_asset_contract_address: string;
+    base_asset_id: string;
+    base_asset_name: string;
+    base_asset_symbol: string;
+    contract_address: string;
+    created_at: string;
+    dex_id: string;
+    dex_slug: string;
+    lastUpdated: string;
+    name: string;
+    network_id: string;
+    network_slug: string;
+    quote: Array<{
+      convert_id: string;
+      fully_diluted_value: number;
+      last_updated: string;
+      liquidity: number;
+      percent_change_price_1h: number;
+      percent_change_price_24h: number;
+      price: number;
+      price_by_quote_asset: number;
+      volume_24h: number;
+      quote_asset_contract_address: string;
+      quote_asset_id: string;
+      quote_asset_name: string;
+      quote_asset_symbol: string;
+    }>;
+  }
+  
 }

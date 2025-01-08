@@ -8,6 +8,7 @@ import { login } from './services/FirestoreUser';
 import { useNavigate } from 'react-router-dom';
 import { client } from './services/SubGraph';
 import { Provider } from 'urql';
+import websocketService from './services/WebSocket';
 
 const App: React.FC = () => {
   const [user, setUser] = useState<any>(null); // Adjust based on your actual user type
