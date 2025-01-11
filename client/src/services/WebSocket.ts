@@ -1,19 +1,26 @@
-import PairDetails from "@/components/PairDetails";
+import PairDetails from "../components/PairDetails";
 import { CoinMarketCap } from "../models/Token";
 
 type PairUpdateCallback = (pairDetails: CoinMarketCap.TradingPair) => void;
 type ErrorCallback = (error: string) => void;
 
-class WebSocketService {
+export class WebSocketService {
   private websocket: WebSocket | null = null;
   private pairDetails: Record<string, CoinMarketCap.TradingPair> = {};
   private callbacks: Record<string, PairUpdateCallback[]> = {};
+  private globalCallbacks: PairUpdateCallback[] = []; // New array for global "all pairs" subscribers
   private errorCallback: ErrorCallback | null = null;
+  private reconnectAttempts = 0;
 
   public connect(): void {
     if (this.websocket) return;
 
     this.websocket = new WebSocket("ws://localhost:3001/ws/pairs");
+
+    this.websocket.onopen = () => {
+      console.log("WebSocket connection established.");
+      this.reconnectAttempts = 0; // Reset reconnect attempts
+    };
 
     this.websocket.onmessage = (event: MessageEvent) => {
       const message = JSON.parse(event.data);
@@ -21,13 +28,23 @@ class WebSocketService {
       if (message.type === "pairUpdate") {
         message.data.forEach((pair: CoinMarketCap.TradingPair) => {
           this.pairDetails[pair.name] = pair;
+          // Notify all subscribers for this specific pair
+          if (this.callbacks[pair.name]) {
+            this.callbacks[pair.name].forEach((callback) => callback(pair));
+          }
 
-          // Notify all subscribers for this pair
-          const callbacks = this.callbacks[pair.name] || [];
-          callbacks.forEach((callback) => callback(pair));
+          // Notify global subscribers (all pairs)
+          if (this.callbacks["all"]) {
+            this.callbacks["all"].forEach((callback) => callback(pair));
+          }
+
+
+          // Notify global subscribers for all pairs (if any)
+          this.globalCallbacks.forEach((callback) => callback(pair));
+
+          // Persist updated data to localStorage
+          // localStorage.setItem("pairDetails", JSON.stringify(this.pairDetails));
         });
-      } else if (message.type === "error" && this.errorCallback) {
-        this.errorCallback(message.message);
       }
     };
 
@@ -39,36 +56,74 @@ class WebSocketService {
     };
 
     this.websocket.onclose = () => {
-      console.log("WebSocket connection closed");
-      this.websocket = null;
+      console.log("WebSocket connection closed.");
+      this.websocket = null; // Reset the websocket reference on close
+      this.reconnect(); // Attempt to reconnect
     };
   }
 
-  public subscribeToPair(
-    tradingPair: string,
-    callback: PairUpdateCallback
-  ): void {
-    if (!this.callbacks[tradingPair]) {
-      this.callbacks[tradingPair] = [];
+  private reconnect(): void {
+    if (this.websocket || this.reconnectAttempts >= 5) return; // Limit reconnect attempts
+
+    const delay = Math.min(1000 * 2 ** this.reconnectAttempts, 30000); // Exponential backoff
+    console.log(`Reconnecting in ${delay / 1000} seconds...`);
+
+    setTimeout(() => {
+      this.reconnectAttempts++;
+      this.connect();
+    }, delay);
+  }
+
+  // Subscribe to a specific pair by name
+  public subscribeToPair(pairName: string, callback: PairUpdateCallback): void {
+    if (!this.callbacks[pairName]) {
+      this.callbacks[pairName] = [];
     }
-    this.callbacks[tradingPair].push(callback);
+    this.callbacks[pairName].push(callback);
   }
 
-  public getAll(): Record<string, CoinMarketCap.TradingPair> {
-    return this.pairDetails;
+  // Unsubscribe from a specific pair by name
+  public unsubscribeFromPair(pairName: string, callback: PairUpdateCallback): void {
+    if (!this.callbacks[pairName]) return;
+
+    this.callbacks[pairName] = this.callbacks[pairName].filter(
+      (cb) => cb !== callback
+    );
+
+    // Clean up if no more callbacks are listening for this pair
+    if (this.callbacks[pairName].length === 0) {
+      delete this.callbacks[pairName];
+    }
   }
 
-  public setErrorCallback(callback: ErrorCallback): void {
+  // Subscribe to all pairs (global subscription)
+  public subscribeToAllPairs(callback: PairUpdateCallback): void {
+    this.globalCallbacks.push(callback);
+  }
+
+  // Unsubscribe from all pairs
+  public unsubscribeFromAllPairs(callback: PairUpdateCallback): void {
+    this.globalCallbacks = this.globalCallbacks.filter((cb) => cb !== callback);
+  }
+
+  public getPairDetails(pairName: string): CoinMarketCap.TradingPair | undefined {
+    return this.pairDetails[pairName];
+  }
+
+  public getAll(): Promise<Record<string, CoinMarketCap.TradingPair>> {
+    return Promise.resolve(this.pairDetails); // Return the cached pairs
+  }
+
+  public onError(callback: ErrorCallback): void {
     this.errorCallback = callback;
   }
 
   public disconnect(): void {
-    if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
+    if (this.websocket) {
       this.websocket.close();
+      this.websocket = null;
     }
   }
 }
 
-const websocketService = new WebSocketService();
-websocketService.connect();
-export default websocketService;
+

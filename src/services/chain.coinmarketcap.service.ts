@@ -24,7 +24,7 @@ const getTrades = async (
       const tokenData = tokenDoc.data();
 
       if (tokenData) {
-        const lastUpdated = new Date(tokenData.lastUpdated)
+        const lastUpdated = new Date(tokenData.lastUpdated);
         const currentTime = new Date();
 
         // Check if lastUpdated is within 10 seconds
@@ -69,8 +69,7 @@ const getTrades = async (
     const tradeData = {
       // network_slug: network,
       // contract_address: contractAddress,
-      trades: json.data[0].trades,
-      lastUpdated: json.status.timestamp,
+      trades: json.data[0].trades
     };
 
     await tokenRef.set(tradeData, { merge: true });

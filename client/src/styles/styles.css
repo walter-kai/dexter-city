@@ -12,8 +12,12 @@ body {
   background-color: #fdfdfd;
 }
 
-h1, h2 {
-  color: #333;
+h1 {
+  color: #adccd9;
+}
+
+h2 {
+  color: #91c2d7;
 }
 
 ul {

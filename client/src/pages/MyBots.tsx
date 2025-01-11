@@ -7,8 +7,7 @@ import BotDetails from '../components/BotDetail';
 import { generateLogoHash } from '../components/BotDetail';
 
 const MyBots = () => {
-  const { botId } = useParams<{ botId?: string }>();
-  const { publicToken, fetchPublicToken } = useToken();
+
   const navigate = useNavigate(); // Hook for navigation
 
   const [bots, setBots] = useState<BotConfig[]>([]);
@@ -16,7 +15,7 @@ const MyBots = () => {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ walletId: string } | null>(null);
   const [selectedBotId, setSelectedBotId] = useState<string | null>(null);
-  const [triggerBuildModal, setBuildModal] = useState<boolean | null>(null);
+
   const [botToDelete, setBotToDelete] = useState<string | null>(null);
 
   const selectedBot = bots.find((bot) => bot.botName === selectedBotId);
@@ -73,7 +72,8 @@ const MyBots = () => {
   };
 
   const handleTriggerBuildModal = () => {
-    setBuildModal(!triggerBuildModal);
+    navigate('/build');
+
   };
 
   const handleCloseModal = () => {
@@ -254,18 +254,6 @@ const MyBots = () => {
         </div>
       )}
 
-      {/* Build Modal */}
-      {triggerBuildModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                      <button
-              onClick={handleTriggerBuildModal}
-              className="absolute top-4 right-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300"
-            >
-              ✕
-            </button>
-          <BuildBot />
-        </div>
-      )}
 
       {/* View Modal */}
       {selectedBot && (
