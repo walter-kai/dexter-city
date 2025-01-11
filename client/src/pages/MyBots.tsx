@@ -4,7 +4,7 @@ import { useToken } from '../services/TokenProvider';
 import { BotConfig } from '../models/Bot';
 import BuildBot from './Build';
 import BotDetails from '../components/BotDetail';
-import { generateLogoHash } from '../components/BotDetail';
+import { generateLogoHash } from "../services/Robohash";
 
 const MyBots = () => {
 

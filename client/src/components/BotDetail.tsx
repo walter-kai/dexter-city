@@ -1,6 +1,7 @@
 import React from "react";
 
 import { BotConfig } from "../models/Bot";
+import { generateLogoHash } from "../services/Robohash";
 
 interface BotDetailsPageProps {
   bot: BotConfig | null;
@@ -58,10 +59,6 @@ const BotDetails: React.FC<BotDetailsPageProps> = ({ bot, onClose }) => {
       </div>
     </div>
   );
-};
-
-export const generateLogoHash = (name: string) => {
-  return `https://robohash.org/${encodeURIComponent(name)}`;
 };
 
 export default BotDetails;

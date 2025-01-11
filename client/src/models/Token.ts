@@ -47,10 +47,12 @@ export namespace CoinMarketCap {
   export interface TradingPair {
     base_asset_contract_address: string;
     base_asset_id: string;
+    base_asset_ucid: string;
     base_asset_name: string;
     base_asset_symbol: string;
     quote_asset_contract_address: string;
     quote_asset_id: string;
+    quote_asset_ucid: string;
     quote_asset_name: string;
     quote_asset_symbol: string;
     contract_address: string;

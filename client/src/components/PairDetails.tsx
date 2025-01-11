@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
-import { Chart, Plugin } from "chart.js";
+import { Chart, Colors, Plugin } from "chart.js";
 import { CoinMarketCap } from "../models/Token";
 import "chart.js/auto"; // Automatically registers required chart.js components
 import LoadingScreenDots from "./LoadingScreenDots";
 
 interface PairDetailsProps {
   tradingPair: CoinMarketCap.TradingPair | undefined;
+  safetyOrdersCount: number;
+  priceDeviation: number; // as a fraction (e.g., 0.04 for 4%)
+  gapMultiplier: number;
 }
 
 interface Trade {
@@ -21,17 +24,18 @@ interface Trade {
   }[];
 }
 
-const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
+const PairDetails: React.FC<PairDetailsProps> = ({ 
+  tradingPair, 
+  safetyOrdersCount, 
+  priceDeviation, 
+  gapMultiplier 
+}) => {
   const [error, setError] = useState<string | null>(null);
   const [trades, setTrades] = useState<Trade[]>([]);
   const [calculatedValues, setCalculatedValues] = useState<{
     currentPrice: number;
     safetyOrderPrices: number[];
   } | null>(null);
-
-  const [safetyOrdersCount, setSafetyOrdersCount] = useState(8);
-  const [priceDeviation, setPriceDeviation] = useState(0.04); // 4%
-  const [gapMultiplier, setGapMultiplier] = useState(1.2);
 
   useEffect(() => {
     if (!tradingPair) return;
@@ -60,11 +64,10 @@ const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
 
     const mostRecentPrice = trades[trades.length - 1].quote[0].price;
     const safetyOrderPrices: number[] = [];
-    let lastPrice = 0;
 
     for (let i = 0; i < safetyOrdersCount; i++) {
       const deviationMultiplier = priceDeviation * Math.pow(gapMultiplier, i);
-      const safetyOrderPrice = mostRecentPrice - mostRecentPrice * deviationMultiplier;
+      const safetyOrderPrice = (safetyOrderPrices.length > 0 ? safetyOrderPrices[i-1] : mostRecentPrice) - mostRecentPrice * deviationMultiplier/100;
       safetyOrderPrices.push(safetyOrderPrice);
     }
 
@@ -86,13 +89,22 @@ const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
     beforeDraw(chart) {
       const ctx = chart.ctx;
       const yScale = chart.scales.y;
-
+  
       if (!ctx || !yScale || !calculatedValues) return;
-
+  
       const { currentPrice, safetyOrderPrices } = calculatedValues;
-
+  
+      // Clip to the chart's drawing area
       ctx.save();
-
+      ctx.beginPath();
+      ctx.rect(
+        chart.chartArea.left,
+        chart.chartArea.top,
+        chart.chartArea.right - chart.chartArea.left,
+        chart.chartArea.bottom - chart.chartArea.top
+      );
+      ctx.clip();
+  
       // Draw the current price line
       const currentPriceY = yScale.getPixelForValue(currentPrice);
       ctx.beginPath();
@@ -102,7 +114,7 @@ const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
       ctx.moveTo(chart.chartArea.left, currentPriceY);
       ctx.lineTo(chart.chartArea.right, currentPriceY);
       ctx.stroke();
-
+  
       // Draw safety order lines
       safetyOrderPrices.forEach((price) => {
         const y = yScale.getPixelForValue(price);
@@ -114,11 +126,11 @@ const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
         ctx.lineTo(chart.chartArea.right, y);
         ctx.stroke();
       });
-
-      ctx.restore();
+  
+      ctx.restore(); // Restore the original clipping area
     },
   };
-
+  
   useEffect(() => {
     Chart.register(safetyOrdersPlugin);
     return () => {
@@ -134,12 +146,20 @@ const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
         title: {
           display: true,
           text: "Time",
+          color: "white",
+        },
+        ticks: {
+          color: "white", // Set label color to white for x-axis
         },
       },
       y: {
         title: {
           display: true,
           text: "Price",
+          color: "white",
+        },
+        ticks: {
+          color: "white", // Set label color to white for y-axis
         },
       },
     },
@@ -147,7 +167,9 @@ const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
 
   const chartData = trades
     ? {
-        labels: trades.map((trade) => new Date(trade.date).toLocaleTimeString()),
+        labels: trades.map((trade) =>
+          new Date(trade.date).toLocaleTimeString('en-GB', { hour12: false })
+        ),
         datasets: [
           {
             label: "Price",
@@ -203,41 +225,8 @@ const PairDetails: React.FC<PairDetailsProps> = ({ tradingPair }) => {
               </div>
             </p>
           </div>
-          <div>
-            <div className="inputs">
-              <label>
-                Safety Orders Count:
-                <input
-                  type="number"
-                  className="text-black mx-2 px-2 w-16"
-                  value={safetyOrdersCount}
-                  onChange={(e) => setSafetyOrdersCount(parseInt(e.target.value))}
-                />
-              </label>
-              <label>
-                Price Deviation (%):
-                <input
-                  type="number"
-                  step="0.001"
-                  className="text-black mx-2 px-2 w-16"
-                  value={priceDeviation}
-                  onChange={(e) => setPriceDeviation(parseFloat(e.target.value))}
-                />
-              </label>
-              <label>
-                Gap Multiplier:
-                <input
-                  type="number"
-                  step="0.1"
-                  className="text-black mx-2 px-2 w-16"
-                  value={gapMultiplier}
-                  onChange={(e) => setGapMultiplier(parseFloat(e.target.value))}
-                />
-              </label>
-            </div>
-          </div>
           {trades && chartData ? (
-            <div className="h-full">
+            <div className="h-[550px]">
               <Line data={chartData} options={chartOptions} />
             </div>
           ) : (

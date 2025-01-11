@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Select from "react-select";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../models/Bot";
 import { CoinMarketCap } from "../models/Token";
@@ -6,6 +7,7 @@ import { CoinMarketCap } from "../models/Token";
 import PairDetails from "../components/PairDetails";
 import { usePairDetails } from "../contexts/PairDetails";
 import User from "../models/User";
+import { generateLogoHash } from "../services/Robohash";
 
 const BuildBot: React.FC = () => {
   const [formData, setFormData] = useState<BotConfig>({
@@ -157,99 +159,158 @@ const BuildBot: React.FC = () => {
     }
   };
 
-  return (
-    <div className="h-full mt-6 items-center bg-gradient-to-bl from-[#343949] to-[#7c8aaf]">
-      <h1 className="text-2xl text-center text-white rounded">Create a DCA Bot</h1>
-      <div className="flex h-full">
+  const DropdownWithImages: React.FC<{
+    availablePairs: CoinMarketCap.TradingPair[];
+    formData: BotConfig;
+    onChange: (pair: string) => void;
+  }> = ({ availablePairs, formData, onChange }) => {
+    const options = availablePairs
+      .filter((pair) => pair.network_slug === formData.network)
+      .map((pair) => ({
+        value: pair.name,
+        label: (
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex">
+              <img
+                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair?.base_asset_ucid || "default"}.png`}
+                alt={`${pair.base_asset_symbol} icon`}
+                className="w-5 h-5 mr-2"
+                // style={{ width: 20, height: 20, marginRight: 4 }}
+              />
+              {pair.base_asset_symbol}
+            </div>
+            <div className="flex">
+              <img
+                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair?.quote_asset_ucid || "default"}.png`}
+                alt={`${pair.quote_asset_symbol} icon`}
+                className="w-5 h-5 mr-2"
+              />
+              {pair.quote_asset_symbol}
+            </div>
+          </div>
+        ),
+        style: {
+          backgroundColor: "FFFFFF", // Example: gold for BTC, light gray for others
+        },
+      }));
+  
+    return (
+      <Select
+        options={options}
+        onChange={(selectedOption: any) => {
+          if (selectedOption) {
+            onChange((selectedOption as any).value);
+          }
+        }}
+        value={options.find((option) => option.value === formData.tradingPair)} // Bind current value
+        placeholder="Select a pair"
+        isSearchable
+      />
+    );
+  };
+  
+  
 
-        {/* Live price display */}
-        <div className="col-span-2 bg-gray-800 p-4 mt-4">
-          <PairDetails tradingPair={tradingPair} />
-        </div>
-        <form onSubmit={handleSubmit}>
-          {/* General Configuration */}
-          <div className="grid grid-cols-2 gap-6">
-            <div className="col-span-2">
-              <label className="block text-white">Bot Name:</label>
+
+  return (
+    <div className="h-[700px] mt-6 items-center bg-gray-800 z-1">
+      <div className="flex z-3 h-full gap-4 mx-10">
+
+      <form onSubmit={handleSubmit}>
+
+        <h1 className="text-2xl  text-center text-white rounded">Create a DCA Bot</h1>
+        {/* General Configuration */}
+          <div className="flex ">
+            <label className="text-white my-auto pr-2">Bot Name:</label>
                 <input
                   type="text"
                   name="botName"
                   value={formData.botName}
                   onChange={handleInputChange}
-                  className="w-full p-2 bg-gray-800 text-white rounded"
+                  className="p-2 bg-gray-500 text-white rounded left-0"
                   placeholder="Enter a unique name"
                 />
                 {botNameError && <p className="text-red-500">{botNameError}</p>}
-            </div>
           </div>
+        <div className="grid grid-cols-2 gap-6">
+          { formData.botName.length > 0 ? (
+            <img src={generateLogoHash(formData.botName)} alt="profile pic" className="h-[200px]"></img>
+          ) : (
+            <img src={"dexter.png"} alt="profile pic" className="h-[200px]"></img>
+          ) }
+          <div className="">
+              <div>
+                <label className="block text-white">Network:</label>
+                <select
+                  name="network"
+                  value={formData.network}
+                  onChange={handleInputChange}
+                  className="p-2 bg-gray-500 text-white rounded"
+                >
+                  <option value="Ethereum">Ethereum</option>
+                  <option value="Solana">Solana</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-white">Trading Pair:</label>
+                <DropdownWithImages
+                  availablePairs={availablePairs}
+                  formData={formData}
+                  onChange={(pair: string) => {
+                    setFormData({
+                      ...formData,
+                      tradingPair: pair,
+                    });
+                  }}                  />
 
-        <div className="grid grid-cols-4 gap-4">
-          <div>
-            <label className="block text-white">Network:</label>
-            <select
-              name="network"
-              value={formData.network}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-            >
-              <option value="Ethereum">Ethereum</option>
-              <option value="Solana">Solana</option>
-            </select>
+                <div className="flex h-12 m-2">
+                  <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.base_asset_ucid}.png`} alt="token icon"></img>
+                  <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.quote_asset_ucid}.png`} alt="token icon"></img>
+                </div>
+              </div>
           </div>
-          <div>
-            <label className="block text-white">Trading Pair:</label>
-            <select
-              name="tradingPair"
-              value={formData.tradingPair}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              disabled={availablePairs.length === 0}
-            >
-              {
-                availablePairs
-                  .filter((pair) => pair.network_slug === formData.network)
-                  .map((pair) => (
-                    <option key={pair.name} value={pair.name}>
-                      {pair.name}
-                    </option>
-                  ))
-              }
-            </select>
-          </div>
+        </div>
 
-
-          <div>
-            <label className="block text-white">Trailing Take Profit (%):</label>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="relative">
+            <label className="block text-white">Trailing Take Profit</label>
             <input
               type="number"
               name="trailingTakeProfit"
               value={formData.trailingTakeProfit}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+              step="0.01"
             />
+            <span className="absolute right-3 bottom-[8px] text-teal-100">%</span>
           </div>
-          <div>
-            <label className="block text-white">Price Deviation (%):</label>
+
+          <div className="relative">
+            <label className="block text-white">Price Deviation</label>
             <input
               type="number"
               name="priceDeviation"
               value={formData.priceDeviation}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+              step="0.01"
             />
+            <span className="absolute right-3 bottom-[8px] text-teal-100">%</span>
           </div>
-          <div>
-            <label className="block text-white">Cooldown Period (seconds):</label>
+          
+          <div className="relative">
+            <label className="block text-white">Cooldown Period</label>
             <input
               type="number"
               name="cooldownPeriod"
               value={formData.cooldownPeriod}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
             />
+            <span className="absolute right-3 bottom-[8px] text-teal-100">s</span>
           </div>
+
+
           <div>
             <label className="block text-white">Safety Orders:</label>
             <input
@@ -257,31 +318,35 @@ const BuildBot: React.FC = () => {
               name="safetyOrders"
               value={formData.safetyOrders}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
+              className="w-full p-2 bg-gray-500 text-white rounded"
             />
           </div>
-          <div>
-            <label className="block text-white">Safety Order Gap Multiplier:</label>
+
+          <div className="relative">
+            <label className="block text-white">Safety Order Gap Multiplier</label>
             <input
               type="number"
               name="safetyOrderGapMultiplier"
               value={formData.safetyOrderGapMultiplier}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+              step="0.01"
             />
+            <span className="absolute right-3 bottom-[8px] text-teal-100">x</span>
           </div>
-          <div>
-            <label className="block text-white">Safety Order Size Multiplier:</label>
+          <div className="relative">
+            <label className="block text-white">Safety Order Size Multiplier</label>
             <input
               type="number"
               name="safetyOrderSizeMultiplier"
               value={formData.safetyOrderSizeMultiplier}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-800 text-white rounded"
-              step="0.1"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+              step="0.01"
             />
+            <span className="absolute right-3 bottom-[8px] text-teal-100">x</span>
           </div>
+
           <div className="col-span-2 text-center mt-4">
             <button
               type="submit"
@@ -292,7 +357,18 @@ const BuildBot: React.FC = () => {
             {formError && <p className="text-red-500 mt-2">{formError}</p>}
           </div>
         </div>
-      </form>
+
+        </form>
+        {/* Live price display */}
+        <div className="w-3/4 mt-4">
+          <PairDetails 
+            tradingPair={tradingPair}
+            safetyOrdersCount={formData.safetyOrders}
+            priceDeviation={formData.priceDeviation}
+            gapMultiplier={formData.safetyOrderGapMultiplier}
+          />
+        </div>
+
     </div>
 </div>
 );

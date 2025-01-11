@@ -79,7 +79,7 @@ wss.on('connection', (ws) => {
   sendLivePrices();
 
   // Setup to fetch updates periodically (e.g., every minute)
-  const intervalId = setInterval(sendLivePrices, 10000); // 10 seconds
+  const intervalId = setInterval(sendLivePrices, 100000); // 10 seconds
 
   // Cleanup when WebSocket disconnects
   ws.on('close', () => {
