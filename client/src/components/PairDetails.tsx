@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
 import { Chart, Colors, Plugin } from "chart.js";
-import { CoinMarketCap } from "../models/Token";
+import { CoinMarketCap, Subgraph } from "../models/Token";
 import "chart.js/auto"; // Automatically registers required chart.js components
 import LoadingScreenDots from "./LoadingScreenDots";
 
 interface PairDetailsProps {
-  tradingPair: CoinMarketCap.TradingPair | undefined;
+  tradingPair: Subgraph.PairData | undefined;
   safetyOrdersCount: number;
   priceDeviation: number; // as a fraction (e.g., 0.04 for 4%)
   gapMultiplier: number;
@@ -37,27 +37,27 @@ const PairDetails: React.FC<PairDetailsProps> = ({
     safetyOrderPrices: number[];
   } | null>(null);
 
-  useEffect(() => {
-    if (!tradingPair) return;
+  // useEffect(() => {
+  //   if (!tradingPair) return;
 
-    const fetchTrades = async () => {
-      try {
-        const response = await fetch(
-          `/api/chain/trades?network=${tradingPair.network_slug}&contractAddress=${tradingPair.contract_address}`
-        );
-        if (!response.ok) {
-          throw new Error(`Failed to fetch trades: ${response.statusText}`);
-        }
-        const data = await response.json();
-        const tradesList: Trade[] = data.data;
-        setTrades(tradesList);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An unknown error occurred.");
-      }
-    };
+  //   const fetchTrades = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         `/api/chain/trades?network=${tradingPair.network_slug}&contractAddress=${tradingPair.contract_address}`
+  //       );
+  //       if (!response.ok) {
+  //         throw new Error(`Failed to fetch trades: ${response.statusText}`);
+  //       }
+  //       const data = await response.json();
+  //       const tradesList: Trade[] = data.data;
+  //       setTrades(tradesList);
+  //     } catch (err) {
+  //       setError(err instanceof Error ? err.message : "An unknown error occurred.");
+  //     }
+  //   };
 
-    fetchTrades();
-  }, [tradingPair]);
+  //   fetchTrades();
+  // }, [tradingPair]);
 
   const calculateSafetyOrderPrices = () => {
     if (!trades || trades.length === 0) return null;
@@ -167,7 +167,10 @@ const PairDetails: React.FC<PairDetailsProps> = ({
 
   const chartData = trades
     ? {
-        labels: trades.map((trade) =>
+      labels: trades
+        .slice() 
+        .reverse()
+        .map((trade) =>
           new Date(trade.date).toLocaleTimeString('en-GB', { hour12: false })
         ),
         datasets: [
@@ -184,7 +187,7 @@ const PairDetails: React.FC<PairDetailsProps> = ({
 
   return (
     <div className="text-white ">
-      Details for <h2>{tradingPair?.base_asset_name} 🔁 {tradingPair?.quote_asset_name}</h2>
+      {/* Details for <h2>{tradingPair?.base_asset_name} 🔁 {tradingPair?.quote_asset_name}</h2>
       {error ? (
         <p>Error: {error}</p>
       ) : tradingPair ? (
@@ -235,7 +238,7 @@ const PairDetails: React.FC<PairDetailsProps> = ({
         </>
       ) : (
         <p>Loading...</p>
-      )}
+      )} */}
     </div>
   );
 };

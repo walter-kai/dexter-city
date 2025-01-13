@@ -6,8 +6,8 @@ import NavBar from './components/NavBar';
 import { useSDK } from '@metamask/sdk-react';
 import { login } from './services/FirestoreUser';
 import { useNavigate } from 'react-router-dom';
-import { client } from './services/SubGraph';
-import { Provider } from 'urql';
+// import { client } from '../../src/services/SubGraph';
+// import { Provider } from 'urql';
 import { PairDetailsProvider } from './contexts/PairDetails'; // Import the provider
 
 const App: React.FC = () => {
@@ -48,7 +48,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <Provider value={client}>
+
       <PairDetailsProvider>
         <div className="bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen">
           {location.pathname !== '/' && <NavBar telegramUser={user} />}
@@ -62,7 +62,7 @@ const App: React.FC = () => {
           </div>
         </div>
       </PairDetailsProvider>
-    </Provider>
+
   );
 };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTokensQuery } from '../services/SubGraph';
+// import { useTokensQuery } from '../../../src/services/SubGraph';
 
 const LoadingSpinner: React.FC = () => (
   <div className="flex justify-center items-center mt-10">
@@ -13,16 +13,16 @@ const ErrorMessage: React.FC<{ message: string }> = ({ message }) => (
 );
 
 const TokenTable: React.FC = () => {
-  const [{ data, fetching, error }] = useTokensQuery();
+  // const [{ data, fetching, error }] = useTokensQuery();
 
-  if (fetching) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error.message} />;
+  // if (fetching) return <LoadingSpinner />;
+  // if (error) return <ErrorMessage message={error.message} />;
 
-  const ethPriceUSD = data?.bundles[0]?.ethPriceUSD;
+  // const ethPriceUSD = data?.bundles[0]?.ethPriceUSD;
 
   return (
     <div className="overflow-x-auto mt-10 bg-black/70 text-white">
-      <table className="min-w-full border-collapse border border-gray-300 text-sm">
+      {/* <table className="min-w-full border-collapse border border-gray-300 text-sm">
         <thead className="bg-gray-100 text-black">
           <tr>
             <th className="border border-gray-300 px-4 py-2 text-left">#</th>
@@ -49,7 +49,7 @@ const TokenTable: React.FC = () => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table> */}
     </div>
   );
 };

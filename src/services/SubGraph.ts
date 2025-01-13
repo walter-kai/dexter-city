@@ -2,7 +2,7 @@ import { createClient, cacheExchange, fetchExchange, useQuery as urqlUseQuery } 
 
 // Create the client to interact with the subgraph
 export const client = createClient({
-  url: 'https://gateway.thegraph.com/api/cf949c81dc1152037b34ecdea916c0a8/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV',
+  url: 'https://gateway.thegraph.com/api/cf949c81dc1152037b34ecdea916c0a8/subgraphs/id/A3Np3RQbaBA6oKJgiwDJeo5T3zrYfGHPWFYayMwtNDum',
   exchanges: [cacheExchange, fetchExchange],
 });
 
@@ -109,23 +109,56 @@ export const getPairDataQuery = (pairId: string): string => `{
 
 // Function to fetch all Uniswap pairs with pagination
 export const getAllPairsQuery = (skip: number): string => `{
-  query getAllPairs($skip: Int! {
-    pairs(first: 1000, skip: $skip) {
+    pairs(first: 1000, skip: $skip, orderBy: volumeUSD, orderDirection: desc) {
       id
+    	volumeUSD
+    	volumeToken0
+      token0Price
+        txCount
+
+      token0 {
+        symbol
+        name
+        tradeVolume
+        totalLiquidity
+        totalSupply
+      }
+    	volumeToken1
+    	token1Price
+      token1 {
+        symbol
+        name
+        tradeVolume
+        totalLiquidity
+        totalSupply
+      }
     }
-  }
 }`;
 
 // Function to fetch the most liquid pairs by reserveUSD
 export const getMostLiquidPairsQuery = `{
   pairs(first: 1000, orderBy: reserveUSD, orderDirection: desc) {
     id
+      token0Price
+      token0 {
+        symbol
+        name
+      }
+    	token1Price
+      token1 {
+        symbol
+        name
+      }
   }
 }`;
 
 // Function to fetch recent swaps within a specific pair
 export const getRecentSwapsQuery = (pairId: string): string => `{
-  swaps(orderBy: timestamp, orderDirection: desc, where: {pair: "${pairId}"}) {
+  swaps(orderBy: timestamp, orderDirection: desc, where: {
+    pair: "${pairId}"
+    timestamp_gte: 1719835200,
+    timestamp_lte: 1720440000
+  }) {
     pair {
       token0 {
         symbol

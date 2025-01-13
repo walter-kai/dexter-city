@@ -7,6 +7,8 @@ import { CoinMarketCap } from "../../client/src/models/Token"
 // Define the API base URL and endpoint
 const BASE_URL = "https://pro-api.coinmarketcap.com";
 const API_KEY = "f669f32d-181b-495b-865c-97eb53373232"; // Your API key
+// const BASE_URL = "https://api.coingecko.com/api/v3";
+// const API_KEY = "f669f32d-181b-495b-865c-97eb53373232"; // Your API key
 
 const getTrades = async (
   network: string,
@@ -273,23 +275,42 @@ const reloadTokens = async (
 };
 
 // Function to get tokens based on symbol
+const chunkArray = (array: string[], chunkSize: number): string[][] => {
+  const chunks: string[][] = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+  return chunks;
+};
+
 const getTokens = async (symbols: string[]): Promise<CoinMarketCap.Token[] | null> => {
   try {
     const tokensCollection = db.collection("tokens-cmc");
     const upperCaseSymbols = symbols.map(symbol => symbol.toUpperCase());
+    const chunkSize = 30; // Firestore limit
+    const symbolChunks = chunkArray(upperCaseSymbols, chunkSize);
 
-    const tokenSnapshot = await tokensCollection
-      .where("symbol", "in", upperCaseSymbols)
-      .get();
+    let allTokens: CoinMarketCap.Token[] = [];
 
-    if (tokenSnapshot.empty) {
+    for (const chunk of symbolChunks) {
+      const tokenSnapshot = await tokensCollection
+        .where("symbol", "in", chunk)
+        .get();
+
+      if (tokenSnapshot.empty) {
+        logger.warn(`No tokens found for symbols: ${chunk.join(", ")}`);
+      } else {
+        const tokens: CoinMarketCap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as CoinMarketCap.Token);
+        allTokens = [...allTokens, ...tokens];
+      }
+    }
+
+    if (allTokens.length === 0) {
       logger.warn(`No tokens found for symbols: ${symbols.join(", ")}`);
       return [];
     }
 
-    const tokens: CoinMarketCap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as CoinMarketCap.Token);
-
-    return tokens;
+    return allTokens;
   } catch (err) {
     logger.error(
       `Error fetching tokens by symbols: ${symbols.join(", ")}. ${err instanceof Error ? err.message : "An error occurred"}`
@@ -297,6 +318,7 @@ const getTokens = async (symbols: string[]): Promise<CoinMarketCap.Token[] | nul
     return null;
   }
 };
+
 
 // Function to get pairs based on symbols
 const getPairs = async (): Promise<CoinMarketCap.Token[] | null> => {

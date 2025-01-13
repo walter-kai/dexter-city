@@ -1,12 +1,12 @@
 import PairDetails from "../components/PairDetails";
-import { CoinMarketCap } from "../models/Token";
+import { CoinMarketCap, Subgraph } from "../models/Token";
 
-type PairUpdateCallback = (pairDetails: CoinMarketCap.TradingPair) => void;
+type PairUpdateCallback = (pairDetails: Subgraph.PairData) => void;
 type ErrorCallback = (error: string) => void;
 
 export class WebSocketService {
   private websocket: WebSocket | null = null;
-  private pairDetails: Record<string, CoinMarketCap.TradingPair> = {};
+  private pairDetails: Record<string, Subgraph.PairData> = {};
   private callbacks: Record<string, PairUpdateCallback[]> = {};
   private globalCallbacks: PairUpdateCallback[] = []; // New array for global "all pairs" subscribers
   private errorCallback: ErrorCallback | null = null;
@@ -26,7 +26,7 @@ export class WebSocketService {
       const message = JSON.parse(event.data);
 
       if (message.type === "pairUpdate") {
-        message.data.forEach((pair: CoinMarketCap.TradingPair) => {
+        message.data.forEach((pair: Subgraph.PairData) => {
           this.pairDetails[pair.name] = pair;
           // Notify all subscribers for this specific pair
           if (this.callbacks[pair.name]) {
@@ -106,11 +106,11 @@ export class WebSocketService {
     this.globalCallbacks = this.globalCallbacks.filter((cb) => cb !== callback);
   }
 
-  public getPairDetails(pairName: string): CoinMarketCap.TradingPair | undefined {
+  public getPairDetails(pairName: string): Subgraph.PairData | undefined {
     return this.pairDetails[pairName];
   }
 
-  public getAll(): Promise<Record<string, CoinMarketCap.TradingPair>> {
+  public getAll(): Promise<Record<string, Subgraph.PairData>> {
     return Promise.resolve(this.pairDetails); // Return the cached pairs
   }
 

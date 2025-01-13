@@ -4,7 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import morgan from 'morgan';
 import { Server as WebSocketServer } from 'ws'; // WebSocket library
-import coinmarketcap from './services/chain.coinmarketcap.service'; // Import getPairs function
+import subgraph from './services/chain.subgraph.service'; // Import getPairs function
 import routes from './routes';
 
 // Load environment variables
@@ -60,7 +60,7 @@ wss.on('connection', (ws) => {
   // Function to fetch the pairs and send to the client
   const sendLivePrices = async () => {
     try {
-      const pairs = await coinmarketcap.getPairs(); // Fetch the pairs data using getPairs function
+      const pairs = await subgraph.getPairs(); // Fetch the pairs data using getPairs function
       const updates = pairs ? pairs : [];
 
       // Send updates to the client

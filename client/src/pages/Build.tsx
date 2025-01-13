@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../models/Bot";
-import { CoinMarketCap } from "../models/Token";
+import { CoinMarketCap, Subgraph } from "../models/Token";
 
 import PairDetails from "../components/PairDetails";
 import { usePairDetails } from "../contexts/PairDetails";
@@ -35,7 +35,7 @@ const BuildBot: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tradingPair, setTradingPair] = useState<CoinMarketCap.TradingPair | undefined>(undefined);
+  const [tradingPair, setTradingPair] = useState<Subgraph.PairData | undefined>(undefined);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,7 +43,7 @@ const BuildBot: React.FC = () => {
   const { botConfig } = state || {};
 
   // Access pair details and available pairs from context
-  const { pairDetails, availablePairs } = usePairDetails();
+  const { pairDetails } = usePairDetails();
 
   useEffect(() => {
     if (botConfig) {
@@ -159,50 +159,52 @@ const BuildBot: React.FC = () => {
     }
   };
 
-  const DropdownWithImages: React.FC<{
-    availablePairs: CoinMarketCap.TradingPair[];
+  interface DropdownWithImagesProps {
+    availablePairs: Record<string, Subgraph.PairData>;
     formData: BotConfig;
     onChange: (pair: string) => void;
-  }> = ({ availablePairs, formData, onChange }) => {
-    const options = availablePairs
-      .filter((pair) => pair.network_slug === formData.network)
+  }
+  
+  const DropdownWithImages: React.FC<DropdownWithImagesProps> = ({ availablePairs, formData, onChange }) => {
+    // Generate options by filtering and mapping over the `availablePairs`
+    const options = Object.values(availablePairs)
+      .filter((pair) => pair.network === formData.network) // Filter pairs based on the selected network
       .map((pair) => ({
-        value: pair.name,
+        value: pair.name, // Use pair name as the value
         label: (
           <div className="grid grid-cols-2 gap-2">
-            <div className="flex">
+            <div className="flex items-center">
               <img
-                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair?.base_asset_ucid || "default"}.png`}
-                alt={`${pair.base_asset_symbol} icon`}
+                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair.token0ImgId || "default"}.png`}
+                alt={`${pair.token0.symbol} icon`}
                 className="w-5 h-5 mr-2"
-                // style={{ width: 20, height: 20, marginRight: 4 }}
               />
-              {pair.base_asset_symbol}
+              {pair.token0.symbol}
             </div>
-            <div className="flex">
+            <div className="flex items-center">
               <img
-                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair?.quote_asset_ucid || "default"}.png`}
-                alt={`${pair.quote_asset_symbol} icon`}
+                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair.token1ImgId || "default"}.png`}
+                alt={`${pair.token1.symbol} icon`}
                 className="w-5 h-5 mr-2"
               />
-              {pair.quote_asset_symbol}
+              {pair.token1.symbol}
             </div>
           </div>
         ),
         style: {
-          backgroundColor: "FFFFFF", // Example: gold for BTC, light gray for others
+          backgroundColor: "#FFFFFF", // Example: white background
         },
       }));
   
     return (
       <Select
         options={options}
-        onChange={(selectedOption: any) => {
+        onChange={(selectedOption) => {
           if (selectedOption) {
-            onChange((selectedOption as any).value);
+            onChange(selectedOption.value); // Pass the selected pair value to the parent component
           }
         }}
-        value={options.find((option) => option.value === formData.tradingPair)} // Bind current value
+        value={options.find((option) => option.value === formData.tradingPair)} // Set the current value
         placeholder="Select a pair"
         isSearchable
       />
@@ -254,7 +256,7 @@ const BuildBot: React.FC = () => {
               <div>
                 <label className="block text-white">Trading Pair:</label>
                 <DropdownWithImages
-                  availablePairs={availablePairs}
+                  availablePairs={pairDetails}
                   formData={formData}
                   onChange={(pair: string) => {
                     setFormData({
@@ -264,8 +266,8 @@ const BuildBot: React.FC = () => {
                   }}                  />
 
                 <div className="flex h-12 m-2">
-                  <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.base_asset_ucid}.png`} alt="token icon"></img>
-                  <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.quote_asset_ucid}.png`} alt="token icon"></img>
+                  <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token0ImgId}.png`} alt="token icon"></img>
+                  <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token1ImgId}.png`} alt="token icon"></img>
                 </div>
               </div>
           </div>

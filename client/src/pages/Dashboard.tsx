@@ -133,7 +133,7 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
 
-{/* <WrappedTokenTable /> */}
+<WrappedTokenTable />
 
               </div>
             </div>
