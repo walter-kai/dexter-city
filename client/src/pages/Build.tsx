@@ -165,35 +165,91 @@ const BuildBot: React.FC = () => {
     onChange: (pair: string) => void;
   }
   
-  const DropdownWithImages: React.FC<DropdownWithImagesProps> = ({ availablePairs, formData, onChange }) => {
+
+  
+  const customStyles = {
+    control: (base: any) => ({
+      ...base,
+      backgroundColor: "#6B7280", // Tailwind's bg-gray-800
+      color: "#ffffff",
+      borderColor: "#4b5563", // Tailwind's gray-600
+      borderRadius: "0.375rem", // Tailwind's rounded-md
+      padding: "0.25rem", // Tailwind's p-2
+    }),
+    menu: (base: any) => ({
+      ...base,
+      backgroundColor: "#1f2937", // Tailwind's bg-gray-800
+      color: "#ffffff",
+      // marginLeft: "-25%", // Shift dropdown 50% to the left
+      // width: "125%", // Extend width by 50%
+      zIndex: 10,
+    }),
+    menuList: (base: any) => ({
+      ...base,
+      padding: 0,
+      maxHeight: "200px", // Set a max height for scrollable behavior
+      overflowY: "auto", // Enable vertical scrolling
+      scrollbarWidth: "thin", // Firefox scrollbar
+      scrollbarColor: "#374151 #1f2937", // Scrollbar track and thumb colors (Firefox)
+      "&::-webkit-scrollbar": {
+        width: "8px", // Scrollbar width
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: "#374151", // Tailwind's gray-700
+        borderRadius: "4px", // Rounded scrollbar thumb
+      },
+      "&::-webkit-scrollbar-track": {
+        backgroundColor: "#1f2937", // Tailwind's bg-gray-800
+      },
+    }),
+    option: (base: any, { isFocused, isSelected }: any) => ({
+      ...base,
+      backgroundColor: isFocused
+        ? "#374151" // Tailwind's bg-gray-700
+        : isSelected
+        ? "#111827" // Tailwind's bg-gray-900
+        : "#1f2937", // Tailwind's bg-gray-800
+      color: "#ffffff",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+    }),
+    singleValue: (base: any) => ({
+      ...base,
+      color: "#ffffff",
+    }),
+  };
+  
+  const DropdownWithImages: React.FC<DropdownWithImagesProps> = ({
+    availablePairs,
+    formData,
+    onChange,
+  }) => {
     // Generate options by filtering and mapping over the `availablePairs`
     const options = Object.values(availablePairs)
       .filter((pair) => pair.network === formData.network) // Filter pairs based on the selected network
       .map((pair) => ({
         value: pair.name, // Use pair name as the value
         label: (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="flex">
             <div className="flex items-center">
               <img
                 src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair.token0ImgId || "default"}.png`}
-                alt={`${pair.token0.symbol} icon`}
+                alt={`${pair.name} token0 icon`}
                 className="w-5 h-5 mr-2"
               />
-              {pair.token0.symbol}
+              <span>{pair.name.split(":")[1] /* Extract token0 symbol */}</span>
             </div>
             <div className="flex items-center">
               <img
                 src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair.token1ImgId || "default"}.png`}
-                alt={`${pair.token1.symbol} icon`}
+                alt={`${pair.name} token1 icon`}
                 className="w-5 h-5 mr-2"
               />
-              {pair.token1.symbol}
+              <span>{pair.name.split(":")[2] /* Extract token1 symbol */}</span>
             </div>
           </div>
         ),
-        style: {
-          backgroundColor: "#FFFFFF", // Example: white background
-        },
       }));
   
     return (
@@ -205,14 +261,12 @@ const BuildBot: React.FC = () => {
           }
         }}
         value={options.find((option) => option.value === formData.tradingPair)} // Set the current value
-        placeholder="Select a pair"
+        // placeholder="Select a pair"
         isSearchable
+        styles={customStyles} // Apply custom styles
       />
     );
   };
-  
-  
-
 
   return (
     <div className="h-[700px] mt-6 items-center bg-gray-800 z-1">
@@ -222,57 +276,59 @@ const BuildBot: React.FC = () => {
 
         <h1 className="text-2xl  text-center text-white rounded">Create a DCA Bot</h1>
         {/* General Configuration */}
-          <div className="flex ">
-            <label className="text-white my-auto pr-2">Bot Name:</label>
-                <input
-                  type="text"
-                  name="botName"
-                  value={formData.botName}
-                  onChange={handleInputChange}
-                  className="p-2 bg-gray-500 text-white rounded left-0"
-                  placeholder="Enter a unique name"
-                />
-                {botNameError && <p className="text-red-500">{botNameError}</p>}
-          </div>
-        <div className="grid grid-cols-2 gap-6">
+
+        <div className="flex justify-center">
           { formData.botName.length > 0 ? (
             <img src={generateLogoHash(formData.botName)} alt="profile pic" className="h-[200px]"></img>
           ) : (
             <img src={"dexter.png"} alt="profile pic" className="h-[200px]"></img>
           ) }
-          <div className="">
-              <div>
-                <label className="block text-white">Network:</label>
-                <select
-                  name="network"
-                  value={formData.network}
-                  onChange={handleInputChange}
-                  className="p-2 bg-gray-500 text-white rounded"
-                >
-                  <option value="Ethereum">Ethereum</option>
-                  <option value="Solana">Solana</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-white">Trading Pair:</label>
-                <DropdownWithImages
-                  availablePairs={pairDetails}
-                  formData={formData}
-                  onChange={(pair: string) => {
-                    setFormData({
-                      ...formData,
-                      tradingPair: pair,
-                    });
-                  }}                  />
-
-                <div className="flex h-12 m-2">
-                  <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token0ImgId}.png`} alt="token icon"></img>
-                  <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token1ImgId}.png`} alt="token icon"></img>
-                </div>
-              </div>
-          </div>
         </div>
 
+        <div className="flex">
+            <div className="relative w-[66%]">
+              <label className="block text-white pr-2">Bot Name:</label>
+                  <input
+                    type="text"
+                    name="botName"
+                    value={formData.botName}
+                    onChange={handleInputChange}
+                    className="p-2 bg-gray-500 text-white rounded w-full"
+                    placeholder="Enter a unique name"
+                  />
+                  {botNameError && <p className="text-red-500">{botNameError}</p>}
+            </div>
+            <div className="ml-4 w-[33%]">
+              <label className="block text-white">Network:</label>
+              <select
+                name="network"
+                value={formData.network}
+                onChange={handleInputChange}
+                className="h-10 pl-1 w-full bg-gray-500 text-white rounded"
+              >
+                <option value="Ethereum">Ethereum</option>
+                <option value="Solana">Solana</option>
+              </select>
+            </div>
+              
+          </div>
+        <div>
+          <label className="block text-white">Trading Pair:</label>
+          <DropdownWithImages
+            availablePairs={pairDetails}
+            formData={formData}
+            onChange={(pair: string) => {
+              setFormData({
+                ...formData,
+                tradingPair: pair,
+              });
+            }}                  />
+
+          {/* <div className="flex h-12 m-2">
+            <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token0ImgId}.png`} alt="token icon"></img>
+            <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token1ImgId}.png`} alt="token icon"></img>
+          </div> */}
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="relative">
             <label className="block text-white">Trailing Take Profit</label>

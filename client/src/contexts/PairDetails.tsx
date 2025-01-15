@@ -60,9 +60,6 @@ export const PairDetailsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     websocketService.unsubscribeFromPair(pairName, callback);
   };
 
-  // Expose available pairs as part of the context
-  const availablePairs = Object.values(pairDetails); // This returns an array of all trading pairs
-
   return (
     <PairDetailsContext.Provider value={{ pairDetails, subscribeToPair, unsubscribeFromPair }}>
       {children}
