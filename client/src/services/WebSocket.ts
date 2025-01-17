@@ -1,4 +1,4 @@
-import PairDetails from "../components/PairDetails";
+import PairChart from "../components/PairChart";
 import { CoinMarketCap, Subgraph } from "../models/Token";
 
 type PairUpdateCallback = (pairDetails: Subgraph.PairData) => void;

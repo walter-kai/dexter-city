@@ -2,6 +2,23 @@ import { Request, Response } from "express";
 import subgraphService from "../services/chain.subgraph.service";
 
 
+// const getSwaps = async (req: Request, res: Response): Promise<Response> => {
+//   try {
+//     // Fetch pairs for Solana
+//     const uniswapSuccess = await subgraphService.getSwaps();
+//     if (!uniswapSuccess) {
+//       console.error("Failed to reload pairs for Uniswap.");
+//       return res.status(500).json({ error: "Failed to reload pairs for Uniswap." });
+//     }
+
+//     // If both succeeded, return success response
+//     return res.status(200).json({ message: "Pairs reloaded successfully for Uniswap subgraph." });
+//   } catch (error) {
+//     console.error("Error reloading pairs:", error);
+//     return res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
 const reloadPairs = async (req: Request, res: Response): Promise<Response> => {
   try {
     // Fetch pairs for Solana
@@ -38,34 +55,35 @@ const getPairs = async (req: Request, res: Response): Promise<Response> => {
 };
 
 
-// const getTrades = async (req: Request, res: Response): Promise<Response> => {
-//   const { network, contractAddress } = req.query; // Extract network and contractAddress from query parameters
+const reloadSwaps = async (req: Request, res: Response): Promise<Response> => {
+  const { contractAddress } = req.query; // Extract network and contractAddress from query parameters
 
-//   try {
-//     // Check if the required parameters are provided
-//     if (!network || !contractAddress) {
-//       return res.status(400).json({ error: "Missing required parameters: network and contractAddress" });
-//     }
+  try {
+    // Check if the required parameters are provided
+    if (!contractAddress) {
+      return res.status(400).json({ error: "Missing required parameters: network and contractAddress" });
+    }
 
-//     // Fetch the cryptocurrency data using the service's getTrades method
-//     const tradesList = await subgraphService.getTrades(network as string, contractAddress as string);
+    // Fetch the cryptocurrency data using the service's getTrades method
+    const tradesList = await subgraphService.reloadSwaps(contractAddress as string);
 
-//     // Check if the dexList is null
-//     if (!tradesList) {
-//       return res.status(404).json({ error: "Dex list not found" });
-//     }
+    // Check if the dexList is null
+    if (!tradesList) {
+      return res.status(404).json({ error: "Dex list not found" });
+    }
 
-//     // Return the fetched data
-//     return res.json({ data: tradesList });
-//   } catch (error) {
-//     console.error("Error fetching trades:", error);
-//     return res.status(500).json({ error: "Internal server error" });
-//   }
-// };
+    // Return the fetched data
+    return res.json({ data: tradesList });
+  } catch (error) {
+    console.error("Error fetching trades:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
 export default {
   reloadPairs,
   getPairs,
-  // getTrades
+  // getSwaps,
+  reloadSwaps
 };

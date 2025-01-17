@@ -3,7 +3,7 @@ import { db } from "../config/firebase";
 import admin from "firebase-admin";
 import logger from "../config/logger";
 import { CoinMarketCap, Subgraph } from "../../client/src/models/Token";
-import { getAllPairsQuery } from "./SubGraph";
+import { getAllPairsQuery, getRecentSwapsQuery, getRecentSwapsQueryFromLastUpdate } from "./SubGraph";
 import coinMarketCapService from "./chain.coinmarketcap.service"
 
 // Create the client to interact with the subgraph
@@ -145,7 +145,160 @@ const reloadPairs = async (): Promise<Subgraph.PairData[] | null> => {
   }
 };
 
+const reloadSwaps = async (contractAddress: string): Promise<Subgraph.SwapData[] | null> => {
+  try {
+    const tokensCollection = db.collection("pairs-uniswap");
 
+    // Check if the pair exists in Firestore by contract address
+    const tokenSnapshot = await tokensCollection.where("id", "==", contractAddress).get();
+
+    if (tokenSnapshot.empty) {
+      logger.warn("No pairs found in Firestore for the given contract address.");
+      return [];
+    }
+
+    const pairDoc = tokenSnapshot.docs[0];
+    // Check if the 'swaps' subcollection exists
+    const swapsCollection = pairDoc.ref.collection("swaps");
+    const swapsSnapshot = await swapsCollection.get();
+
+    let swaps: Subgraph.SwapData[] = [];
+
+    if (!swapsSnapshot.empty) {
+      // If swaps exist in the subcollection, return them
+      swaps = swapsSnapshot.docs.map((doc) => doc.data() as Subgraph.SwapData);
+
+      // Sort swaps by timestamp in descending order
+      swaps = swaps.sort((a, b) => b.timestamp - a.timestamp);
+
+      // Get the most recent swap timestamp after sorting
+      const mostRecentSwap = swaps[0];
+      const mostRecentTimestamp = mostRecentSwap.timestamp;
+
+      // Fetch more swaps from the subgraph, passing the most recent timestamp
+      const updatedSwaps = await updateSwapsFromSubgraph(contractAddress, mostRecentTimestamp);
+      swaps = swaps.concat(updatedSwaps);
+    } else {
+      // If no swaps are found in Firestore, fetch from the subgraph
+      const swapsFromSubgraph = await fetchSwapsFromSubgraph(contractAddress);
+      swaps = swapsFromSubgraph;
+    }
+
+    // Sort swaps by timestamp in descending order (again after new swaps are added)
+    swaps = swaps.sort((a, b) => b.timestamp - a.timestamp);
+
+    // Save the new swaps to Firestore
+    if (swaps.length > 0) {
+      const batch = db.batch();
+
+      // Add each swap to the Firestore collection
+      swaps.forEach((swap) => {
+        const swapRef = pairDoc.ref.collection("swaps").doc(); // Create a new document reference for each swap
+        batch.set(swapRef, swap); // Set the swap data in Firestore
+      });
+
+      // Commit the batch write
+      await batch.commit();
+      logger.info(`Successfully saved ${swaps.length} swaps to Firestore.`);
+    }
+
+    return swaps;
+
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      logger.error(`Error fetching pairs from Firestore: ${err.message}`);
+    } else {
+      logger.error("Unknown error occurred while fetching pairs from Firestore.");
+    }
+    return null;
+  }
+};
+
+
+
+/**
+ * Fetch recent swaps from the subgraph for a specific pair.
+ * This will attempt to fetch the data 5 times, similar to the previous pairs fetching logic.
+ */
+const fetchSwapsFromSubgraph = async (contractAddress: string): Promise<Subgraph.SwapData[]> => {
+  let skip = 0;
+  let allSwaps: Subgraph.SwapData[] = [];
+
+  try {
+    // Fetch swaps 5 times
+    for (let i = 0; i < 5; i++) {
+      const result = await client
+        .query(getRecentSwapsQuery(contractAddress), { skip }) // Using pairName and skip for recent swaps
+        .toPromise();
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+
+      const swaps = result.data?.swaps || [];
+      allSwaps = allSwaps.concat(swaps);
+
+      // Stop fetching if fewer than 1000 items are returned
+      if (swaps.length < 1000) {
+        break;
+      }
+
+      skip += 1000;
+      logger.info(`Downloading swaps: ${skip} of 5000`);
+    }
+
+    return allSwaps;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      logger.error(`Error fetching recent swaps from subgraph: ${err.message}`);
+    } else {
+      logger.error("Unknown error occurred while fetching recent swaps from subgraph.");
+    }
+    return [];
+  }
+};
+
+/**
+ * Fetch recent swaps from the subgraph for a specific pair, starting from the most recent timestamp.
+ * This will attempt to fetch the data 5 times, similar to the previous swaps fetching logic.
+ */
+const updateSwapsFromSubgraph = async (contractAddress: string, startTimestamp: number): Promise<Subgraph.SwapData[]> => {
+  let skip = 0;
+  let allSwaps: Subgraph.SwapData[] = [];
+
+  try {
+    // Fetch swaps 5 times
+    for (let i = 0; i < 5; i++) {
+      const result = await client
+        .query(getRecentSwapsQueryFromLastUpdate(contractAddress, startTimestamp), { skip }) // Pass the startTimestamp to the query
+        .toPromise();
+
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
+
+      const swaps = result.data?.swaps || [];
+      allSwaps = allSwaps.concat(swaps);
+
+      // Stop fetching if fewer than 1000 items are returned
+      if (swaps.length < 1000) {
+        break;
+      }
+
+      skip += 1000;
+      logger.info(`Downloading swaps: ${skip} of 5000`);
+    }
+
+    return allSwaps;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      logger.error(`Error fetching recent swaps from subgraph: ${err.message}`);
+    } else {
+      logger.error("Unknown error occurred while fetching recent swaps from subgraph.");
+    }
+    return [];
+  }
+};
 
 
 /**
@@ -158,6 +311,7 @@ const getPairs = async (pairSymbols: string[] = []): Promise<Subgraph.PairData[]
 
     // Hardcoded list of pairs
     const hardcodedPairs = [
+      "ETH:ALPHA:WETH",
       "ETH:MYSTERY:WETH",
       "ETH:SPX:WETH",
       "ETH:FINE:WETH",
@@ -201,6 +355,7 @@ const getPairs = async (pairSymbols: string[] = []): Promise<Subgraph.PairData[]
 };
 
 export default {
+  reloadSwaps,
   reloadPairs,
   getPairs,
 };

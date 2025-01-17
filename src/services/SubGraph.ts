@@ -152,29 +152,60 @@ export const getMostLiquidPairsQuery = `{
   }
 }`;
 
-// Function to fetch recent swaps within a specific pair
-export const getRecentSwapsQuery = (pairId: string): string => `{
-  swaps(orderBy: timestamp, orderDirection: desc, where: {
-    pair: "${pairId}"
-    timestamp_gte: 1719835200,
-    timestamp_lte: 1720440000
-  }) {
-    pair {
-      token0 {
-        symbol
+// Function to fetch recent swaps within a specific pair, with a skip parameter for pagination
+export const getRecentSwapsQuery = (pairId: string, skip: number = 0, first: number = 1000): string => {
+  return `{
+    swaps(orderBy: timestamp, orderDirection: desc, where: {
+      pair: "${pairId}"
+    }, skip: ${skip}, first: ${first}) {
+      pair {
+        token0 {
+          symbol
+        }
+        token1 {
+          symbol
+        }
       }
-      token1 {
-        symbol
-      }
+      timestamp
+      amount0In
+      amount0Out
+      amount1In
+      amount1Out
+      amountUSD
+      to
     }
-    amount0In
-    amount0Out
-    amount1In
-    amount1Out
-    amountUSD
-    to
-  }
-}`;
+  }`;
+};
+
+
+// Function to fetch recent swaps starting from the last update timestamp up until now
+export const getRecentSwapsQueryFromLastUpdate = (pairId: string, lastUpdateTimestamp: number): string => {
+  const currentTimestamp = Math.floor(Date.now() / 1000); // Current time in seconds
+
+  return `{
+    swaps(orderBy: timestamp, orderDirection: desc, where: {
+      pair: "${pairId}"
+      timestamp_gte: ${lastUpdateTimestamp},
+      timestamp_lte: ${currentTimestamp}
+    }) {
+      pair {
+        token0 {
+          symbol
+        }
+        token1 {
+          symbol
+        }
+      }
+      amount0In
+      amount0Out
+      amount1In
+      amount1Out
+      amountUSD
+      to
+    }
+  }`;
+};
+
 
 // Function to fetch daily aggregated data for a specific pair
 export const getPairDailyAggregatedQuery = (pairAddress: string, date: string): string => `{

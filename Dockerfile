@@ -1,5 +1,5 @@
 # Stage 1: Build the client (React app)
-FROM node:16 AS client-build
+FROM node:20-alpine AS client-build
 
 # Set working directory
 WORKDIR /app/client
@@ -17,9 +17,9 @@ COPY client/ ./
 RUN npm run build
 
 # Stage 2: Build the server (Node/Express with TypeScript)
-FROM node:16 AS server-build
+FROM node:20-alpine AS server-build
 
-# Set working directory
+# Set working directory for server
 WORKDIR /app
 
 # Copy server dependencies and package.json
@@ -35,7 +35,7 @@ COPY src/ ./src
 RUN npm run build
 
 # Stage 3: Final stage to run the app (server and serve React build)
-FROM node:16
+FROM node:20-alpine
 
 # Set working directory
 WORKDIR /app
@@ -49,8 +49,8 @@ COPY --from=client-build /app/client/build ./client/build
 # Install production dependencies for server
 RUN npm install --only=production
 
-# Expose the ports (assuming you want server on 3001 and client on 3000)
-EXPOSE 3001
+# Expose the ports (frontend on 3000, backend on 3001)
+EXPOSE 3000 3001
 
 # Start the server (which will also serve the React app)
-CMD ["node", "dist/server.js"]
+CMD ["npm", "run", "start"]

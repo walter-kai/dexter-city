@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../models/Bot";
 import { CoinMarketCap, Subgraph } from "../models/Token";
 
-import PairDetails from "../components/PairDetails";
+import PairChart from "../components/PairChart";
 import { usePairDetails } from "../contexts/PairDetails";
 import User from "../models/User";
 import { generateLogoHash } from "../services/Robohash";
@@ -419,7 +419,7 @@ const BuildBot: React.FC = () => {
         </form>
         {/* Live price display */}
         <div className="w-3/4 mt-4">
-          <PairDetails 
+          <PairChart 
             tradingPair={tradingPair}
             safetyOrdersCount={formData.safetyOrders}
             priceDeviation={formData.priceDeviation}

@@ -98,57 +98,66 @@ export namespace CoinMarketCap {
 
 export namespace Subgraph {
 
-  // Define TypeScript types for queries
-export interface GlobalStats {
-  totalVolumeUSD: number;
-  totalLiquidityUSD: number;
-  txCount: number;
-}
+    // Define TypeScript types for queries
+  export interface GlobalStats {
+    totalVolumeUSD: number;
+    totalLiquidityUSD: number;
+    txCount: number;
+  }
 
-export interface TokenDetails {
-  symbol: string;
-  name: string;
-  tradeVolume: number;
-  totalLiquidity: number;
-  totalSupply: number;
-}
+  export interface TokenDetails {
+    symbol: string;
+    name: string;
+    tradeVolume: number;
+    totalLiquidity: number;
+    totalSupply: number;
+  }
 
-export interface PairData {
-  name: string;
-  network: "Ethereum";
-  id: string;
-  txCount: number;
-  volumeUSD: number;
-  volumeToken0: number;
-  token0Price: number;
-  token0: TokenDetails;
-  token0ImgId: number,
-  volumeToken1: number;
-  token1Price: number;
-  token1: TokenDetails;
-  token1ImgId: number,
+  export interface PairData {
+    name: string;
+    network: "Ethereum";
+    id: string;
+    txCount: number;
+    volumeUSD: number;
+    volumeToken0: number;
+    token0Price: number;
+    token0: TokenDetails;
+    token0ImgId: number,
+    volumeToken1: number;
+    token1Price: number;
+    token1: TokenDetails;
+    token1ImgId: number,
+    
+  }
+
   
-}
+  export interface SwapData {
+    amount0In: number;
+    amount0Out: number;
+    amount1In: number;
+    amount1Out: number;
+    amountUSD: number;
+    timestamp: number;
+  }
 
+  export interface TokenData {
+    name: string;
+    symbol: string;
+    decimals: number;
+    derivedETH: number;
+    tradeVolumeUSD: number;
+    totalLiquidity: number;
+  }
 
-export interface TokenData {
-  name: string;
-  symbol: string;
-  decimals: number;
-  derivedETH: number;
-  tradeVolumeUSD: number;
-  totalLiquidity: number;
-}
+  export interface DailyAggregatedData {
+    date: string;
+    dailyVolumeToken0: number;
+    dailyVolumeToken1: number;
+    dailyVolumeUSD: number;
+    reserveUSD: number;
+  }
 
-export interface DailyAggregatedData {
-  date: string;
-  dailyVolumeToken0: number;
-  dailyVolumeToken1: number;
-  dailyVolumeUSD: number;
-  reserveUSD: number;
-}
-
-export interface ETHPrice {
-  ethPrice: number;
-}
+  export interface ETHPrice {
+    ethPrice: number;
+  }
 }

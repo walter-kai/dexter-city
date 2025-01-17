@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Line } from "react-chartjs-2";
-import { Chart, Colors, Plugin } from "chart.js";
-import { CoinMarketCap, Subgraph } from "../models/Token";
+import { Chart, Plugin } from "chart.js";
 import "chart.js/auto"; // Automatically registers required chart.js components
 import LoadingScreenDots from "./LoadingScreenDots";
+import { Subgraph } from "@/models/Token";
 
 interface PairDetailsProps {
   tradingPair: Subgraph.PairData | undefined;
@@ -12,62 +12,50 @@ interface PairDetailsProps {
   gapMultiplier: number;
 }
 
-interface Trade {
-  date: string;
-  type: string;
-  quote: {
-    price: number;
-    amount_base_asset: number;
-    amount_quote_asset: number;
-    total: number;
-    price_by_quote_asset: number;
-  }[];
-}
-
-const PairDetails: React.FC<PairDetailsProps> = ({ 
-  tradingPair, 
-  safetyOrdersCount, 
-  priceDeviation, 
-  gapMultiplier 
+const PairChart: React.FC<PairDetailsProps> = ({
+  tradingPair: swapPair,
+  safetyOrdersCount,
+  priceDeviation,
+  gapMultiplier
 }) => {
   const [error, setError] = useState<string | null>(null);
-  const [trades, setTrades] = useState<Trade[]>([]);
+  const [swaps, setSwaps] = useState<Subgraph.SwapData[]>([]); // Corrected to use the Swap interface
   const [calculatedValues, setCalculatedValues] = useState<{
     currentPrice: number;
     safetyOrderPrices: number[];
   } | null>(null);
 
-  // useEffect(() => {
-  //   if (!tradingPair) return;
+  useEffect(() => {
+    if (!swapPair) return;
 
-  //   const fetchTrades = async () => {
-  //     try {
-  //       const response = await fetch(
-  //         `/api/chain/trades?network=${tradingPair.network_slug}&contractAddress=${tradingPair.contract_address}`
-  //       );
-  //       if (!response.ok) {
-  //         throw new Error(`Failed to fetch trades: ${response.statusText}`);
-  //       }
-  //       const data = await response.json();
-  //       const tradesList: Trade[] = data.data;
-  //       setTrades(tradesList);
-  //     } catch (err) {
-  //       setError(err instanceof Error ? err.message : "An unknown error occurred.");
-  //     }
-  //   };
+    const fetchSwaps = async () => {
+      try {
+        const response = await fetch(
+          `/api/chain/swaps?contractAddress=${swapPair.id}`
+        );
+        if (!response.ok) {
+          throw new Error(`Failed to fetch trades: ${response.statusText}`);
+        }
+        const data = await response.json();
+        const swapList: Subgraph.SwapData[] = data.data; // Corrected to use Swap[] instead of Subgraph.SwapData[]
+        setSwaps(swapList);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An unknown error occurred.");
+      }
+    };
 
-  //   fetchTrades();
-  // }, [tradingPair]);
+    fetchSwaps();
+  }, [swapPair]);
 
   const calculateSafetyOrderPrices = () => {
-    if (!trades || trades.length === 0) return null;
+    if (!swaps || swaps.length === 0) return null;
 
-    const mostRecentPrice = trades[trades.length - 1].quote[0].price;
+    const mostRecentPrice = swaps[swaps.length - 1].amountUSD; // Assuming amountUSD as the price for simplicity
     const safetyOrderPrices: number[] = [];
 
     for (let i = 0; i < safetyOrdersCount; i++) {
       const deviationMultiplier = priceDeviation * Math.pow(gapMultiplier, i);
-      const safetyOrderPrice = (safetyOrderPrices.length > 0 ? safetyOrderPrices[i-1] : mostRecentPrice) - mostRecentPrice * deviationMultiplier/100;
+      const safetyOrderPrice = (safetyOrderPrices.length > 0 ? safetyOrderPrices[i - 1] : mostRecentPrice) - mostRecentPrice * deviationMultiplier / 100;
       safetyOrderPrices.push(safetyOrderPrice);
     }
 
@@ -78,11 +66,11 @@ const PairDetails: React.FC<PairDetailsProps> = ({
   };
 
   useEffect(() => {
-    if (trades.length > 0) {
+    if (swaps.length > 0) {
       const values = calculateSafetyOrderPrices();
       if (values) setCalculatedValues(values);
     }
-  }, [trades, safetyOrdersCount, priceDeviation, gapMultiplier]);
+  }, [swaps, safetyOrdersCount, priceDeviation, gapMultiplier]);
 
   const safetyOrdersPlugin: Plugin = {
     id: "safetyOrders",
@@ -165,18 +153,18 @@ const PairDetails: React.FC<PairDetailsProps> = ({
     },
   };
 
-  const chartData = trades
+  const chartData = swaps
     ? {
-      labels: trades
-        .slice() 
-        .reverse()
-        .map((trade) =>
-          new Date(trade.date).toLocaleTimeString('en-GB', { hour12: false })
-        ),
+        labels: swaps
+          .slice() 
+          .reverse()
+          .map((swap) =>
+            new Date(swap.timestamp).toLocaleTimeString("en-GB", { hour12: false }) // Use timestamp here
+          ),
         datasets: [
           {
             label: "Price",
-            data: trades.map((trade) => trade.quote[0].price),
+            data: swaps.map((swap) => swap.amountUSD), // Assuming amountUSD as the price for simplicity
             borderColor: "rgba(75,192,192,1)",
             backgroundColor: "rgba(75,192,192,0.2)",
             fill: true,
@@ -187,48 +175,48 @@ const PairDetails: React.FC<PairDetailsProps> = ({
 
   return (
     <div className="text-white ">
-      {/* Details for <h2>{tradingPair?.base_asset_name} 🔁 {tradingPair?.quote_asset_name}</h2>
+      {/* Details for <h2>{swapPair?.base_asset_name} 🔁 {swapPair?.quote_asset_name}</h2> */}
       {error ? (
         <p>Error: {error}</p>
-      ) : tradingPair ? (
+      ) : swapPair ? (
         <>
           <div className="grid grid-cols-3 text-xs">
             <p>
-              <strong>Price:</strong> {tradingPair.quote[0].price}{" "}
-              {tradingPair.quote_asset_symbol}
+              {/* <strong>Price:</strong> {swapPair.quote[0].price}{" "}
+              {swapPair.quote_asset_symbol}
             </p>
             <p>
               <strong>1h Price Change:</strong>{" "}
-              {parseFloat(tradingPair.quote[0].percent_change_price_1h.toPrecision(4)) * 100}%
+              {parseFloat(swapPair.quote[0].percent_change_price_1h.toPrecision(4)) * 100}%
             </p>
             <p>
-              <strong>Liquidity:</strong> {tradingPair.quote[0].liquidity}
+              <strong>Liquidity:</strong> {swapPair.quote[0].liquidity}
             </p>
             <p>
               <strong>24h Price Change:</strong>{" "}
-              {parseFloat(tradingPair.quote[0].percent_change_price_24h.toPrecision(4)) * 100}%
+              {parseFloat(swapPair.quote[0].percent_change_price_24h.toPrecision(4)) * 100}%
             </p>
             <p>
-              <strong>Volume (24h):</strong> {tradingPair.quote[0].volume_24h}
+              <strong>Volume (24h):</strong> {swapPair.quote[0].volume_24h}
             </p>
             <p>
               <div>
                 <strong>Last Updated:</strong>{" "}
-                {new Date(tradingPair.last_updated).toLocaleDateString("en-US", {
+                {new Date(swapPair.last_updated).toLocaleDateString("en-US", {
                   month: "short",
                   day: "2-digit",
                   year: "numeric",
                 })}{" "}
-                {new Date(tradingPair.last_updated).toLocaleString("en-US", {
+                {new Date(swapPair.last_updated).toLocaleString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
                   second: "2-digit",
                   hour12: false,
                 })}
-              </div>
+              </div> */}
             </p>
           </div>
-          {trades && chartData ? (
+          {swaps && chartData ? (
             <div className="h-[550px]">
               <Line data={chartData} options={chartOptions} />
             </div>
@@ -238,9 +226,9 @@ const PairDetails: React.FC<PairDetailsProps> = ({
         </>
       ) : (
         <p>Loading...</p>
-      )} */}
+      )}
     </div>
   );
 };
 
-export default PairDetails;
+export default PairChart;
