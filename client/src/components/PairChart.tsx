@@ -110,13 +110,16 @@ const PairChart: React.FC<PairDetailsProps> = ({
           threshold: 10,  // Minimum movement required for panning
         },
         zoom: {
+          mode: 'x' as 'x', 
           wheel: {
             enabled: true,
-            mode: 'x' as 'x', 
           },
           pinch: {
             enabled: true,
-            mode: 'xy' as 'xy', 
+          },
+          limits: {
+            y: {min: 0, max: 100},
+            y2: {min: -5, max: 5}
           },
         },
       },
