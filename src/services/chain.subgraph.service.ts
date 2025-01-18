@@ -145,70 +145,26 @@ const reloadPairs = async (): Promise<Subgraph.PairData[] | null> => {
   }
 };
 
+
 const reloadSwaps = async (contractAddress: string): Promise<Subgraph.SwapData[] | null> => {
   try {
-    const tokensCollection = db.collection("pairs-uniswap");
+    // Fetch all swaps directly from the subgraph
+    const swaps = await fetchSwapsFromSubgraph(contractAddress);
 
-    // Check if the pair exists in Firestore by contract address
-    const tokenSnapshot = await tokensCollection.where("id", "==", contractAddress).get();
-
-    if (tokenSnapshot.empty) {
-      logger.warn("No pairs found in Firestore for the given contract address.");
+    if (!swaps || swaps.length === 0) {
+      logger.warn("No swaps found for the given contract address.");
       return [];
     }
 
-    const pairDoc = tokenSnapshot.docs[0];
-    // Check if the 'swaps' subcollection exists
-    const swapsCollection = pairDoc.ref.collection("swaps");
-    const swapsSnapshot = await swapsCollection.get();
+    // Sort swaps by timestamp in descending order
+    const sortedSwaps = swaps.sort((a, b) => b.timestamp - a.timestamp);
 
-    let swaps: Subgraph.SwapData[] = [];
-
-    if (!swapsSnapshot.empty) {
-      // If swaps exist in the subcollection, return them
-      swaps = swapsSnapshot.docs.map((doc) => doc.data() as Subgraph.SwapData);
-
-      // Sort swaps by timestamp in descending order
-      swaps = swaps.sort((a, b) => b.timestamp - a.timestamp);
-
-      // Get the most recent swap timestamp after sorting
-      const mostRecentSwap = swaps[0];
-      const mostRecentTimestamp = mostRecentSwap.timestamp;
-
-      // Fetch more swaps from the subgraph, passing the most recent timestamp
-      const updatedSwaps = await updateSwapsFromSubgraph(contractAddress, mostRecentTimestamp);
-      swaps = swaps.concat(updatedSwaps);
-    } else {
-      // If no swaps are found in Firestore, fetch from the subgraph
-      const swapsFromSubgraph = await fetchSwapsFromSubgraph(contractAddress);
-      swaps = swapsFromSubgraph;
-    }
-
-    // Sort swaps by timestamp in descending order (again after new swaps are added)
-    swaps = swaps.sort((a, b) => b.timestamp - a.timestamp);
-
-    // Save the new swaps to Firestore
-    if (swaps.length > 0) {
-      const batch = db.batch();
-
-      // Add each swap to the Firestore collection
-      swaps.forEach((swap) => {
-        const swapRef = pairDoc.ref.collection("swaps").doc(); // Create a new document reference for each swap
-        batch.set(swapRef, swap); // Set the swap data in Firestore
-      });
-
-      // Commit the batch write
-      await batch.commit();
-      logger.info(`Successfully saved ${swaps.length} swaps to Firestore.`);
-    }
-
-    return swaps;
-
+    return sortedSwaps;
   } catch (err: unknown) {
     if (err instanceof Error) {
-      logger.error(`Error fetching pairs from Firestore: ${err.message}`);
+      logger.error(`Error reloading swaps: ${err.message}`);
     } else {
-      logger.error("Unknown error occurred while fetching pairs from Firestore.");
+      logger.error("Unknown error occurred while reloading swaps.");
     }
     return null;
   }
@@ -270,7 +226,7 @@ const updateSwapsFromSubgraph = async (contractAddress: string, startTimestamp: 
     // Fetch swaps 5 times
     for (let i = 0; i < 5; i++) {
       const result = await client
-        .query(getRecentSwapsQueryFromLastUpdate(contractAddress, startTimestamp), { skip }) // Pass the startTimestamp to the query
+        .query(getRecentSwapsQueryFromLastUpdate(contractAddress, startTimestamp as number, skip), { skip }) // Pass the startTimestamp to the query
         .toPromise();
 
       if (result.error) {

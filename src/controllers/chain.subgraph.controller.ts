@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import subgraphService from "../services/chain.subgraph.service";
+import ApiError from "../utils/api-error";
 
 
 // const getSwaps = async (req: Request, res: Response): Promise<Response> => {
@@ -56,7 +57,12 @@ const getPairs = async (req: Request, res: Response): Promise<Response> => {
 
 
 const reloadSwaps = async (req: Request, res: Response): Promise<Response> => {
-  const { contractAddress } = req.query; // Extract network and contractAddress from query parameters
+
+  if (req.params.contractAddress == null) {
+    throw new ApiError(400, "Missing chatId in request params");
+  }
+
+  const contractAddress = req.params.contractAddress; // Extract network and contractAddress from query parameters
 
   try {
     // Check if the required parameters are provided

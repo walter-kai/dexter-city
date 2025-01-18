@@ -420,7 +420,7 @@ const BuildBot: React.FC = () => {
         {/* Live price display */}
         <div className="w-3/4 mt-4">
           <PairChart 
-            tradingPair={tradingPair}
+            swapPair={tradingPair}
             safetyOrdersCount={formData.safetyOrders}
             priceDeviation={formData.priceDeviation}
             gapMultiplier={formData.safetyOrderGapMultiplier}

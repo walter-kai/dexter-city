@@ -179,23 +179,24 @@ export const getRecentSwapsQuery = (pairId: string, skip: number = 0, first: num
 
 
 // Function to fetch recent swaps starting from the last update timestamp up until now
-export const getRecentSwapsQueryFromLastUpdate = (pairId: string, lastUpdateTimestamp: number): string => {
+export const getRecentSwapsQueryFromLastUpdate = (pairId: string, lastUpdateTimestamp: number, skip: number = 0, first: number = 1000): string => {
   const currentTimestamp = Math.floor(Date.now() / 1000); // Current time in seconds
+  const convertlastUpdateTimestamp = Math.floor(lastUpdateTimestamp); // Current time in seconds
 
   return `{
     swaps(orderBy: timestamp, orderDirection: desc, where: {
       pair: "${pairId}"
-      timestamp_gte: ${lastUpdateTimestamp},
-      timestamp_lte: ${currentTimestamp}
-    }) {
-      pair {
-        token0 {
-          symbol
+      timestamp_gte: ${convertlastUpdateTimestamp},
+      timestamp_lte: ${currentTimestamp},
+    }, skip: ${skip}, first: ${first}) {
+        pair {
+          token0 {
+            symbol
+          }
+          token1 {
+            symbol
+          }
         }
-        token1 {
-          symbol
-        }
-      }
       amount0In
       amount0Out
       amount1In

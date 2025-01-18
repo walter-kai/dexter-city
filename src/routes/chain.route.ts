@@ -8,7 +8,7 @@ const router = express.Router();
 // router.route("/dexs").put(chainController.reloadDexs);
 router.route("/tokens").put(coinMarketCapController.reloadTokens);
 // router.route("/swaps").get(subgraphController.getSwaps);
-router.route("/swaps").get(subgraphController.reloadSwaps);
+router.route("/swaps/:contractAddress").get(subgraphController.reloadSwaps);
 router.route("/pairs").get(subgraphController.getPairs);
 router.route("/reloadPairs").get(subgraphController.reloadPairs);
 // router.route("/tokens/:symbol").get(chainController.getTokenBySymbol);
