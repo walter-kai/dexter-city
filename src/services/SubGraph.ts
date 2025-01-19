@@ -174,6 +174,8 @@ export const getRecentSwapsQuery = (pairId: string, skip: number = 0, first: num
       amountUSD
       to
     }
+
+    
   }`;
 };
 

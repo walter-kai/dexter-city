@@ -1,12 +1,71 @@
 import React, { useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
-import { Chart, registerables } from "chart.js";
+import { Chart } from "react-chartjs-2";
+import { Chart as ChartJS, registerables } from "chart.js";
+import { OhlcElement, OhlcController, CandlestickElement, CandlestickController } from 'chartjs-chart-financial'
 import LoadingScreenDots from "./LoadingScreenDots";
 import { Subgraph } from "../models/Token";
 import zoomPlugin from "chartjs-plugin-zoom"; // Import the zoom plugin
+import 'chartjs-adapter-date-fns';  // Ensure that date-fns adapter is imported
+
+interface ChartOptions {
+  responsive: boolean;
+  maintainAspectRatio: boolean;
+  scales: {
+    x: {
+      title: {
+        display: boolean;
+        text: string;
+        color: string;
+      };
+      ticks: {
+        color: string;
+      };
+    };
+    y: {
+      title: {
+        display: boolean;
+        text: string;
+        color: string;
+      };
+      ticks: {
+        color: string;
+      };
+    };
+  };
+  plugins: {
+    zoom: {
+      pan: {
+        enabled: boolean;
+        mode: 'xy';
+        speed: number;
+        threshold: number;
+      };
+      zoom: {
+        mode: 'x';
+        wheel: {
+          enabled: boolean;
+        };
+        pinch: {
+          enabled: boolean;
+        };
+        limits: {
+          y: {
+            min: number;
+            max: number;
+          };
+          y2: {
+            min: number;
+            max: number;
+          };
+        };
+      };
+    };
+  };
+}
+
 
 // Register necessary chart components
-Chart.register(...registerables, zoomPlugin); // Register all components, including zoom plugin
+ChartJS.register(...registerables, zoomPlugin, OhlcElement, OhlcController, CandlestickElement, CandlestickController);
 
 interface PairDetailsProps {
   swapPair: Subgraph.PairData | undefined;
@@ -27,15 +86,14 @@ const PairChart: React.FC<PairDetailsProps> = ({
     currentPrice: number;
     safetyOrderPrices: number[];
   } | null>(null);
-  const [timeInterval, setTimeInterval] = useState<string>('1m'); // Track the selected time interval
+  const [timeInterval, setTimeInterval] = useState<'1m' | '15m' | '1h' | '1d'>('1m'); // Type the interval explicitly
 
   useEffect(() => {
     if (!swapPair) return;
 
     const fetchSwaps = async () => {
       try {
-        // Adjust the API endpoint to include the selected time interval
-        const response = await fetch(`/api/chain/swaps/${swapPair.id}?interval=${timeInterval}`);
+        const response = await fetch(`/api/chain/swaps/${swapPair.id}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch trades: ${response.statusText}`);
         }
@@ -47,7 +105,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
     };
 
     fetchSwaps();
-  }, [swapPair, timeInterval]); // Fetch data when swapPair or timeInterval changes
+  }, [swapPair]);
 
   useEffect(() => {
     const calculateSafetyOrderPrices = () => {
@@ -76,7 +134,75 @@ const PairChart: React.FC<PairDetailsProps> = ({
     }
   }, [swaps, safetyOrdersCount, priceDeviation, gapMultiplier]);
 
-  const chartOptions = {
+  // Function to aggregate swaps based on selected time interval
+  const aggregateSwapsByInterval = (swaps: Subgraph.SwapData[], interval: '1m' | '15m' | '1h' | '1d') => {
+    const intervalInMinutes: { [key in '1m' | '15m' | '1h' | '1d']: number } = {
+      '1m': 1,
+      '15m': 15,
+      '1h': 60,
+      '1d': 1440,
+    };
+
+    const intervalMinutes = intervalInMinutes[interval];
+
+    const aggregatedSwaps: { time: number; open: number; high: number; low: number; close: number }[] = [];
+    let bucketStartTime: number = Math.floor(swaps[0].timestamp / (intervalMinutes * 60)) * (intervalMinutes * 60);
+
+    let priceSum = 0;
+    let count = 0;
+    let low = Number.MAX_VALUE;
+    let high = -Number.MAX_VALUE;
+
+    swaps.forEach((swap) => {
+      const timestampInInterval = Math.floor(swap.timestamp / (intervalMinutes * 60)) * (intervalMinutes * 60);
+
+      if (timestampInInterval !== bucketStartTime) {
+        if (count > 0) {
+          aggregatedSwaps.push({
+            time: bucketStartTime * 1000,  // Save timestamp in milliseconds
+            open: priceSum / count,
+            high,
+            low,
+            close: priceSum / count,
+          });
+        }
+        bucketStartTime = timestampInInterval;
+        priceSum = 0;
+        count = 0;
+        low = Number.MAX_VALUE;
+        high = -Number.MAX_VALUE;
+      }
+
+      const { amount0In, amount1In, amount0Out, amount1Out } = swap;
+      let price = 0;
+
+      if (amount0In !== 0 && amount1Out !== 0) {
+        price = amount1Out / amount0In;
+      } else if (amount1In !== 0 && amount0Out !== 0) {
+        price = amount1In / amount0Out;
+      }
+
+      low = Math.min(low, price);
+      high = Math.max(high, price);
+      priceSum += price;
+      count++;
+    });
+
+    // Push the last bucket if it exists
+    if (count > 0) {
+      aggregatedSwaps.push({
+        time: bucketStartTime * 1000,  // Save timestamp in milliseconds
+        open: priceSum / count,
+        high,
+        low,
+        close: priceSum / count,
+      });
+    }
+
+    return aggregatedSwaps;
+  };
+
+  const chartOptions: ChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -125,40 +251,32 @@ const PairChart: React.FC<PairDetailsProps> = ({
       },
     },
   };
+  
 
-  const chartData = swaps
+  const chartData = swaps.length > 0
     ? {
-        labels: swaps
-          .slice()
-          .reverse()
-          .map((swap) =>
-            new Date(swap.timestamp * 1000).toLocaleTimeString("en-GB", {
-              hour12: false,
-            })
-          ),
+        labels: aggregateSwapsByInterval(swaps, timeInterval).map((swap) => swap.time),
         datasets: [
           {
             label: `${swapPair?.name.split(":")[1]} Price (USD)`,
-            data: swaps.map((swap) => {
-              // Determine price for each swap based on direction
-              if (swap.amount0In && swap.amount1Out) {
-                // If swapping amount0 for amount1
-                return swap.amount0In / swap.amount1Out;
-              } else if (swap.amount1In && swap.amount0Out) {
-                // If swapping amount1 for amount0
-                return swap.amount1In / swap.amount0Out;
-              }
-              return 0; // Default case (if no price can be determined)
-            }),
+            data: aggregateSwapsByInterval(swaps, timeInterval).map((swap) => ({
+              x: swap.time,
+              o: swap.open,
+              h: swap.high,
+              l: swap.low,
+              c: swap.close,
+            })),
             borderColor: "rgba(75,192,192,1)",
             backgroundColor: "rgba(75,192,192,0.2)",
+            pointRadius: 0,
+            borderWidth: 1,
             fill: false,
           },
         ],
       }
     : null;
 
-  const handleIntervalChange = (interval: string) => {
+  const handleIntervalChange = (interval: '1m' | '15m' | '1h' | '1d') => {
     setTimeInterval(interval);
   };
 
@@ -173,28 +291,24 @@ const PairChart: React.FC<PairDetailsProps> = ({
           </h2>
 
           {/* Time Interval Buttons */}
-          <div className="flex space-x-4">
-            {['1m', '15m', '1h', '1d'].map((interval) => (
-              <button
-                key={interval}
-                className={`p-2 ${timeInterval === interval ? 'bg-blue-500' : 'bg-gray-700'} text-white`}
-                onClick={() => handleIntervalChange(interval)}
-              >
-                {interval}
-              </button>
-            ))}
+          <div className="time-interval-buttons">
+            <button onClick={() => handleIntervalChange('1m')}>1m</button>
+            <button onClick={() => handleIntervalChange('15m')}>15m</button>
+            <button onClick={() => handleIntervalChange('1h')}>1h</button>
+            <button onClick={() => handleIntervalChange('1d')}>1d</button>
           </div>
 
-          {swaps && chartData ? (
-            <div className="h-[550px]">
-              <Line data={chartData} options={chartOptions} />
+          {/* Loading or Chart */}
+          {chartData ? (
+            <div style={{ height: "500px" }}>
+              <Chart type="candlestick" data={chartData} options={chartOptions} />
             </div>
           ) : (
             <LoadingScreenDots />
           )}
         </>
       ) : (
-        <p>Loading...</p>
+        <p>No pair selected</p>
       )}
     </div>
   );

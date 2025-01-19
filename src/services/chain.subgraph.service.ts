@@ -184,7 +184,7 @@ const fetchSwapsFromSubgraph = async (contractAddress: string): Promise<Subgraph
     // Fetch swaps 5 times
     for (let i = 0; i < 5; i++) {
       const result = await client
-        .query(getRecentSwapsQuery(contractAddress), { skip }) // Using pairName and skip for recent swaps
+        .query(getRecentSwapsQuery(contractAddress, skip), { skip }) // Using pairName and skip for recent swaps
         .toPromise();
 
       if (result.error) {
@@ -192,7 +192,18 @@ const fetchSwapsFromSubgraph = async (contractAddress: string): Promise<Subgraph
       }
 
       const swaps = result.data?.swaps || [];
-      allSwaps = allSwaps.concat(swaps);
+
+      // Convert string fields to numbers
+      const parsedSwaps = swaps.map((swap: any) => ({
+        amount0In: parseFloat(swap.amount0In),
+        amount0Out: parseFloat(swap.amount0Out),
+        amount1In: parseFloat(swap.amount1In),
+        amount1Out: parseFloat(swap.amount1Out),
+        amountUSD: parseFloat(swap.amountUSD),
+        timestamp: parseInt(swap.timestamp, 10),
+      }));
+
+      allSwaps = allSwaps.concat(parsedSwaps);
 
       // Stop fetching if fewer than 1000 items are returned
       if (swaps.length < 1000) {
@@ -203,7 +214,7 @@ const fetchSwapsFromSubgraph = async (contractAddress: string): Promise<Subgraph
       logger.info(`Downloading swaps: ${skip} of 5000`);
     }
 
-    return allSwaps;
+    return allSwaps as Subgraph.SwapData[];
   } catch (err: unknown) {
     if (err instanceof Error) {
       logger.error(`Error fetching recent swaps from subgraph: ${err.message}`);
@@ -213,6 +224,7 @@ const fetchSwapsFromSubgraph = async (contractAddress: string): Promise<Subgraph
     return [];
   }
 };
+
 
 /**
  * Fetch recent swaps from the subgraph for a specific pair, starting from the most recent timestamp.
