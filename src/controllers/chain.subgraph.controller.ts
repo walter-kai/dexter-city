@@ -20,23 +20,6 @@ import ApiError from "../utils/api-error";
 //   }
 // };
 
-const reloadPairs = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    // Fetch pairs for Solana
-    const uniswapSuccess = await subgraphService.reloadPairs();
-    if (!uniswapSuccess) {
-      console.error("Failed to reload pairs for Uniswap.");
-      return res.status(500).json({ error: "Failed to reload pairs for Uniswap." });
-    }
-
-    // If both succeeded, return success response
-    return res.status(200).json({ message: "Pairs reloaded successfully for Uniswap subgraph." });
-  } catch (error) {
-    console.error("Error reloading pairs:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
-
 const getPairs = async (req: Request, res: Response): Promise<Response> => {
   // const { symbol } = req.params; // Get the symbol from the URL params
 
@@ -56,7 +39,7 @@ const getPairs = async (req: Request, res: Response): Promise<Response> => {
 };
 
 
-const reloadSwaps = async (req: Request, res: Response): Promise<Response> => {
+const getSwaps = async (req: Request, res: Response): Promise<Response> => {
 
   if (req.params.contractAddress == null) {
     throw new ApiError(400, "Missing chatId in request params");
@@ -71,7 +54,7 @@ const reloadSwaps = async (req: Request, res: Response): Promise<Response> => {
     }
 
     // Fetch the cryptocurrency data using the service's getTrades method
-    const tradesList = await subgraphService.reloadSwaps(contractAddress as string);
+    const tradesList = await subgraphService.getSwaps(contractAddress as string);
 
     // Check if the dexList is null
     if (!tradesList) {
@@ -88,8 +71,6 @@ const reloadSwaps = async (req: Request, res: Response): Promise<Response> => {
 
 
 export default {
-  reloadPairs,
   getPairs,
-  // getSwaps,
-  reloadSwaps
+  getSwaps
 };

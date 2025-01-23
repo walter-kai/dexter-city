@@ -37,9 +37,15 @@ interface PairData {
 }
 
 interface Pair {
-  token1: any;
-  token0: any;
   id: string;
+  token0: {
+    id: string;
+    symbol: string;
+  };
+  token1: {
+    id: string;
+    symbol: string;
+  };
 }
 
 interface TokenData {

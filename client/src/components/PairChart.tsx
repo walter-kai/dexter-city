@@ -80,6 +80,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
   priceDeviation,
   gapMultiplier,
 }) => {
+  const [loading, setLoading] = useState<boolean | null>(true);
   const [error, setError] = useState<string | null>(null);
   const [swaps, setSwaps] = useState<Subgraph.SwapData[]>([]);
   const [calculatedValues, setCalculatedValues] = useState<{
@@ -93,12 +94,14 @@ const PairChart: React.FC<PairDetailsProps> = ({
 
     const fetchSwaps = async () => {
       try {
+        setLoading(true);
         const response = await fetch(`/api/chain/swaps/${swapPair.id}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch trades: ${response.statusText}`);
         }
         const data = await response.json();
         setSwaps(data.data); // Assuming the API returns an array of swaps in `data.data`
+        setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unknown error occurred.");
       }
@@ -268,8 +271,8 @@ const PairChart: React.FC<PairDetailsProps> = ({
             })),
             borderColor: "rgba(75,192,192,1)",
             backgroundColor: "rgba(75,192,192,0.2)",
-            pointRadius: 0,
-            borderWidth: 1,
+            pointRadius: 1,
+            borderWidth: 2,
             fill: false,
           },
         ],
@@ -299,7 +302,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
           </div>
 
           {/* Loading or Chart */}
-          {chartData ? (
+          {loading? (<LoadingScreenDots />) : chartData ? (
             <div style={{ height: "500px" }}>
               <Chart type="candlestick" data={chartData} options={chartOptions} />
             </div>
