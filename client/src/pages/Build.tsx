@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import BuildForm from "../components/BuildForm";
 import LivePrice from "../components/LivePrice";
-import { PairDetailsProvider } from "../contexts/PairDetails";
+// import { PairDetailsProvider } from "../contexts/PairDetails";
 
 const BuildBot: React.FC = () => {
   const [selectedPair, setSelectedPair] = useState<string>("");
 
   return (
-    <PairDetailsProvider>
+    // <PairDetailsProvider>
       <div className="h-[700px] mt-6 items-center bg-gray-800 z-1">
         <div className="flex z-3 h-full gap-4 mx-10">
           <BuildForm setSelectedPair={setSelectedPair} />
@@ -16,7 +16,7 @@ const BuildBot: React.FC = () => {
           </div>
         </div>
       </div>
-    </PairDetailsProvider>
+    // </PairDetailsProvider>
   );
 };
 
