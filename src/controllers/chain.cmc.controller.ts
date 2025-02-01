@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import subgraphService from "../services/chain.subgraph.service";
+import cmcService from "../services/chain.cmc.service";
 import ApiError from "../utils/api-error";
 
 
@@ -24,42 +24,21 @@ const reloadTokens = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     // Fetch the cryptocurrency id by symbol using the service's get method
-    const tokens = await subgraphService.reloadTokens();
+    const tokens = await cmcService.reloadTokens();
 
     if (tokens === null) {
       return res.status(404).json({ error: `Dex list not found` });
     }
 
-    return res.json({ pairs: tokens }); // Respond with the id of the token
+    return res.json({ tokens }); // Respond with the id of the token
   } catch (error) {
     console.error("Error fetching token:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
-
-const reloadPools = async (req: Request, res: Response): Promise<Response> => {
-  const { tokenAddress } = req.params; // Get the symbol from the URL params
-
-  try {
-    // Fetch the cryptocurrency id by symbol using the service's get method
-    const pools = await subgraphService.reloadPools(tokenAddress);
-
-    if (pools === null) {
-      return res.status(404).json({ error: `Dex list not found` });
-    }
-
-    return res.json({ pools: pools }); // Respond with the id of the token
-  } catch (error) {
-    console.error("Error fetching token:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-
 
 
 
 export default {
   reloadTokens,
-  reloadPools
 };
