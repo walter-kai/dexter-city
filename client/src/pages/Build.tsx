@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import BuildForm from "../components/Build/Form";
+import BuildForm from "../components/BuildForm";
 import LivePrice from "../components/LivePrice";
 // import { PairDetailsProvider } from "../contexts/PairDetails";
 

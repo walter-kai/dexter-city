@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { BotConfig } from "../../models/Bot";
-import User from "../../models/User";
+import { BotConfig } from "../models/Bot";
+import User from "../models/User";
+import Select from "react-select";
 import { useNavigate } from "react-router-dom";
-import { Subgraph } from "../../models/Token";
-import { generateLogoHash } from "../../services/Robohash";
-import DropdownWithImages from "./Dropdown";
+import { Subgraph } from "../models/Token";
+import { generateLogoHash } from "../services/Robohash";
 // import { usePairDetails } from "../contexts/PairDetails";
 
 interface BotFormProps {
   setSelectedPair: (pair: string) => void;
 }
+
+interface DropdownWithImagesProps {
+    availableTokens: Record<string, Subgraph.TokenData>;
+    formData: BotConfig;
+    onChange: (pair: string) => void;
+  }
 
 const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
   const [formData, setFormData] = useState<BotConfig>({
@@ -40,6 +46,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+
   const fetchTokenDetails = async () => {
     setLoading(true);
     try {
@@ -63,6 +70,8 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
       setLoading(false);
     }
   };
+  
+
 
   useEffect(() => {
     fetchTokenDetails();
@@ -71,6 +80,59 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
   useEffect(() => {
     checkBotNameAvailability(formData.botName);
   }, [formData.botName]);
+
+  const customStyles = {
+    control: (base: any) => ({
+      ...base,
+      backgroundColor: "#6B7280", // Tailwind's bg-gray-800
+      color: "#ffffff",
+      borderColor: "#4b5563", // Tailwind's gray-600
+      borderRadius: "0.375rem", // Tailwind's rounded-md
+      padding: "0.25rem", // Tailwind's p-2
+    }),
+    menu: (base: any) => ({
+      ...base,
+      backgroundColor: "#1f2937", // Tailwind's bg-gray-800
+      color: "#ffffff",
+      // marginLeft: "-25%", // Shift dropdown 50% to the left
+      // width: "125%", // Extend width by 50%
+      zIndex: 10,
+    }),
+    menuList: (base: any) => ({
+      ...base,
+      padding: 0,
+      maxHeight: "200px", // Set a max height for scrollable behavior
+      overflowY: "auto", // Enable vertical scrolling
+      scrollbarWidth: "thin", // Firefox scrollbar
+      scrollbarColor: "#374151 #1f2937", // Scrollbar track and thumb colors (Firefox)
+      "&::-webkit-scrollbar": {
+        width: "8px", // Scrollbar width
+      },
+      "&::-webkit-scrollbar-thumb": {
+        backgroundColor: "#374151", // Tailwind's gray-700
+        borderRadius: "4px", // Rounded scrollbar thumb
+      },
+      "&::-webkit-scrollbar-track": {
+        backgroundColor: "#1f2937", // Tailwind's bg-gray-800
+      },
+    }),
+    option: (base: any, { isFocused, isSelected }: any) => ({
+      ...base,
+      backgroundColor: isFocused
+        ? "#374151" // Tailwind's bg-gray-700
+        : isSelected
+        ? "#111827" // Tailwind's bg-gray-900
+        : "#1f2937", // Tailwind's bg-gray-800
+      color: "#ffffff",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+    }),
+    singleValue: (base: any) => ({
+      ...base,
+      color: "#ffffff",
+    }),
+  };
 
 
   const handleInputChange = (
@@ -168,7 +230,44 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
     }
   };
 
-
+  const DropdownWithImages: React.FC<DropdownWithImagesProps> = ({
+    availableTokens,
+    formData,
+    onChange,
+  }) => {
+    // Generate options by filtering and mapping over the `availablePairs`
+    const options = Object.values(availableTokens)
+      .filter((pair) => pair.name.split(":")[0] === formData.network) // Filter pairs based on the selected network
+      .map((token) => ({
+        value: token.name, // Use pair name as the value
+        label: (
+          <div className="flex">
+            <div className="flex items-center">
+              <img
+                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${token.imgId || "default"}.png`}
+                alt={`${token.name}`}
+                className="w-5 h-5 mr-2"
+              />
+              <span>{token.symbol /* Extract token0 symbol */}</span>
+            </div>
+          </div>
+        ),
+      }));
+  
+    return (
+      <Select
+        options={options}
+        onChange={(selectedOption) => {
+          if (selectedOption) {
+            onChange(selectedOption.value); // Pass the selected pair value to the parent component
+          }
+        }}
+        value={options.find((option) => option.value === formData.tradingPair)} // Set the current value
+        isSearchable
+        styles={customStyles} // Apply custom styles
+      />
+    );
+  };
   
 
   return (
@@ -193,7 +292,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
                     name="botName"
                     value={formData.botName}
                     onChange={handleInputChange}
-                    className="p-2 bg-gray-900 text-white rounded w-full"
+                    className="p-2 bg-gray-500 text-white rounded w-full"
                     placeholder="Enter a unique name"
                   />
                   {botNameError && <p className="text-red-500">{botNameError}</p>}
@@ -204,7 +303,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
                 name="network"
                 value={formData.network}
                 onChange={handleInputChange}
-                className="h-10 pl-1 w-full bg-gray-900 text-white rounded"
+                className="h-10 pl-1 w-full bg-gray-500 text-white rounded"
               >
                 <option value="Ethereum">Ethereum</option>
                 <option value="Solana">Solana</option>
@@ -237,7 +336,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
               name="trailingTakeProfit"
               value={formData.trailingTakeProfit}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-900 text-white rounded pr-10"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
               step="0.01"
             />
             <span className="absolute right-3 bottom-[8px] text-teal-100">%</span>
@@ -250,7 +349,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
               name="priceDeviation"
               value={formData.priceDeviation}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-900 text-white rounded pr-10"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
               step="0.01"
             />
             <span className="absolute right-3 bottom-[8px] text-teal-100">%</span>
@@ -263,7 +362,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
               name="cooldownPeriod"
               value={formData.cooldownPeriod}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-900 text-white rounded pr-10"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
             />
             <span className="absolute right-3 bottom-[8px] text-teal-100">s</span>
           </div>
@@ -276,7 +375,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
               name="safetyOrders"
               value={formData.safetyOrders}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-900 text-white rounded"
+              className="w-full p-2 bg-gray-500 text-white rounded"
             />
           </div>
 
@@ -287,7 +386,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
               name="safetyOrderGapMultiplier"
               value={formData.safetyOrderGapMultiplier}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-900 text-white rounded pr-10"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
               step="0.01"
             />
             <span className="absolute right-3 bottom-[8px] text-teal-100">x</span>
@@ -299,7 +398,7 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
               name="safetyOrderSizeMultiplier"
               value={formData.safetyOrderSizeMultiplier}
               onChange={handleInputChange}
-              className="w-full p-2 bg-gray-900 text-white rounded pr-10"
+              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
               step="0.01"
             />
             <span className="absolute right-3 bottom-[8px] text-teal-100">x</span>
