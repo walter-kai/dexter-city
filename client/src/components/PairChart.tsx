@@ -230,6 +230,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
         },
       },
     },
+    
     plugins: {
       zoom: {
         pan: {
@@ -271,6 +272,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
             })),
             borderColor: "rgba(75,192,192,1)",
             backgroundColor: "rgba(75,192,192,0.2)",
+            
             pointRadius: 1,
             borderWidth: 2,
             fill: false,
@@ -282,6 +284,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
   const handleIntervalChange = (interval: '1m' | '15m' | '1h' | '1d') => {
     setTimeInterval(interval);
   };
+  
 
   return (
     <div className="text-white">

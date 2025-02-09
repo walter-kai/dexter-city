@@ -8,6 +8,8 @@ import PairChart from "../components/PairChart";
 import { usePairDetails } from "../contexts/PairDetails";
 import User from "../models/User";
 import { generateLogoHash } from "../services/Robohash";
+import PairChart2 from "../components/PairChart2";
+import RandomChart from "../components/RandoChart";
 
 const BuildBot: React.FC = () => {
   const [formData, setFormData] = useState<BotConfig>({
@@ -419,12 +421,14 @@ const BuildBot: React.FC = () => {
         </form>
         {/* Live price display */}
         <div className="w-3/4 mt-4">
-          <PairChart 
+          {/* <PairChart 
             swapPair={tradingPair}
             safetyOrdersCount={formData.safetyOrders}
             priceDeviation={formData.priceDeviation}
             gapMultiplier={formData.safetyOrderGapMultiplier}
-          />
+          /> */}
+          {/* <PairChart2 swapPair={tradingPair}/> */}
+          <RandomChart />
         </div>
 
     </div>
