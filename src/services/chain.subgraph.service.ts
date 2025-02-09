@@ -2,7 +2,7 @@ import { db } from "../config/firebase";
 import admin from "firebase-admin";
 import logger from "../config/logger";
 import { CoinMarketCap, Subgraph } from "../../client/src/models/Token";
-// import coinMarketCapService from "./chain.alchemy.service";
+import coinMarketCapService from "./chain.alchemy.service";
 
 import { createClient, cacheExchange, fetchExchange, useQuery as urqlUseQuery } from 'urql';
 
@@ -44,11 +44,15 @@ const reloadPoolsQuery = (tokenAddress: string): string => `{
 
 
 /**
+ * Save a single token to Firestore based on tokenAddress.
+ */
+/**
  * Get a token from Firestore based on tokenAddress.
  */
-const getToken = async (tokenAddress: string): Promise<Subgraph.TokenData | undefined> => {
+const getToken = async (tokenAddress: string): Promise<void> => {
   try {
     const tokensCollection = db.collection("tokens-uniswap");
+    const poolsCollection = db.collection("pools-uniswap");
 
     // Search for the token by its address
     const tokenSnapshot = await tokensCollection
@@ -57,20 +61,52 @@ const getToken = async (tokenAddress: string): Promise<Subgraph.TokenData | unde
       .get();
 
     if (tokenSnapshot.empty) {
-      return undefined;
+      throw new Error(`Token not found for address: ${tokenAddress}`);
     }
 
-    return tokenSnapshot.docs[0].data() as Subgraph.TokenData; // Get the first (and only) token from the query result
+    const token = tokenSnapshot.docs[0].data(); // Get the first (and only) token from the query result
+    logger.info(`Token with address ${tokenAddress} found:`, token);
 
+    // Fetch pools related to the token (assumed to be based on tokenAddress or token.id)
+    const poolsSnapshot = await poolsCollection
+      .where("tokenAddress", "==", tokenAddress) // Assuming you have tokenAddress in the pool collection
+      .get();
+
+    if (poolsSnapshot.empty) {
+      throw new Error(`No pools found for token address: ${tokenAddress}`);
+    }
+
+    let highestVolumeUSDPool = null;
+    let highestVolumeUSD = BigInt(0); // Start with zero as initial comparison value
+
+    poolsSnapshot.docs.forEach((doc) => {
+      const pool = doc.data();
+      const volumeUSD = pool.volumeUSD; // Assuming 'volumeUSD' is a string
+      
+      // Convert volumeUSD to a BigInt for accurate comparison
+      const volumeUSDBigInt = BigInt(volumeUSD); 
+
+      if (volumeUSDBigInt > highestVolumeUSD) {
+        highestVolumeUSD = volumeUSDBigInt;
+        highestVolumeUSDPool = pool;
+      }
+    });
+
+    if (highestVolumeUSDPool) {
+      logger.info(`Pool with the highest volumeUSD:`, highestVolumeUSDPool);
+    } else {
+      logger.warn(`No pools with valid volumeUSD found for token address: ${tokenAddress}`);
+    }
 
   } catch (err: unknown) {
     if (err instanceof Error) {
-      logger.error(`Error fetching token: ${err.message}`);
+      logger.error(`Error fetching token or pools: ${err.message}`);
     } else {
-      logger.error("Unknown error occurred while fetching token.");
+      logger.error("Unknown error occurred while fetching token or pools.");
     }
   }
 };
+
 
 
 /**

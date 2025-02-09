@@ -56,11 +56,11 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
       }
       const data = await response.json();
   
-      // Assuming `data` is an array of objects with `token` and `poolId` properties
+      // Assuming `data` is an object or array of token data that you want to store
+      // Here, we convert the data into a Record<string, Subgraph.TokenData>
       const tokenRecord: Record<string, Subgraph.TokenData> = {};
-  
-      data.forEach(({ token }: { token: Subgraph.TokenData }) => {
-        tokenRecord[token.id] = token; // Assuming 'id' is a unique field for tokens
+      data.forEach((token: Subgraph.TokenData) => {
+        tokenRecord[token.id] = token;  // Assuming 'id' is a unique field for tokens
       });
   
       setTokens(tokenRecord); // Update the state with the new token record
@@ -70,7 +70,6 @@ const BotForm: React.FC<BotFormProps> = ({ setSelectedPair }) => {
       setLoading(false);
     }
   };
-  
 
 
   useEffect(() => {
