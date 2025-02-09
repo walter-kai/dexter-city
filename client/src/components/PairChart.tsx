@@ -1,15 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Chart } from "react-chartjs-2";
 import { Chart as ChartJS, registerables } from "chart.js";
-import { OhlcElement, OhlcController, CandlestickElement, CandlestickController } from 'chartjs-chart-financial';
+import { OhlcElement, OhlcController, CandlestickElement, CandlestickController } from 'chartjs-chart-financial'
 import LoadingScreenDots from "./LoadingScreenDots";
-import { Pool, TickMath, nearestUsableTick } from "@uniswap/v3-sdk";
-import { Token, CurrencyAmount } from "@uniswap/sdk-core";
+import { Subgraph } from "../models/Token";
 import zoomPlugin from "chartjs-plugin-zoom"; // Import the zoom plugin
-import 'chartjs-adapter-date-fns';
-
-// Register necessary chart components
-ChartJS.register(...registerables, zoomPlugin, OhlcElement, OhlcController, CandlestickElement, CandlestickController);
+import 'chartjs-adapter-date-fns';  // Ensure that date-fns adapter is imported
 
 interface ChartOptions {
   responsive: boolean;
@@ -57,75 +53,159 @@ interface ChartOptions {
             min: number;
             max: number;
           };
+          y2: {
+            min: number;
+            max: number;
+          };
         };
       };
     };
   };
 }
 
+
+// Register necessary chart components
+ChartJS.register(...registerables, zoomPlugin, OhlcElement, OhlcController, CandlestickElement, CandlestickController);
+
 interface PairDetailsProps {
-  tokenA: Token;
-  tokenB: Token;
-  fee: number; // Fee tier (500, 3000, 10000 for Uniswap)
+  swapPair: Subgraph.PairData | undefined;
   safetyOrdersCount: number;
   priceDeviation: number; // as a fraction (e.g., 0.04 for 4%)
   gapMultiplier: number;
 }
 
 const PairChart: React.FC<PairDetailsProps> = ({
-  tokenA,
-  tokenB,
-  fee,
+  swapPair,
   safetyOrdersCount,
   priceDeviation,
   gapMultiplier,
 }) => {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean | null>(true);
   const [error, setError] = useState<string | null>(null);
+  const [swaps, setSwaps] = useState<Subgraph.SwapData[]>([]);
   const [calculatedValues, setCalculatedValues] = useState<{
     currentPrice: number;
     safetyOrderPrices: number[];
   } | null>(null);
-  const [timeInterval, setTimeInterval] = useState<'1m' | '15m' | '1h' | '1d'>('1m');
+  const [timeInterval, setTimeInterval] = useState<'1m' | '15m' | '1h' | '1d'>('1m'); // Type the interval explicitly
 
   useEffect(() => {
-    const fetchData = async () => {
+    if (!swapPair) return;
+
+    const fetchSwaps = async () => {
       try {
         setLoading(true);
-
-        // Example data to create a pool; you would fetch this dynamically in a real-world case
-        const pool = new Pool(
-          tokenA,
-          tokenB,
-          fee,
-          "789345679854345678", // sqrtPriceX96 (example value)
-          1000000, // liquidity (example value)
-          200000 // tickCurrent (example value)
-        );
-
-        const currentPrice = parseFloat(pool.token0Price.toSignificant(6));
-        const safetyOrderPrices: number[] = [];
-
-        for (let i = 0; i < safetyOrdersCount; i++) {
-          const deviationMultiplier = priceDeviation * Math.pow(gapMultiplier, i);
-          const safetyOrderPrice =
-            (safetyOrderPrices.length > 0 ? safetyOrderPrices[i - 1] : currentPrice) -
-            currentPrice * deviationMultiplier;
-          safetyOrderPrices.push(safetyOrderPrice);
+        const response = await fetch(`/api/chain/swaps/${swapPair.id}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch trades: ${response.statusText}`);
         }
-
-        setCalculatedValues({ currentPrice, safetyOrderPrices });
+        const data = await response.json();
+        setSwaps(data.data); // Assuming the API returns an array of swaps in `data.data`
         setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unknown error occurred.");
-        setLoading(false);
       }
     };
 
-    fetchData();
-  }, [tokenA, tokenB, fee, safetyOrdersCount, priceDeviation, gapMultiplier]);
+    fetchSwaps();
+  }, [swapPair]);
 
-  const chartOptions = {
+  useEffect(() => {
+    const calculateSafetyOrderPrices = () => {
+      if (!swaps || swaps.length === 0) return null;
+
+      const mostRecentPrice = swaps[swaps.length - 1].amountUSD;
+      const safetyOrderPrices: number[] = [];
+
+      for (let i = 0; i < safetyOrdersCount; i++) {
+        const deviationMultiplier = priceDeviation * Math.pow(gapMultiplier, i);
+        const safetyOrderPrice =
+          (safetyOrderPrices.length > 0 ? safetyOrderPrices[i - 1] : mostRecentPrice) -
+          mostRecentPrice * deviationMultiplier;
+        safetyOrderPrices.push(safetyOrderPrice);
+      }
+
+      return {
+        currentPrice: mostRecentPrice,
+        safetyOrderPrices,
+      };
+    };
+
+    if (swaps.length > 0) {
+      const values = calculateSafetyOrderPrices();
+      if (values) setCalculatedValues(values);
+    }
+  }, [swaps, safetyOrdersCount, priceDeviation, gapMultiplier]);
+
+  // Function to aggregate swaps based on selected time interval
+  const aggregateSwapsByInterval = (swaps: Subgraph.SwapData[], interval: '1m' | '15m' | '1h' | '1d') => {
+    const intervalInMinutes: { [key in '1m' | '15m' | '1h' | '1d']: number } = {
+      '1m': 1,
+      '15m': 15,
+      '1h': 60,
+      '1d': 1440,
+    };
+
+    const intervalMinutes = intervalInMinutes[interval];
+
+    const aggregatedSwaps: { time: number; open: number; high: number; low: number; close: number }[] = [];
+    let bucketStartTime: number = Math.floor(swaps[0].timestamp / (intervalMinutes * 60)) * (intervalMinutes * 60);
+
+    let priceSum = 0;
+    let count = 0;
+    let low = Number.MAX_VALUE;
+    let high = -Number.MAX_VALUE;
+
+    swaps.forEach((swap) => {
+      const timestampInInterval = Math.floor(swap.timestamp / (intervalMinutes * 60)) * (intervalMinutes * 60);
+
+      if (timestampInInterval !== bucketStartTime) {
+        if (count > 0) {
+          aggregatedSwaps.push({
+            time: bucketStartTime * 1000,  // Save timestamp in milliseconds
+            open: priceSum / count,
+            high,
+            low,
+            close: priceSum / count,
+          });
+        }
+        bucketStartTime = timestampInInterval;
+        priceSum = 0;
+        count = 0;
+        low = Number.MAX_VALUE;
+        high = -Number.MAX_VALUE;
+      }
+
+      const { amount0In, amount1In, amount0Out, amount1Out } = swap;
+      let price = 0;
+
+      if (amount0In !== 0 && amount1Out !== 0) {
+        price = amount1Out / amount0In;
+      } else if (amount1In !== 0 && amount0Out !== 0) {
+        price = amount1In / amount0Out;
+      }
+
+      low = Math.min(low, price);
+      high = Math.max(high, price);
+      priceSum += price;
+      count++;
+    });
+
+    // Push the last bucket if it exists
+    if (count > 0) {
+      aggregatedSwaps.push({
+        time: bucketStartTime * 1000,  // Save timestamp in milliseconds
+        open: priceSum / count,
+        high,
+        low,
+        close: priceSum / count,
+      });
+    }
+
+    return aggregatedSwaps;
+  };
+
+  const chartOptions: ChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
@@ -138,9 +218,6 @@ const PairChart: React.FC<PairDetailsProps> = ({
         ticks: {
           color: "white",
         },
-        grid: {
-          color: "rgba(255, 255, 255, 0.2)",
-        },
       },
       y: {
         title: {
@@ -151,21 +228,18 @@ const PairChart: React.FC<PairDetailsProps> = ({
         ticks: {
           color: "white",
         },
-        grid: {
-          color: "rgba(255, 255, 255, 0.2)",
-        },
       },
     },
     plugins: {
       zoom: {
         pan: {
           enabled: true,
-          mode: "xy",
-          speed: 10,
-          threshold: 10,
+          mode: 'xy' as 'xy',
+          speed: 10,  // Adjust the panning speed
+          threshold: 10,  // Minimum movement required for panning
         },
         zoom: {
-          mode: "x",
+          mode: 'x' as 'x', 
           wheel: {
             enabled: true,
           },
@@ -173,45 +247,71 @@ const PairChart: React.FC<PairDetailsProps> = ({
             enabled: true,
           },
           limits: {
-            y: { min: 0, max: 100 },
+            y: {min: 0, max: 100},
+            y2: {min: -5, max: 5}
           },
         },
       },
     },
-  } as ChartOptions;
+  };
+  
+
+  const chartData = swaps.length > 0
+    ? {
+        labels: aggregateSwapsByInterval(swaps, timeInterval).map((swap) => swap.time),
+        datasets: [
+          {
+            label: `${swapPair?.name.split(":")[1]} Price (USD)`,
+            data: aggregateSwapsByInterval(swaps, timeInterval).map((swap) => ({
+              x: swap.time,
+              o: swap.open,
+              h: swap.high,
+              l: swap.low,
+              c: swap.close,
+            })),
+            borderColor: "rgba(75,192,192,1)",
+            backgroundColor: "rgba(75,192,192,0.2)",
+            pointRadius: 1,
+            borderWidth: 2,
+            fill: false,
+          },
+        ],
+      }
+    : null;
+
+  const handleIntervalChange = (interval: '1m' | '15m' | '1h' | '1d') => {
+    setTimeInterval(interval);
+  };
 
   return (
     <div className="text-white">
       {error ? (
         <p>Error: {error}</p>
-      ) : loading ? (
-        <LoadingScreenDots />
-      ) : calculatedValues ? (
-        <div style={{ height: "500px" }}>
-          <Chart
-            type="candlestick"
-            data={{
-              labels: Array(safetyOrdersCount).fill(""),
-              datasets: [
-                {
-                  label: `Price for ${tokenA.symbol}/${tokenB.symbol}`,
-                  data: calculatedValues.safetyOrderPrices.map((price, index) => ({
-                    x: index,
-                    o: price,
-                    h: price * 1.02, // Example high price
-                    l: price * 0.98, // Example low price
-                    c: price, // Close price
-                  })),
-                  borderColor: "rgb(75, 192, 192)",
-                  backgroundColor: "rgba(75,192,192,0.2)",
-                },
-              ],
-            }}
-            options={chartOptions}
-          />
-        </div>
+      ) : swapPair ? (
+        <>
+          <h2>
+            {swapPair?.name.split(":")[1]} 🔁 {swapPair?.name.split(":")[0]}
+          </h2>
+
+          {/* Time Interval Buttons */}
+          <div className="time-interval-buttons">
+            <button onClick={() => handleIntervalChange('1m')}>1m</button>
+            <button onClick={() => handleIntervalChange('15m')}>15m</button>
+            <button onClick={() => handleIntervalChange('1h')}>1h</button>
+            <button onClick={() => handleIntervalChange('1d')}>1d</button>
+          </div>
+
+          {/* Loading or Chart */}
+          {loading? (<LoadingScreenDots />) : chartData ? (
+            <div style={{ height: "500px" }}>
+              <Chart type="candlestick" data={chartData} options={chartOptions} />
+            </div>
+          ) : (
+            <LoadingScreenDots />
+          )}
+        </>
       ) : (
-        <p>No data available</p>
+        <p>No pair selected</p>
       )}
     </div>
   );

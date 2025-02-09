@@ -59,20 +59,20 @@ wss.on('connection', (ws) => {
 
   // Function to fetch the pairs and send to the client
   const sendLivePrices = async () => {
-    // try {
-    //   const pairs = await subgraph.getPairs(); // Fetch the pairs data using getPairs function
-    //   const updates = pairs ? pairs : [];
+    try {
+      const pairs = await subgraph.getPairs(); // Fetch the pairs data using getPairs function
+      const updates = pairs ? pairs : [];
 
-    //   // Send updates to the client
-    //   if (ws.readyState === ws.OPEN) {
-    //     ws.send(JSON.stringify({ type: 'pairUpdate', data: updates }));
-    //   }
-    // } catch (error) {
-    //   console.error('Error fetching pairs:', error);
-    //   if (ws.readyState === ws.OPEN) {
-    //     ws.send(JSON.stringify({ type: 'error', message: 'Error fetching pairs updates' }));
-    //   }
-    // }
+      // Send updates to the client
+      if (ws.readyState === ws.OPEN) {
+        ws.send(JSON.stringify({ type: 'pairUpdate', data: updates }));
+      }
+    } catch (error) {
+      console.error('Error fetching pairs:', error);
+      if (ws.readyState === ws.OPEN) {
+        ws.send(JSON.stringify({ type: 'error', message: 'Error fetching pairs updates' }));
+      }
+    }
   };
 
   // Initial fetch when the connection is established

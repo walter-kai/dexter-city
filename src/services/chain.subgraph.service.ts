@@ -1,390 +1,183 @@
+import { createClient, cacheExchange, fetchExchange } from "urql";
 import { db } from "../config/firebase";
 import admin from "firebase-admin";
 import logger from "../config/logger";
 import { CoinMarketCap, Subgraph } from "../../client/src/models/Token";
-import coinMarketCapService from "./chain.alchemy.service";
-
-import { createClient, cacheExchange, fetchExchange, useQuery as urqlUseQuery } from 'urql';
+import { getAllPairsQuery, getMostLiquidPairsQuery, getRecentSwapsQuery, getRecentSwapsQueryFromLastUpdate, useMostLiquidPairsQuery } from "./SubGraph";
+import coinMarketCapService from "./chain.coinmarketcap.service"
 
 // Create the client to interact with the subgraph
 export const client = createClient({
-  url: 'https://gateway.thegraph.com/api/cf949c81dc1152037b34ecdea916c0a8/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV',
+  url: "https://gateway.thegraph.com/api/cf949c81dc1152037b34ecdea916c0a8/subgraphs/id/A3Np3RQbaBA6oKJgiwDJeo5T3zrYfGHPWFYayMwtNDum",
   exchanges: [cacheExchange, fetchExchange],
 });
 
-// Function to fetch the top tokens by volume
-const reloadTokensQuery = (skip: number = 0, first: number = 500): string => `{
-  tokens(orderBy: volume, orderDirection: desc, skip: ${skip}, first: ${first}) {
-    id
-    name
-    symbol
-  }
-}`;
-
-// Function to fetch the pools by token address
-const reloadPoolsQuery = (tokenAddress: string): string => `{
-  pools(
-    orderBy: volumeUSD
-    orderDirection: desc
-    where: {
-      token0: "${tokenAddress}"
-    }) {
-      id
-      feeTier
-      volumeUSD
-      liquidity
-      token0 {
-        symbol
-      }
-      token1 {
-        symbol
-      }
-    }
-  }`;
-
-
 /**
- * Save a single token to Firestore based on tokenAddress.
+ * Save pairs to Firestore.
  */
-/**
- * Get a token from Firestore based on tokenAddress.
- */
-const getToken = async (tokenAddress: string): Promise<void> => {
+const savePairsToFirestore = async (pairs: Subgraph.PairData[]): Promise<void> => {
   try {
-    const tokensCollection = db.collection("tokens-uniswap");
-    const poolsCollection = db.collection("pools-uniswap");
+    const tokensCollection = db.collection("pairs-uniswap");
 
-    // Search for the token by its address
-    const tokenSnapshot = await tokensCollection
-      .where("id", "==", tokenAddress)
-      .limit(1)  // Assuming address is unique in tokens-uniswap collection
-      .get();
-
-    if (tokenSnapshot.empty) {
-      throw new Error(`Token not found for address: ${tokenAddress}`);
-    }
-
-    const token = tokenSnapshot.docs[0].data(); // Get the first (and only) token from the query result
-    logger.info(`Token with address ${tokenAddress} found:`, token);
-
-    // Fetch pools related to the token (assumed to be based on tokenAddress or token.id)
-    const poolsSnapshot = await poolsCollection
-      .where("tokenAddress", "==", tokenAddress) // Assuming you have tokenAddress in the pool collection
-      .get();
-
-    if (poolsSnapshot.empty) {
-      throw new Error(`No pools found for token address: ${tokenAddress}`);
-    }
-
-    let highestVolumeUSDPool = null;
-    let highestVolumeUSD = BigInt(0); // Start with zero as initial comparison value
-
-    poolsSnapshot.docs.forEach((doc) => {
-      const pool = doc.data();
-      const volumeUSD = pool.volumeUSD; // Assuming 'volumeUSD' is a string
-      
-      // Convert volumeUSD to a BigInt for accurate comparison
-      const volumeUSDBigInt = BigInt(volumeUSD); 
-
-      if (volumeUSDBigInt > highestVolumeUSD) {
-        highestVolumeUSD = volumeUSDBigInt;
-        highestVolumeUSDPool = pool;
-      }
-    });
-
-    if (highestVolumeUSDPool) {
-      logger.info(`Pool with the highest volumeUSD:`, highestVolumeUSDPool);
-    } else {
-      logger.warn(`No pools with valid volumeUSD found for token address: ${tokenAddress}`);
-    }
-
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      logger.error(`Error fetching token or pools: ${err.message}`);
-    } else {
-      logger.error("Unknown error occurred while fetching token or pools.");
-    }
-  }
-};
-
-
-
-/**
- * Save tokens and pools to Firestore.
- */
-const reloadToTokensFirestore = async (tokens: Subgraph.TokenData[]): Promise<void> => {
-  try {
-    const tokensCollection = db.collection("tokens-uniswap");
-    const cmcCollection = db.collection("tokens-cmc");
-    const poolsCollection = db.collection("pools-uniswap");
-
-    const savePromises = tokens.map(async (token) => {
-      const tokenName = `ETH:${token.symbol.replace(/\//g, '.')}:${token.name.replace(/\//g, '.')}`;
-      
-      // Fetch the imgId from the tokens-cmc collection based on symbol
-      const cmcDocSnapshot = await cmcCollection
-        .where("symbol", "==", token.symbol)
-        .limit(1) // assuming each symbol is unique in tokens-cmc collection
-        .get();
-
-      let imgId = null;
-      if (!cmcDocSnapshot.empty) {
-        const cmcDoc = cmcDocSnapshot.docs[0];
-        imgId = cmcDoc.data().id; // assuming 'id' is the field for imgId in tokens-cmc
-      }
-
-      // Fetch the pool data and get the first pool instance's id
-      const poolData = await reloadPools(token.id);
-      let poolId = null;
-      if (poolData && poolData.length > 0) {
-        poolId = poolData[0]?.id; // Get the id of the first pool instance
-      }
-
-      const dataToSave = {
-        ...token,
-        name: tokenName,
-        lastUpdated: admin.firestore.Timestamp.now(),
-        imgId, // add imgId here
-        poolId, // add poolId here
-      };
-    
-      return tokensCollection
-        .doc(tokenName)
-        .set(dataToSave, { merge: false }); // Ensures overwriting, not merging
-    });
-    
-    await Promise.all(savePromises);
-    logger.info("All tokens successfully saved to Firestore.");
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      logger.error(`Error saving tokens to Firestore: ${err.message}`);
-    } else {
-      logger.error("Unknown error occurred while saving tokens to Firestore.");
-    }
-  }
-};
-
-
-
-const reloadToPoolFirestore = async (pools: Subgraph.PoolData[]): Promise<void> => {
-  try {
-    const tokensCollection = db.collection("pools-uniswap");
-
-    const savePromises = pools.map((pool) => {
-      const tokenName = `ETH:${pool.token0.symbol.replace(/\//g, '.')}:${pool.token1.symbol.replace(/\//g, '.')}`;
+    const savePromises = pairs.map(({ token0, token1, ...pair }) => {
+      const pairName = `ETH:${token0.symbol}:${token1.symbol}`;
       
       const dataToSave = {
-        ...pool,
-        name: tokenName,
+        ...pair,
+        name: pairName,
+        network: "Ethereum",
         lastUpdated: admin.firestore.Timestamp.now(),
       };
     
       return tokensCollection
-        .doc(tokenName)
+        .doc(pairName)
         .set(dataToSave, { merge: false }); // Ensures overwriting, not merging
     });
     
+
     await Promise.all(savePromises);
-    logger.info("All tokens successfully saved to Firestore.");
+    logger.info("All pairs successfully saved to Firestore.");
   } catch (err: unknown) {
     if (err instanceof Error) {
-      logger.error(`Error saving tokens to Firestore: ${err.message}`);
+      logger.error(`Error saving pairs to Firestore: ${err.message}`);
     } else {
-      logger.error("Unknown error occurred while saving tokens to Firestore.");
+      logger.error("Unknown error occurred while saving pairs to Firestore.");
     }
   }
 };
 
-
-const reloadTokens = async (): Promise<Subgraph.TokenData[] | null> => {
+const getSwaps = async (contractAddress: string): Promise<Subgraph.SwapData[] | null> => {
   try {
-    const fetchTokensFromSubgraph = async (): Promise<Subgraph.TokenData[]> => {
+
+    /**
+     * Fetch recent swaps from the subgraph for a specific pair.
+     * This will attempt to fetch the data 5 times, similar to the previous pairs fetching logic.
+     */
+    const fetchSwapsFromSubgraph = async (contractAddress: string): Promise<Subgraph.SwapData[]> => {
       let skip = 0;
-      let allTokens: Subgraph.TokenData[] = []; // Initialize an array to hold all tokens
-    
+      let allSwaps: Subgraph.SwapData[] = [];
+
       try {
-        // Fetch tokens 5 times
+        // Fetch swaps 5 times
         for (let i = 0; i < 5; i++) {
           const result = await client
-            .query(reloadTokensQuery(skip), { skip }) // Using skip for fetching tokens
+            .query(getRecentSwapsQuery(contractAddress, skip), { skip }) // Using pairName and skip for recent swaps
             .toPromise();
-    
+
           if (result.error) {
             throw new Error(result.error.message);
           }
-    
-          const tokens = result.data?.tokens || [];
-    
-          // Stop fetching if fewer than 500 items are returned
-          if (tokens.length < 500) {
+
+          const swaps = result.data?.swaps || [];
+
+          // Convert string fields to numbers
+          const parsedSwaps = swaps.map((swap: any) => ({
+            amount0In: parseFloat(swap.amount0In),
+            amount0Out: parseFloat(swap.amount0Out),
+            amount1In: parseFloat(swap.amount1In),
+            amount1Out: parseFloat(swap.amount1Out),
+            amountUSD: parseFloat(swap.amountUSD),
+            timestamp: parseInt(swap.timestamp, 10),
+          }));
+
+          allSwaps = allSwaps.concat(parsedSwaps);
+
+          // Stop fetching if fewer than 1000 items are returned
+          if (swaps.length < 1000) {
             break;
           }
-    
-          // Aggregate tokens in the allTokens array
-          allTokens = [...allTokens, ...tokens];
-          reloadToTokensFirestore(tokens);
-    
-          skip += 500;
-          logger.info(`Downloading tokens: ${skip} of 2500`);
+
+          skip += 1000;
+          logger.info(`Downloading swaps: ${skip} of 5000`);
         }
-    
-        return allTokens; // Return the aggregated tokens
+
+        return allSwaps as Subgraph.SwapData[];
       } catch (err: unknown) {
         if (err instanceof Error) {
-          logger.error(`Error fetching tokens from subgraph: ${err.message}`);
+          logger.error(`Error fetching recent swaps from subgraph: ${err.message}`);
         } else {
-          logger.error("Unknown error occurred while fetching tokens from subgraph.");
+          logger.error("Unknown error occurred while fetching recent swaps from subgraph.");
         }
         return [];
       }
     };
-    
-    // Fetch all tokens directly from the subgraph
-    const tokens = await fetchTokensFromSubgraph();
+    // Fetch all swaps directly from the subgraph
+    const swaps = await fetchSwapsFromSubgraph(contractAddress);
 
-    if (!tokens || tokens.length === 0) {
-      logger.warn("No tokens found.");
+    if (!swaps || swaps.length === 0) {
+      logger.warn("No swaps found for the given contract address.");
       return [];
     }
 
-    return tokens;
+    // Sort swaps by timestamp in descending order
+    const sortedSwaps = swaps.sort((a, b) => b.timestamp - a.timestamp);
+
+    return sortedSwaps;
   } catch (err: unknown) {
     if (err instanceof Error) {
-      logger.error(`Error reloading tokens: ${err.message}`);
+      logger.error(`Error reloading swaps: ${err.message}`);
     } else {
-      logger.error("Unknown error occurred while reloading tokens.");
+      logger.error("Unknown error occurred while reloading swaps.");
     }
     return null;
   }
 };
 
-// Reload pools for a given token address
-const reloadPools = async (tokenAddress: string): Promise<Subgraph.PoolData[] | null> => {
+
+/**
+ * Get specific pairs from Firestore based on a list of pair symbols.
+ * This will use a hardcoded list of pairs if pairSymbols is null.
+ */
+const getPairs = async (pairSymbols: string[] = []): Promise<Subgraph.PairData[] | null> => {
   try {
-    /**
-     * Fetch pools from the subgraph.
-     * This will attempt to fetch the data once, no need for multiple fetches or skip logic.
-     */
-    const fetchPoolsFromSubgraph = async (tokenAddress: string): Promise<Subgraph.PoolData[]> => {
-      let pools: Subgraph.PoolData[] = []; 
-    
-      try {
-        const poolsRef = admin.firestore().collection("pools-uniswap");
-        
-        // Step 1: Query Firestore where `id` == `tokenAddress`
-        const snapshot = await poolsRef.where("id", "==", tokenAddress).limit(1).get();
-    
-        if (!snapshot.empty) {
-          const docData = snapshot.docs[0].data();
-          logger.info(`Pools for ${tokenAddress} found in Firestore. Returning cached data.`);
-          return docData.pools || []; // Return stored pool data
-        }
-    
-        // Step 2: If not in Firestore, fetch from the subgraph
-        logger.info(`Fetching pools for ${tokenAddress} from Subgraph.`);
-        const result = await client.query(reloadPoolsQuery(tokenAddress), { tokenAddress }).toPromise();
-    
-        if (result.error) {
-          throw new Error(result.error.message);
-        }
-    
-        pools = result.data?.pools || [];
-    
-        // Step 3: Save to Firestore
-        if (pools.length > 0) {
-          await poolsRef.add({ id: tokenAddress, pools, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-        }
-    
-        return pools;
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          logger.error(`Error fetching pools from subgraph: ${err.message}`);
-        } else {
-          logger.error("Unknown error occurred while fetching pools from subgraph.");
-        }
-        return [];
-      }
-    };
-    
-    
-    
-    // Fetch pools for the given token address
-    const pools = await fetchPoolsFromSubgraph(tokenAddress);
+    const tokensCollection = db.collection("pairs-uniswap");
 
-    if (!pools || pools.length === 0) {
-      logger.warn("No pools found.");
+    // Hardcoded list of pairs
+    const hardcodedPairs = [
+      "ETH:ALPHA:WETH",
+      "ETH:MYSTERY:WETH",
+      "ETH:SPX:WETH",
+      "ETH:FINE:WETH",
+      "ETH:MOODENG:WETH",
+      "ETH:SMARTCREDIT:WETH",
+      "ETH:TRUMP:WETH",
+      "ETH:WETH:TRUMP",
+      "ETH:WETH:TRIBE",
+      "ETH:WETH:ZKML",
+      "ETH:EMAX:WETH",
+      "ETH:WOO:USDC",
+      "ETH:WOO:WETH",
+      "ETH:TIDAL:USDC",
+      "ETH:XCAD:USDC",
+      "ETH:XCAD:USDT",
+      "ETH:XCAD:WETH",
+      "ETH:WETH:MEME",
+    ];
+
+    // If pairSymbols is null, use the hardcoded list of pairs
+    const pairsToQuery = pairSymbols.length > 0 ? pairSymbols : hardcodedPairs;
+
+    // Fetch pairs from Firestore
+    const tokenSnapshot = await tokensCollection.where(admin.firestore.FieldPath.documentId(), "in", pairsToQuery).get();
+
+    if (tokenSnapshot.empty) {
+      logger.warn("No pairs found in Firestore for the given symbols.");
       return [];
     }
 
-    return pools;
+    const pairs: Subgraph.PairData[] = tokenSnapshot.docs.map((doc) => doc.data() as Subgraph.PairData);
+    return pairs;
   } catch (err: unknown) {
     if (err instanceof Error) {
-      logger.error(`Error reloading pools: ${err.message}`);
+      logger.error(`Error fetching pairs from Firestore: ${err.message}`);
     } else {
-      logger.error("Unknown error occurred while reloading pools.");
+      logger.error("Unknown error occurred while fetching pairs from Firestore.");
     }
     return null;
   }
 };
-
-// Reload ticks for a given token address
-const reloadTicks = async (tokenAddress: string): Promise<Subgraph.PoolData[] | null> => {
-  try {
-    /**
-     * Fetch pools from the subgraph.
-     * This will attempt to fetch the data once, no need for multiple fetches or skip logic.
-     */
-    const fetchPoolsFromSubgraph = async (tokenAddress: string): Promise<Subgraph.PoolData[]> => {
-      let pools: Subgraph.PoolData[] = []; // Initialize an array to hold all pools
-    
-      try {
-        // Fetch the pools for the token once
-        const result = await client.query(reloadPoolsQuery(tokenAddress), { tokenAddress }).toPromise();
-    
-        if (result.error) {
-          throw new Error(result.error.message);
-        }
-    
-        pools = result.data?.pools || [];
-
-        // Save pools to Firestore under the appropriate token
-        await reloadToPoolFirestore(pools);  // Use reloadPoolToTokenFirestore instead of reloadToTokensFirestore
-        
-        return pools; // Return the fetched pools
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          logger.error(`Error fetching pools from subgraph: ${err.message}`);
-        } else {
-          logger.error("Unknown error occurred while fetching pools from subgraph.");
-        }
-        return [];
-      }
-    };
-    
-    // Fetch pools for the given token address
-    const pools = await fetchPoolsFromSubgraph(tokenAddress);
-
-    if (!pools || pools.length === 0) {
-      logger.warn("No pools found.");
-      return [];
-    }
-
-    return pools;
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      logger.error(`Error reloading pools: ${err.message}`);
-    } else {
-      logger.error("Unknown error occurred while reloading pools.");
-    }
-    return null;
-  }
-};
-
-
 
 export default {
-  getToken,
-  reloadTokens,
-  reloadPools,
-  reloadTicks,
+  getSwaps,
+  getPairs,
 };

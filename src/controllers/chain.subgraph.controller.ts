@@ -20,35 +20,18 @@ import ApiError from "../utils/api-error";
 //   }
 // };
 
-const reloadTokens = async (req: Request, res: Response): Promise<Response> => {
+const getPairs = async (req: Request, res: Response): Promise<Response> => {
+  // const { symbol } = req.params; // Get the symbol from the URL params
 
   try {
     // Fetch the cryptocurrency id by symbol using the service's get method
-    const tokens = await subgraphService.reloadTokens();
+    const pairList = await subgraphService.getPairs();
 
-    if (tokens === null) {
+    if (pairList === null) {
       return res.status(404).json({ error: `Dex list not found` });
     }
 
-    return res.json({ pairs: tokens }); // Respond with the id of the token
-  } catch (error) {
-    console.error("Error fetching token:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-const reloadPools = async (req: Request, res: Response): Promise<Response> => {
-  const { tokenAddress } = req.params; // Get the symbol from the URL params
-
-  try {
-    // Fetch the cryptocurrency id by symbol using the service's get method
-    const pools = await subgraphService.reloadPools(tokenAddress);
-
-    if (pools === null) {
-      return res.status(404).json({ error: `Dex list not found` });
-    }
-
-    return res.json({ pools: pools }); // Respond with the id of the token
+    return res.json({ pairs: pairList }); // Respond with the id of the token
   } catch (error) {
     console.error("Error fetching token:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -56,10 +39,38 @@ const reloadPools = async (req: Request, res: Response): Promise<Response> => {
 };
 
 
+const getSwaps = async (req: Request, res: Response): Promise<Response> => {
 
+  if (req.params.contractAddress == null) {
+    throw new ApiError(400, "Missing chatId in request params");
+  }
+
+  const contractAddress = req.params.contractAddress; // Extract network and contractAddress from query parameters
+
+  try {
+    // Check if the required parameters are provided
+    if (!contractAddress) {
+      return res.status(400).json({ error: "Missing required parameters: network and contractAddress" });
+    }
+
+    // Fetch the cryptocurrency data using the service's getTrades method
+    const tradesList = await subgraphService.getSwaps(contractAddress as string);
+
+    // Check if the dexList is null
+    if (!tradesList) {
+      return res.status(404).json({ error: "Dex list not found" });
+    }
+
+    // Return the fetched data
+    return res.json({ data: tradesList });
+  } catch (error) {
+    console.error("Error fetching trades:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
 
 
 export default {
-  reloadTokens,
-  reloadPools
+  getPairs,
+  getSwaps
 };

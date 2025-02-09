@@ -233,7 +233,7 @@ const reloadTokens = async (
 
       const json = await response.json();
 
-      if (json.status.error_code !== 0) {
+      if (json.status.error_code !== '0') {
         throw new Error(json.status.error_message || "Unknown API error");
       }
 

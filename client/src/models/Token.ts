@@ -141,27 +141,12 @@ export namespace Subgraph {
   }
 
   export interface TokenData {
-    id: string;
     name: string;
-    imgId: number;
     symbol: string;
     decimals: number;
     derivedETH: number;
     tradeVolumeUSD: number;
     totalLiquidity: number;
-  }
-
-  export interface PoolData {
-    id: string;
-    feeTier: string;
-    volumeUSD: number;
-    liquidity: number;
-    token0: {
-      symbol: string;
-    };
-    token1: {
-      symbol: string;
-    };
   }
 
   export interface DailyAggregatedData {
