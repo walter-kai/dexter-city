@@ -1,7 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto";
+import { CandlestickController, OhlcController, CandlestickElement, OhlcElement } from "chartjs-chart-financial";
 import "chartjs-chart-financial";
-import { Subgraph } from "../models/Token";
+import "chartjs-adapter-date-fns"; // Ensure the date adapter is imported
+import { FaChartBar, FaBorderAll, FaBorderNone } from "react-icons/fa";
+import { FaChartLine, FaChartColumn } from "react-icons/fa6";
+import { LuChartColumnBig, LuChartCandlestick } from "react-icons/lu";
+import { Subgraph } from "@/models/Token";
+
 
 interface PairDetailsProps {
   swapPair: Subgraph.PairData | undefined;
@@ -10,12 +16,10 @@ interface PairDetailsProps {
 const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const [chartInstance, setChartInstance] = useState<Chart | null>(null);
+  const [lineState, setLine] = useState<boolean>(false);
+  const [barType, setBarType] = useState<boolean>(false);
+  const [scaleType, setScaleType] = useState<"linear" | "logarithmic">("linear");
   const [swaps, setSwaps] = useState<Subgraph.SwapData[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const barCount = 60; // You can adjust this based on how much data you want to display
-  const initialDate = new Date();
 
   // Generate OHLC data from swap data
   const generateOHLCData = (swaps: Subgraph.SwapData[]) => {
@@ -56,98 +60,158 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
 
     const fetchSwaps = async () => {
       try {
-        setLoading(true);
+        // setLoading(true);
         const response = await fetch(`/api/chain/swaps/${swapPair.id}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch trades: ${response.statusText}`);
         }
         const data = await response.json();
         setSwaps(data.data); // Assuming the API returns an array of swaps in `data.data`
-        setLoading(false);
+        // setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unknown error occurred.");
-        setLoading(false);
+        // setLoading(false);
       }
     };
 
     fetchSwaps();
   }, [swapPair]);
 
-  // Initialize Chart.js
   useEffect(() => {
-    if (!swaps.length || !chartRef.current) return;
-
-    const ctx = chartRef.current.getContext("2d");
-    if (!ctx) return;
-
-    // Generate OHLC data from the swaps data
-    const { barData, lineData } = generateOHLCData(swaps);
-
-    const newChart = new Chart(ctx, {
-      type: "candlestick",
-      data: {
-        datasets: [
-          {
-            label: "CHRT - Chart.js Corporation",
-            data: barData,
+    Chart.register(CandlestickController, OhlcController, CandlestickElement, OhlcElement);
+  
+    if (chartRef.current) {
+      const ctx = chartRef.current.getContext("2d");
+      if (!ctx) return;
+  
+      const { barData, lineData } = generateOHLCData(swaps);
+  
+      // 🔹 Transform lineData to match candlestick format
+      const transformedLineData = lineData.map(({ x, y }) => ({
+        x,
+        y,
+        o: 0,
+        h: 0,
+        l: 0,
+        c: 0,
+      }));
+  
+      const newChart = new Chart(ctx, {
+        type: "candlestick",
+        data: {
+          datasets: [
+            {
+              label: "CHRT - Chart.js Corporation",
+              data: barData,
+            },
+            {
+              label: "Close Price",
+              type: "line",
+              data: transformedLineData, // ✅ Use the transformed data
+              hidden: true,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: {
+              type: "time", // Ensures Chart.js treats x-axis as a time scale
+              time: {
+                unit: "day",
+              },
+            },
           },
-        ],
-      },
-    });
+        },
+      });
+  
+      setChartInstance(newChart);
+    }
+  }, []);
 
-    setChartInstance(newChart);
-  }, [swaps]); // Re-run when swaps data changes
+
+  useEffect(() => {
+
+    updateChart(); // Only update the chart after the lineState state has changed
+    
+  }, [barType, lineState, scaleType]);
+  
+  
 
   // Update Chart Configurations
   const updateChart = () => {
     if (!chartInstance) return;
-
-    const scaleType = (document.getElementById("scale-type") as HTMLSelectElement).value;
-    const colorScheme = (document.getElementById("color-scheme") as HTMLSelectElement).value;
-    const border = (document.getElementById("border") as HTMLSelectElement).value;
-    const mixed = (document.getElementById("mixed") as HTMLSelectElement).value;
-
-    chartInstance.options.scales!.y!.type = scaleType as "linear" | "logarithmic";
-
-    if (border === "false") {
+  
+    // Update barType border color
+    if (barType) {
       (chartInstance.data.datasets[0] as any).borderColors = "rgba(0, 0, 0, 0)";
     } else {
       delete (chartInstance.data.datasets[0] as any).borderColors;
     }
-
-    chartInstance.data.datasets[1].hidden = mixed !== "true";
-
+  
+    // Toggle lineState visibility (whether line dataset is visible)
+    chartInstance.data.datasets[1].hidden = lineState;
+    chartInstance.options.scales!.y!.type = scaleType as "linear" | "logarithmic";
+    // Update chart
     chartInstance.update();
   };
 
+
   return (
     <div>
-      <h2>Sample Chart</h2>
-      {loading && <p>Loading swaps...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+      <h1>Chart.js - Financial Chart</h1>
       <div style={{ width: "1000px" }}>
         <canvas ref={chartRef}></canvas>
       </div>
-      <div>
-        Bar Type:
-        <select id="border" onChange={updateChart}>
-          <option value="true" selected>
-            Candlestick
-          </option>
-          <option value="false">OHLC</option>
-        </select>
-        Scale Type:
-        <select id="scale-type" onChange={updateChart}>
-          <option value="linear" selected>
-            Linear
-          </option>
-          <option value="logarithmic">Logarithmic</option>
-        </select>
+      <div className="text-white">
+      Bar Type:
+      <button onClick={() => {
+        setBarType(prevBarType => {
+          const newBarType = !prevBarType;
+          return newBarType;
+        });
+      }}>
+        { barType ? (
+          <LuChartCandlestick />
+        ) : (
+          <LuChartColumnBig />
+        )}
+      </button>
 
-        <button onClick={updateChart}>Update</button>
+
+        Scale Type:
+        <button onClick={() => {
+          setScaleType(prevScaleType => {
+            const newScaleType = prevScaleType === "linear" ? "logarithmic" : "linear";
+            return newScaleType;
+          });
+        }}>
+          { scaleType ? (
+            <FaChartLine />
+          ) : (
+            <FaChartColumn />
+          )}
+        </button>
+
+        Line:
+        <button onClick={() => {
+          setLine(prevLineState => {
+            const newLineState = !prevLineState;
+            return newLineState;
+          });
+        }}>
+          { lineState ? (
+            <FaChartLine />
+          ) : (
+            <FaChartColumn />
+          )}
+        </button>
       </div>
     </div>
   );
 };
 
 export default PairChart2;
+function setError(arg0: string) {
+  throw new Error("Function not implemented.");
+}
+

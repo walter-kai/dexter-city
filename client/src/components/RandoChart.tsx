@@ -3,12 +3,18 @@ import Chart from "chart.js/auto";
 import { CandlestickController, OhlcController, CandlestickElement, OhlcElement } from "chartjs-chart-financial";
 import "chartjs-chart-financial";
 import "chartjs-adapter-date-fns"; // Ensure the date adapter is imported
+import { FaChartBar, FaBorderAll, FaBorderNone } from "react-icons/fa";
+import { FaChartLine, FaChartColumn } from "react-icons/fa6";
+import { LuChartColumnBig, LuChartCandlestick } from "react-icons/lu";
 
 
 
 const RandomChart: React.FC = () => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const [chartInstance, setChartInstance] = useState<Chart | null>(null);
+  const [lineState, setLine] = useState<boolean>(false);
+  const [barType, setBarType] = useState<boolean>(false);
+  const [scaleType, setScaleType] = useState<"linear" | "logarithmic">("linear");
 
   const barCount = 60;
   const initialDate = new Date();
@@ -91,45 +97,34 @@ const RandomChart: React.FC = () => {
       setChartInstance(newChart);
     }
   }, []);
+
+
+  useEffect(() => {
+
+    updateChart(); // Only update the chart after the lineState state has changed
+    
+  }, [barType, lineState, scaleType]);
   
   
 
   // Update Chart Configurations
   const updateChart = () => {
     if (!chartInstance) return;
-
-    // const type = (document.getElementById("type") as HTMLSelectElement).value;
-    const scaleType = (document.getElementById("scale-type") as HTMLSelectElement).value;
-    // const colorScheme = (document.getElementById("color-scheme") as HTMLSelectElement).value;
-    const border = (document.getElementById("border") as HTMLSelectElement).value;
-    const mixed = (document.getElementById("mixed") as HTMLSelectElement).value;
-
-    // chartInstance.config.type = type;
-    chartInstance.options.scales!.y!.type = scaleType as "linear" | "logarithmic";
-
-    // Apply color scheme
-    // if (colorScheme === "neon") {
-    //   (chartInstance.data.datasets[0] as any).backgroundColors = {
-    //     up: "#01ff01",
-    //     down: "#fe0000",
-    //     unchanged: "#999",
-    //   };
-    // } else {
-    //   delete (chartInstance.data.datasets[0] as any).backgroundColors;
-    // }
-
-    // Toggle border
-    if (border === "false") {
+  
+    // Update barType border color
+    if (barType) {
       (chartInstance.data.datasets[0] as any).borderColors = "rgba(0, 0, 0, 0)";
     } else {
       delete (chartInstance.data.datasets[0] as any).borderColors;
     }
-
-    // Toggle mixed charts
-    chartInstance.data.datasets[1].hidden = mixed !== "true";
-
+  
+    // Toggle lineState visibility (whether line dataset is visible)
+    chartInstance.data.datasets[1].hidden = lineState;
+    chartInstance.options.scales!.y!.type = scaleType as "linear" | "logarithmic";
+    // Update chart
     chartInstance.update();
   };
+  
 
   // Randomize Data
   const randomizeData = () => {
@@ -144,43 +139,54 @@ const RandomChart: React.FC = () => {
   return (
     <div>
       <h1>Chart.js - Financial Chart</h1>
-      <p>
-        See the{" "}
-        <a href="https://github.com/chartjs/chartjs-chart-financial/tree/master/docs">
-          source for this example
-        </a>
-        ,{" "}
-        <a href="https://github.com/chartjs/chartjs-chart-financial">README</a>, and{" "}
-        <a href="https://www.chartjs.org/docs/">Chart.js docs</a> for more details.
-      </p>
-      <h2>Sample Chart</h2>
       <div style={{ width: "1000px" }}>
         <canvas ref={chartRef}></canvas>
       </div>
       <div className="text-white">
-        Bar Type:
-        <select id="border" onChange={updateChart}>
-          <option value="true" selected>
-            Candlestick
-          </option>
-          <option value="false">Bars</option>
-        </select>
-        Scale Type:
-        <select id="scale-type" onChange={updateChart}>
-          <option value="linear" selected>
-            Linear
-          </option>
-          <option value="logarithmic">Logarithmic</option>
-        </select>
+      Bar Type:
+      <button onClick={() => {
+        setBarType(prevBarType => {
+          const newBarType = !prevBarType;
+          return newBarType;
+        });
+      }}>
+        { barType ? (
+          <LuChartCandlestick />
+        ) : (
+          <LuChartColumnBig />
+        )}
+      </button>
 
-        Mixed:
-        <select id="mixed" onChange={updateChart}>
-          <option value="true">Yes</option>
-          <option value="false" selected>
-            No
-          </option>
-        </select>
-        <button onClick={updateChart}>Update</button>
+
+        Scale Type:
+        <button onClick={() => {
+          setScaleType(prevScaleType => {
+            const newScaleType = prevScaleType === "linear" ? "logarithmic" : "linear";
+            return newScaleType;
+          });
+        }}>
+          { scaleType ? (
+            <FaChartLine />
+          ) : (
+            <FaChartColumn />
+          )}
+        </button>
+
+        Line:
+        <button onClick={() => {
+          setLine(prevLineState => {
+            const newLineState = !prevLineState;
+            return newLineState;
+          });
+        }}>
+          { lineState ? (
+            <FaChartLine />
+          ) : (
+            <FaChartColumn />
+          )}
+        </button>
+
+
         <button onClick={randomizeData}>Randomize Data</button>
       </div>
     </div>
