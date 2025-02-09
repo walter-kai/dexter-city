@@ -427,7 +427,7 @@ const BuildBot: React.FC = () => {
             priceDeviation={formData.priceDeviation}
             gapMultiplier={formData.safetyOrderGapMultiplier}
           /> */}
-          {/* <PairChart2 swapPair={tradingPair}/> */}
+          <PairChart2 swapPair={tradingPair}/>
           <RandomChart />
         </div>
 
