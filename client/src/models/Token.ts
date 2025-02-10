@@ -121,11 +121,11 @@ export namespace Subgraph {
     volumeUSD: number;
     volumeToken0: number;
     token0Price: number;
-    token0: TokenDetails;
+    // token0: TokenDetails;
     token0ImgId: number,
     volumeToken1: number;
     token1Price: number;
-    token1: TokenDetails;
+    // token1: TokenDetails;
     token1ImgId: number,
     
   }

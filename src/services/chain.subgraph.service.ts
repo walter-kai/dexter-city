@@ -12,40 +12,6 @@ export const client = createClient({
   exchanges: [cacheExchange, fetchExchange],
 });
 
-/**
- * Save pairs to Firestore.
- */
-const savePairsToFirestore = async (pairs: Subgraph.PairData[]): Promise<void> => {
-  try {
-    const tokensCollection = db.collection("pairs-uniswap");
-
-    const savePromises = pairs.map(({ token0, token1, ...pair }) => {
-      const pairName = `ETH:${token0.symbol}:${token1.symbol}`;
-      
-      const dataToSave = {
-        ...pair,
-        name: pairName,
-        network: "Ethereum",
-        lastUpdated: admin.firestore.Timestamp.now(),
-      };
-    
-      return tokensCollection
-        .doc(pairName)
-        .set(dataToSave, { merge: false }); // Ensures overwriting, not merging
-    });
-    
-
-    await Promise.all(savePromises);
-    logger.info("All pairs successfully saved to Firestore.");
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      logger.error(`Error saving pairs to Firestore: ${err.message}`);
-    } else {
-      logger.error("Unknown error occurred while saving pairs to Firestore.");
-    }
-  }
-};
-
 const getSwaps = async (contractAddress: string): Promise<Subgraph.SwapData[] | null> => {
   try {
 
@@ -134,24 +100,11 @@ const getPairs = async (pairSymbols: string[] = []): Promise<Subgraph.PairData[]
 
     // Hardcoded list of pairs
     const hardcodedPairs = [
-      "ETH:ALPHA:WETH",
       "ETH:MYSTERY:WETH",
-      "ETH:SPX:WETH",
-      "ETH:FINE:WETH",
       "ETH:MOODENG:WETH",
-      "ETH:SMARTCREDIT:WETH",
       "ETH:TRUMP:WETH",
-      "ETH:WETH:TRUMP",
-      "ETH:WETH:TRIBE",
-      "ETH:WETH:ZKML",
-      "ETH:EMAX:WETH",
-      "ETH:WOO:USDC",
       "ETH:WOO:WETH",
-      "ETH:TIDAL:USDC",
-      "ETH:XCAD:USDC",
-      "ETH:XCAD:USDT",
-      "ETH:XCAD:WETH",
-      "ETH:WETH:MEME",
+
     ];
 
     // If pairSymbols is null, use the hardcoded list of pairs
@@ -177,7 +130,122 @@ const getPairs = async (pairSymbols: string[] = []): Promise<Subgraph.PairData[]
   }
 };
 
+/**
+ * Reload pairs from the subgraph and write to Firestore.
+ */
+const reloadPairs = async (): Promise<Subgraph.PairData[] | null> => {
+  try {
+    const tokensCollection = db.collection("pairs-uniswap");
+    const tokensCmcCollection = db.collection("tokens-cmc");
+
+    /**
+     * Fetch recent pairs from the subgraph and get the corresponding token images
+     */
+    const fetchPairsFromSubgraph = async (): Promise<Subgraph.PairData[]> => {
+      let skip = 0;
+      let allPairs: Subgraph.PairData[] = [];
+
+      try {
+        // Fetch pairs 5 times, adjust the query accordingly
+        for (let i = 0; i < 5; i++) {
+          const result = await client
+            .query(getMostLiquidPairsQuery(skip), { skip })
+            .toPromise();
+
+          if (result.error) {
+            throw new Error(result.error.message);
+          }
+
+          const pairs = result.data?.pairs || [];
+
+          // Process each pair
+          for (const pair of pairs) {
+            const token0Symbol = pair.token0.symbol;
+            const token1Symbol = pair.token1.symbol;
+
+            // Get the imgId for token0 from the tokens-cmc collection
+            const token0Doc = await tokensCmcCollection
+              .where("symbol", "==", token0Symbol)
+              .limit(1)
+              .get();
+            const token0ImgId = token0Doc.empty
+              ? null
+              : token0Doc.docs[0].data().id;
+
+            // Get the imgId for token1 from the tokens-cmc collection
+            const token1Doc = await tokensCmcCollection
+              .where("symbol", "==", token1Symbol)
+              .limit(1)
+              .get();
+            const token1ImgId = token1Doc.empty
+              ? null
+              : token1Doc.docs[0].data().id;
+
+            // Construct the pair document with all the required data
+            const pairData = {
+              __typename: "Pair",
+              id: pair.id,
+              lastUpdated: new Date(),  // Timestamp of when the pair is updated
+              name: pair.name,
+              network: pair.network,
+              token0ImgId: token0ImgId,
+              token1ImgId: token1ImgId,
+              token0Price: pair.token0Price,
+              token1Price: pair.token1Price,
+              txCount: pair.txCount,
+              volumeToken0: pair.volumeToken0,
+              volumeToken1: pair.volumeToken1,
+              volumeUSD: pair.volumeUSD,
+            };
+
+            // Save the pair data in Firestore
+            await tokensCollection.doc(`ETH:${token0Symbol}:${token1Symbol}`).set(pairData, { merge: true });
+
+            allPairs.push(pairData);
+          }
+
+          // Stop fetching if fewer than 1000 items are returned
+          if (pairs.length < 1000) {
+            break;
+          }
+
+          skip += 1000;
+          logger.info(`Downloading pairs: ${skip} of 5000`);
+        }
+
+        return allPairs;
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          logger.error(`Error fetching pairs from subgraph: ${err.message}`);
+        } else {
+          logger.error("Unknown error occurred while fetching pairs from subgraph.");
+        }
+        return [];
+      }
+    };
+
+    // Fetch pairs from the subgraph and store them
+    const pairs = await fetchPairsFromSubgraph();
+
+    if (!pairs || pairs.length === 0) {
+      logger.warn("No pairs found for the given query.");
+      return [];
+    }
+
+    return pairs;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      logger.error(`Error reloading pairs: ${err.message}`);
+    } else {
+      logger.error("Unknown error occurred while reloading pairs.");
+    }
+    return null;
+  }
+};
+
+
 export default {
   getSwaps,
   getPairs,
+  reloadPairs
 };

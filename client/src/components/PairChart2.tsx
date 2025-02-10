@@ -6,6 +6,7 @@ import "chartjs-adapter-date-fns";
 import { FaChartBar, FaChartLine, FaChartColumn } from "react-icons/fa6";
 import { LuChartColumnBig, LuChartCandlestick } from "react-icons/lu";
 import { Subgraph } from "@/models/Token";
+import LoadingScreenDots from "./LoadingScreenDots";
 
 interface PairDetailsProps {
   swapPair: Subgraph.PairData | undefined;
@@ -14,6 +15,7 @@ interface PairDetailsProps {
 const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstanceRef = useRef<Chart | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [lineState, setLine] = useState<boolean>(false);
   const [barType, setBarType] = useState<boolean>(false);
   const [scaleType, setScaleType] = useState<"linear" | "logarithmic">("linear");
@@ -84,7 +86,8 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
 
     const fetchSwaps = async () => {
       try {
-        const response = await fetch(`/api/chain/swaps/${swapPair.id}`);
+        setLoading(true);
+        const response = await fetch(`/api/chain/uni/swaps/${swapPair.id}`);
         if (!response.ok) throw new Error(`Failed to fetch trades: ${response.statusText}`);
         const data = await response.json();
         if (!Array.isArray(data.data)) {
@@ -92,6 +95,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
           return;
         }
         setSwaps(data.data);
+        setLoading(false);
       } catch (err) {
         console.error(err);
       }
@@ -178,6 +182,9 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
           },
           y: {
             type: scaleType,
+            ticks: {
+              callback: (value) => Number(value).toExponential(3), // Formats Y-axis labels to 4 decimal places
+            },
           },
         },
         plugins: {
@@ -228,11 +235,8 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
 
   return (
     <div>
-      <h1>Chart.js - Financial Chart</h1>
-      <div style={{ width: "1000px" }}>
-        <canvas ref={chartRef}></canvas>
-      </div>
-      <div className="text-white">
+      <h1>Uniswap v2 🦄 {swapPair?.name.slice(4)}</h1>
+      <div className="text-gray-300">
         <span>Bar Type:</span>
         <button onClick={() => setBarType((prev) => !prev)}>
           {barType ? <LuChartCandlestick /> : <LuChartColumnBig />}
@@ -253,6 +257,13 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
             <strong>Percent Change: {percentChange.toFixed(2)}%</strong>
           </div>
         )}
+      </div>
+      <div style={{ width: "1000px" }}>
+        { loading ? ( 
+          <LoadingScreenDots />
+        ) : (
+          <canvas ref={chartRef}></canvas>
+        ) }
       </div>
     </div>
   );

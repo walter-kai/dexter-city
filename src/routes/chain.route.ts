@@ -6,11 +6,12 @@ const router = express.Router();
 
 // router.route("/dexs").get(chainController.getDexs);
 // router.route("/dexs").put(chainController.reloadDexs);
-router.route("/tokens").put(coinMarketCapController.reloadTokens);
+router.route("/cmc/reloadTokens").put(coinMarketCapController.reloadTokens);
 // router.route("/swaps").get(subgraphController.getSwaps);
-router.route("/swaps/:contractAddress").get(subgraphController.getSwaps);
-router.route("/pairs").get(subgraphController.getPairs);
-// router.route("/reloadPairs").get(subgraphController.reloadPairs);
+router.route("/uni/swaps/:contractAddress").get(subgraphController.getSwaps);
+router.route("/uni/pairs").get(subgraphController.getPairs);
+router.route("/cmc/reloadPairs").get(coinMarketCapController.reloadPairs);
+router.route("/uni/reloadPairs").get(subgraphController.reloadPairs);
 // router.route("/tokens/:symbol").get(chainController.getTokenBySymbol);
 
 

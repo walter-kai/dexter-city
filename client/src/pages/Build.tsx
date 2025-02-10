@@ -10,6 +10,7 @@ import User from "../models/User";
 import { generateLogoHash } from "../services/Robohash";
 import PairChart2 from "../components/PairChart2";
 import RandomChart from "../components/RandoChart";
+import { DropdownWithImages } from "../components/DropdownImages";
 
 const BuildBot: React.FC = () => {
   const [formData, setFormData] = useState<BotConfig>({
@@ -38,6 +39,7 @@ const BuildBot: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tradingPair, setTradingPair] = useState<Subgraph.PairData | undefined>(undefined);
+  const [profitBase, setProfitBase] = useState<"token0" | "token1" | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -161,113 +163,9 @@ const BuildBot: React.FC = () => {
     }
   };
 
-  interface DropdownWithImagesProps {
-    availablePairs: Record<string, Subgraph.PairData>;
-    formData: BotConfig;
-    onChange: (pair: string) => void;
-  }
-  
 
-  
-  const customStyles = {
-    control: (base: any) => ({
-      ...base,
-      backgroundColor: "#6B7280", // Tailwind's bg-gray-800
-      color: "#ffffff",
-      borderColor: "#4b5563", // Tailwind's gray-600
-      borderRadius: "0.375rem", // Tailwind's rounded-md
-      padding: "0.25rem", // Tailwind's p-2
-    }),
-    menu: (base: any) => ({
-      ...base,
-      backgroundColor: "#1f2937", // Tailwind's bg-gray-800
-      color: "#ffffff",
-      // marginLeft: "-25%", // Shift dropdown 50% to the left
-      // width: "125%", // Extend width by 50%
-      zIndex: 10,
-    }),
-    menuList: (base: any) => ({
-      ...base,
-      padding: 0,
-      maxHeight: "200px", // Set a max height for scrollable behavior
-      overflowY: "auto", // Enable vertical scrolling
-      scrollbarWidth: "thin", // Firefox scrollbar
-      scrollbarColor: "#374151 #1f2937", // Scrollbar track and thumb colors (Firefox)
-      "&::-webkit-scrollbar": {
-        width: "8px", // Scrollbar width
-      },
-      "&::-webkit-scrollbar-thumb": {
-        backgroundColor: "#374151", // Tailwind's gray-700
-        borderRadius: "4px", // Rounded scrollbar thumb
-      },
-      "&::-webkit-scrollbar-track": {
-        backgroundColor: "#1f2937", // Tailwind's bg-gray-800
-      },
-    }),
-    option: (base: any, { isFocused, isSelected }: any) => ({
-      ...base,
-      backgroundColor: isFocused
-        ? "#374151" // Tailwind's bg-gray-700
-        : isSelected
-        ? "#111827" // Tailwind's bg-gray-900
-        : "#1f2937", // Tailwind's bg-gray-800
-      color: "#ffffff",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-    }),
-    singleValue: (base: any) => ({
-      ...base,
-      color: "#ffffff",
-    }),
-  };
-  
-  const DropdownWithImages: React.FC<DropdownWithImagesProps> = ({
-    availablePairs,
-    formData,
-    onChange,
-  }) => {
-    // Generate options by filtering and mapping over the `availablePairs`
-    const options = Object.values(availablePairs)
-      .filter((pair) => pair.network === formData.network) // Filter pairs based on the selected network
-      .map((pair) => ({
-        value: pair.name, // Use pair name as the value
-        label: (
-          <div className="flex">
-            <div className="flex items-center">
-              <img
-                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair.token0ImgId || "default"}.png`}
-                alt={`${pair.name} token0 icon`}
-                className="w-5 h-5 mr-2"
-              />
-              <span>{pair.name.split(":")[1] /* Extract token0 symbol */}</span>
-            </div>
-            <div className="flex items-center">
-              <img
-                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pair.token1ImgId || "default"}.png`}
-                alt={`${pair.name} token1 icon`}
-                className="w-5 h-5 mr-2"
-              />
-              <span>{pair.name.split(":")[2] /* Extract token1 symbol */}</span>
-            </div>
-          </div>
-        ),
-      }));
-  
-    return (
-      <Select
-        options={options}
-        onChange={(selectedOption) => {
-          if (selectedOption) {
-            onChange(selectedOption.value); // Pass the selected pair value to the parent component
-          }
-        }}
-        value={options.find((option) => option.value === formData.tradingPair)} // Set the current value
-        // placeholder="Select a pair"
-        isSearchable
-        styles={customStyles} // Apply custom styles
-      />
-    );
+  const handleProfitBaseToggle = (selectedToken: "token0" | "token1") => {
+    setProfitBase(selectedToken);
   };
 
   return (
@@ -325,15 +223,41 @@ const BuildBot: React.FC = () => {
                 tradingPair: pair,
               });
             }}                  />
+          {/* Profit Base Toggle */}
+          <label className="block text-white">Profit Base:</label>
 
-          {/* <div className="flex h-12 m-2">
-            <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token0ImgId}.png`} alt="token icon"></img>
-            <img src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token1ImgId}.png`} alt="token icon"></img>
-          </div> */}
+          <div className="flex justify-center gap-4">
+            {tradingPair?.token0ImgId && (
+              <div
+                className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token0" ? "bg-purple-800" : "bg-gray-500"}`}
+                onClick={() => handleProfitBaseToggle("token0")}
+              >
+                <img
+                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token0ImgId}.png`}
+                  alt="Token 0"
+                  className="w-12 h-12 rounded-full"
+                />
+                <p className="text-white text-sm text-center w-full">{tradingPair?.name.split(':')[1]}</p>
+              </div>
+            )}
+            {tradingPair?.token1ImgId && (
+              <div
+                className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token1" ? "bg-purple-800" : "bg-gray-500"}`}
+                onClick={() => handleProfitBaseToggle("token1")}
+              >
+                <img
+                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token1ImgId}.png`}
+                  alt="Token 1"
+                  className="w-12 h-12 rounded-full"
+                />
+                <p className="text-white text-sm text-center w-full">{tradingPair?.name.split(':')[2]}</p>
+              </div>
+            )}
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="relative">
-            <label className="block text-white">Trailing Take Profit</label>
+            <label className="block text-white">Take Profit</label>
             <input
               type="number"
               name="trailingTakeProfit"
@@ -428,7 +352,7 @@ const BuildBot: React.FC = () => {
             gapMultiplier={formData.safetyOrderGapMultiplier}
           /> */}
           <PairChart2 swapPair={tradingPair}/>
-          <RandomChart />
+          {/* <RandomChart /> */}
         </div>
 
     </div>

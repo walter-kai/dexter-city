@@ -95,7 +95,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
     const fetchSwaps = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/chain/swaps/${swapPair.id}`);
+        const response = await fetch(`/api/chain/uni/swaps/${swapPair.id}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch trades: ${response.statusText}`);
         }

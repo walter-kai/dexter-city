@@ -70,7 +70,36 @@ const getSwaps = async (req: Request, res: Response): Promise<Response> => {
 };
 
 
+const reloadPairs = async (req: Request, res: Response): Promise<Response> => {
+
+  if (req.params.contractAddress == null) {
+    throw new ApiError(400, "Missing chatId in request params");
+  }
+
+  // const contractAddress = req.params.contractAddress; // Extract network and contractAddress from query parameters
+
+  try {
+
+
+    // Fetch the cryptocurrency data using the service's getTrades method
+    const pairsList = await subgraphService.reloadPairs();
+
+    // Check if the dexList is null
+    if (!pairsList) {
+      return res.status(404).json({ error: "Dex list not found" });
+    }
+
+    // Return the fetched data
+    return res.json({ data: pairsList });
+  } catch (error) {
+    console.error("Error fetching trades:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
 export default {
   getPairs,
-  getSwaps
+  getSwaps,
+  reloadPairs
 };

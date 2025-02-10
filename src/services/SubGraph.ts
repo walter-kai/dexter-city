@@ -142,21 +142,24 @@ export const getAllPairsQuery = (skip: number): string => `{
 }`;
 
 // Function to fetch the most liquid pairs by reserveUSD
-export const getMostLiquidPairsQuery = `{
-  pairs(first: 1000, orderBy: reserveUSD, orderDirection: desc) {
-    id
+export const getMostLiquidPairsQuery = (skip: number = 0, first: number = 1000): string => {
+  return `{
+    pairs(first: ${first}, skip: ${skip}, orderBy: volumeUSD, orderDirection: desc) {
+      id
+      txCount
       token0Price
       token0 {
         symbol
         name
       }
-    	token1Price
+      token1Price
       token1 {
         symbol
         name
       }
-  }
-}`;
+    }
+  }`;
+};
 
 // Function to fetch recent swaps within a specific pair, with a skip parameter for pagination
 export const getRecentSwapsQuery = (pairId: string, skip: number = 0, first: number = 1000): string => {
@@ -316,7 +319,7 @@ export const useAllPairsQuery = (skip: number) =>
 // Custom hook to fetch the most liquid pairs
 export const useMostLiquidPairsQuery = () =>
   urqlUseQuery<{ pairs: Pair[] }>({
-    query: getMostLiquidPairsQuery,
+    query: getMostLiquidPairsQuery(),
   });
 
 // Custom hook to fetch recent swaps for a specific pair
