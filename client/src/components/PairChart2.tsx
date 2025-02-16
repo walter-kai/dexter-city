@@ -279,7 +279,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
 
   return (
     <div>
-      <h1>Uniswap v2 🦄 {swapPair?.name.slice(4)}</h1>
+      <h1>Uniswap v3 🦄 {swapPair?.name.slice(4)}</h1>
       <div className="text-gray-300">
         <span>Bar Type:</span>
         <button onClick={() => setBarType((prev) => !prev)}>

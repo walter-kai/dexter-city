@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 import { BotConfig } from "../models/Bot";
 import { Subgraph } from "../models/Token";
+import LoadingScreenDots from "./LoadingScreenDots";
 
 interface DropdownWithImagesProps {
   formData: BotConfig;
@@ -159,11 +160,10 @@ export const DropdownWithImagesV3: React.FC<DropdownWithImagesProps> = ({
     fetchPairs();
   }, []);
 
-  if (!availablePools) return <p>Loading pools...</p>;
+  if (!availablePools) return <LoadingScreenDots />;
 
   const options = availablePools
     .map((pool) => {
-      const [token0Symbol, token1Symbol] = pool.name.split(";");
 
       return {
         value: pool.name,
@@ -172,18 +172,18 @@ export const DropdownWithImagesV3: React.FC<DropdownWithImagesProps> = ({
             <div className="flex items-center">
               <img
                 src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pool.token0.imgId || "default"}.png`}
-                alt={`${token0Symbol} icon`}
+                alt={`${pool.token0.symbol} icon`}
                 className="w-5 h-5 mr-2"
               />
-              <span className="mr-2">{token0Symbol}</span>
+              <span className="mr-2">{pool.token0.symbol}</span>
             </div>
             <div className="flex items-center">
               <img
                 src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pool.token1.imgId || "default"}.png`}
-                alt={`${token1Symbol} icon`}
+                alt={`${pool.token1.symbol} icon`}
                 className="w-5 h-5 mx-2"
               />
-              <span>{token1Symbol}</span>
+              <span>{pool.token1.symbol}</span>
             </div>
           </div>
         ),

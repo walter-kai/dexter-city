@@ -96,7 +96,7 @@ const BuildBot: React.FC = () => {
       try {
         const response = await fetch(`/api/bot?botName=${botName}`);
         if (response.status !== 404) {
-          setBotNameError("Bot name is already taken.");
+          setBotNameError("Bot name taken. Please try again.");
         } else {
           setBotNameError(null);
         }
@@ -187,7 +187,7 @@ const BuildBot: React.FC = () => {
 
         <div className="flex">
             <div className="relative w-[66%]">
-              <label className="block text-white pr-2">Bot Name:</label>
+              <label className="block text-white pr-2 flex">Bot Name: {botNameError && <p className="text-red-500 text-xs ml-1 my-auto">{botNameError}</p>}</label> 
                   <input
                     type="text"
                     name="botName"
@@ -196,7 +196,6 @@ const BuildBot: React.FC = () => {
                     className="p-2 bg-gray-500 text-white rounded w-full"
                     placeholder="Enter a unique name"
                   />
-                  {botNameError && <p className="text-red-500">{botNameError}</p>}
             </div>
             <div className="ml-4 w-[33%]">
               <label className="block text-white">Network:</label>
@@ -225,37 +224,43 @@ const BuildBot: React.FC = () => {
                 tradingPool: pool.name.split(':')[1],
               });
             }}                  />
-          {/* Profit Base Toggle */}
-          <label className="block text-white">Profit Base:</label>
 
-          <div className="flex justify-center gap-4">
-            {tradingPool?.token0.imgId && (
-              <div
-                className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token0" ? "bg-purple-800" : "bg-gray-500"}`}
-                onClick={() => handleProfitBaseToggle("token0")}
-              >
-                <img
-                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token0.imgId}.png`}
-                  alt="Token 0"
-                  className="w-12 h-12 rounded-full"
-                />
-                <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(':')[1]}</p>
-              </div>
-            )}
-            {tradingPool?.token1.imgId && (
-              <div
-                className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token1" ? "bg-purple-800" : "bg-gray-500"}`}
-                onClick={() => handleProfitBaseToggle("token1")}
-              >
-                <img
-                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token1.imgId}.png`}
-                  alt="Token 1"
-                  className="w-12 h-12 rounded-full"
-                />
-                <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(':')[2]}</p>
-              </div>
-            )}
-          </div>
+        {tradingPool ? (
+          <>
+            {/* Profit Base Toggle */}
+            <label className="block text-white">Profit Base:</label>
+            <div className="flex justify-center gap-4">
+              {tradingPool?.token0.imgId && (
+                <div
+                  className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token0" ? "bg-purple-800" : "bg-gray-500"}`}
+                  onClick={() => handleProfitBaseToggle("token0")}
+                >
+                  <img
+                    src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token0.imgId}.png`}
+                    alt="Token 0"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(':')[1]}</p>
+                </div>
+              )}
+              {tradingPool?.token1.imgId && (
+                <div
+                  className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token1" ? "bg-purple-800" : "bg-gray-500"}`}
+                  onClick={() => handleProfitBaseToggle("token1")}
+                >
+                  <img
+                    src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token1.imgId}.png`}
+                    alt="Token 1"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(':')[2]}</p>
+                </div>
+              )}
+            </div>
+          </>
+
+        ) : (<></>)
+        }
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="relative">

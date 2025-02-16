@@ -218,7 +218,7 @@ const getPools = async (): Promise<Subgraph.PoolData[] | null> => {
       .sort((a, b) => b.volumeUSD - a.volumeUSD);
 
     // Take the top 100 by volume
-    const top100Pools = sortedByVolume.slice(0, 100);
+    const top100Pools = sortedByVolume.slice(0, 200);
 
     // Sort the top 100 pools by token0.symbol in descending order
     top100Pools.sort((a, b) => b.token0.symbol.localeCompare(a.token0.symbol));
