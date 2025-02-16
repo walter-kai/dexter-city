@@ -9,7 +9,7 @@ import { Subgraph } from "@/models/Token";
 import LoadingScreenDots from "./LoadingScreenDots";
 
 interface PairDetailsProps {
-  swapPair: Subgraph.PairData | undefined;
+  swapPair: Subgraph.PoolData | undefined;
 }
 
 const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
@@ -19,11 +19,11 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
   const [lineState, setLine] = useState<boolean>(false);
   const [barType, setBarType] = useState<boolean>(false);
   const [scaleType, setScaleType] = useState<"linear" | "logarithmic">("linear");
-  const [swaps, setSwaps] = useState<Subgraph.SwapData[]>([]);
+  const [swaps, setSwaps] = useState<Subgraph.SwapDataV3[]>([]);
   const [percentChange, setPercentChange] = useState<number | null>(null);
   const [fadeIn, setFadeIn] = useState<boolean>(false);
 
-  const generateOHLCData = (swaps: Subgraph.SwapData[]) => {
+  const generateOHLCDataV2 = (swaps: Subgraph.SwapDataV2[]) => {
     const barData: { x: number; o: number; h: number; l: number; c: number }[] = [];
     const lineData: { x: number; y: number }[] = [];
 
@@ -77,6 +77,49 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
     return { barData, lineData };
   };
 
+  const generateOHLCData = (swaps: Subgraph.SwapDataV3[]) => {
+    const barData: { x: number; o: number; h: number; l: number; c: number }[] = [];
+    const lineData: { x: number; y: number }[] = [];
+  
+    if (swaps.length === 0) return { barData, lineData };
+  
+    let lastCloseNotRounded = swaps[0].amount1 / swaps[0].amount0;
+    let lastClose = Number(lastCloseNotRounded.toExponential(5));
+  
+    const groupedSwaps: { [key: number]: { open?: number; high: number; low: number; close?: number } } = {};
+  
+    swaps.forEach((swap) => {
+      const { amount0, amount1, timestamp } = swap;
+      const price = amount1 / amount0;
+      const priceRounded = Number(price.toExponential(5));
+  
+      // Normalize timestamp to 24-hour bins
+      const date = new Date(timestamp * 1000);
+      date.setUTCHours(0, 0, 0, 0);
+      const timeKey = date.getTime(); // Group by this key
+  
+      if (!groupedSwaps[timeKey]) {
+        groupedSwaps[timeKey] = { open: priceRounded, high: priceRounded, low: priceRounded, close: priceRounded };
+      } else {
+        groupedSwaps[timeKey].high = Math.max(groupedSwaps[timeKey].high, priceRounded);
+        groupedSwaps[timeKey].low = Math.min(groupedSwaps[timeKey].low, priceRounded);
+        groupedSwaps[timeKey].close = priceRounded;
+      }
+  
+      lastClose = priceRounded;
+    });
+  
+    Object.entries(groupedSwaps).forEach(([time, { open, high, low, close }]) => {
+      if (open !== undefined && close !== undefined) {
+        barData.push({ x: Number(time), o: close, h: high, l: low, c: open });
+        lineData.push({ x: Number(time), y: (open < close ? close + (open - close) / 2 : open + (close - open) / 2) });
+      }
+    });
+  
+    return { barData, lineData };
+  };
+  
+
   const calculatePercentChange = (currentPrice: number, previousPrice: number) => {
     if (!previousPrice) return 0;
     return ((currentPrice - previousPrice) / previousPrice) * 100;
@@ -88,7 +131,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
     const fetchSwaps = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/chain/uni/swaps/${swapPair.id}`);
+        const response = await fetch(`/api/chain/uni/swaps/${swapPair.address}`);
         if (!response.ok) throw new Error(`Failed to fetch trades: ${response.statusText}`);
         const data = await response.json();
         if (!Array.isArray(data.data)) {

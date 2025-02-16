@@ -114,11 +114,30 @@ export namespace Subgraph {
     price: number;
   }
 
+  export interface PoolData {
+    name: string;
+    lastUpdated: Date;
+    network: "Ethereum";
+    address: string;
+    volumeUSD: number;
+    // volumeToken0: number;
+    // token0Price: number;
+    // token0Symbol: string;
+    token0: TokenDetails;
+    // token0ImgId: number,
+    // volumeToken1: number;
+    // token1Price: number;
+    // token1Symbol: string;
+    token1: TokenDetails;
+    // token1ImgId: number,
+    
+  }
+
   export interface PairData {
     name: string;
     lastUpdated: Date;
     network: "Ethereum";
-    id: string;
+    address: string;
     volumeUSD: number;
     // volumeToken0: number;
     // token0Price: number;
@@ -154,11 +173,18 @@ export namespace Subgraph {
   }
 
   
-  export interface SwapData {
+  export interface SwapDataV2 {
     amount0In: number;
     amount0Out: number;
     amount1In: number;
     amount1Out: number;
+    amountUSD: number;
+    timestamp: number;
+  }
+  
+  export interface SwapDataV3 {
+    amount0: number;
+    amount1: number;
     amountUSD: number;
     timestamp: number;
   }

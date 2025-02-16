@@ -2,24 +2,6 @@ import { Request, Response } from "express";
 import subgraphService from "../services/chain.subgraph.service";
 import ApiError from "../utils/api-error";
 
-
-// const getSwaps = async (req: Request, res: Response): Promise<Response> => {
-//   try {
-//     // Fetch pairs for Solana
-//     const uniswapSuccess = await subgraphService.getSwaps();
-//     if (!uniswapSuccess) {
-//       console.error("Failed to reload pairs for Uniswap.");
-//       return res.status(500).json({ error: "Failed to reload pairs for Uniswap." });
-//     }
-
-//     // If both succeeded, return success response
-//     return res.status(200).json({ message: "Pairs reloaded successfully for Uniswap subgraph." });
-//   } catch (error) {
-//     console.error("Error reloading pairs:", error);
-//     return res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
 const getPairs = async (req: Request, res: Response): Promise<Response> => {
   // const { symbol } = req.params; // Get the symbol from the URL params
 
@@ -32,6 +14,24 @@ const getPairs = async (req: Request, res: Response): Promise<Response> => {
     }
 
     return res.json({ pairs: pairList }); // Respond with the id of the token
+  } catch (error) {
+    console.error("Error fetching token:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const getPools = async (req: Request, res: Response): Promise<Response> => {
+  // const { symbol } = req.params; // Get the symbol from the URL params
+
+  try {
+    // Fetch the cryptocurrency id by symbol using the service's get method
+    const poolList = await subgraphService.getPools();
+
+    if (poolList === null) {
+      return res.status(404).json({ error: `Dex list not found` });
+    }
+
+    return res.json({ pools: poolList }); // Respond with the id of the token
   } catch (error) {
     console.error("Error fetching token:", error);
     return res.status(500).json({ error: "Internal server error" });
@@ -54,7 +54,7 @@ const getSwaps = async (req: Request, res: Response): Promise<Response> => {
     }
 
     // Fetch the cryptocurrency data using the service's getTrades method
-    const tradesList = await subgraphService.getSwaps(contractAddress as string);
+    const tradesList = await subgraphService.getSwapsV3(contractAddress as string);
 
     // Check if the dexList is null
     if (!tradesList) {
@@ -114,6 +114,7 @@ const reloadPools = async (req: Request, res: Response): Promise<Response> => {
 
 export default {
   getPairs,
+  getPools,
   getSwaps,
   reloadPairs,
   reloadPools

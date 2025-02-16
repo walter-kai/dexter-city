@@ -4,9 +4,9 @@ import { Subgraph } from '../models/Token';
 
 // Define the context type
 interface PairDetailsContextType {
-  pairDetails: Record<string, Subgraph.PairData>;
-  subscribeToPair: (pairName: string, callback: (pair: Subgraph.PairData) => void) => void;
-  unsubscribeFromPair: (pairName: string, callback: (pair: Subgraph.PairData) => void) => void;
+  pairDetails: Record<string, Subgraph.PoolData>;
+  subscribeToPair: (pairName: string, callback: (pair: Subgraph.PoolData) => void) => void;
+  unsubscribeFromPair: (pairName: string, callback: (pair: Subgraph.PoolData) => void) => void;
 }
 
 // Create the context
@@ -16,7 +16,7 @@ const PairDetailsContext = createContext<PairDetailsContextType | undefined>(und
 const websocketService = new WebSocketService();
 
 // Adjust this type if needed to match what your WebSocket service expects
-type PairUpdateCallback = (pair: Subgraph.PairData) => void;
+type PairUpdateCallback = (pair: Subgraph.PoolData) => void;
 
 // export const PairDetailsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 //   const [pairDetails, setPairDetails] = useState<Record<string, Subgraph.PairData>>({});

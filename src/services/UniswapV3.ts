@@ -22,29 +22,40 @@ interface uniswapV3Pair {
 }
 
 // Create the client to interact with the subgraph
-export const client = createClient({
+const client = createClient({
   url: 'https://gateway.thegraph.com/api/cf949c81dc1152037b34ecdea916c0a8/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV',
   exchanges: [cacheExchange, fetchExchange],
 });
 
-
-// Function to fetch the top tokens by volume
-export const getTopTokensQuery = `{
-  tokens(first: 15, orderBy: volumeUSD, orderDirection: desc) {
-    id
-    name
-    symbol
-    derivedETH
-    volumeUSD
-    txCount
-  }
-  bundles(first: 1) {
-    ethPriceUSD
-  }
-}`;
-
 const sanitizeDocId = (name: string): string => {
   return name.replace(/[^a-zA-Z0-9:-]/g, "_"); // Replace illegal characters
+};
+
+export const fetchSwapsV3 = async (
+  poolAddress: string,
+  skip: number = 0,
+  first: number = 1000
+): Promise<Subgraph.SwapDataV3[]> => {
+  const query = `{
+    swaps(first: ${first}, skip: ${skip}, orderBy: timestamp, orderDirection: desc, where: { pool: "${poolAddress}" }) {
+      timestamp
+      amount0
+      amount1
+      amountUSD
+    }
+  }`;
+
+  try {
+    const result = await client.query(query, { skip }).toPromise();
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return result.data?.swaps || [];
+  } catch (error) {
+    console.error("Error fetching recent swaps:", error);
+    throw error;
+  }
 };
 
 
@@ -107,21 +118,3 @@ export const fetchTopPools = async (skip: number = 0, first: number = 1000): Pro
     throw error;
   }
 };
-
-// Custom hook to fetch the top tokens by volume
-export const useTopTokensQuery = () =>
-  urqlUseQuery<{
-    tokens: {
-      id: string;
-      name: string;
-      symbol: string;
-      derivedETH: string;
-      volumeUSD: string;
-      txCount: number;
-    }[];
-    bundles: { ethPriceUSD: string }[];
-  }>({
-    query: getTopTokensQuery,
-  });
-
-

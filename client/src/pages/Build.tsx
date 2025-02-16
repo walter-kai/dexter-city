@@ -10,7 +10,7 @@ import User from "../models/User";
 import { generateLogoHash } from "../services/Robohash";
 import PairChart2 from "../components/PairChart2";
 import RandomChart from "../components/RandoChart";
-import { DropdownWithImages } from "../components/DropdownImages";
+import { DropdownWithImagesV2, DropdownWithImagesV3 } from "../components/DropdownImages";
 
 const BuildBot: React.FC = () => {
   const [formData, setFormData] = useState<BotConfig>({
@@ -19,7 +19,7 @@ const BuildBot: React.FC = () => {
     creatorWalletId: "",
     botName: "",
     network: "Ethereum",
-    tradingPair: "",
+    tradingPool: "",
     triggerType: "RSA",
     orderType: "Market",
     takeProfit: 1,
@@ -38,7 +38,7 @@ const BuildBot: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [tradingPair, setTradingPair] = useState<Subgraph.PairData | undefined>(undefined);
+  const [tradingPool, setTradingPool] = useState<Subgraph.PoolData | undefined>(undefined);
   const [profitBase, setProfitBase] = useState<"token0" | "token1" | null>(null);
 
   const navigate = useNavigate();
@@ -62,11 +62,11 @@ const BuildBot: React.FC = () => {
   }, [botConfig]);
 
   // useEffect(() => {
-  //   if (formData.tradingPair) {
-  //     const pair = availablePairs[formData.tradingPair];
-  //     setTradingPair(pair);
+  //   if (formData.tradingPool) {
+  //     const pair = availablePairs[formData.tradingPool];
+  //     setTradingPool(pair);
   //   }
-  // }, [availablePairs, formData.tradingPair]);
+  // }, [availablePairs, formData.tradingPool]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -214,42 +214,45 @@ const BuildBot: React.FC = () => {
           </div>
         <div>
           <label className="block text-white">Trading Pair:</label>
-          <DropdownWithImages
+
+          {/* Dropdown */}
+          <DropdownWithImagesV3
             formData={formData}
-            onChange={(pair: Subgraph.PairData) => {
+            onChange={(pool: Subgraph.PoolData) => {
+              setTradingPool(pool);
               setFormData({
                 ...formData,
-                tradingPair: pair.name.split(':')[1],
+                tradingPool: pool.name.split(':')[1],
               });
             }}                  />
           {/* Profit Base Toggle */}
           <label className="block text-white">Profit Base:</label>
 
           <div className="flex justify-center gap-4">
-            {tradingPair?.token0.imgId && (
+            {tradingPool?.token0.imgId && (
               <div
                 className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token0" ? "bg-purple-800" : "bg-gray-500"}`}
                 onClick={() => handleProfitBaseToggle("token0")}
               >
                 <img
-                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token0.imgId}.png`}
+                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token0.imgId}.png`}
                   alt="Token 0"
                   className="w-12 h-12 rounded-full"
                 />
-                <p className="text-white text-sm text-center w-full">{tradingPair?.name.split(':')[1]}</p>
+                <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(':')[1]}</p>
               </div>
             )}
-            {tradingPair?.token1.imgId && (
+            {tradingPool?.token1.imgId && (
               <div
                 className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token1" ? "bg-purple-800" : "bg-gray-500"}`}
                 onClick={() => handleProfitBaseToggle("token1")}
               >
                 <img
-                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token1.imgId}.png`}
+                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token1.imgId}.png`}
                   alt="Token 1"
                   className="w-12 h-12 rounded-full"
                 />
-                <p className="text-white text-sm text-center w-full">{tradingPair?.name.split(':')[2]}</p>
+                <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(':')[2]}</p>
               </div>
             )}
           </div>
@@ -350,7 +353,7 @@ const BuildBot: React.FC = () => {
             priceDeviation={formData.priceDeviation}
             gapMultiplier={formData.safetyOrderGapMultiplier}
           /> */}
-          <PairChart2 swapPair={tradingPair}/>
+          <PairChart2 swapPair={tradingPool}/>
           {/* <RandomChart /> */}
         </div>
 

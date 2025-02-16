@@ -68,7 +68,7 @@ interface ChartOptions {
 ChartJS.register(...registerables, zoomPlugin, OhlcElement, OhlcController, CandlestickElement, CandlestickController);
 
 interface PairDetailsProps {
-  swapPair: Subgraph.PairData | undefined;
+  swapPair: Subgraph.PoolData | undefined;
   safetyOrdersCount: number;
   priceDeviation: number; // as a fraction (e.g., 0.04 for 4%)
   gapMultiplier: number;
@@ -82,7 +82,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
 }) => {
   const [loading, setLoading] = useState<boolean | null>(true);
   const [error, setError] = useState<string | null>(null);
-  const [swaps, setSwaps] = useState<Subgraph.SwapData[]>([]);
+  const [swaps, setSwaps] = useState<Subgraph.SwapDataV2[]>([]);
   const [calculatedValues, setCalculatedValues] = useState<{
     currentPrice: number;
     safetyOrderPrices: number[];
@@ -95,7 +95,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
     const fetchSwaps = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/chain/uni/swaps/${swapPair.id}`);
+        const response = await fetch(`/api/chain/uni/swaps/${swapPair.address}`);
         if (!response.ok) {
           throw new Error(`Failed to fetch trades: ${response.statusText}`);
         }
@@ -138,7 +138,7 @@ const PairChart: React.FC<PairDetailsProps> = ({
   }, [swaps, safetyOrdersCount, priceDeviation, gapMultiplier]);
 
   // Function to aggregate swaps based on selected time interval
-  const aggregateSwapsByInterval = (swaps: Subgraph.SwapData[], interval: '1m' | '15m' | '1h' | '1d') => {
+  const aggregateSwapsByInterval = (swaps: Subgraph.SwapDataV2[], interval: '1m' | '15m' | '1h' | '1d') => {
     const intervalInMinutes: { [key in '1m' | '15m' | '1h' | '1d']: number } = {
       '1m': 1,
       '15m': 15,

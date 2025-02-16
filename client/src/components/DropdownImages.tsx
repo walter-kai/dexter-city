@@ -5,7 +5,7 @@ import { Subgraph } from "../models/Token";
 
 interface DropdownWithImagesProps {
   formData: BotConfig;
-  onChange: (pairData: Subgraph.PairData) => void; // Passes the full pair object
+  onChange: (pairData: Subgraph.PoolData) => void; // Passes the full pair object
 }
 
 const customStyles = {
@@ -55,7 +55,7 @@ const customStyles = {
   }),
 };
 
-export const DropdownWithImages: React.FC<DropdownWithImagesProps> = ({
+export const DropdownWithImagesV2: React.FC<DropdownWithImagesProps> = ({
   formData,
   onChange,
 }) => {
@@ -127,7 +127,81 @@ console.log("Options:", options); // Debugging: Ensure this is populated
           onChange(selectedOption.pairData); // Pass full pairData object
         }
       }}
-      value={options.find((option) => option.value === formData.tradingPair)}
+      value={options.find((option) => option.value === formData.tradingPool)}
+      isSearchable
+      styles={customStyles}
+    />
+  );
+};
+
+
+export const DropdownWithImagesV3: React.FC<DropdownWithImagesProps> = ({
+  formData,
+  onChange,
+}) => {
+  const [availablePools, setAvailablePools] = useState<Subgraph.PoolData[] | null>(null);
+
+  useEffect(() => {
+    const fetchPairs = async () => {
+      try {
+        const response = await fetch("/api/chain/uni/pools");
+        if (!response.ok) throw new Error("Failed to fetch pools");
+        
+        const data = await response.json();
+        console.log("Fetched pools:", data); // Debug: Log the API response
+        
+        setAvailablePools(data.pools);
+      } catch (error) {
+        console.error("Error fetching pools:", error);
+      }
+    };
+
+    fetchPairs();
+  }, []);
+
+  if (!availablePools) return <p>Loading pools...</p>;
+
+  const options = availablePools
+    .map((pool) => {
+      const [token0Symbol, token1Symbol] = pool.name.split(";");
+
+      return {
+        value: pool.name,
+        label: (
+          <div className="flex">
+            <div className="flex items-center">
+              <img
+                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pool.token0.imgId || "default"}.png`}
+                alt={`${token0Symbol} icon`}
+                className="w-5 h-5 mr-2"
+              />
+              <span className="mr-2">{token0Symbol}</span>
+            </div>
+            <div className="flex items-center">
+              <img
+                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pool.token1.imgId || "default"}.png`}
+                alt={`${token1Symbol} icon`}
+                className="w-5 h-5 mx-2"
+              />
+              <span>{token1Symbol}</span>
+            </div>
+          </div>
+        ),
+        poolData: pool, // Store the full pairData object
+      };
+    });
+
+  console.log("Dropdown Options:", options); // Debug: Check dropdown options
+
+  return (
+    <Select
+      options={options}
+      onChange={(selectedOption: any) => {
+        if (selectedOption) {
+          onChange(selectedOption.poolData); // Pass full pairData object
+        }
+      }}
+      value={options.find((option) => option.value === formData.tradingPool)}
       isSearchable
       styles={customStyles}
     />

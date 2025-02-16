@@ -55,7 +55,7 @@ interface ETHPrice {
 }
 
 // Function to fetch recent swaps with a specific pairId and skip parameter
-export const fetchRecentSwaps = async (pairId: string, skip: number = 0): Promise<Subgraph.SwapData[]> => {
+export const fetchRecentSwapsV2 = async (pairId: string, skip: number = 0): Promise<Subgraph.SwapDataV2[]> => {
   const recentSwapsQuery = `{
     swaps(orderBy: timestamp, orderDirection: desc, where: {
       pair: "${pairId}"
@@ -100,7 +100,7 @@ const sanitizeDocId = (name: string): string => {
 
 // Function to fetch the most liquid pairs with pagination
 // Function to fetch the most liquid pairs with pagination and flattening the data
-export const fetchMostLiquidPairs = async (skip: number = 0, first: number = 1000): Promise<Subgraph.PairData[]> => {
+export const fetchMostLiquidPairsV2 = async (skip: number = 0, first: number = 1000): Promise<Subgraph.PoolData[]> => {
   const mostLiquidPairsQuery = `{
     pairs(first: ${first}, skip: ${skip}, orderBy: volumeUSD, orderDirection: desc) {
       id
@@ -129,7 +129,7 @@ export const fetchMostLiquidPairs = async (skip: number = 0, first: number = 100
     }
 
     
-const pairs: Subgraph.PairData[] = result.data?.pairs.map((pair: uniswapV2Pair) => ({
+const pairs: Subgraph.PoolData[] = result.data?.pairs.map((pair: uniswapV2Pair) => ({
   id: pair.id,
   name: sanitizeDocId(`ETH:${pair.token0.symbol}:${pair.token1.symbol}`),
   lastUpdated: new Date(),
@@ -162,7 +162,7 @@ const pairs: Subgraph.PairData[] = result.data?.pairs.map((pair: uniswapV2Pair) 
 
 
 // Function to fetch the pair data for a specific Uniswap pair
-export const getPairDataQuery = (pairId: string): string => `{
+export const getPairDataQueryV2 = (pairId: string): string => `{
   pair(id: "${pairId}") {
     token0 {
       id
@@ -188,7 +188,7 @@ export const getPairDataQuery = (pairId: string): string => `{
 }`;
 
 // Function to fetch all Uniswap pairs with pagination
-export const getAllPairsQuery = (skip: number): string => `{
+export const getAllPairsQueryV2 = (skip: number): string => `{
     pairs(first: 1000, skip: $skip, orderBy: volumeUSD, orderDirection: desc) {
       id
     	volumeUSD
@@ -216,7 +216,7 @@ export const getAllPairsQuery = (skip: number): string => `{
 }`;
 
 // Custom hook to fetch the most liquid pairs
-export const useMostLiquidPairsQuery = () =>
+export const useMostLiquidPairsQueryV2 = () =>
   urqlUseQuery<{ pairs: uniswapV2Pair[] }>({
     query: getMostLiquidPairsQuery(),
   });
@@ -244,7 +244,7 @@ const getMostLiquidPairsQuery = (skip: number = 0, first: number = 1000): string
 
 
 // Function to fetch recent swaps within a specific pair, with a skip parameter for pagination
-export const getRecentSwapsQuery = (pairId: string, skip: number = 0, first: number = 1000): string => {
+export const getRecentSwapsQueryV2 = (pairId: string, skip: number = 0, first: number = 1000): string => {
   return `{
     swaps(orderBy: timestamp, orderDirection: desc, where: {
       pair: "${pairId}"
@@ -272,7 +272,7 @@ export const getRecentSwapsQuery = (pairId: string, skip: number = 0, first: num
 
 
 // Function to fetch recent swaps starting from the last update timestamp up until now
-export const getRecentSwapsQueryFromLastUpdate = (pairId: string, lastUpdateTimestamp: number, skip: number = 0, first: number = 1000): string => {
+export const getRecentSwapsQueryFromLastUpdateV2 = (pairId: string, lastUpdateTimestamp: number, skip: number = 0, first: number = 1000): string => {
   const currentTimestamp = Math.floor(Date.now() / 1000); // Current time in seconds
   const convertlastUpdateTimestamp = Math.floor(lastUpdateTimestamp); // Current time in seconds
 
@@ -376,14 +376,14 @@ export const useTokensQuery = () => urqlUseQuery<{ tokens: { id: string; name: s
 
 // Custom hook to fetch data for a specific pair
 export const usePairDataQuery = (pairId: string) =>
-  urqlUseQuery<{ pair: Subgraph.PairData }>({
-    query: getPairDataQuery(pairId),
+  urqlUseQuery<{ pair: Subgraph.PoolData }>({
+    query: getPairDataQueryV2(pairId),
   });
 
 // Custom hook to fetch all pairs with pagination
 export const useAllPairsQuery = (skip: number) =>
   urqlUseQuery<{ pairs: uniswapV2Pair[] }>({
-    query: getAllPairsQuery(skip),
+    query: getAllPairsQueryV2(skip),
   });
 
 
@@ -401,7 +401,7 @@ export const useRecentSwapsQuery = (pairId: string) =>
       to: string;
     }[];
   }>({
-    query: getRecentSwapsQuery(pairId),
+    query: getRecentSwapsQueryV2(pairId),
   });
 
 // Custom hook to fetch daily aggregated data for a specific pair

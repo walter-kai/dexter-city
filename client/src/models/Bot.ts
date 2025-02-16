@@ -12,7 +12,7 @@ export interface BotConfig {
   creatorWalletId: string;
   botName: string;
   network: "Ethereum" | "Solana";
-  tradingPair: string;
+  tradingPool: string;
   triggerType: "RSA" | string;
   orderType: "Market" | string;  // Assuming there may be other order types
   takeProfit: number;

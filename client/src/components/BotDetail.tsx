@@ -15,7 +15,7 @@ const BotDetails: React.FC<BotDetailsPageProps> = ({ bot, onClose }) => {
     { label: "Status", value: bot.status || "N/A" },
     { label: "Creator", value: bot.creatorName || "N/A" },
     { label: "Creator Wallet ID", value: bot.creatorWalletId || "N/A" },
-    { label: "Trading Pair", value: bot.tradingPair || "N/A" },
+    { label: "Trading Pair", value: bot.tradingPool || "N/A" },
     { label: "Trigger Type", value: bot.triggerType || "N/A" },
     { label: "Initial Order Size", value: bot.initialOrderSize || "N/A" },
     { label: "Price Deviation", value: `${bot.priceDeviation || 0}%` },
