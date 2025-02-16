@@ -21,6 +21,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
   const [scaleType, setScaleType] = useState<"linear" | "logarithmic">("linear");
   const [swaps, setSwaps] = useState<Subgraph.SwapData[]>([]);
   const [percentChange, setPercentChange] = useState<number | null>(null);
+  const [fadeIn, setFadeIn] = useState<boolean>(false);
 
   const generateOHLCData = (swaps: Subgraph.SwapData[]) => {
     const barData: { x: number; o: number; h: number; l: number; c: number }[] = [];
@@ -229,7 +230,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
         },
       },
     });
-
+    setFadeIn(true);
     chartInstanceRef.current.update();
   }, [swaps, barType, lineState, scaleType]);
 
@@ -262,7 +263,10 @@ const PairChart2: React.FC<PairDetailsProps> = ({ swapPair }) => {
         { loading ? ( 
           <LoadingScreenDots />
         ) : (
-          <canvas ref={chartRef}></canvas>
+          <canvas
+            ref={chartRef}
+            className={`transition-opacity duration-2000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
+          ></canvas>
         ) }
       </div>
     </div>

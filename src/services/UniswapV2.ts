@@ -1,4 +1,5 @@
 import { createClient, cacheExchange, fetchExchange, useQuery as urqlUseQuery } from 'urql';
+import { Subgraph } from '../../client/src/models/Token';
 
 // Create the client to interact with the subgraph
 export const client = createClient({
@@ -13,39 +14,23 @@ interface GlobalStats {
   txCount: number;
 }
 
-interface PairData {
-  token0: {
+interface uniswapV2Pair { 
+  id: any; 
+  volumeUSD: any; 
+  token0Price: any; 
+  token1Price: any;
+  token0: { 
     id: string;
-    symbol: string;
-    name: string;
-    derivedETH: string;
-  };
-  token1: {
+    symbol: any; 
+    name: any; 
+    tradeVolumeUSD: any; 
+  }; 
+  token1: { 
     id: string;
-    symbol: string;
-    name: string;
-    derivedETH: string;
-  };
-  reserve0: string;
-  reserve1: string;
-  reserveUSD: string;
-  trackedReserveETH: string;
-  token0Price: string;
-  token1Price: string;
-  volumeUSD: string;
-  txCount: number;
-}
-
-interface Pair {
-  id: string;
-  token0: {
-    id: string;
-    symbol: string;
-  };
-  token1: {
-    id: string;
-    symbol: string;
-  };
+    symbol: any; 
+    name: any; 
+    tradeVolumeUSD: any; 
+  }; 
 }
 
 interface TokenData {
@@ -69,23 +54,112 @@ interface ETHPrice {
   ethPrice: string;
 }
 
-// Function to fetch the global stats like total volume, liquidity, and transaction count
-export const getGlobalStatsQuery = `{
-  uniswapFactory(id: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f") {
-    totalVolumeUSD
-    totalLiquidityUSD
-    txCount
-  }
-}`;
+// Function to fetch recent swaps with a specific pairId and skip parameter
+export const fetchRecentSwaps = async (pairId: string, skip: number = 0): Promise<Subgraph.SwapData[]> => {
+  const recentSwapsQuery = `{
+    swaps(orderBy: timestamp, orderDirection: desc, where: {
+      pair: "${pairId}"
+    }, skip: ${skip}, first: 1000) {
+      pair {
+        token0 {
+          symbol
+        }
+        token1 {
+          symbol
+        }
+      }
+      timestamp
+      amount0In
+      amount0Out
+      amount1In
+      amount1Out
+      amountUSD
+      to
+    }
+  }`;
 
-// Function to fetch global historical data at a specific block
-export const getGlobalHistoricalStatsQuery = (blockNumber: number): string => `{
-  uniswapFactory(id: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f", block: {number: ${blockNumber}}) {
-    totalVolumeUSD
-    totalLiquidityUSD
-    txCount
+  try {
+    const result = await client.query(recentSwapsQuery, { skip }).toPromise();
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return result.data?.swaps || [];
+  } catch (error) {
+    console.error('Error fetching recent swaps:', error);
+    throw error;
   }
-}`;
+};
+
+
+
+const sanitizeDocId = (name: string): string => {
+  return name.replace(/[^a-zA-Z0-9:-]/g, "_"); // Replace illegal characters
+};
+
+
+// Function to fetch the most liquid pairs with pagination
+// Function to fetch the most liquid pairs with pagination and flattening the data
+export const fetchMostLiquidPairs = async (skip: number = 0, first: number = 1000): Promise<Subgraph.PairData[]> => {
+  const mostLiquidPairsQuery = `{
+    pairs(first: ${first}, skip: ${skip}, orderBy: volumeUSD, orderDirection: desc) {
+      id
+      volumeUSD
+      token0Price
+      token0 {
+        id
+        symbol
+        name
+        tradeVolumeUSD
+      }
+      token1Price
+      token1 {
+        id
+        symbol
+        name
+        tradeVolumeUSD
+      }
+    }
+  }`;
+
+  try {
+    const result = await client.query(mostLiquidPairsQuery, { skip }).toPromise();
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    
+const pairs: Subgraph.PairData[] = result.data?.pairs.map((pair: uniswapV2Pair) => ({
+  id: pair.id,
+  name: sanitizeDocId(`ETH:${pair.token0.symbol}:${pair.token1.symbol}`),
+  lastUpdated: new Date(),
+  network: "Ethereum",
+  volumeUSD: pair.volumeUSD,
+  token0: {
+    address: pair.token0.id, 
+    symbol: pair.token0.symbol,
+    name: pair.token0.name,
+    volume: pair.token0.tradeVolumeUSD,
+    price: pair.token0Price,
+  },
+  token1: {
+    address: pair.token1.id, 
+    symbol: pair.token1.symbol,
+    name: pair.token1.name,
+    volume: pair.token1.tradeVolumeUSD,
+    price: pair.token1Price,
+  },
+})) || [];
+
+
+    return pairs;
+  } catch (error) {
+    console.error('Error fetching most liquid pairs:', error);
+    throw error;
+  }
+};
+
+
 
 // Function to fetch the pair data for a specific Uniswap pair
 export const getPairDataQuery = (pairId: string): string => `{
@@ -141,13 +215,20 @@ export const getAllPairsQuery = (skip: number): string => `{
     }
 }`;
 
+// Custom hook to fetch the most liquid pairs
+export const useMostLiquidPairsQuery = () =>
+  urqlUseQuery<{ pairs: uniswapV2Pair[] }>({
+    query: getMostLiquidPairsQuery(),
+  });
+
 // Function to fetch the most liquid pairs by reserveUSD
-export const getMostLiquidPairsQuery = (skip: number = 0, first: number = 1000): string => {
+const getMostLiquidPairsQuery = (skip: number = 0, first: number = 1000): string => {
   return `{
     pairs(first: ${first}, skip: ${skip}, orderBy: volumeUSD, orderDirection: desc) {
       id
       txCount
       token0Price
+      
       token0 {
         symbol
         name
@@ -160,6 +241,7 @@ export const getMostLiquidPairsQuery = (skip: number = 0, first: number = 1000):
     }
   }`;
 };
+
 
 // Function to fetch recent swaps within a specific pair, with a skip parameter for pagination
 export const getRecentSwapsQuery = (pairId: string, skip: number = 0, first: number = 1000): string => {
@@ -292,35 +374,19 @@ export const useTokensQuery = () => urqlUseQuery<{ tokens: { id: string; name: s
 });
 
 
-// Custom hook to fetch global stats
-export const useGlobalStatsQuery = () =>
-  urqlUseQuery<{ uniswapFactory: GlobalStats }>({
-    query: getGlobalStatsQuery,
-  });
-
-// Custom hook to fetch global historical stats at a specific block
-export const useGlobalHistoricalStatsQuery = (blockNumber: number) =>
-  urqlUseQuery<{ uniswapFactory: GlobalStats }>({
-    query: getGlobalHistoricalStatsQuery(blockNumber),
-  });
-
 // Custom hook to fetch data for a specific pair
 export const usePairDataQuery = (pairId: string) =>
-  urqlUseQuery<{ pair: PairData }>({
+  urqlUseQuery<{ pair: Subgraph.PairData }>({
     query: getPairDataQuery(pairId),
   });
 
 // Custom hook to fetch all pairs with pagination
 export const useAllPairsQuery = (skip: number) =>
-  urqlUseQuery<{ pairs: Pair[] }>({
+  urqlUseQuery<{ pairs: uniswapV2Pair[] }>({
     query: getAllPairsQuery(skip),
   });
 
-// Custom hook to fetch the most liquid pairs
-export const useMostLiquidPairsQuery = () =>
-  urqlUseQuery<{ pairs: Pair[] }>({
-    query: getMostLiquidPairsQuery(),
-  });
+
 
 // Custom hook to fetch recent swaps for a specific pair
 export const useRecentSwapsQuery = (pairId: string) =>

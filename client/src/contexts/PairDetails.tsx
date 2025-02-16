@@ -18,54 +18,54 @@ const websocketService = new WebSocketService();
 // Adjust this type if needed to match what your WebSocket service expects
 type PairUpdateCallback = (pair: Subgraph.PairData) => void;
 
-export const PairDetailsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [pairDetails, setPairDetails] = useState<Record<string, Subgraph.PairData>>({});
+// export const PairDetailsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+//   const [pairDetails, setPairDetails] = useState<Record<string, Subgraph.PairData>>({});
 
-  useEffect(() => {
-    // Connect to WebSocket when the component is mounted
-    websocketService.connect();
+  // useEffect(() => {
+  //   // Connect to WebSocket when the component is mounted
+  //   websocketService.connect();
     
-    // Handle WebSocket error
-    websocketService.onError((error: string) => {
-      console.error("WebSocket error:", error);
-    });
+  //   // Handle WebSocket error
+  //   websocketService.onError((error: string) => {
+  //     console.error("WebSocket error:", error);
+  //   });
 
-    // Subscribe to all pairs
-    const handlePairUpdate: PairUpdateCallback = (pair: Subgraph.PairData) => {
-      setPairDetails((prev) => {
-        const pairKey = `${pair.name}`;
-        return {
-          ...prev,
-          [pairKey]: pair,
-        };
-      });
-    };
+  //   // Subscribe to all pairs
+  //   const handlePairUpdate: PairUpdateCallback = (pair: Subgraph.PairData) => {
+  //     setPairDetails((prev) => {
+  //       const pairKey = `${pair.name}`;
+  //       return {
+  //         ...prev,
+  //         [pairKey]: pair,
+  //       };
+  //     });
+  //   };
 
-    websocketService.subscribeToPair("all", handlePairUpdate);
+  //   websocketService.subscribeToPair("all", handlePairUpdate);
 
-    // Cleanup WebSocket connection on unmount
-    return () => {
-      websocketService.disconnect();
-      websocketService.unsubscribeFromPair("all", handlePairUpdate);
-    };
-  }, []);
+  //   // Cleanup WebSocket connection on unmount
+  //   return () => {
+  //     websocketService.disconnect();
+  //     websocketService.unsubscribeFromPair("all", handlePairUpdate);
+  //   };
+  // }, []);
 
-  // Subscribe to a specific pair by name
-  const subscribeToPair = (pairName: string, callback: (pair: Subgraph.PairData) => void) => {
-    websocketService.subscribeToPair(pairName, callback);
-  };
+  // // Subscribe to a specific pair by name
+  // const subscribeToPair = (pairName: string, callback: (pair: Subgraph.PairData) => void) => {
+  //   websocketService.subscribeToPair(pairName, callback);
+  // };
 
-  // Unsubscribe from a specific pair by name
-  const unsubscribeFromPair = (pairName: string, callback: (pair: Subgraph.PairData) => void) => {
-    websocketService.unsubscribeFromPair(pairName, callback);
-  };
+  // // Unsubscribe from a specific pair by name
+  // const unsubscribeFromPair = (pairName: string, callback: (pair: Subgraph.PairData) => void) => {
+  //   websocketService.unsubscribeFromPair(pairName, callback);
+  // };
 
-  return (
-    <PairDetailsContext.Provider value={{ pairDetails, subscribeToPair, unsubscribeFromPair }}>
-      {children}
-    </PairDetailsContext.Provider>
-  );
-};
+  // return (
+  //   <PairDetailsContext.Provider value={{ pairDetails, subscribeToPair, unsubscribeFromPair }}>
+  //     {children}
+  //   </PairDetailsContext.Provider>
+  // );
+// };
 
 // Custom hook to use the context
 export const usePairDetails = (): PairDetailsContextType => {

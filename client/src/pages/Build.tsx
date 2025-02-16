@@ -5,7 +5,7 @@ import { BotConfig } from "../models/Bot";
 import { CoinMarketCap, Subgraph } from "../models/Token";
 
 import PairChart from "../components/PairChart";
-import { usePairDetails } from "../contexts/PairDetails";
+// import { usePairDetails } from "../contexts/PairDetails";
 import User from "../models/User";
 import { generateLogoHash } from "../services/Robohash";
 import PairChart2 from "../components/PairChart2";
@@ -47,7 +47,7 @@ const BuildBot: React.FC = () => {
   const { botConfig } = state || {};
 
   // Access pair details and available pairs from context
-  const { pairDetails } = usePairDetails();
+  // const { pairDetails: availablePairs } = usePairDetails();
 
   useEffect(() => {
     if (botConfig) {
@@ -61,12 +61,12 @@ const BuildBot: React.FC = () => {
     checkBotNameAvailability(formData.botName);
   }, [botConfig]);
 
-  useEffect(() => {
-    if (formData.tradingPair) {
-      const pair = pairDetails[formData.tradingPair];
-      setTradingPair(pair);
-    }
-  }, [pairDetails, formData.tradingPair]);
+  // useEffect(() => {
+  //   if (formData.tradingPair) {
+  //     const pair = availablePairs[formData.tradingPair];
+  //     setTradingPair(pair);
+  //   }
+  // }, [availablePairs, formData.tradingPair]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -215,38 +215,37 @@ const BuildBot: React.FC = () => {
         <div>
           <label className="block text-white">Trading Pair:</label>
           <DropdownWithImages
-            availablePairs={pairDetails}
             formData={formData}
-            onChange={(pair: string) => {
+            onChange={(pair: Subgraph.PairData) => {
               setFormData({
                 ...formData,
-                tradingPair: pair,
+                tradingPair: pair.name.split(':')[1],
               });
             }}                  />
           {/* Profit Base Toggle */}
           <label className="block text-white">Profit Base:</label>
 
           <div className="flex justify-center gap-4">
-            {tradingPair?.token0ImgId && (
+            {tradingPair?.token0.imgId && (
               <div
                 className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token0" ? "bg-purple-800" : "bg-gray-500"}`}
                 onClick={() => handleProfitBaseToggle("token0")}
               >
                 <img
-                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token0ImgId}.png`}
+                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token0.imgId}.png`}
                   alt="Token 0"
                   className="w-12 h-12 rounded-full"
                 />
                 <p className="text-white text-sm text-center w-full">{tradingPair?.name.split(':')[1]}</p>
               </div>
             )}
-            {tradingPair?.token1ImgId && (
+            {tradingPair?.token1.imgId && (
               <div
                 className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token1" ? "bg-purple-800" : "bg-gray-500"}`}
                 onClick={() => handleProfitBaseToggle("token1")}
               >
                 <img
-                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token1ImgId}.png`}
+                  src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPair?.token1.imgId}.png`}
                   alt="Token 1"
                   className="w-12 h-12 rounded-full"
                 />

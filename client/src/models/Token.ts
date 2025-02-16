@@ -106,27 +106,50 @@ export namespace Subgraph {
   }
 
   export interface TokenDetails {
+    address: string;
     symbol: string;
     name: string;
-    tradeVolume: number;
-    totalLiquidity: number;
-    totalSupply: number;
+    imgId: number;
+    volume: number;
+    price: number;
   }
 
   export interface PairData {
     name: string;
+    lastUpdated: Date;
     network: "Ethereum";
     id: string;
-    txCount: number;
     volumeUSD: number;
-    volumeToken0: number;
-    token0Price: number;
-    // token0: TokenDetails;
-    token0ImgId: number,
-    volumeToken1: number;
-    token1Price: number;
-    // token1: TokenDetails;
-    token1ImgId: number,
+    // volumeToken0: number;
+    // token0Price: number;
+    // token0Symbol: string;
+    token0: TokenDetails;
+    // token0ImgId: number,
+    // volumeToken1: number;
+    // token1Price: number;
+    // token1Symbol: string;
+    token1: TokenDetails;
+    // token1ImgId: number,
+    
+  }
+
+
+  export interface PoolData {
+    name: string;
+    lastUpdated: Date;
+    network: "Ethereum";
+    address: string;
+    volumeUSD: number;
+    // volumeToken0: number;
+    // token0Price: number;
+    // token0Symbol: string;
+    token0: TokenDetails;
+    // token0ImgId: number,
+    // volumeToken1: number;
+    // token1Price: number;
+    // token1Symbol: string;
+    token1: TokenDetails;
+    // token1ImgId: number,
     
   }
 

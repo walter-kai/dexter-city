@@ -17,6 +17,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src", "../src/services/SubGraph.ts"],
+  "include": ["src", "../src/services/UniswapV2.ts"],
   "exclude": ["node_modules"]
 }

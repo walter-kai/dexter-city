@@ -12,6 +12,7 @@ router.route("/uni/swaps/:contractAddress").get(subgraphController.getSwaps);
 router.route("/uni/pairs").get(subgraphController.getPairs);
 router.route("/cmc/reloadPairs").get(coinMarketCapController.reloadPairs);
 router.route("/uni/reloadPairs").get(subgraphController.reloadPairs);
+router.route("/uni/reloadPools").get(subgraphController.reloadPools);
 // router.route("/tokens/:symbol").get(chainController.getTokenBySymbol);
 
 

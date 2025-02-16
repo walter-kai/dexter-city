@@ -72,27 +72,41 @@ const getSwaps = async (req: Request, res: Response): Promise<Response> => {
 
 const reloadPairs = async (req: Request, res: Response): Promise<Response> => {
 
-  if (req.params.contractAddress == null) {
-    throw new ApiError(400, "Missing chatId in request params");
-  }
-
-  // const contractAddress = req.params.contractAddress; // Extract network and contractAddress from query parameters
 
   try {
-
-
     // Fetch the cryptocurrency data using the service's getTrades method
     const pairsList = await subgraphService.reloadPairs();
 
     // Check if the dexList is null
     if (!pairsList) {
-      return res.status(404).json({ error: "Dex list not found" });
+      return res.status(404).json({ error: "Dex pair list not found" });
     }
 
     // Return the fetched data
     return res.json({ data: pairsList });
   } catch (error) {
-    console.error("Error fetching trades:", error);
+    console.error("Error fetching pairs:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+const reloadPools = async (req: Request, res: Response): Promise<Response> => {
+
+
+  try {
+    // Fetch the cryptocurrency data using the service's getTrades method
+    const poolsList = await subgraphService.reloadPools();
+
+    // Check if the dexList is null
+    if (!poolsList) {
+      return res.status(404).json({ error: "Dex pool list not found" });
+    }
+
+    // Return the fetched data
+    return res.json({ data: poolsList });
+  } catch (error) {
+    console.error("Error fetching pools:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -101,5 +115,6 @@ const reloadPairs = async (req: Request, res: Response): Promise<Response> => {
 export default {
   getPairs,
   getSwaps,
-  reloadPairs
+  reloadPairs,
+  reloadPools
 };

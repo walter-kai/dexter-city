@@ -8,7 +8,7 @@ import { login } from './services/FirestoreUser';
 import { useNavigate } from 'react-router-dom';
 // import { client } from '../../src/services/SubGraph';
 // import { Provider } from 'urql';
-import { PairDetailsProvider } from './contexts/PairDetails'; // Import the provider
+// import { PairDetailsProvider } from './contexts/PairDetails'; // Import the provider
 
 const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -49,7 +49,7 @@ const App: React.FC = () => {
 
   return (
 
-      <PairDetailsProvider>
+
         <div className="bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen">
           {location.pathname !== '/' && <NavBar telegramUser={user} />}
           <div className="mx-auto pt-12">
@@ -61,7 +61,7 @@ const App: React.FC = () => {
             </Routes>
           </div>
         </div>
-      </PairDetailsProvider>
+
 
   );
 };

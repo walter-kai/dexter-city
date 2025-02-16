@@ -1,20 +1,14 @@
-import { createClient, cacheExchange, fetchExchange } from "urql";
 import { db } from "../config/firebase";
 import admin from "firebase-admin";
 import logger from "../config/logger";
 import { CoinMarketCap, Subgraph } from "../../client/src/models/Token";
-import { getAllPairsQuery, getMostLiquidPairsQuery, getRecentSwapsQuery, getRecentSwapsQueryFromLastUpdate, useMostLiquidPairsQuery } from "./SubGraph";
-import coinMarketCapService from "./chain.coinmarketcap.service"
+import coinMarketCapService from "./chain.coinmarketcap.service";
+import { fetchMostLiquidPairs as fetchMostLiquidPairs, fetchRecentSwaps } from "./UniswapV2";
+import { fetchTopPools } from "./UniswapV3";
 
-// Create the client to interact with the subgraph
-export const client = createClient({
-  url: "https://gateway.thegraph.com/api/cf949c81dc1152037b34ecdea916c0a8/subgraphs/id/A3Np3RQbaBA6oKJgiwDJeo5T3zrYfGHPWFYayMwtNDum",
-  exchanges: [cacheExchange, fetchExchange],
-});
-
-const getSwaps = async (contractAddress: string): Promise<Subgraph.SwapData[] | null> => {
+// Function to fetch recent swaps from the subgraph
+export const getSwaps = async (contractAddress: string): Promise<Subgraph.SwapData[] | null> => {
   try {
-
     /**
      * Fetch recent swaps from the subgraph for a specific pair.
      * This will attempt to fetch the data 5 times, similar to the previous pairs fetching logic.
@@ -25,16 +19,16 @@ const getSwaps = async (contractAddress: string): Promise<Subgraph.SwapData[] | 
 
       try {
         // Fetch swaps 5 times
-        for (let i = 0; i < 5; i++) {
-          const result = await client
-            .query(getRecentSwapsQuery(contractAddress, skip), { skip }) // Using pairName and skip for recent swaps
-            .toPromise();
+        for (let i = 0; i < 1; i++) {
+          // const result = await client
+          //   .query(getRecentSwapsQuery(contractAddress, skip), { skip }) // Using pairName and skip for recent swaps
+          //   .toPromise();
 
-          if (result.error) {
-            throw new Error(result.error.message);
-          }
+          // if (result.error) {
+          //   throw new Error(result.error.message);
+          // }
 
-          const swaps = result.data?.swaps || [];
+          const swaps = await fetchRecentSwaps(contractAddress, skip);
 
           // Convert string fields to numbers
           const parsedSwaps = swaps.map((swap: any) => ({
@@ -104,7 +98,6 @@ const getPairs = async (pairSymbols: string[] = []): Promise<Subgraph.PairData[]
       "ETH:MOODENG:WETH",
       "ETH:TRUMP:WETH",
       "ETH:WOO:WETH",
-
     ];
 
     // If pairSymbols is null, use the hardcoded list of pairs
@@ -130,6 +123,7 @@ const getPairs = async (pairSymbols: string[] = []): Promise<Subgraph.PairData[]
   }
 };
 
+
 /**
  * Reload pairs from the subgraph and write to Firestore.
  */
@@ -137,115 +131,235 @@ const reloadPairs = async (): Promise<Subgraph.PairData[] | null> => {
   try {
     const tokensCollection = db.collection("pairs-uniswap");
     const tokensCmcCollection = db.collection("tokens-cmc");
+  
+    /**
+     * Preload token symbols and their imgIds from tokens-cmc collection
+     */
+    const preloadTokenImages = async (): Promise<Map<string, number | null>> => {
+      const tokenMap = new Map<string, number | null>();
+      const snapshot = await tokensCmcCollection.get();
+  
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.symbol) {
+          const imgId = Number(data.id); // Ensure it's a number
+          tokenMap.set(data.symbol, isNaN(imgId) ? null : imgId);
+        }
+      });
+  
+      return tokenMap;
+    };
+  
+/**
+ * Fetch recent pairs from the subgraph and get the corresponding token images
+ */
+const fetchPairsFromSubgraph = async (): Promise<Subgraph.PairData[]> => {
+  let skip = 0;
+  let allPairs: Subgraph.PairData[] = [];
 
+  try {
+    // Load token images once before looping
+    const tokenImageMap = await preloadTokenImages();
+
+    for (let i = 0; i < 5; i++) {
+      const pairs = await fetchMostLiquidPairs(skip);
+      const batch = db.batch();
+
+      for (const pair of pairs) {
+        const token0ImgId = tokenImageMap.get(pair.token0.symbol) ?? 0;
+        const token1ImgId = tokenImageMap.get(pair.token1.symbol) ?? 0;
+
+
+        // Construct the pair document using interfaces
+        const pairData: Subgraph.PairData = {
+          ...pair,
+          // id: pair.id,
+          lastUpdated: new Date(),
+          // name: pair.name,
+          network: "Ethereum",
+          // volumeUSD: pair.volumeUSD,
+          // token0: {
+          //   ...pair.token0,
+          //   // address: pair.token0.address,
+          //   // symbol: pair.token0.symbol,
+          //   // name: pair.token0.name,
+          //   imgId: token0ImgId,
+          //   // volume: pair.token0.volume,
+          //   // price: pair.token0.price,
+          // },
+          // token1: {
+          //   ...pair.token1,
+          //   // address: pair.token1.address,
+          //   // symbol: pair.token1.symbol,
+          //   // name: pair.token1.name,
+          //   imgId: token1ImgId,
+          //   // volume: pair.token1.volume,
+          //   // price: pair.token1.price,
+          // },
+        };
+
+        const pairDocRef = tokensCollection.doc(pair.name);
+        batch.set(pairDocRef, pairData, { merge: true });
+
+        allPairs.push(pairData);
+      }
+
+      // Commit all Firestore writes in a batch
+      await batch.commit();
+
+      if (pairs.length < 1000) break;
+
+      skip += 1000;
+      logger.info(`Downloading pairs: ${skip} of 5000`);
+    }
+
+    return allPairs;
+  } catch (err: unknown) {
+    logger.error(
+      `Error fetching pairs from subgraph: ${
+        err instanceof Error ? err.message : "Unknown error"
+      }`
+    );
+    return [];
+  }
+};
+
+    // Fetch pairs from the subgraph and store them
+    const pairs = await fetchPairsFromSubgraph();
+  
+    if (pairs.length === 0) {
+      logger.warn("No pairs found for the given query.");
+      return [];
+    }
+  
+    return pairs;
+  } catch (err: unknown) {
+    logger.error(
+      `Error reloading pairs: ${err instanceof Error ? err.message : "Unknown error"}`
+    );
+    return null;
+  }
+  
+};
+
+/**
+ * Reload pairs from the subgraph and write to Firestore.
+ */
+const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
+  try {
+    const tokensCollection = db.collection("pools-uniswap");
+    const tokensCmcCollection = db.collection("tokens-cmc");
+  
+    /**
+     * Preload token symbols and their imgIds from tokens-cmc collection
+     */
+    const preloadTokenImages = async (): Promise<Map<string, number | null>> => {
+      const tokenMap = new Map<string, number | null>();
+      const snapshot = await tokensCmcCollection.get();
+  
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.symbol) {
+          const imgId = Number(data.id); // Ensure it's a number
+          tokenMap.set(data.symbol, isNaN(imgId) ? null : imgId);
+        }
+      });
+  
+      return tokenMap;
+    };
+  
     /**
      * Fetch recent pairs from the subgraph and get the corresponding token images
      */
-    const fetchPairsFromSubgraph = async (): Promise<Subgraph.PairData[]> => {
+    const fetchPoolsFromSubgraph = async (): Promise<Subgraph.PoolData[]> => {
       let skip = 0;
-      let allPairs: Subgraph.PairData[] = [];
+      let allPools: Subgraph.PoolData[] = [];
 
       try {
-        // Fetch pairs 5 times, adjust the query accordingly
-        for (let i = 0; i < 5; i++) {
-          const result = await client
-            .query(getMostLiquidPairsQuery(skip), { skip })
-            .toPromise();
+        // Load token images once before looping
+        const tokenImageMap = await preloadTokenImages();
 
-          if (result.error) {
-            throw new Error(result.error.message);
-          }
+        for (let i = 0; i < 1; i++) {
+          const pools = await fetchTopPools(skip);
+          const batch = db.batch();
 
-          const pairs = result.data?.pairs || [];
+          for (const pool of pools) {
+            const token0ImgId = tokenImageMap.get(pool.token0.symbol) ?? 0;
+            const token1ImgId = tokenImageMap.get(pool.token1.symbol) ?? 0;
 
-          // Process each pair
-          for (const pair of pairs) {
-            const token0Symbol = pair.token0.symbol;
-            const token1Symbol = pair.token1.symbol;
 
-            // Get the imgId for token0 from the tokens-cmc collection
-            const token0Doc = await tokensCmcCollection
-              .where("symbol", "==", token0Symbol)
-              .limit(1)
-              .get();
-            const token0ImgId = token0Doc.empty
-              ? null
-              : token0Doc.docs[0].data().id;
-
-            // Get the imgId for token1 from the tokens-cmc collection
-            const token1Doc = await tokensCmcCollection
-              .where("symbol", "==", token1Symbol)
-              .limit(1)
-              .get();
-            const token1ImgId = token1Doc.empty
-              ? null
-              : token1Doc.docs[0].data().id;
-
-            // Construct the pair document with all the required data
-            const pairData = {
-              __typename: "Pair",
-              id: pair.id,
-              lastUpdated: new Date(),  // Timestamp of when the pair is updated
-              name: pair.name,
-              network: pair.network,
-              token0ImgId: token0ImgId,
-              token1ImgId: token1ImgId,
-              token0Price: pair.token0Price,
-              token1Price: pair.token1Price,
-              txCount: pair.txCount,
-              volumeToken0: pair.volumeToken0,
-              volumeToken1: pair.volumeToken1,
-              volumeUSD: pair.volumeUSD,
+            // Construct the pair document using interfaces
+            const poolData: Subgraph.PoolData = {
+              address: pool.address,
+              lastUpdated: new Date(),
+              name: pool.name,
+              network: "Ethereum",
+              volumeUSD: pool.volumeUSD,
+              token0: {
+                address: pool.token0.address,
+                symbol: pool.token0.symbol,
+                name: pool.token0.name,
+                imgId: token0ImgId,
+                volume: pool.token0.volume,
+                price: pool.token0.price,
+              },
+              token1: {
+                address: pool.token1.address,
+                symbol: pool.token1.symbol,
+                name: pool.token1.name,
+                imgId: token1ImgId,
+                volume: pool.token1.volume,
+                price: pool.token1.price,
+              },
             };
 
-            // Save the pair data in Firestore
-            await tokensCollection.doc(`ETH:${token0Symbol}:${token1Symbol}`).set(pairData, { merge: true });
+            const poolDocRef = tokensCollection.doc(pool.name);
+            batch.set(poolDocRef, poolData, { merge: true });
 
-            allPairs.push(pairData);
+            allPools.push(poolData);
           }
 
-          // Stop fetching if fewer than 1000 items are returned
-          if (pairs.length < 1000) {
-            break;
-          }
+          // Commit all Firestore writes in a batch
+          await batch.commit();
+
+          if (pools.length < 1000) break;
 
           skip += 1000;
-          logger.info(`Downloading pairs: ${skip} of 5000`);
+          logger.info(`Downloading pools: ${skip} of 5000`);
         }
 
-        return allPairs;
+        return allPools;
       } catch (err: unknown) {
-        if (err instanceof Error) {
-          logger.error(`Error fetching pairs from subgraph: ${err.message}`);
-        } else {
-          logger.error("Unknown error occurred while fetching pairs from subgraph.");
-        }
+        logger.error(
+          `Error fetching pools from subgraph: ${
+            err instanceof Error ? err.message : "Unknown error"
+          }`
+        );
         return [];
       }
     };
 
     // Fetch pairs from the subgraph and store them
-    const pairs = await fetchPairsFromSubgraph();
-
-    if (!pairs || pairs.length === 0) {
+    const pools = await fetchPoolsFromSubgraph();
+  
+    if (pools.length === 0) {
       logger.warn("No pairs found for the given query.");
       return [];
     }
-
-    return pairs;
+  
+    return pools;
   } catch (err: unknown) {
-    if (err instanceof Error) {
-      logger.error(`Error reloading pairs: ${err.message}`);
-    } else {
-      logger.error("Unknown error occurred while reloading pairs.");
-    }
+    logger.error(
+      `Error reloading pairs: ${err instanceof Error ? err.message : "Unknown error"}`
+    );
     return null;
   }
+  
 };
-
 
 export default {
   getSwaps,
   getPairs,
-  reloadPairs
+  reloadPairs,
+  reloadPools
 };
