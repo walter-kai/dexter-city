@@ -29,9 +29,9 @@ const generateOHLCData = (swaps: Subgraph.SwapDataV3[], priceType: "tradeToken" 
     : amountUSD / Math.abs(amount0);
     const priceRounded = Number(price.toExponential(5));
 
-    // Normalize timestamp to 24-hour bins
+    // Normalize timestamp to hourly bins
     const date = new Date(timestamp * 1000);
-    date.setUTCHours(0, 0, 0, 0);
+    date.setUTCMinutes(0, 0, 0);
     const timeKey = date.getTime(); // Group by this key
 
     if (!groupedSwaps[timeKey]) {
@@ -58,14 +58,14 @@ const generateOHLCData = (swaps: Subgraph.SwapDataV3[], priceType: "tradeToken" 
       previousClose = close;
     }
 
-    // Fill missing days
+    // Fill missing hours
     if (i < sortedTimes.length - 1) {
       let nextTime = sortedTimes[i + 1];
       let currentDate = new Date(time);
       let nextDate = new Date(nextTime);
 
-      while (currentDate.getTime() + 86400000 < nextDate.getTime()) {
-        currentDate = new Date(currentDate.getTime() + 86400000);
+      while (currentDate.getTime() + 3600000 < nextDate.getTime()) {
+        currentDate = new Date(currentDate.getTime() + 3600000);
         barData.push({
           x: currentDate.getTime(),
           o: previousClose,
@@ -277,9 +277,9 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
               const percentChangeFormatted = percentChange.toFixed(2);
               const percentColor = percentChange > 0 ? "green" : "red";
 
-              labels.push(`Price: ${currentClose.toExponential(5)} (${percentChangeFormatted}%)`);
+              labels.push(`Price: ${currentClose.toFixed(3)} (${percentChangeFormatted}%)`);
             } else {
-              labels.push(`Price: ${currentClose.toExponential(5)}`);
+              labels.push(`Price: ${currentClose.toFixed(3)}`);
             }
 
             return labels;
@@ -348,7 +348,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
           y: {
             type: scaleType,
             ticks: {
-              callback: (value) => Number(value).toExponential(5), // Formats Y-axis labels to 5 decimal places
+              callback: (value) => Number(value).toFixed(3), // Formats Y-axis labels to 3 decimal places
             },
           },
         },
