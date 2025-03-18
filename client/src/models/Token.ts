@@ -120,6 +120,7 @@ export namespace Subgraph {
     network: "Ethereum";
     address: string;
     volumeUSD: number;
+    txCount: number;
     // volumeToken0: number;
     // token0Price: number;
     // token0Symbol: string;

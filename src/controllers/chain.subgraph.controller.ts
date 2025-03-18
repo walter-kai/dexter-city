@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import subgraphService from "../services/chain.subgraph.service";
+import firebaseService from "../services/firebase.service";
 import ApiError from "../utils/api-error";
 
 const getPairs = async (req: Request, res: Response): Promise<Response> => {
@@ -25,7 +26,7 @@ const getPools = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     // Fetch the cryptocurrency id by symbol using the service's get method
-    const poolList = await subgraphService.getPools();
+    const poolList = await firebaseService.getPools();
 
     if (poolList === null) {
       return res.status(404).json({ error: `Dex list not found` });

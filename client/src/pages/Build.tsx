@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import Select from "react-select";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../models/Bot";
 import { CoinMarketCap, Subgraph } from "../models/Token";
 
-import PairChart from "../components/PairChart";
+
 // import { usePairDetails } from "../contexts/PairDetails";
 import User from "../models/User";
 import { generateLogoHash } from "../services/Robohash";
 import PairChart2 from "../components/PairChart2";
-import RandomChart from "../components/RandoChart";
+
 import { DropdownWithImagesV2, DropdownWithImagesV3 } from "../components/DropdownImages";
 
 const BuildBot: React.FC = () => {
@@ -358,7 +358,7 @@ const BuildBot: React.FC = () => {
             priceDeviation={formData.priceDeviation}
             gapMultiplier={formData.safetyOrderGapMultiplier}
           /> */}
-          <PairChart2 swapPair={tradingPool}/>
+          <PairChart2 botForm={formData} pool={tradingPool}/>
           {/* <RandomChart /> */}
         </div>
 

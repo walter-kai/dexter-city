@@ -80,7 +80,7 @@ export const getSwapsV3 = async (contractAddress: string): Promise<Subgraph.Swap
 };
 
 // Function to fetch recent swaps from the subgraph
-export const getSwaps = async (contractAddress: string): Promise<Subgraph.SwapDataV2[] | null> => {
+export const getSwapsV2 = async (contractAddress: string): Promise<Subgraph.SwapDataV2[] | null> => {
   try {
     /**
      * Fetch recent swaps from the subgraph for a specific pair.
@@ -196,46 +196,6 @@ const getPairs = async (pairSymbols: string[] = []): Promise<Subgraph.PoolData[]
   }
 };
 
-/**
- * Get top 100 pools from Firestore, sorted by volumeUSD in descending order first,
- * then sorted by token0.symbol in descending order.
- */
-const getPools = async (): Promise<Subgraph.PoolData[] | null> => {
-  try {
-    const poolsCollection = db.collection("pools-uniswap");
-
-    // Fetch all pools first (potentially large)
-    const poolSnapshot = await poolsCollection.get();
-
-    if (poolSnapshot.empty) {
-      logger.warn("No pools found in Firestore.");
-      return [];
-    }
-
-    // Extract data and sort by volumeUSD (descending)
-    const sortedByVolume: Subgraph.PoolData[] = poolSnapshot.docs
-      .map((doc) => doc.data() as Subgraph.PoolData)
-      .sort((a, b) => b.volumeUSD - a.volumeUSD);
-
-    // Take the top 100 by volume
-    const top100Pools = sortedByVolume.slice(0, 200);
-
-    // Sort the top 100 pools by token0.symbol in descending order
-    top100Pools.sort((a, b) => b.token0.symbol.localeCompare(a.token0.symbol));
-
-    return top100Pools;
-  } catch (err: unknown) {
-    if (err instanceof Error) {
-      logger.error(`Error fetching pools from Firestore: ${err.message}`);
-    } else {
-      logger.error("Unknown error occurred while fetching pools from Firestore.");
-    }
-    return null;
-  }
-};
-
-
-
 
 /**
  * Reload pairs from the subgraph and write to Firestore.
@@ -286,29 +246,8 @@ const fetchPairsFromSubgraph = async (): Promise<Subgraph.PoolData[]> => {
         // Construct the pair document using interfaces
         const pairData: Subgraph.PoolData = {
           ...pair,
-          // id: pair.id,
           lastUpdated: new Date(),
-          // name: pair.name,
           network: "Ethereum",
-          // volumeUSD: pair.volumeUSD,
-          // token0: {
-          //   ...pair.token0,
-          //   // address: pair.token0.address,
-          //   // symbol: pair.token0.symbol,
-          //   // name: pair.token0.name,
-          //   imgId: token0ImgId,
-          //   // volume: pair.token0.volume,
-          //   // price: pair.token0.price,
-          // },
-          // token1: {
-          //   ...pair.token1,
-          //   // address: pair.token1.address,
-          //   // symbol: pair.token1.symbol,
-          //   // name: pair.token1.name,
-          //   imgId: token1ImgId,
-          //   // volume: pair.token1.volume,
-          //   // price: pair.token1.price,
-          // },
         };
 
         const pairDocRef = tokensCollection.doc(pair.name);
@@ -400,29 +339,18 @@ const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
             const token0ImgId = tokenImageMap.get(pool.token0.symbol) ?? 0;
             const token1ImgId = tokenImageMap.get(pool.token1.symbol) ?? 0;
 
-
             // Construct the pair document using interfaces
             const poolData: Subgraph.PoolData = {
-              address: pool.address,
+              ...pool,
               lastUpdated: new Date(),
-              name: pool.name,
               network: "Ethereum",
-              volumeUSD: pool.volumeUSD,
               token0: {
-                address: pool.token0.address,
-                symbol: pool.token0.symbol,
-                name: pool.token0.name,
+                ...pool.token0,
                 imgId: token0ImgId,
-                volume: pool.token0.volume,
-                price: pool.token0.price,
               },
               token1: {
-                address: pool.token1.address,
-                symbol: pool.token1.symbol,
-                name: pool.token1.name,
+                ...pool.token1,
                 imgId: token1ImgId,
-                volume: pool.token1.volume,
-                price: pool.token1.price,
               },
             };
 
@@ -472,8 +400,7 @@ const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
 
 export default {
   getSwapsV3,
-  getSwaps,
-  getPools,
+  getSwaps: getSwapsV2,
   getPairs,
   reloadPairs,
   reloadPools

@@ -1,6 +1,5 @@
-import { createClient, cacheExchange, fetchExchange, useQuery as urqlUseQuery } from 'urql';
+import { createClient, cacheExchange, fetchExchange } from 'urql';
 import { Subgraph } from '../../client/src/models/Token';
-
 
 interface uniswapV3Pair { 
   id: any; 
@@ -34,10 +33,14 @@ const sanitizeDocId = (name: string): string => {
 export const fetchSwapsV3 = async (
   poolAddress: string,
   skip: number = 0,
-  first: number = 1000
+  startTime?: Date,
+  endTime?: Date,
 ): Promise<Subgraph.SwapDataV3[]> => {
+  const startTimestamp = startTime ? Math.floor(startTime.getTime() / 1000) : Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
+  const endTimestamp = endTime ? Math.floor(endTime.getTime() / 1000) : Math.floor(Date.now() / 1000);
+
   const query = `{
-    swaps(first: ${first}, skip: ${skip}, orderBy: timestamp, orderDirection: desc, where: { pool: "${poolAddress}" }) {
+    swaps(first: 1000, skip: ${skip}, orderBy: timestamp, orderDirection: desc, where: { pool: "${poolAddress}", timestamp_gte: ${startTimestamp}, timestamp_lte: ${endTimestamp} }) {
       timestamp
       amount0
       amount1
@@ -58,13 +61,13 @@ export const fetchSwapsV3 = async (
   }
 };
 
-
 // Function to fetch recent swaps with a specific pairId and skip parameter
 export const fetchTopPools = async (skip: number = 0, first: number = 1000): Promise<Subgraph.PoolData[]> => {
   
   const query = `{
-    pools(first: ${first}, skip: ${skip}, orderBy: volumeUSD, orderDirection: desc) {
+    pools(first: ${first}, skip: ${skip}, orderBy: txCount, orderDirection: desc) {
       id
+      txCount
       volumeUSD
       token0Price
       token0 {
@@ -88,7 +91,6 @@ export const fetchTopPools = async (skip: number = 0, first: number = 1000): Pro
     if (result.error) {
       throw new Error(result.error.message);
     }
-
 
     const pools: Subgraph.PoolData[] = result.data?.pools.map((pool: uniswapV3Pair) => ({
       address: pool.id,
