@@ -11,6 +11,7 @@ import { generateLogoHash } from "../services/Robohash";
 import PairChart2 from "../components/PairChart2";
 
 import { DropdownWithImagesV2, DropdownWithImagesV3 } from "../components/DropdownImages";
+import LivePrice from "../components/LivePrice";
 
 const BuildBot: React.FC = () => {
   const [formData, setFormData] = useState<BotConfig>({
@@ -352,14 +353,14 @@ const BuildBot: React.FC = () => {
         </form>
         {/* Live price display */}
         <div className="w-3/4 mt-4">
-          {/* <PairChart 
-            swapPair={tradingPair}
-            safetyOrdersCount={formData.safetyOrders}
-            priceDeviation={formData.priceDeviation}
-            gapMultiplier={formData.safetyOrderGapMultiplier}
-          /> */}
-          <PairChart2 botForm={formData} pool={tradingPool}/>
-          {/* <RandomChart /> */}
+          {tradingPool && profitBase && (
+            <LivePrice
+              poolAddress={tradingPool.address}
+              baseCurrency={profitBase === "token0" ? tradingPool.token0.symbol : tradingPool.token1.symbol}
+              quoteCurrency={profitBase === "token0" ? tradingPool.token1.symbol : tradingPool.token0.symbol}
+            />
+          )}
+          <PairChart2 botForm={formData} pool={tradingPool} />
         </div>
 
     </div>
