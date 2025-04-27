@@ -48,8 +48,8 @@ export const generateOHLCData = (swaps: Subgraph.SwapDataV3[], priceType: "trade
     });
 
     if (swapsInTimeGroup.length > 0) {
-      const open = swapsInTimeGroup[0].amountUSD / Math.abs(swapsInTimeGroup[0].amount0);
-      const close = swapsInTimeGroup[swapsInTimeGroup.length - 1].amountUSD / Math.abs(swapsInTimeGroup[swapsInTimeGroup.length - 1].amount0);
+      const close = swapsInTimeGroup[0].amountUSD / Math.abs(swapsInTimeGroup[0].amount0);
+      const open = swapsInTimeGroup[swapsInTimeGroup.length - 1].amountUSD / Math.abs(swapsInTimeGroup[swapsInTimeGroup.length - 1].amount0);
       const high = Math.max(...swapsInTimeGroup.map((swap) => swap.amountUSD / Math.abs(swap.amount0)));
       const low = Math.min(...swapsInTimeGroup.map((swap) => swap.amountUSD / Math.abs(swap.amount0)));
 
