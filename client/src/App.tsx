@@ -84,9 +84,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-gradient-to-bl from-[#343949] to-[#7c8aaf] h-screen">
+    <div className="bg-gradient-to-bl from-gray-800 to-[#7c8aaf] ">
       {location.pathname !== '/' && <NavBar telegramUser={user} />}
-      <div className="mx-auto pt-12">
+      <div className="mx-auto py-12 h-full">
         <Routes>
           {routes.map(({ path, component }) => {
             const Component = componentMap[component];

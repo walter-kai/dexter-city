@@ -4,13 +4,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../models/Bot";
 import { CoinMarketCap, Subgraph } from "../models/Token";
 
-
-// import { usePairDetails } from "../contexts/PairDetails";
 import User from "../models/User";
 import { generateLogoHash } from "../services/Robohash";
-import PairChart2 from "../components/buildBot/Chart";
+import PairChart from "../components/buildBot/PairChart";
 
-import { DropdownWithImagesV2, DropdownWithImagesV3 } from "../components/DropdownImages";
 import LivePrice from "../components/buildBot/LivePrice";
 
 const BuildBot: React.FC = () => {
@@ -41,14 +38,12 @@ const BuildBot: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [tradingPool, setTradingPool] = useState<Subgraph.PoolData | undefined>(undefined);
   const [profitBase, setProfitBase] = useState<"token0" | "token1" | null>(null);
+  const [availablePools, setAvailablePools] = useState<Subgraph.PoolData[] | null>(null);
 
   const navigate = useNavigate();
   const location = useLocation();
   const { state } = location;
   const { botConfig } = state || {};
-
-  // Access pair details and available pairs from context
-  // const { pairDetails: availablePairs } = usePairDetails();
 
   useEffect(() => {
     if (botConfig) {
@@ -62,12 +57,21 @@ const BuildBot: React.FC = () => {
     checkBotNameAvailability(formData.botName);
   }, [botConfig]);
 
-  // useEffect(() => {
-  //   if (formData.tradingPool) {
-  //     const pair = availablePairs[formData.tradingPool];
-  //     setTradingPool(pair);
-  //   }
-  // }, [availablePairs, formData.tradingPool]);
+  useEffect(() => {
+    const fetchPools = async () => {
+      try {
+        const response = await fetch("/api/chain/uni/pools");
+        if (!response.ok) throw new Error("Failed to fetch pools");
+
+        const data = await response.json();
+        setAvailablePools(data.pools);
+      } catch (error) {
+        console.error("Error fetching pools:", error);
+      }
+    };
+
+    fetchPools();
+  }, []);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -164,206 +168,237 @@ const BuildBot: React.FC = () => {
     }
   };
 
-
   const handleProfitBaseToggle = (selectedToken: "token0" | "token1") => {
     setProfitBase(selectedToken);
   };
 
   return (
-    <div className="h-[700px] mt-6 items-center bg-gray-800 z-1">
-      <div className="flex z-3 h-full gap-4 mx-10">
-
-      <form onSubmit={handleSubmit}>
-
-        <h1 className="text-2xl  text-center text-white rounded">Create a DCA Bot</h1>
-        {/* General Configuration */}
-
-        <div className="flex justify-center">
-          { formData.botName.length > 0 ? (
-            <img src={generateLogoHash(formData.botName)} alt="profile pic" className="h-[200px]"></img>
-          ) : (
-            <img src={"dexter.png"} alt="profile pic" className="h-[200px]"></img>
-          ) }
-        </div>
-
-        <div className="flex">
-            <div className="relative w-[66%]">
-              <label className="block text-white pr-2 flex">Bot Name: {botNameError && <p className="text-red-500 text-xs ml-1 my-auto">{botNameError}</p>}</label> 
-                  <input
-                    type="text"
-                    name="botName"
-                    value={formData.botName}
-                    onChange={handleInputChange}
-                    className="p-2 bg-gray-500 text-white rounded w-full"
-                    placeholder="Enter a unique name"
-                  />
+    <div className="h-fit items-center z-1">
+      <div className="z-3 h-full gap-4 m-10 mt-0">
+        <form onSubmit={handleSubmit}>
+          <div className="flex items-center justify-center space-y-4">
+            <label className="block text-white pr-2 flex">
+              {botNameError && <p className="text-red-500 text-xs ml-1 my-auto">{botNameError}</p>}
+            </label>
+            <input
+              type="text"
+              name="botName"
+              value={formData.botName}
+              onChange={handleInputChange}
+              className="p-2 bg-gray-500 text-white rounded w-72 h-fit"
+              placeholder="Enter a unique name"
+            />
+            <div className="flex justify-center">
+              {formData.botName.length > 0 ? (
+                <img src={generateLogoHash(formData.botName)} alt="profile pic" className="h-[150px]" />
+              ) : (
+                <img src={"dexter.png"} alt="profile pic" className="h-[150px]" />
+              )}
             </div>
-            <div className="ml-4 w-[33%]">
+          </div>
+          <div className="flex items-center justify-center space-x-4">
+            <div className="w-72">
               <label className="block text-white">Network:</label>
               <select
                 name="network"
                 value={formData.network}
                 onChange={handleInputChange}
-                className="h-10 pl-1 w-full bg-gray-500 text-white rounded"
+                className="h-10 w-full bg-gray-500 text-white rounded"
               >
                 <option value="Ethereum">Ethereum</option>
                 <option value="Solana">Solana</option>
               </select>
+
+              <label className="block text-white mt-4">Trading Pair:</label>
+              <div
+                className="h-64 overflow-y-auto bg-gray-700 rounded p-2"
+                style={{
+                  scrollbarWidth: "thin",
+                  scrollbarColor: "gray darkgray",
+                }}
+              >
+                {availablePools ? (
+                  availablePools.map((pool) => (
+                    <div
+                      key={pool.address}
+                      className={`flex items-center p-2 cursor-pointer rounded ${
+                        formData.tradingPool === pool.name.split(":")[1]
+                          ? "bg-purple-800"
+                          : "hover:bg-gray-600"
+                      }`}
+                      onClick={() => {
+                        setTradingPool(pool);
+                        setFormData({
+                          ...formData,
+                          tradingPool: pool.name.split(":")[1],
+                        });
+                      }}
+                    >
+                      <img
+                        src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pool.token0.imgId || "default"}.png`}
+                        alt={`${pool.token0.symbol} icon`}
+                        className="w-6 h-6 mr-2"
+                      />
+                      <span className="text-white">{pool.token0.symbol}</span>
+                      <span className="text-white mx-2">↔️</span>
+                      <img
+                        src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pool.token1.imgId || "default"}.png`}
+                        alt={`${pool.token1.symbol} icon`}
+                        className="w-6 h-6 mx-2"
+                      />
+                      <span className="text-white">{pool.token1.symbol}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-white">Loading pools...</p>
+                )}
+              </div>
             </div>
-              
-          </div>
-        <div>
-          <label className="block text-white">Trading Pair:</label>
-
-          {/* Dropdown */}
-          <DropdownWithImagesV3
-            formData={formData}
-            onChange={(pool: Subgraph.PoolData) => {
-              setTradingPool(pool);
-              setFormData({
-                ...formData,
-                tradingPool: pool.name.split(':')[1],
-              });
-            }}                  />
-
-        {tradingPool && (
-          <>
-            {/* Profit Base Toggle */}
-            <label className="block text-white">Profit Base:</label>
-            <div className="flex justify-center gap-4">
-              {tradingPool?.token0.imgId && (
-                <div
-                  className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token0" ? "bg-purple-800" : "bg-gray-500"}`}
-                  onClick={() => handleProfitBaseToggle("token0")}
-                >
-                  <img
-                    src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token0.imgId}.png`}
-                    alt="Token 0"
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(':')[1]}</p>
-                </div>
-              )}
-              {tradingPool?.token1.imgId && (
-                <div
-                  className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${profitBase === "token1" ? "bg-purple-800" : "bg-gray-500"}`}
-                  onClick={() => handleProfitBaseToggle("token1")}
-                >
-                  <img
-                    src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token1.imgId}.png`}
-                    alt="Token 1"
-                    className="w-8 h-8 rounded-full"
-                  />
-                  <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(':')[2]}</p>
-                </div>
-              )}
+            <div className="mt-4">
+              {/* {tradingPool && profitBase && (
+                <LivePrice
+                  poolAddress={tradingPool.address}
+                  baseCurrency={
+                    profitBase === "token0"
+                      ? tradingPool.token0.symbol
+                      : tradingPool.token1.symbol
+                  }
+                  quoteCurrency={
+                    profitBase === "token0"
+                      ? tradingPool.token1.symbol
+                      : tradingPool.token0.symbol
+                  }
+                />
+              )} */}
+              <PairChart botForm={formData} pool={tradingPool} className="h-[350px] w-[700px]" />
             </div>
-          </>
-        )}
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="relative">
-            <label className="block text-white">Take Profit</label>
-            <input
-              type="number"
-              name="trailingTakeProfit"
-              value={formData.trailingTakeProfit}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
-              step="0.01"
-            />
-            <span className="absolute right-3 bottom-[8px] text-teal-100">%</span>
           </div>
-
-          <div className="relative">
-            <label className="block text-white">Price Deviation</label>
-            <input
-              type="number"
-              name="priceDeviation"
-              value={formData.priceDeviation}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
-              step="0.01"
-            />
-            <span className="absolute right-3 bottom-[8px] text-teal-100">%</span>
-          </div>
-          
-          <div className="relative">
-            <label className="block text-white">Cooldown Period</label>
-            <input
-              type="number"
-              name="cooldownPeriod"
-              value={formData.cooldownPeriod}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
-            />
-            <span className="absolute right-3 bottom-[8px] text-teal-100">s</span>
-          </div>
-
-
-          <div>
-            <label className="block text-white">Safety Orders:</label>
-            <input
-              type="number"
-              name="safetyOrders"
-              value={formData.safetyOrders}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-500 text-white rounded"
-            />
-          </div>
-
-          <div className="relative">
-            <label className="block text-white">Safety Order Gap Multiplier</label>
-            <input
-              type="number"
-              name="safetyOrderGapMultiplier"
-              value={formData.safetyOrderGapMultiplier}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
-              step="0.01"
-            />
-            <span className="absolute right-3 bottom-[8px] text-teal-100">x</span>
-          </div>
-          <div className="relative">
-            <label className="block text-white">Safety Order Size Multiplier</label>
-            <input
-              type="number"
-              name="safetyOrderSizeMultiplier"
-              value={formData.safetyOrderSizeMultiplier}
-              onChange={handleInputChange}
-              className="w-full p-2 bg-gray-500 text-white rounded pr-10"
-              step="0.01"
-            />
-            <span className="absolute right-3 bottom-[8px] text-teal-100">x</span>
-          </div>
-
-          <div className="col-span-2 text-center mt-4">
-            <button
-              type="submit"
-              className="bg-blue-600 text-white p-2 w-full rounded"
-            >
-              Create Bot
-            </button>
-            {formError && <p className="text-red-500 mt-2">{formError}</p>}
-          </div>
-        </div>
-
-        </form>
-        {/* Live price display */}
-        <div className="w-3/4 mt-4">
-          {tradingPool && profitBase && (
-            <LivePrice
-              poolAddress={tradingPool.address}
-              baseCurrency={profitBase === "token0" ? tradingPool.token0.symbol : tradingPool.token1.symbol}
-              quoteCurrency={profitBase === "token0" ? tradingPool.token1.symbol : tradingPool.token0.symbol}
-            />
+          {tradingPool && (
+            <>
+              <label className="block text-white">Profit Currency:</label>
+              <div className="flex justify-center gap-4 mb-4">
+                {tradingPool?.token0.imgId && (
+                  <div
+                    className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${
+                      profitBase === "token0" ? "bg-purple-800" : "bg-gray-500"
+                    }`}
+                    onClick={() => handleProfitBaseToggle("token0")}
+                  >
+                    <img
+                      src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token0.imgId}.png`}
+                      alt="Token 0"
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(":")[1]}</p>
+                  </div>
+                )}
+                {tradingPool?.token1.imgId && (
+                  <div
+                    className={`cursor-pointer p-1 w-full flex rounded-lg items-center ${
+                      profitBase === "token1" ? "bg-purple-800" : "bg-gray-500"
+                    }`}
+                    onClick={() => handleProfitBaseToggle("token1")}
+                  >
+                    <img
+                      src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token1.imgId}.png`}
+                      alt="Token 1"
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(":")[2]}</p>
+                  </div>
+                )}
+              </div>
+            </>
           )}
-          <PairChart2 botForm={formData} pool={tradingPool} />
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="relative">
+              <label className="block text-white">Take Profit</label>
+              <input
+                type="number"
+                name="trailingTakeProfit"
+                value={formData.trailingTakeProfit}
+                onChange={handleInputChange}
+                className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+                step="0.01"
+              />
+              <span className="absolute right-3 bottom-[8px] text-teal-100">%</span>
+            </div>
 
+            <div className="relative">
+              <label className="block text-white">Price Deviation</label>
+              <input
+                type="number"
+                name="priceDeviation"
+                value={formData.priceDeviation}
+                onChange={handleInputChange}
+                className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+                step="0.01"
+              />
+              <span className="absolute right-3 bottom-[8px] text-teal-100">%</span>
+            </div>
+
+            <div className="relative">
+              <label className="block text-white">Cooldown Period</label>
+              <input
+                type="number"
+                name="cooldownPeriod"
+                value={formData.cooldownPeriod}
+                onChange={handleInputChange}
+                className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+              />
+              <span className="absolute right-3 bottom-[8px] text-teal-100">s</span>
+            </div>
+
+            <div>
+              <label className="block text-white">Safety Orders:</label>
+              <input
+                type="number"
+                name="safetyOrders"
+                value={formData.safetyOrders}
+                onChange={handleInputChange}
+                className="w-full p-2 bg-gray-500 text-white rounded"
+              />
+            </div>
+
+            <div className="relative">
+              <label className="block text-white">Safety Order Gap Multiplier</label>
+              <input
+                type="number"
+                name="safetyOrderGapMultiplier"
+                value={formData.safetyOrderGapMultiplier}
+                onChange={handleInputChange}
+                className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+                step="0.01"
+              />
+              <span className="absolute right-3 bottom-[8px] text-teal-100">x</span>
+            </div>
+            <div className="relative">
+              <label className="block text-white">Safety Order Size Multiplier</label>
+              <input
+                type="number"
+                name="safetyOrderSizeMultiplier"
+                value={formData.safetyOrderSizeMultiplier}
+                onChange={handleInputChange}
+                className="w-full p-2 bg-gray-500 text-white rounded pr-10"
+                step="0.01"
+              />
+              <span className="absolute right-3 bottom-[8px] text-teal-100">x</span>
+            </div>
+
+            <div className="col-span-2 text-center mt-4">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white p-2 w-full rounded"
+              >
+                Create Bot
+              </button>
+              {formError && <p className="text-red-500 mt-2">{formError}</p>}
+            </div>
+          </div>
+        </form>
+      </div>
     </div>
-</div>
-);
+  );
 };
 
 export default BuildBot;

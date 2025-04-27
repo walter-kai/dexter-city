@@ -18,9 +18,10 @@ const calculatePercentChange = (currentPrice: number, previousPrice: number) => 
 interface PairDetailsProps {
   botForm: BotConfig;
   pool: Subgraph.PoolData | undefined;
+  className?: string; // Added className prop
 }
 
-const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
+const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => {
   const chartRef = useRef<HTMLCanvasElement>(null);
   const chartInstanceRef = useRef<Chart | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -256,9 +257,9 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
   }, [botForm]);
 
   return (
-    <div>
+    <div > {/* Apply className prop */}
       <a href={`https://coinmarketcap.com/dexscan/ethereum/${pool?.address}`} target="_blank" rel="noopener noreferrer">
-      {pool?.name.slice(4)}
+        {pool?.name.slice(4)}
       </a>
       <div className="text-gray-300">
         {percentChange !== null && (
@@ -267,15 +268,15 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
           </div>
         )}
       </div>
-      <div style={{ width: "1000px" }}>
-        { loading ? ( 
+      <div className={className}>
+        {loading ? (
           <LoadingScreenDots />
         ) : (
           <canvas
             ref={chartRef}
             className={`transition-opacity duration-2000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
           ></canvas>
-        ) }
+        )}
       </div>
     </div>
   );
