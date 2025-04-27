@@ -1,5 +1,5 @@
 import express from "express";
-import userController from "../controllers/user.controller";
+import userController from "../user/user.controller";
 const router = express.Router();
 
 // router.route("/:telegramId/picks").get(userController.getUsersPicks);

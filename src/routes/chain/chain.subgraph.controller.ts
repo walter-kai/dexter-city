@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import subgraphService from "../services/chain.subgraph.service";
-import firebaseService from "../services/firebase.service";
-import ApiError from "../utils/api-error";
+import subgraphService from "./chain.subgraph.service";
+import firebaseService from "../firebase/firebase.service";
+import ApiError from "../../utils/api-error";
 
 const getPairs = async (req: Request, res: Response): Promise<Response> => {
   // const { symbol } = req.params; // Get the symbol from the URL params

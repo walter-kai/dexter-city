@@ -1,9 +1,9 @@
 import express from "express";
-import botRoute from "./bot.route";
-import authRoute from "./auth.route";
-import userRoute from "./user.route";
-import telegramRoute from "./telegram.route";
-import chainRoute from "./chain.route";
+import botRoute from "./bot/bot.route";
+import authRoute from "./auth/auth.route";
+import userRoute from "./user/user.route";
+import telegramRoute from "./telegram/telegram.route";
+import chainRoute from "./chain/chain.route";
 
 
 const router = express.Router();

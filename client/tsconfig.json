@@ -17,6 +17,6 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src", "../src/services/UniswapV2.ts"],
+  "include": ["src", "../src/routes/chain/UniswapV2.ts"],
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,5 @@
 import express from "express";
-import botController from "../controllers/bot.controller";
+import botController from "./bot.controller";
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
-import { Subgraph } from "../../client/src/models/Token";
-import { db } from "../config/firebase";
-import logger from "../config/logger";
+import { Subgraph } from "../../../client/src/models/Token";
+import { db } from "../../config/firebase";
+import logger from "../../config/logger";
 
 /**
  * Get top 100 pools from Firestore, sorted by volumeUSD in descending order first,

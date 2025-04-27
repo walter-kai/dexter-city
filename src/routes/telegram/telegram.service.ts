@@ -1,7 +1,7 @@
 // import { usersCollection } from "../controllers/telegram.controller";
 // import { GetGamePromptArgs, getGames }from '../../client/src/services/FirestoreGames'; // Adjust path as necessary
 
-import { getDocs } from "firebase/firestore/lite";
+// import { getDocs } from "firebase/firestore/lite";
 import TelegramBot, { CallbackQuery, Message } from "node-telegram-bot-api";
 import { config } from 'dotenv';
 config({ path: '.env' });

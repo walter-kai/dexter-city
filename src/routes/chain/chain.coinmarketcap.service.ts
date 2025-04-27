@@ -1,8 +1,8 @@
-import { db } from "../config/firebase";
-import admin from "firebase-admin";
+import { db } from "../../config/firebase";
+// import admin from "firebase-admin";
 import { Timestamp } from "@google-cloud/firestore";
-import logger from "../config/logger";
-import { CoinMarketCap } from "../../client/src/models/Token"
+import logger from "../../config/logger";
+import { CoinMarketCap } from "../../../client/src/models/Token"
 
 // Define the API base URL and endpoint
 const BASE_URL = "https://pro-api.coinmarketcap.com";

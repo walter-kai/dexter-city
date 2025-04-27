@@ -1,9 +1,9 @@
-import userService from "./user.service";
-import User, {  UserArgs } from '../../client/src/models/User'; // Adjust path as necessary
-import ApiError from "../utils/api-error";
-import { Telegraf } from 'telegraf';
-import admin from "firebase-admin"; // Import admin SDK
-import logger from "../config/logger";
+import userService from "../user/user.service";
+import User, {  UserArgs } from '../../../client/src/models/User'; // Adjust path as necessary
+// import ApiError from "../../utils/api-error";
+// import { Telegraf } from 'telegraf';
+// import admin from "firebase-admin"; // Import admin SDK
+import logger from "../../config/logger";
 
 import { PassThrough } from 'stream';
 

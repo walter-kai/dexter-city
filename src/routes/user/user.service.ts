@@ -1,8 +1,9 @@
 import admin from "firebase-admin"; // Import admin SDK
-import User, { FireStoreUser, UserArgs} from "../../client/src/models/User";
+import User, { FireStoreUser, UserArgs} from "../../../client/src/models/User";
 
-import logger from "../config/logger";
-import ApiError from "../utils/api-error";
+import logger from "../../config/logger";
+import { db } from "../../config/firebase";
+import ApiError from "../../utils/api-error";
 
 // Initialize Firestore using Firebase Admin SDK
 // const firestore = admin.firestore();
@@ -10,7 +11,6 @@ import ApiError from "../utils/api-error";
 // import { collection, query, where, getDocs, addDoc } from "firebase/firestore"; 
 import { Timestamp } from '@google-cloud/firestore'; // Ensure this is correct
 
-import { db } from "../config/firebase";
 import { Telegraf } from "telegraf";
 import { PassThrough } from "stream";
 

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import coinMarketCapService from "../services/chain.coinmarketcap.service";
+import coinMarketCapService from "./chain.coinmarketcap.service";
 // import botConfig from "../../client/src/models/Bot"
 
 const reloadDexs = async (req: Request, res: Response): Promise<Response> => {

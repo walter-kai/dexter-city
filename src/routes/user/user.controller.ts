@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import userService from "../services/user.service";
-import ApiError from "../utils/api-error";
-import catchAsync from "../utils/catch-async";
-import User, { UserArgs } from "../../client/src/models/User";
+import userService from "../user/user.service";
+import ApiError from "../../utils/api-error";
+import catchAsync from "../../utils/catch-async";
+import User, { UserArgs } from "../../../client/src/models/User";
 
 const setUserChatId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   if (req.params.telegramId == null) {

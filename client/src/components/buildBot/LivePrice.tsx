@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPublicClient, http } from 'viem';
 import { mainnet } from 'viem/chains';
-import { getPoolImmutables, getPoolState } from '../services/UniswapV3';
+import { getPoolImmutables, getPoolState } from '../../services/UniswapV3';
 
 interface LivePriceProps {
   poolAddress: string;

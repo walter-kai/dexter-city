@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
-import logger from "../config/logger";
-import { db } from "../config/firebase";
-import { BotConfig } from "../../client/src/models/Bot";
+import logger from "../../config/logger";
+import { db } from "../../config/firebase";
+import { BotConfig } from "../../../client/src/models/Bot";
 
 /**
  * Get all bots' details created by a specific wallet ID

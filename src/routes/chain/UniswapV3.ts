@@ -1,5 +1,5 @@
 import { createClient, cacheExchange, fetchExchange } from 'urql';
-import { Subgraph } from '../../client/src/models/Token';
+import { Subgraph } from '../../../client/src/models/Token';
 
 interface uniswapV3Pair { 
   id: any; 

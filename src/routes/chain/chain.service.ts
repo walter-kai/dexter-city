@@ -1,8 +1,8 @@
 import { Timestamp } from "firebase-admin/firestore";
-import logger from "../config/logger";
-import { db } from "../config/firebase";
-import { Subgraph } from "../../client/src/models/Token";
-import ApiError from "../utils/api-error";
+import logger from "../../config/logger";
+import { db } from "../../config/firebase";
+import { Subgraph } from "../../../client/src/models/Token";
+import ApiError from "../../utils/api-error";
 
 /**
  * Updates swaps in the Firestore database for the matching pool document.

@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import ApiError from "../utils/api-error";
-import catchAsync from "../utils/catch-async";
+import ApiError from "../../utils/api-error";
+import catchAsync from "../../utils/catch-async";
 
-import authService from "../services/auth.service";
-import userService from "../services/user.service";
-import { UserArgs } from '../../client/src/models/User'; // Adjust path as necessary
+import authService from "./auth.service";
+import userService from "../user/user.service";
+import { UserArgs } from '../../../client/src/models/User'; // Adjust path as necessary
 
 const login = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   const userData: UserArgs = req.body; // Validate the structure

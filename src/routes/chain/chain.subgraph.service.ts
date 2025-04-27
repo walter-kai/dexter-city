@@ -1,7 +1,7 @@
-import { db } from "../config/firebase";
+import { db } from "../../config/firebase";
 import admin from "firebase-admin";
-import logger from "../config/logger";
-import { CoinMarketCap, Subgraph } from "../../client/src/models/Token";
+import logger from "../../config/logger";
+import { CoinMarketCap, Subgraph } from "../../../client/src/models/Token";
 import coinMarketCapService from "./chain.coinmarketcap.service";
 import { fetchMostLiquidPairsV2 as fetchMostLiquidPairsV2, fetchRecentSwapsV2 } from "./UniswapV2";
 import { fetchSwapsV3, fetchTopPools } from "./UniswapV3";

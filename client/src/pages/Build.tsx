@@ -8,10 +8,10 @@ import { CoinMarketCap, Subgraph } from "../models/Token";
 // import { usePairDetails } from "../contexts/PairDetails";
 import User from "../models/User";
 import { generateLogoHash } from "../services/Robohash";
-import PairChart2 from "../components/PairChart2";
+import PairChart2 from "../components/buildBot/Chart";
 
 import { DropdownWithImagesV2, DropdownWithImagesV3 } from "../components/DropdownImages";
-import LivePrice from "../components/LivePrice";
+import LivePrice from "../components/buildBot/LivePrice";
 
 const BuildBot: React.FC = () => {
   const [formData, setFormData] = useState<BotConfig>({
@@ -226,7 +226,7 @@ const BuildBot: React.FC = () => {
               });
             }}                  />
 
-        {tradingPool ? (
+        {tradingPool && (
           <>
             {/* Profit Base Toggle */}
             <label className="block text-white">Profit Base:</label>
@@ -259,9 +259,7 @@ const BuildBot: React.FC = () => {
               )}
             </div>
           </>
-
-        ) : (<></>)
-        }
+        )}
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="relative">

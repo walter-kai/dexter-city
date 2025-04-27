@@ -4,7 +4,7 @@ import cors from 'cors';
 import path from 'path';
 import morgan from 'morgan';
 import { Server as WebSocketServer } from 'ws'; // WebSocket library
-import subgraph from './services/chain.subgraph.service'; // Import getPairs function
+import subgraph from './routes/chain/chain.subgraph.service'; // Import getPairs function
 import routes from './routes';
 
 // Load environment variables

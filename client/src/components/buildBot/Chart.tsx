@@ -5,134 +5,10 @@ import "chartjs-chart-financial";
 import "chartjs-adapter-date-fns";
 import { FaChartBar, FaChartLine, FaChartColumn } from "react-icons/fa6";
 import { LuChartColumnBig, LuChartCandlestick } from "react-icons/lu";
-import { Subgraph } from "../models/Token";
-import LoadingScreenDots from "./LoadingScreenDots";
-import { BotConfig } from "../models/Bot";
-
-const generateOHLCData = (swaps: Subgraph.SwapDataV3[], priceType: "tradeToken" | "USD") => {
-  const barData: { x: number; o: number; h: number; l: number; c: number }[] = [];
-  const lineData: { x: number; y: number }[] = [];
-
-  if (swaps.length === 0) return { barData, lineData };
-
-  let lastCloseNotRounded = priceType === "tradeToken" 
-    ? Math.abs(swaps[0].amount1) / swaps[0].amount0 
-    : swaps[0].amountUSD / Math.abs(swaps[0].amount0);
-  let lastClose = Number(lastCloseNotRounded.toExponential(5));
-
-  const groupedSwaps: { [key: number]: { open?: number; high: number; low: number; close?: number } } = {};
-
-  swaps.forEach((swap) => {
-    const { amount0, amount1, amountUSD, timestamp } = swap;
-    const price = priceType === "tradeToken" 
-    ? Math.abs(amount1) / Math.abs(amount0) 
-    : amountUSD / Math.abs(amount0);
-    const priceRounded = Number(price.toExponential(5));
-
-    // Normalize timestamp to hourly bins
-    const date = new Date(timestamp * 1000);
-    date.setUTCMinutes(0, 0, 0);
-    const timeKey = date.getTime(); // Group by this key
-
-    if (!groupedSwaps[timeKey]) {
-      groupedSwaps[timeKey] = { open: priceRounded, high: priceRounded, low: priceRounded, close: priceRounded };
-    } else {
-      groupedSwaps[timeKey].high = Math.max(groupedSwaps[timeKey].high, priceRounded);
-      groupedSwaps[timeKey].low = Math.min(groupedSwaps[timeKey].low, priceRounded);
-      groupedSwaps[timeKey].close = priceRounded;
-    }
-
-    lastClose = priceRounded;
-  });
-
-  const sortedTimes = Object.keys(groupedSwaps).map(Number).sort((a, b) => a - b);
-  let previousClose = lastClose;
-
-  for (let i = 0; i < sortedTimes.length; i++) {
-    const time = sortedTimes[i];
-    const { open, high, low, close } = groupedSwaps[time];
-
-    if (open !== undefined && close !== undefined) {
-      barData.push({ x: time, o: open, h: high, l: low, c: close });
-      lineData.push({ x: time, y: close });
-      previousClose = close;
-    }
-
-    // Fill missing hours
-    if (i < sortedTimes.length - 1) {
-      let nextTime = sortedTimes[i + 1];
-      let currentDate = new Date(time);
-      let nextDate = new Date(nextTime);
-
-      while (currentDate.getTime() + 3600000 < nextDate.getTime()) {
-        currentDate = new Date(currentDate.getTime() + 3600000);
-        barData.push({
-          x: currentDate.getTime(),
-          o: previousClose,
-          h: previousClose,
-          l: previousClose,
-          c: previousClose,
-        });
-        lineData.push({ x: currentDate.getTime(), y: previousClose });
-      }
-    }
-  }
-
-  return { barData, lineData };
-};
-
-const fillMissingDays = (barData: { x: number; o: number; h: number; l: number; c: number }[]) => {
-  if (barData.length === 0) return barData;
-
-  const filledData = [];
-  let previousBar = barData[0];
-  filledData.push(previousBar);
-
-  for (let i = 1; i < barData.length; i++) {
-    const currentBar = barData[i];
-    let previousDate = new Date(previousBar.x);
-    let currentDate = new Date(currentBar.x);
-
-    // Fill missing days
-    while (previousDate.getTime() + 86400000 < currentDate.getTime()) {
-      previousDate = new Date(previousDate.getTime() + 86400000);
-      filledData.push({
-        x: previousDate.getTime(),
-        o: previousBar.c,
-        h: previousBar.c,
-        l: previousBar.c,
-        c: previousBar.c,
-      });
-    }
-
-    filledData.push(currentBar);
-    previousBar = currentBar;
-  }
-
-  return filledData;
-};
-
-const generateSafetyOrderAndProfitLines = (currentPrice: number, botForm: BotConfig) => {
-  const lines: { price: number; color: string; dash: number[] }[] = [];
-  let safetyOrderPrice = currentPrice * (1 - botForm.priceDeviation);
-  let safetyOrderGap = botForm.safetyOrderGapMultiplier;
-
-  // Generate safety order lines
-  for (let i = 0; i < botForm.safetyOrders; i++) {
-    lines.push({ price: safetyOrderPrice, color: "blue", dash: [5, 5] });
-    safetyOrderPrice *= (1 - botForm.priceDeviation * safetyOrderGap);
-    safetyOrderGap *= botForm.safetyOrderGapMultiplier;
-  }
-
-  // Generate take profit line
-  const takeProfitPrice = currentPrice * (1 + botForm.takeProfit);
-  lines.push({ price: takeProfitPrice, color: "green", dash: [10, 5] });
-
-  // Generate current price line
-  lines.push({ price: currentPrice, color: "black", dash: [5, 5] });
-
-  return lines;
-};
+import { Subgraph } from "../../models/Token";
+import LoadingScreenDots from "../LoadingScreenDots";
+import { BotConfig } from "../../models/Bot";
+import { generateOHLCData, fillMissingDays, generateSafetyOrderAndProfitLines } from "./ChartUtil";
 
 const calculatePercentChange = (currentPrice: number, previousPrice: number) => {
   if (!previousPrice) return 0;
@@ -140,7 +16,6 @@ const calculatePercentChange = (currentPrice: number, previousPrice: number) => 
 };
 
 interface PairDetailsProps {
-  // swapPair: Subgraph.PoolData | undefined;
   botForm: BotConfig;
   pool: Subgraph.PoolData | undefined;
 }
@@ -199,7 +74,6 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
   useEffect(() => {
     if (!chartInstanceRef.current) return;
     chartInstanceRef.current.options.scales!.y!.type = scaleType as "linear" | "logarithmic";
-    // Update chart
     chartInstanceRef.current.update();
   }, [scaleType]);
 
@@ -208,12 +82,12 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
     const ctx = chartInstanceRef.current.ctx;
     const yScale = chartInstanceRef.current.scales.y;
     const { barData } = generateOHLCData(swaps, priceType);
-    if (barData.length === 0) return; // Ensure barData is not empty
+    if (barData.length === 0) return;
     const lastBar = barData[barData.length - 1];
-    if (!lastBar || typeof lastBar.c === 'undefined') return; // Ensure lastBar and lastBar.c are defined
+    if (!lastBar || typeof lastBar.c === 'undefined') return;
     const lines = generateSafetyOrderAndProfitLines(lastBar.c, botForm);
 
-    ctx.save(); // Save context before drawing
+    ctx.save();
     lines.forEach(({ price, color, dash }) => {
       if (price >= yScale.min && price <= yScale.max) {
         const y = yScale.getPixelForValue(price);
@@ -226,7 +100,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
         ctx.stroke();
       }
     });
-    ctx.restore(); // Restore context after drawing
+    ctx.restore();
 
     chartInstanceRef.current.update();
   };
@@ -246,7 +120,6 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
     const { barData, lineData } = generateOHLCData(swaps, priceType);
     const filledBarData = fillMissingDays(barData);
 
-    // 🔹 Transform lineData to match candlestick format
     const transformedLineData = lineData.map(({ x, y }) => ({
       x,
       y,
@@ -257,7 +130,6 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
     }));
 
     const plugins = {
-      // Keep your existing tooltip configuration:
       tooltip: {
         callbacks: {
           label: (tooltipItem: TooltipItem<"line" | "candlestick">) => {
@@ -266,20 +138,20 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
             const currentData = dataset[currentIndex] as { o: number; h: number; l: number; c: number };
 
             let labels: string[] = [];
-            const currentClose = currentData.c;
+            const { o, h, l, c } = currentData;
 
-            // Get previous data point if available
+            labels.push(`Open: ${o.toFixed(3)}`);
+            labels.push(`High: ${h.toFixed(3)}`);
+            labels.push(`Low: ${l.toFixed(3)}`);
+            labels.push(`Close: ${c.toFixed(3)}`);
+
             const previousData = dataset[currentIndex - 1] as { o: number; h: number; l: number; c: number };
 
             if (previousData) {
               const previousClose = previousData.c;
-              const percentChange = ((currentClose - previousClose) / previousClose) * 100;
+              const percentChange = ((c - previousClose) / previousClose) * 100;
               const percentChangeFormatted = percentChange.toFixed(2);
-              const percentColor = percentChange > 0 ? "green" : "red";
-
-              labels.push(`Price: ${currentClose.toFixed(3)} (${percentChangeFormatted}%)`);
-            } else {
-              labels.push(`Price: ${currentClose.toFixed(3)}`);
+              labels.push(`Change: ${percentChangeFormatted}%`);
             }
 
             return labels;
@@ -293,13 +165,12 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
       legend: {
         display: false,
       },
-      // The improved beforeDraw hook:
       beforeDraw: (chart: Chart) => {
         const ctx = chart.ctx;
         const yScale = chart.scales.y;
         const lines = generateSafetyOrderAndProfitLines(filledBarData[filledBarData.length - 1].c, botForm);
 
-        ctx.save(); // Save context before drawing
+        ctx.save();
         lines.forEach(({ price, color, dash }) => {
           if (price >= yScale.min && price <= yScale.max) {
             const y = yScale.getPixelForValue(price);
@@ -312,7 +183,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
             ctx.stroke();
           }
         });
-        ctx.restore(); // Restore context after drawing
+        ctx.restore();
       },
     };
 
@@ -328,7 +199,7 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
           {
             label: "Close Price",
             type: "line",
-            data: transformedLineData,  // Use the correct data format for line chart
+            data: transformedLineData,
             hidden: !lineState,
             borderColor: "red",
           },
@@ -344,11 +215,32 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
             time: {
               unit: "day",
             },
+            ticks: {
+              source: "auto",
+              color: "white", // Set X-axis label color to white
+            },
+            grid: {
+              color: "rgba(200, 200, 200, 0.2)", // Set X-axis grid lines to a lighter gray
+            },
+
+            min: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).getTime(),
+            max: new Date(Date.now() + 3 * 60 * 60 * 1000).getTime(),
           },
           y: {
             type: scaleType,
             ticks: {
-              callback: (value) => Number(value).toFixed(3), // Formats Y-axis labels to 3 decimal places
+              callback: (value) => {
+                const num = Number(value);
+                const decimals = num === 0 ? 0 : Math.max(0, -Math.floor(Math.log10(Math.abs(num))));
+                return num.toFixed(decimals + 4);
+              },
+              color: "white", // Set Y-axis label color to white
+            },
+            border: {
+              color: "rgba(200, 200, 200, 0.2)"
+            },
+            grid: {
+              color: "rgba(200, 200, 200, 0.2)"
             },
           },
         },
@@ -369,29 +261,6 @@ const PairChart2: React.FC<PairDetailsProps> = ({ botForm, pool }) => {
       {pool?.name.slice(4)}
       </a>
       <div className="text-gray-300">
-        <span>Bar Type:</span>
-        <button onClick={() => setBarType((prev) => !prev)}>
-          {barType ? <LuChartCandlestick /> : <LuChartColumnBig />}
-        </button>
-
-        <span>Scale Type:</span>
-        <button onClick={() => setScaleType((prev) => (prev === "linear" ? "logarithmic" : "linear"))}>
-          {scaleType === "linear" ? <FaChartLine /> : <FaChartColumn />}
-        </button>
-
-        <span>Line:</span>
-        <button onClick={() => setLine((prev) => !prev)}>
-          {lineState ? <FaChartLine /> : <FaChartColumn />}
-        </button>
-
-        <span>Price Type:</span>
-        <button onClick={() => setPriceType("tradeToken")} className={`${priceType === "USD" ? "" : "text-teal-200"}`}>
-          {pool?.name.split(':')[2]}
-        </button>
-        <button onClick={() => setPriceType("USD")} className={`${priceType === "USD" ? "text-teal-200" : ""}`}>
-          USD
-        </button>
-
         {percentChange !== null && (
           <div style={{ color: percentChange >= 0 ? "green" : "red" }}>
             <strong>Percent Change: {percentChange.toFixed(2)}%</strong>

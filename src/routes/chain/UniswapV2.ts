@@ -1,5 +1,5 @@
 import { createClient, cacheExchange, fetchExchange, useQuery as urqlUseQuery } from 'urql';
-import { Subgraph } from '../../client/src/models/Token';
+import { Subgraph } from '../../../client/src/models/Token';
 
 // Create the client to interact with the subgraph
 export const client = createClient({
