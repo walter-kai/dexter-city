@@ -1,7 +1,7 @@
 import React from "react";
 
 import { BotConfig } from "../models/Bot";
-import { generateLogoHash } from "../services/Robohash";
+import { generateLogoHash } from "../hooks/Robohash";
 
 interface BotDetailsPageProps {
   bot: BotConfig | null;
@@ -34,25 +34,25 @@ const BotDetails: React.FC<BotDetailsPageProps> = ({ bot, onClose }) => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-5xl rounded-lg p-8 relative">
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+      <div className="bg-[#23263a] w-full max-w-5xl rounded-lg p-8 relative border border-[#00ffe7]/30 shadow-[0_0_24px_#00ffe7]">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 bg-gray-200 p-2 rounded-full hover:bg-gray-300"
+          className="absolute top-4 right-4 bg-[#181a23] p-2 rounded-full hover:bg-[#00ffe7] hover:text-[#181a23] text-[#00ffe7] shadow-[0_0_8px_#00ffe7] transition"
         >
           ✕
         </button>
-        <h2 className="text-3xl font-bold mb-6 text-center">{bot.botName}</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]">{bot.botName}</h2>
         <img
           src={generateLogoHash(bot.botName)}
           alt={bot.botName}
-          className="w-32 h-32 mx-auto rounded-full mb-6"
+          className="w-32 h-32 mx-auto rounded-full mb-6 border-2 border-[#00ffe7]"
         />
 
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-gray-700">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-[#e0e7ef]">
           {details.map((detail, index) => (
             <div key={index}>
-              <strong>{detail.label}:</strong> {detail.value}
+              <strong className="text-[#00ffe7]">{detail.label}:</strong> {detail.value}
             </div>
           ))}
         </div>

@@ -4,7 +4,7 @@ import authRoute from "./auth/auth.route";
 import userRoute from "./user/user.route";
 import telegramRoute from "./telegram/telegram.route";
 import chainRoute from "./chain/chain.route";
-
+import firebaseRoute from "./firebase/firebase.route";
 
 const router = express.Router();
 
@@ -33,24 +33,15 @@ const defaultRoutes: ReadonlyArray<RouteObj> = [
   {
     path: "/telegram",
     route: telegramRoute,
+  },
+  {
+    path: "/firebase",
+    route: firebaseRoute,
   }
 ];
-
-// const devRoutes: ReadonlyArray<RouteObj> = [
-//   {
-//     path: "/game",
-//     route: gameRoute,
-//   },
-// ];
 
 defaultRoutes.forEach((route) => {
   router.use(route.path, route.route);
 });
-
-// if (config.env === "staging") {
-//   devRoutes.forEach((route) => {
-//     router.use(route.path, route.route);
-//   });
-// }
 
 export default router;

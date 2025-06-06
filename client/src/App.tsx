@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { routes } from './models/Routes';
 import NavBar from './components/NavBar';
 import { useSDK } from '@metamask/sdk-react';
-import { login } from './services/FirestoreUser';
+import { login } from './hooks/FirestoreUser';
 import { useNavigate } from 'react-router-dom';
 import ShopDetail from './pages/ShopDetail';
 import OnboardForm from './pages/OnboardForm';
@@ -32,7 +32,7 @@ const WrappedOnboardForm = (props: any) => {
 const componentMap: Record<string, React.LazyExoticComponent<React.FC>> = {
   Build: React.lazy(() => import('./pages/Build')),
   Dashboard: React.lazy(() => import('./pages/Dashboard')),
-  UserGuide: React.lazy(() => import('./pages/UserGuide')),
+  UserGuide: React.lazy(() => import('./pages/Guide')),
   Support: React.lazy(() => import('./pages/Support')),
   ShopDetail: React.lazy(() => Promise.resolve({ default: WrappedShopDetail })),
   Shop: React.lazy(() => import('./pages/Shop')),
@@ -84,9 +84,9 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-gradient-to-bl from-gray-800 to-[#7c8aaf] ">
+    <div className="bg-gradient-to-bl from-gray-800 to-[#7c8aaf]">
       {location.pathname !== '/' && <NavBar telegramUser={user} />}
-      <div className="mx-auto py-12 h-full">
+      <div className="mx-auto py-12">
         <Routes>
           {routes.map(({ path, component }) => {
             const Component = componentMap[component];

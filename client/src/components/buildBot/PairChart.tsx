@@ -32,6 +32,8 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
   const [percentChange, setPercentChange] = useState<number | null>(null);
   const [fadeIn, setFadeIn] = useState<boolean>(false);
   const [priceType, setPriceType] = useState<"tradeToken" | "USD">("tradeToken");
+  const [livePrice, setLivePrice] = useState<number | null>(null);
+  const [lastSwapTimestamp, setLastSwapTimestamp] = useState<string | null>(null);
 
   useEffect(() => {
     if (!pool) return;
@@ -47,6 +49,15 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
           return;
         }
         setSwaps(data.data);
+        if (data.data.length > 0) {
+          const lastSwap = data.data[0];
+          const price =
+            priceType === "tradeToken"
+              ? Math.abs(lastSwap.amount1) / Math.abs(lastSwap.amount0)
+              : lastSwap.amountUSD / Math.abs(lastSwap.amount0);
+          setLivePrice(price);
+          setLastSwapTimestamp(new Date(lastSwap.timestamp * 1000).toLocaleString());
+        }
         setLoading(false);
       } catch (err) {
         console.error(err);
@@ -54,7 +65,7 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
     };
 
     fetchSwaps();
-  }, [pool]);
+  }, [pool, priceType]);
 
   useEffect(() => {
     if (!chartInstanceRef.current) return;
@@ -257,7 +268,7 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
   }, [botForm]);
 
   return (
-    <div > {/* Apply className prop */}
+    <div>
       <a href={`https://coinmarketcap.com/dexscan/ethereum/${pool?.address}`} target="_blank" rel="noopener noreferrer">
         {pool?.name.slice(4)}
       </a>
@@ -268,13 +279,22 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
           </div>
         )}
       </div>
+      {livePrice !== null && (
+        <div className="mt-4 p-4 bg-gray-700 rounded text-white">
+          <p>
+            Live price: 1 {priceType === "tradeToken" ? pool?.token1.symbol : "USD"} = {livePrice.toFixed(6)}{" "}
+            {priceType === "tradeToken" ? pool?.token0.symbol : pool?.token1.symbol}
+          </p>
+          {lastSwapTimestamp && <p>Last swap: {lastSwapTimestamp}</p>}
+        </div>
+      )}
       <div className={className}>
         {loading ? (
           <LoadingScreenDots />
         ) : (
           <canvas
             ref={chartRef}
-            className={`transition-opacity duration-2000 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
+            className={`transition-opacity duration-2000  ${fadeIn ? 'opacity-100' : 'opacity-0'}`}
           ></canvas>
         )}
       </div>

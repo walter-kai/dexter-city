@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaLink, FaRegImage, FaExternalLinkAlt } from 'react-icons/fa'; // Importing icons
 import ImageModal from './ImageModal';
-import { Hootsuite } from '../services/Hootsuite';
+import { Hootsuite } from '../hooks/Hootsuite';
 
 // Define the interface for Post
 export interface Post {

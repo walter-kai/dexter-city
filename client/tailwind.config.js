@@ -9,6 +9,24 @@ module.exports = {
       fontFamily: {
         lato: ['Lato'],
       },
+      colors: {
+        // Neon theme color presets
+        neon: {
+          cyan: '#00ffe7',      // Primary neon cyan
+          pink: '#ff005c',      // Secondary neon pink
+          purple: '#faafe8',    // Light purple/pink
+          dark: '#181a23',      // Dark background
+          darker: '#23263a',    // Slightly lighter dark
+          light: '#e0e7ef',     // Light text
+          accent: '#b8eaff',    // Light blue accent
+        }
+      },
+      gradientColorStops: {
+        'neon-gradient': {
+          'from': '#00ffe7',
+          'to': '#faafe8',
+        }
+      }
     },
   },
   plugins: [],

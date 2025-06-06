@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSDK } from "@metamask/sdk-react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 // import NavBar from "../components/NavBar";
-import { login } from "../services/FirestoreUser";
+import { login } from "../hooks/FirestoreUser";
 
 const Home: React.FC = () => {
   const { sdk, connected, connecting } = useSDK();
@@ -45,7 +45,7 @@ const Home: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-full space-y-4">
         <h1 className="text-white text-2xl font-bold">Welcome to Dexter City</h1>
         <h2 className="text-white text-md">Start your journey</h2>
-        <img src="./dexter.png" className="h-48" alt="dexter icon"></img>
+        <img src="./logos/dexter.png" className="h-48" alt="dexter icon"></img>
         <button
           onClick={connectWallet}
           disabled={connecting}

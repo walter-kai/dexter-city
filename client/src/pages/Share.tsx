@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import Map from '../components/Map'; // Import the Map component
 import PostList from '../components/PostList';
-import { useToken } from '../services/TokenProvider';
+import { useToken } from '../hooks/TokenProvider';
 import { cities } from '../components/Cities'; // Import cities
 import { FaChevronDown, FaChevronUp } from 'react-icons/fa'; // Import Font Awesome icons
-import { useOAuth } from '../services/OauthProvider';
+import { useOAuth } from '../hooks/OauthProvider';
 import { Loading } from '../components/Loading';
 
 const Share: React.FC = () => {

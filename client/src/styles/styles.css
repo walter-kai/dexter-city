@@ -17,19 +17,23 @@ code {
 }
 
 .btn-standard {
-  @apply bg-[#143059] text-white font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#1d416e] hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-[#00ffe7]/80 text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c];
 }
 
 .btn-teal {
-  @apply bg-[#336d82] text-white font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#3e7b91] hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-[#00ffe7] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#23263a] hover:text-[#00ffe7] border border-[#00ffe7] shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#00ffe7];
 }
 
 .btn-light {
-  @apply bg-[#eef1f2] border-none text-[#143059] font-bold py-2 px-4 rounded transition duration-200 hover:bg-[#dce2e5] hover:text-[#1d416e] hover:ring-2 hover:ring-gray-300 disabled:opacity-50 disabled:cursor-not-allowed;
+  @apply bg-[#faafe8] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#00ffe7] hover:text-[#181a23] shadow-[0_0_8px_#faafe8] hover:shadow-[0_0_12px_#00ffe7];
 }
 
 .btn-nav {
-  @apply text-black bg-transparent font-bold py-2 px-4 transition duration-200 hover:scale-125 hover:text-[#143059] hover:underline;
+  @apply bg-transparent text-[#00ffe7] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#00ffe7] hover:text-[#181a23] shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#00ffe7];
 }
 
 h1 {
@@ -55,12 +59,14 @@ ul {
 }
 
 li {
-  background-color: white;
+  background-color: #23263a;
   margin-bottom: 10px;
   padding: 15px;
   border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0,255,231,0.1);
   position: relative;
+  color: #e0e7ef;
+  border: 1px solid rgba(0,255,231,0.3);
 }
 
 a {

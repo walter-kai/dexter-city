@@ -5,10 +5,11 @@ import { BotConfig } from "../models/Bot";
 import { CoinMarketCap, Subgraph } from "../models/Token";
 
 import User from "../models/User";
-import { generateLogoHash } from "../services/Robohash";
+import { generateLogoHash } from "../hooks/Robohash";
 import PairChart from "../components/buildBot/PairChart";
+import TokenInfo from "../components/buildBot/TokenInfo"; // Import the updated TokenInfo component
 
-import LivePrice from "../components/buildBot/LivePrice";
+import LoadingScreenDots from "@/components/LoadingScreenDots";
 
 const BuildBot: React.FC = () => {
   const [formData, setFormData] = useState<BotConfig>({
@@ -173,8 +174,8 @@ const BuildBot: React.FC = () => {
   };
 
   return (
-    <div className="h-fit items-center z-1">
-      <div className="z-3 h-full gap-4 m-10 mt-0">
+    <div className="items-center z-1">
+      <div className="z-3 gap-4 m-10 mt-0">
         <form onSubmit={handleSubmit}>
           <div className="flex items-center justify-center space-y-4">
             <label className="block text-white pr-2 flex">
@@ -192,7 +193,7 @@ const BuildBot: React.FC = () => {
               {formData.botName.length > 0 ? (
                 <img src={generateLogoHash(formData.botName)} alt="profile pic" className="h-[150px]" />
               ) : (
-                <img src={"dexter.png"} alt="profile pic" className="h-[150px]" />
+                <img src={"logos/dexter.png"} alt="profile pic" className="h-[150px]" />
               )}
             </div>
           </div>
@@ -250,28 +251,17 @@ const BuildBot: React.FC = () => {
                     </div>
                   ))
                 ) : (
-                  <p className="text-white">Loading pools...</p>
+                  <LoadingScreenDots />
                 )}
               </div>
             </div>
-            <div className="mt-4">
-              {/* {tradingPool && profitBase && (
-                <LivePrice
-                  poolAddress={tradingPool.address}
-                  baseCurrency={
-                    profitBase === "token0"
-                      ? tradingPool.token0.symbol
-                      : tradingPool.token1.symbol
-                  }
-                  quoteCurrency={
-                    profitBase === "token0"
-                      ? tradingPool.token1.symbol
-                      : tradingPool.token0.symbol
-                  }
-                />
-              )} */}
-              <PairChart botForm={formData} pool={tradingPool} className="h-[350px] w-[700px]" />
+            <div className="m-4">
+              <h2 className="text-white text-lg font-bold mb-4">Selected Token Information</h2>
+              <TokenInfo tokenAddress={tradingPool?.token0.address || ""} /> {/* Use TokenInfo with token0.address */}
             </div>
+          </div>
+          <div className="mt-4 h-[650px] w-[800px] mx-auto">
+            <PairChart botForm={formData} pool={tradingPool} className="h-[475px]" />
           </div>
           {tradingPool && (
             <>
@@ -289,7 +279,7 @@ const BuildBot: React.FC = () => {
                       alt="Token 0"
                       className="w-8 h-8 rounded-full"
                     />
-                    <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(":")[1]}</p>
+                    <p className="text-white text-sm text-center w-full">{tradingPool?.token0.symbol}</p>
                   </div>
                 )}
                 {tradingPool?.token1.imgId && (
@@ -304,10 +294,11 @@ const BuildBot: React.FC = () => {
                       alt="Token 1"
                       className="w-8 h-8 rounded-full"
                     />
-                    <p className="text-white text-sm text-center w-full">{tradingPool?.name.split(":")[2]}</p>
+                    <p className="text-white text-sm text-center w-full">{tradingPool?.token1.symbol}</p>
                   </div>
                 )}
               </div>
+
             </>
           )}
           <div className="grid grid-cols-2 gap-4">

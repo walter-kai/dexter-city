@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useContext } from "react";
 // import { UserContext } from "../App";
 import { DndProvider, useDrag, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { updateUser } from "../services/FirestoreUser";
+import { updateUser } from "../hooks/FirestoreUser";
 
 const ItemTypes = {
   SPORT: "sport",

@@ -22,7 +22,7 @@ interface uniswapV3Pair {
 
 // Create the client to interact with the subgraph
 const client = createClient({
-  url: 'https://gateway.thegraph.com/api/cf949c81dc1152037b34ecdea916c0a8/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV',
+  url: `https://gateway.thegraph.com/api/${process.env.THEGRAPH_API_KEY}/subgraphs/id/5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV`,
   exchanges: [cacheExchange, fetchExchange],
 });
 

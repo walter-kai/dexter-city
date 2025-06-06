@@ -15,7 +15,7 @@ const LoadingScreenDots = () => {
   return (
     <div className={`w-full items-center relative`}>
       <Player
-        src='lottie-loadingDots.json'
+        src='lottie/lottie-loadingDots.json'
         className="w-[80px]"
         loop
         autoplay

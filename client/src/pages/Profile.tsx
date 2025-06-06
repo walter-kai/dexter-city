@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useOAuth } from '../services/OauthProvider';  
-import { useToken } from '../services/TokenProvider';
+import { useOAuth } from '../hooks/OauthProvider';  
+import { useToken } from '../hooks/TokenProvider';
 // import { useNavigate } from 'react-router-dom';
 import User from '../models/User'; // Adjust the path as necessary
 import { Loading } from '../components/Loading';

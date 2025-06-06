@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './styles/styles.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { TokenProvider } from './services/TokenProvider';
-import { OAuthProvider } from './services/OauthProvider';
+import { TokenProvider } from './hooks/TokenProvider';
+import { OAuthProvider } from './hooks/OauthProvider';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { MetaMaskProvider } from "@metamask/sdk-react"
 

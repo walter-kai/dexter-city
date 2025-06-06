@@ -112,6 +112,46 @@ export namespace Subgraph {
     imgId: number;
     volume: number;
     price: number;
+    circulating_supply: number;
+    cmc_rank: number;
+    date_added: string;
+    id: number;
+    infinite_supply: boolean;
+    lastUpdated: string; // Timestamp
+    last_updated: string;
+    max_supply: number | null;
+    num_market_pairs: number | null;
+    platform: {
+      id: number | null;
+      name: string | null;
+      slug: string | null;
+      symbol: string | null;
+      token_address: string | null;
+    };
+    quote: {
+      USD: {
+        fully_diluted_market_cap: number | null;
+        last_updated: string | null;
+        market_cap: number | null;
+        market_cap_dominance: number | null;
+        percent_change_1h: number | null;
+        percent_change_24h: number | null;
+        percent_change_30d: number | null;
+        percent_change_60d: number | null;
+        percent_change_7d: number | null;
+        percent_change_90d: number | null;
+        price: number | null;
+        tvl: null | number;
+        volume_24h: number | null;
+        volume_change_24h: number | null;
+      };
+    };
+    self_reported_circulating_supply: number | null;
+    self_reported_market_cap: number | null;
+    slug: string;
+    tags: string[];
+    total_supply: number | null;
+    tvl_ratio: number | null;
   }
 
   export interface PoolData {

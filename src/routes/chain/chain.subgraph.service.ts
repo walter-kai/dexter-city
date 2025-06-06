@@ -5,7 +5,7 @@ import { CoinMarketCap, Subgraph } from "../../../client/src/models/Token";
 import coinMarketCapService from "./chain.coinmarketcap.service";
 import { fetchMostLiquidPairsV2 as fetchMostLiquidPairsV2, fetchRecentSwapsV2 } from "./UniswapV2";
 import { fetchSwapsV3, fetchTopPools } from "./UniswapV3";
-import { updateSwapsToPools } from "./chain.service";
+import { updateSwapsToPools } from "../firebase/firebase.service";
 
 // Function to fetch recent swaps from the subgraph
 export const getSwapsV3 = async (contractAddress: string): Promise<Subgraph.SwapDataV3[] | null> => {

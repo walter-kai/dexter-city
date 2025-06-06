@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { WebSocketService } from '../services/WebSocket';
+import { WebSocketService } from '../hooks/WebSocket';
 import { Subgraph } from '../models/Token';
 
 // Define the context type

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useToken } from '../services/TokenProvider';
+import { useToken } from '../hooks/TokenProvider';
 import { BotConfig } from '../models/Bot';
 import BuildBot from './Build';
 import BotDetails from '../components/BotDetail';
-import { generateLogoHash } from "../services/Robohash";
+import { generateLogoHash } from "../hooks/Robohash";
 
 const MyBots = () => {
 
