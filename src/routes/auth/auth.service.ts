@@ -1,11 +1,6 @@
 import userService from "../user/user.service";
-import User, {  UserArgs } from '../../../client/src/models/User'; // Adjust path as necessary
-// import ApiError from "../../utils/api-error";
-// import { Telegraf } from 'telegraf';
-// import admin from "firebase-admin"; // Import admin SDK
+import User, { UserArgs } from '../../../client/src/models/User';
 import logger from "../../config/logger";
-
-import { PassThrough } from 'stream';
 
 /**
  * Get a test message
@@ -15,26 +10,35 @@ const getTestMessage = async (): Promise<string> => {
   return "The message is hello!";
 };
 
-
-
 /**
  * Login or create a user based on their walletId.
- * @param {User} user - The user data to create the user if not found.
- * @returns {Promise<{ message: string, user: User | null }>} A message or user data.
+ * @param {string} walletId - The wallet ID to login with
+ * @returns {Promise<User>} The user data
  */
-const login = async (user: User): Promise<{ message: string, user: User | null }> => {
+const login = async (walletId: string): Promise<User> => {
   try {
-
     // Fetch the user based on walletId
-    const existingUser: User | null = await userService.getUserByWalletId(user.walletId);
+    let existingUser: User | null = await userService.getUserByWalletId(walletId);
 
-    // If the user does not exist, return early with null
+    // If the user does not exist, create a new one
     if (!existingUser) {
-      logger.info(`No user found with walletId: ${user.walletId}`);
-      return {
-        message: "User not found",
-        user: null,
+      logger.info(`Creating new user with walletId: ${walletId}`);
+      
+      const newUserData: UserArgs = {
+        dateCreated: new Date(),
+        firstName: "New User",
+        lastName: null,
+        telegramHandle: null,
+        lastLoggedIn: new Date(),
+        referralId: null,
+        telegramId: "",
+        walletId: walletId,
+        favoriteTokens: null,
+        photoId: null,
+        photoUrl: null,
       };
+
+      existingUser = await userService.createUser(newUserData);
     }
 
     // Log user activity
@@ -49,19 +53,12 @@ const login = async (user: User): Promise<{ message: string, user: User | null }
 
     const updatedUser = await userService.updateUser(userPayload, breadcrumb);
 
-    return {
-      message: "User updated",
-      user: updatedUser || null,
-    };
+    return updatedUser || existingUser;
   } catch (error) {
     console.error("Error during login or create:", error);
-    return {
-      message: "An error occurred",
-      user: null,
-    };
+    throw new Error("Failed to login user");
   }
 };
-
 
 export default {
   getTestMessage,

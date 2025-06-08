@@ -49,7 +49,7 @@ const Shop = () => {
 	};
 
 	return (
-		<div className="p-8 bg-[#181a23] min-h-screen">
+		<div className="p-8 min-h-screen">
 			<h1 className="text-4xl font-bold text-center mb-8 text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]">
 				Bot Marketplace
 			</h1>

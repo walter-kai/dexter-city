@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog, FaReact } from "react-icons/fa";
 import LoadingScreenDots from "../components/LoadingScreenDots";
-import NavBar from "../components/NavBar";
 import { useSDK } from "@metamask/sdk-react";
 import { WrappedTokenTable } from "../components/TokenTable";
 
@@ -93,16 +92,8 @@ const Dashboard: React.FC = () => {
           <LoadingScreenDots />
         </div>
       ) : connected ? (
-        <div className="flex flex-col items-center animate-fadeIn bg-gradient-to-bl from-[#343949] to-[#7c8aaf]">
-          <NavBar telegramUser={user} />
-          <div
-            className="relative w-full"
-            style={{
-              backgroundImage: "url('./bg-new.jpg')",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
+        <div className="flex flex-col items-center animate-fadeIn">
+          <div className="relative w-full">
             <div className="mt-8 font-bold w-full">
               <div className="m-3 text-center">
                 <div className="bg-black/50 p-3 rounded shadow-md text-left text-white">
@@ -133,8 +124,7 @@ const Dashboard: React.FC = () => {
                   </button>
                 </div>
 
-<WrappedTokenTable />
-
+                <WrappedTokenTable />
               </div>
             </div>
           </div>
@@ -164,9 +154,12 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       ) : (
-        <>
-          
-        </>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h1 className="text-3xl font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] mb-4">
+            Welcome to DexterCity
+          </h1>
+          <p className="text-[#e0e7ef] mb-8">Please connect your wallet to access the dashboard</p>
+        </div>
       )}
     </>
   );

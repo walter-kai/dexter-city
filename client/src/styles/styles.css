@@ -17,22 +17,22 @@ code {
 }
 
 .btn-standard {
-  @apply bg-[#00ffe7]/80 text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply text-center bg-[#00ffe7]/80 text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
   @apply hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c];
 }
 
 .btn-teal {
-  @apply bg-[#00ffe7] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply text-center bg-[#00ffe7] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
   @apply hover:bg-[#23263a] hover:text-[#00ffe7] border border-[#00ffe7] shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#00ffe7];
 }
 
 .btn-light {
-  @apply bg-[#faafe8] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply text-center bg-[#faafe8] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
   @apply hover:bg-[#00ffe7] hover:text-[#181a23] shadow-[0_0_8px_#faafe8] hover:shadow-[0_0_12px_#00ffe7];
 }
 
 .btn-nav {
-  @apply bg-transparent text-[#00ffe7] font-bold py-2 px-4 rounded transition duration-200;
+  @apply text-center bg-transparent text-[#00ffe7] font-bold py-2 px-4 rounded transition duration-200;
   @apply hover:bg-[#00ffe7] hover:text-[#181a23] shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#00ffe7];
 }
 
@@ -45,11 +45,15 @@ h1 {
 }
 
 h1 {
-  color: #adccd9;
+  @apply text-3xl text-center font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]
 }
 
 h2 {
-  color: #91c2d7;
+  @apply text-2xl text-center font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]
+}
+
+h3 {
+  @apply text-xl text-center font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]
 }
 
 ul {

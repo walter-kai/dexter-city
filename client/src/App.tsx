@@ -1,63 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import { routes } from './models/Routes';
-import NavBar from './components/NavBar';
-import { useSDK } from '@metamask/sdk-react';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { MetaMaskProvider, useSDK } from '@metamask/sdk-react';
+import { AuthProvider } from './contexts/AuthContext';
 import { login } from './hooks/FirestoreUser';
-import { useNavigate } from 'react-router-dom';
-import ShopDetail from './pages/ShopDetail';
-import OnboardForm from './pages/OnboardForm';
+import NavBar from './components/NavBar';
+import Footer from './components/Footer';
+import SubNavBar from './components/SubNavBar';
 
-// Wrapper for ShopDetail to provide default props
-const WrappedShopDetail = (props: any) => {
-  const defaultBot = {
-    id: '1',
-    name: 'Default Bot',
-    description: 'This is a default bot description.',
-    price: 0,
-    image: 'https://via.placeholder.com/150',
-  };
-  return <ShopDetail bot={props.bot || defaultBot} />;
-};
+// Import components
+// import Home from './pages/Home';
+import Dashboard from './pages/Dashboard';
+import Shop from './pages/Shop';
+import MyBots from './pages/MyBots';
+import BuildBot from './pages/Build';
+import Guide from './pages/Guide';
+import Support from './pages/Support';
+import Blog from './pages/Blog';
+import PrivacyPolicy from './pages/legal/PrivacyPolicy';
+import TermsOfService from './pages/legal/TermsOfService';
+import NotFound from './pages/NotFound';
+import Quit from './pages/Quit';
 
-// Wrapper for OnboardForm to provide default props
-const WrappedOnboardForm = (props: any) => {
-  const handleComplete = (chosenName: string, favoriteSport: string[]) => {
-    console.log('Onboarding complete:', { chosenName, favoriteSport });
-  };
-  return <OnboardForm onComplete={props.onComplete || handleComplete} />;
-};
-
-// Update componentMap to use wrapped components
-const componentMap: Record<string, React.LazyExoticComponent<React.FC>> = {
-  Build: React.lazy(() => import('./pages/Build')),
-  Dashboard: React.lazy(() => import('./pages/Dashboard')),
-  UserGuide: React.lazy(() => import('./pages/Guide')),
-  Support: React.lazy(() => import('./pages/Support')),
-  ShopDetail: React.lazy(() => Promise.resolve({ default: WrappedShopDetail })),
-  Shop: React.lazy(() => import('./pages/Shop')),
-  Share: React.lazy(() => import('./pages/Share')),
-  Search: React.lazy(() => import('./pages/Search')),
-  Quit: React.lazy(() => import('./pages/Quit')),
-  Profile: React.lazy(() => import('./pages/Profile')),
-  OnboardForm: React.lazy(() => Promise.resolve({ default: WrappedOnboardForm })),
-  NotFound: React.lazy(() => import('./pages/NotFound')),
-  MyBots: React.lazy(() => import('./pages/MyBots')),
-  Home: React.lazy(() => import('./pages/Home')),
-};
-
-const App: React.FC = () => {
+// Main App component inside MetaMask context
+const AppContent: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const { connected, sdk } = useSDK();
   const navigate = useNavigate();
-  const location = useLocation();
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser && storedUser !== 'undefined') {
       setUser(JSON.parse(storedUser));
-    } else {
-      connectWallet();
     }
   }, []);
 
@@ -74,7 +47,8 @@ const App: React.FC = () => {
 
         const user = await login(walletId);
         sessionStorage.setItem('currentUser', JSON.stringify(user));
-        navigate('/dash');
+        setUser(user);
+        navigate('/bots/dashboard');
       } else {
         console.log('No accounts found.');
       }
@@ -84,30 +58,76 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-gradient-to-bl from-gray-800 to-[#7c8aaf]">
-      {location.pathname !== '/' && <NavBar telegramUser={user} />}
-      <div className="mx-auto py-12">
-        <Routes>
-          {routes.map(({ path, component }) => {
-            const Component = componentMap[component];
-            if (!Component) {
-              return null;
-            }
-            return (
-              <Route
-                key={path}
-                path={path}
-                element={
-                  <React.Suspense fallback={<div>Loading...</div>}>
-                    <Component />
-                  </React.Suspense>
-                }
-              />
-            );
-          })}
-        </Routes>
+    <AuthProvider>
+      <div className="App min-h-screen relative">
+        {/* Background Container */}
+        <div className="fixed inset-0 z-0">
+          <div 
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: "url('./bg/city.jpg')",
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90" />
+        </div>
+        
+        {/* Content Container */}
+        <div className="relative z-10 flex flex-col min-h-screen">
+          <NavBar telegramUser={user} />
+          <SubNavBar />
+          
+          <main className="flex-1 pt-20">
+            <Routes>
+              <Route path="/" element={<Guide />} />
+              
+              {/* Bot-related routes under /bots/ */}
+              <Route path="/bots/dashboard" element={<Dashboard />} />
+              <Route path="/bots/garage" element={<MyBots />} />
+              <Route path="/bots/build" element={<BuildBot />} />
+              
+              {/* Backward compatibility routes */}
+              <Route path="/dash" element={<Dashboard />} />
+              <Route path="/build" element={<BuildBot />} />
+              <Route path="/bots" element={<MyBots />} />
+              
+              {/* Other routes */}
+              <Route path="/shop" element={<Shop />} />
+              <Route path="/shop/:botId" element={<Shop />} />
+              <Route path="/guide" element={<Guide />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/quit" element={<Quit />} />
+              
+              {/* Legal routes under /legal/ */}
+              <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/legal/terms-of-service" element={<TermsOfService />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </main>
+          
+          <Footer />
+        </div>
       </div>
-    </div>
+    </AuthProvider>
+  );
+};
+
+// Root App component with MetaMaskProvider
+const App: React.FC = () => {
+  return (
+    <MetaMaskProvider
+      debug={false}
+      sdkOptions={{
+        dappMetadata: {
+          name: "DexterCity",
+          url: window.location.href,
+        },
+        // infuraAPIKey: process.env.REACT_APP_INFURA_API_KEY,
+      }}
+    >
+      <AppContent />
+    </MetaMaskProvider>
   );
 };
 
