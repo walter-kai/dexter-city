@@ -3,120 +3,28 @@
     "version": "v2.5.0",
     "date": "2025-06-07",
     "title": "Whitepaper Release",
-    "description": "Officially launched our comprehensive Whitepaper, outlining the vision, technology, and future of Dexter City.",
+    "description": "Officially launched our comprehensive Whitepaper, outlining the vision, technology, and future of Dexter City. The paper goes deep into the architectural design of the ecosystem, including how various smart contract components interact, our governance model, economic incentives, and long-term scalability plans. It’s a must-read for investors seeking a technical and strategic understanding of our project.",
     "type": "major",
-    "status": "released"
+    "status": "released",
+    "link": "https://waltyao.notion.site/Dexter-City-Whitepaper-20ab9d3af59081718adaf1247361135f",
+    "image": "/blog/whitepaper.png"
   },
   {
     "version": "v2.4.0",
     "date": "2025-05-01",
     "title": "Smart Contract Developer Onboarding",
-    "description": "Welcomed a seasoned smart contract developer with extensive experience across ERC-20 blockchains including Ethereum, Solana, and Skale, bolstering our core development team.",
-    "type": "feature",
-    "status": "released"
-  },
-  {
-    "version": "v2.3.0",
-    "date": "2024-01-20",
-    "title": "Enhanced News Integration",
-    "description": "Added real-time social media monitoring for trading bot updates across Twitter and YouTube",
-    "type": "feature",
-    "status": "released"
-  },
-  {
-    "version": "v2.2.1",
-    "date": "2024-01-18",
-    "title": "UI Performance Improvements",
-    "description": "Optimized ticker animations and reduced memory usage in news feeds",
-    "type": "improvement",
-    "status": "released"
-  },
-  {
-    "version": "v2.2.0",
-    "date": "2024-01-15",
-    "title": "DCA Strategy Presets",
-    "description": "Introduced conservative and aggressive DCA strategy templates with visual feedback",
-    "type": "feature",
-    "status": "released"
-  },
-  {
-    "version": "v2.1.5",
-    "date": "2024-01-12",
-    "title": "Bug Fixes",
-    "description": "Fixed MetaMask connection issues and improved error handling for wallet interactions",
-    "type": "bugfix",
-    "status": "released"
-  },
-  {
-    "version": "v2.1.0",
-    "date": "2024-01-10",
-    "title": "Bot Marketplace Enhancement",
-    "description": "Added bot cloning functionality and improved search filters in the marketplace",
-    "type": "feature",
-    "status": "released"
-  },
-  {
-    "version": "v2.0.8",
-    "date": "2024-01-08",
-    "title": "Security Updates",
-    "description": "Enhanced wallet security protocols and added additional validation layers",
-    "type": "security",
-    "status": "released"
-  },
-  {
-    "version": "v2.0.5",
-    "date": "2024-01-05",
-    "title": "Chart Integration",
-    "description": "Added real-time price charts with safety order visualization for better strategy planning",
-    "type": "feature",
-    "status": "released"
-  },
-  {
-    "version": "v2.0.0",
-    "date": "2024-01-01",
-    "title": "Major Platform Rewrite",
-    "description": "Complete platform overhaul with new MetaMask integration and modern UI design",
-    "type": "major",
-    "status": "released"
-  },
-  {
-    "version": "v1.9.5",
-    "date": "2024-02-15",
-    "title": "Decision to Focus on Smart Contracts",
-    "description": "Based on insights into Uniswap v4 hooks, we transitioned our development focus to a full-blown smart contract-based bot, expanding beyond our initial Telegram bot concept.",
-    "type": "roadmap",
-    "status": "released"
-  },
-  {
-    "version": "v1.9.2",
-    "date": "2023-12-28",
-    "title": "Performance Optimization",
-    "description": "Improved bot execution speed and reduced latency in trade operations",
-    "type": "improvement",
-    "status": "released"
-  },
-  {
-    "version": "v1.9.0",
-    "date": "2023-12-25",
-    "title": "Multi-Network Support",
-    "description": "Added support for Solana network alongside existing Ethereum functionality",
-    "type": "feature",
-    "status": "beta"
-  },
-  {
-    "version": "v1.0.0",
-    "date": "2023-12-07",
-    "title": "Initial Telegram Bot Introduction",
-    "description": "Launched the very first version of our project as a Telegram bot, marking the beginning of our journey.",
-    "type": "major",
-    "status": "released"
+    "description": "Welcomed a seasoned smart contract developer with extensive experience across ERC-20 blockchains including Ethereum, Solana, and Skale. We previously worked together at TENAMINT (tenamint.com), where I managed his integration of smart contracts into our live application. His deep familiarity with production-grade blockchain systems adds immediate strength to our engineering team.",
+    "type": "team",
+    "status": "released",
+    "link": null
   },
   {
     "version": "Upcoming",
     "date": "2025-07-01",
     "title": "Uniswap v4 Hook Incubator Participation",
-    "description": "Excited to announce our acceptance into the Uniswap v4 Hook Incubator cohort, commencing in July. This program will further enhance our capabilities with Uniswap v4.",
+    "description": "Excited to announce our acceptance into the Uniswap v4 Hook Incubator cohort, commencing in July. As part of this program hosted by Atrium Academy, we’ll be diving deep into building powerful new functionality on top of Uniswap v4's hooks framework. This will help us innovate around custom liquidity logic, dynamic fees, and permissionless DeFi infrastructure as we shape Dexter City’s future.",
     "type": "roadmap",
-    "status": "upcoming"
+    "status": "beta",
+    "link": "https://atrium.academy/uniswap"
   }
 ]

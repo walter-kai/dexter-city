@@ -6,6 +6,7 @@ import telegramRoute from "./telegram/telegram.route";
 import chainRoute from "./chain/chain.route";
 import firebaseRoute from "./firebase/firebase.route";
 import socialNewsRoute from "./socialNews/socialNews.route";
+import linkRoute from "./link/link.route";
 
 const router = express.Router();
 
@@ -42,6 +43,10 @@ const defaultRoutes: ReadonlyArray<RouteObj> = [
   {
     path: "/social-news",
     route: socialNewsRoute,
+  },
+  {
+    path: "/link",
+    route: linkRoute,
   }
 ];
 
