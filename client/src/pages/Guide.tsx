@@ -9,13 +9,12 @@ import FAQItem from "../components/guide/FAQItem";
 import TestimonialCard from "../components/guide/TestimonialCard";
 import { sections, faqs, heroLines } from "../components/guide/guideData";
 
-
 const Guide: React.FC = () => {
 	const [visibleLines, setVisibleLines] = useState(0);
 	const [strategyLevel, setStrategyLevel] = useState(50); // 0-100 scale
 	const { connected } = useSDK();
 	const navigate = useNavigate();
-	const { user } = useAuth();
+		const { user } = useAuth();
 
 	useEffect(() => {
 		// Animate lines in one by one
@@ -24,6 +23,17 @@ const Guide: React.FC = () => {
 			return () => clearTimeout(timer);
 		}
 	}, [visibleLines]);
+
+	const scrollToSection = (sectionId: string) => {
+		const element = document.getElementById(sectionId);
+		if (element) {
+			const offsetTop = element.offsetTop - 120; // Adjust for navbar height
+			window.scrollTo({
+				top: offsetTop,
+				behavior: 'smooth'
+			});
+		}
+	};
 
 	// Generate strategy description based on level
 	const getStrategyDescription = (level: number) => {

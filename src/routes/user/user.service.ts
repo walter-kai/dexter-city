@@ -84,7 +84,7 @@ async function createUser(
   const timeNow = Timestamp.now();
 
   const usersRef = db.collection("users");
-  const bot = new Telegraf(process.env.TELEGRAM_TOKEN as string);
+  const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN as string);
 
   logger.info(
     JSON.stringify({
@@ -211,7 +211,7 @@ const downloadAndUploadToFirebase = async (bot: Telegraf, fileId: string, userId
   try {
     const file = await bot.telegram.getFile(fileId);
     if (file && file.file_path) {
-      const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_TOKEN}/${file.file_path}`;
+      const fileUrl = `https://api.telegram.org/file/bot${process.env.TELEGRAM_BOT_TOKEN}/${file.file_path}`;
 
       // Download the image
       const response = await fetch(fileUrl);

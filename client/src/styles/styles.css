@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
+@import './animations.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -57,12 +58,8 @@ code {
 }
 
 .btn-nav {
-  @apply text-center bg-transparent text-[#00ffe7] font-bold py-2 px-4 rounded transition duration-200;
-  @apply hover:bg-[#00ffe7] hover:text-[#181a23] shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#00ffe7];
-}
-
-h1 {
-  @apply text-lg font-semibold !important;
+  @apply text-center bg-transparent text-[#faafe8]/80 font-bold py-2 px-4 transition duration-200;
+  @apply tracking-widest hover:bg-[#00ffe7]/30 hover:text-[#181a23];
 }
 
 .input-standard {
@@ -70,7 +67,7 @@ h1 {
 }
 
 h1 {
-  @apply text-3xl text-center font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]
+  @apply tracking-widest text-3xl text-center font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]
 }
 
 h2 {

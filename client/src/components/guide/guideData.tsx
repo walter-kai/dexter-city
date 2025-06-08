@@ -190,6 +190,6 @@ export const heroLines = [
     </p>
   </>,
   <div className="btn-standard text-center">Metamask Login</div>,
-  <div className="btn-standard text-center">Dexterian Marketplace</div>,
   <div className="btn-standard text-center">Bot Garage</div>,
+  <div className="btn-standard text-center">Dexterian Marketplace</div>,
 ];

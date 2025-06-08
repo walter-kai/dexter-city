@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { FaExternalLinkAlt } from 'react-icons/fa';
-import LoadingScreenDots from '@/components/LoadingScreenDots';
-import NewsFetcher from '@/components/NewsFetcher';
-import LinkPreviewCard from '@/components/LinkPreviewCard';
+import LoadingScreenDots from '../components/LoadingScreenDots';
+import NewsFetcher from '../components/guide/NewsFetcher';
+import LinkPreviewCard from '../components/LinkPreviewCard';
 
 interface PlatformUpdate {
   version: string;
   date: string;
   title: string;
   description: string;
-  type: 'feature' | 'improvement' | 'bugfix' | 'security' | 'major' | 'team' | 'roadmap';
+  type: 'feature' | 'improvement' | 'bugfix' | 'securcity' | 'major' | 'team' | 'roadmap';
   status: 'released' | 'beta' | 'coming-soon';
   link?: string | null;
+  linkText?: string;
   image?: string;
 }
 
 const Blog: React.FC = () => {
   const [platformUpdates, setPlatformUpdates] = useState<PlatformUpdate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<'news' | 'updates'>('news');
 
   useEffect(() => {
     fetchPlatformUpdates();
@@ -70,6 +72,18 @@ const Blog: React.FC = () => {
     }
   };
 
+  const scrollToSection = (section: 'news' | 'updates') => {
+    setActiveSection(section);
+    const element = document.getElementById(section === 'news' ? 'news-section' : 'updates-section');
+    if (element) {
+      const offsetTop = element.offsetTop - 120; // Adjust for navbar height
+      window.scrollTo({
+        top: offsetTop,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen py-10 text-neon-light flex justify-center items-center">
@@ -80,17 +94,14 @@ const Blog: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-10 text-neon-light">
-      <div className="space-y-6 mb-8 relative max-w-6xl mx-auto">
-
+      <div className="space-y-6 mb-8 relative max-w-6xl mx-auto pt-6">
         {/* Media News Section */}
-        <NewsFetcher />
+        <div id="news-section">
+          <NewsFetcher />
+        </div>
 
         {/* Platform Updates Section */}
-        <div>
-          <h2 className="text-2xl font-bold text-center mb-6 text-[#00ffe7]">
-            Dexter City Bulletin
-          </h2>
-          
+        <div id="updates-section">
           <div className="bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-6">
             <div className="space-y-6">
               {platformUpdates.map((update, index) => (
@@ -101,11 +112,13 @@ const Blog: React.FC = () => {
                         {getUpdateTypeIcon(update.type)}
                       </div>
                       <div>
-                        <h3 className="text-[#00ffe7] font-bold text-lg">{update.title}</h3>
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-[#00ffe7] mr-2 text-left font-bold text-lg">{update.title}</h3>
+                            {getStatusBadge(update.status)}
+                        </div>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-[#faafe8] font-semibold">{update.version}</span>
                           <span className="text-[#e0e7ef] text-sm">{new Date(update.date).toLocaleDateString()}</span>
-                          {getStatusBadge(update.status)}
                         </div>
                       </div>
                     </div>
@@ -141,7 +154,7 @@ const Blog: React.FC = () => {
                             rel="noopener noreferrer"
                             className="text-[#00ffe7] hover:underline flex items-center gap-2 text-sm"
                           >
-                            View Full Details <FaExternalLinkAlt className="text-xs" />
+                            {update.linkText || "View Full Details"} <FaExternalLinkAlt className="text-xs" />
                           </a>
                         ) : (
                           <LinkPreviewCard url={update.link} />

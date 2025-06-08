@@ -5,8 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { login } from './hooks/FirestoreUser';
 import NavBar from './components/NavBar';
 import Footer from './components/Footer';
-import SubNavBar from './components/SubNavBar';
-
+import SubNavBar from './components/guide/SubNavBar';
 // Import components
 // import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -16,6 +15,7 @@ import BuildBot from './pages/Build';
 import Guide from './pages/Guide';
 import Support from './pages/Support';
 import Blog from './pages/Blog';
+import ContactUs from './pages/ContactUs';
 import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import TermsOfService from './pages/legal/TermsOfService';
 import NotFound from './pages/NotFound';
@@ -96,6 +96,7 @@ const AppContent: React.FC = () => {
               <Route path="/guide" element={<Guide />} />
               <Route path="/support" element={<Support />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/contact" element={<ContactUs />} />
               <Route path="/quit" element={<Quit />} />
               
               {/* Legal routes under /legal/ */}
