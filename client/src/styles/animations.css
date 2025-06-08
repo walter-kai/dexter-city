@@ -30,6 +30,28 @@
   }
 }
 
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Animation Classes */
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
@@ -41,6 +63,14 @@
 
 .animate-ticker {
   animation: ticker 60s linear infinite;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.animate-fade-in-scale {
+  animation: fade-in-scale 1s ease-out forwards;
 }
 
 /* Utility Animation Classes */

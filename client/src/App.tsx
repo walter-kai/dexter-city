@@ -20,12 +20,21 @@ import PrivacyPolicy from './pages/legal/PrivacyPolicy';
 import TermsOfService from './pages/legal/TermsOfService';
 import NotFound from './pages/NotFound';
 import Quit from './pages/Quit';
+import TokenPairs from './pages/TokenPairs';
 
 // Main App component inside MetaMask context
 const AppContent: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const { connected, sdk } = useSDK();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Reset scroll position on route change (except for hash navigation)
+  useEffect(() => {
+    if (!location.hash) {
+      window.scrollTo(0, 0);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const storedUser = sessionStorage.getItem('currentUser');
@@ -76,7 +85,7 @@ const AppContent: React.FC = () => {
           <NavBar telegramUser={user} />
           <SubNavBar />
           
-          <main className="flex-1 pt-20">
+          <main className="flex-1 pt-32">
             <Routes>
               <Route path="/" element={<Guide />} />
               
@@ -97,6 +106,7 @@ const AppContent: React.FC = () => {
               <Route path="/support" element={<Support />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/contact" element={<ContactUs />} />
+              <Route path="/tokens" element={<TokenPairs />} />
               <Route path="/quit" element={<Quit />} />
               
               {/* Legal routes under /legal/ */}

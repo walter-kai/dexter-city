@@ -47,6 +47,14 @@ code {
   @apply hover:bg-[#23263a] hover:text-[#00ff88] border border-[#00ff88] shadow-[0_0_8px_#00ff88] hover:shadow-[0_0_16px_#00ff88];
 }
 
+.btn-green:hover {
+  @apply transform scale-105;
+}
+
+.btn-green:disabled {
+  @apply opacity-50 cursor-not-allowed hover:scale-100 hover:bg-[#00ff88] hover:text-[#181a23] hover:shadow-[0_0_8px_#00ff88];
+}
+
 .btn-blue {
   @apply text-center bg-[#4dabf7] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
   @apply hover:bg-[#23263a] hover:text-[#4dabf7] border border-[#4dabf7] shadow-[0_0_8px_#4dabf7] hover:shadow-[0_0_16px_#4dabf7];

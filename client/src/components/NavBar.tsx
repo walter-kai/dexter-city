@@ -55,6 +55,17 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
     setShowLoginModal(false);
   };
 
+  const handleNavigation = (path: string) => {
+    // Reset scroll position for route changes (not hash links)
+    if (!path.startsWith('#')) {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+    navigate(path);
+  };
+
   return (
     <>
       <div className="fixed z-20 left-0 w-full top-0 flex py-2 items-center justify-between px-4
@@ -62,7 +73,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
       ">
         {/* Left section */}
         <div className="flex">
-          <button className="" type="button" onClick={() => navigate('/')}>
+          <button className="" type="button" onClick={() => handleNavigation('/')}>
             <img src="logos/dexter.png" className="h-10 -my-4 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
           </button>
         </div>

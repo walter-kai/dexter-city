@@ -72,18 +72,6 @@ const Blog: React.FC = () => {
     }
   };
 
-  const scrollToSection = (section: 'news' | 'updates') => {
-    setActiveSection(section);
-    const element = document.getElementById(section === 'news' ? 'news-section' : 'updates-section');
-    if (element) {
-      const offsetTop = element.offsetTop - 120; // Adjust for navbar height
-      window.scrollTo({
-        top: offsetTop,
-        behavior: 'smooth'
-      });
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen py-10 text-neon-light flex justify-center items-center">

@@ -1,0 +1,368 @@
+import React from 'react';
+import { FaShoppingCart, FaTools, FaChartLine, FaTrophy, FaWallet, FaCog, FaCoins, FaRocket, FaBell } from "react-icons/fa";
+
+interface GuideSectionProps {
+  id: string;
+  icon: React.ReactNode;
+  title: string;
+  summary: string;
+  detail: React.ReactNode;
+}
+
+const GuideSection: React.FC<GuideSectionProps> = ({ id, icon, title, summary, detail }) => {
+  return (
+    <section
+      id={id}
+      className="py-6 mb-8 scroll-mt-24 bg-[#23263a]/90 border border-[#00ffe7]/30 rounded-xl shadow-lg hover:shadow-[0_0_32px_rgba(0,255,231,0.2)] transition-all duration-300"
+    >
+      <div className="flex items-center gap-4 mb-4 border-b border-[#00ffe7]/30 p-6">
+        <div className="text-4xl text-[#00ffe7] bg-[#181a23] p-3 rounded-lg border border-[#00ffe7]/30">
+          {icon}
+        </div>
+        <h2 className="text-3xl font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]">
+          {title}
+        </h2>
+      </div>
+      <p className="text-[#faafe8] font-semibold mb-4 px-6 text-lg">{summary}</p>
+      <div className="text-[#e0e7ef] px-6 leading-relaxed">{detail}</div>
+    </section>
+  );
+};
+
+// Getting Started Steps Data
+export const gettingStartedSteps = [
+  {
+    step: 1,
+    icon: <FaWallet />,
+    title: "Connect MetaMask Wallet",
+    description: "Securely connect your MetaMask wallet to access all DexterCity features",
+    detail: (
+      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+        <div className="flex items-center gap-3 mb-3">
+          <img
+            src="logos/metamask-logo.png"
+            alt="MetaMask"
+            className="w-8 h-8"
+          />
+          <span className="text-[#00ffe7] font-semibold">MetaMask Integration</span>
+        </div>
+        <p className="text-[#e0e7ef] mb-3">
+          Start your trading journey by connecting your MetaMask wallet. This gives you access to:
+        </p>
+        <ul className="space-y-2 text-[#b8eaff]">
+          <li className="flex items-center gap-2">
+            <span>🔐</span> Secure wallet authentication
+          </li>
+          <li className="flex items-center gap-2">
+            <span>💰</span> Direct transaction control
+          </li>
+          <li className="flex items-center gap-2">
+            <span>🔗</span> Ethereum blockchain access
+          </li>
+        </ul>
+      </div>
+    )
+  },
+  {
+    step: 2,
+    icon: <FaCog />,
+    title: "Configure or Buy a Bot",
+    description: "Create a custom bot or purchase a pre-built strategy from our Bot Shop",
+    detail: (
+      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-[#23263a] p-3 rounded border border-[#00ffe7]/10">
+            <h4 className="text-[#00ffe7] font-semibold mb-2 flex items-center gap-2">
+              <span>🛠️</span> Bot Garage
+            </h4>
+            <p className="text-[#e0e7ef] text-sm">Build custom bots with our visual strategy builder</p>
+          </div>
+          <div className="bg-[#23263a] p-3 rounded border border-[#00ffe7]/10">
+            <h4 className="text-[#00ffe7] font-semibold mb-2 flex items-center gap-2">
+              <span>🛒</span> Bot Shop
+            </h4>
+            <p className="text-[#e0e7ef] text-sm">Buy or lease proven strategies from top developers</p>
+          </div>
+        </div>
+      </div>
+    )
+  },
+  {
+    step: 3,
+    icon: <FaCoins />,
+    title: "Choose Trading Pairs",
+    description: "Select from 50+ popular tokens including meme coins and established cryptocurrencies",
+    detail: (
+      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+        <div className="flex items-center gap-3 mb-3">
+          <img
+            src="logos/uniswap-logo.png"
+            alt="Uniswap"
+            className="w-8 h-8"
+          />
+          <span className="text-[#00ffe7] font-semibold">Uniswap Integration</span>
+        </div>
+        <p className="text-[#e0e7ef] mb-3">
+          Trade on the most popular DEX with access to:
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+          <span className="bg-[#23263a] px-2 py-1 rounded text-[#b8eaff]">🚀 ETH/USDC</span>
+          <span className="bg-[#23263a] px-2 py-1 rounded text-[#b8eaff]">🐸 PEPE/ETH</span>
+          <span className="bg-[#23263a] px-2 py-1 rounded text-[#b8eaff]">🐕 SHIB/ETH</span>
+          <span className="bg-[#23263a] px-2 py-1 rounded text-[#b8eaff]">⚡ WBTC/ETH</span>
+        </div>
+        <p className="text-[#faafe8] text-sm mt-2">
+          <a href="/tokens" className="hover:underline">View all 50+ supported trading pairs →</a>
+        </p>
+      </div>
+    )
+  },
+  {
+    step: 4,
+    icon: <FaRocket />,
+    title: "Deploy & Monitor",
+    description: "Launch your bot and manage strategies with real-time monitoring and reinforcements",
+    detail: (
+      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <span>🎯</span>
+            <span className="text-[#e0e7ef]">Deploy bots with custom strategy parameters</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>📊</span>
+            <span className="text-[#e0e7ef]">Real-time performance monitoring and analytics</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>🔧</span>
+            <span className="text-[#e0e7ef]">Inject new strategies during deployment</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>🤖</span>
+            <span className="text-[#e0e7ef]">Bring reinforcement bots for complex strategies</span>
+          </div>
+        </div>
+      </div>
+    )
+  },
+  {
+    step: 5,
+    icon: <FaBell />,
+    title: "Direct Wallet Transfers",
+    description: "All profits go directly to your wallet with instant notifications",
+    detail: (
+      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+        <div className="bg-gradient-to-r from-green-500/20 to-green-500/10 border border-green-500/50 rounded p-3 mb-3">
+          <h4 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
+            <span>💚</span> Direct to Your Wallet
+          </h4>
+          <p className="text-[#e0e7ef] text-sm">
+            All transactions execute directly to your connected wallet - no intermediary custody required.
+          </p>
+        </div>
+        <ul className="space-y-2 text-[#b8eaff]">
+          <li className="flex items-center gap-2">
+            <span>⚡</span> Instant transaction execution
+          </li>
+          <li className="flex items-center gap-2">
+            <span>📱</span> Real-time mobile notifications
+          </li>
+          <li className="flex items-center gap-2">
+            <span>🔒</span> No custody risk - your keys, your coins
+          </li>
+          <li className="flex items-center gap-2">
+            <span>🌐</span> Works even when you're offline
+          </li>
+        </ul>
+      </div>
+    )
+  }
+];
+
+// Features Data
+export const featuresData = [
+  {
+    id: "bot-shop",
+    icon: <FaShoppingCart />,
+    title: "Bot Shop Marketplace",
+    summary: "Discover, buy, lease, and sell trading bots in our comprehensive marketplace",
+    detail: (
+      <div className="space-y-4">
+        <p className="text-lg">
+          The Bot Shop is your gateway to proven trading strategies. Browse bots created by top developers,
+          each with detailed performance metrics, user reviews, and strategy breakdowns.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">🔍</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Discover Strategies</h4>
+            <p className="text-[#e0e7ef] text-sm">Browse hundreds of bots with advanced filtering and sorting</p>
+          </div>
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">💰</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Buy or Lease</h4>
+            <p className="text-[#e0e7ef] text-sm">Purchase bots outright or lease them for lower upfront costs</p>
+          </div>
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">🏪</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Sell Your Bots</h4>
+            <p className="text-[#e0e7ef] text-sm">Monetize your successful strategies by listing them for sale</p>
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-[#00ffe7]/10 to-[#faafe8]/10 p-4 rounded-lg border border-[#00ffe7]/30">
+          <h4 className="text-[#00ffe7] font-semibold mb-2">🎯 Featured Categories</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">DCA Strategies</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Arbitrage Bots</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Trend Following</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Scalping Bots</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "bot-garage",
+    icon: <FaTools />,
+    title: "Bot Garage Workshop",
+    summary: "Your personal workshop for building, customizing, and managing trading bots",
+    detail: (
+      <div className="space-y-4">
+        <p className="text-lg">
+          The Bot Garage is where creativity meets functionality. Use our intuitive visual builder
+          to create sophisticated trading strategies without coding knowledge.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">🔧</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Visual Strategy Builder</h4>
+            <ul className="text-[#e0e7ef] text-sm space-y-1">
+              <li>• Drag-and-drop interface</li>
+              <li>• Pre-built strategy templates</li>
+              <li>• Advanced parameter tuning</li>
+              <li>• Real-time strategy validation</li>
+            </ul>
+          </div>
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">📋</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Bot Management</h4>
+            <ul className="text-[#e0e7ef] text-sm space-y-1">
+              <li>• Clone successful strategies</li>
+              <li>• A/B test different approaches</li>
+              <li>• Version control for strategies</li>
+              <li>• Bulk operations on multiple bots</li>
+            </ul>
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 p-4 rounded-lg border border-blue-500/30">
+          <h4 className="text-blue-400 font-semibold mb-2">🚀 Advanced Features</h4>
+          <div className="flex flex-wrap gap-2">
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Custom Indicators</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Multi-timeframe Analysis</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Risk Management</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Portfolio Rebalancing</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "analytics",
+    icon: <FaChartLine />,
+    title: "Advanced Analytics",
+    summary: "Comprehensive performance tracking with real-time insights and detailed reports",
+    detail: (
+      <div className="space-y-4">
+        <p className="text-lg">
+          Make data-driven decisions with our comprehensive analytics suite. Track every metric
+          that matters and optimize your strategies based on real performance data.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">📊</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Real-time Dashboards</h4>
+            <ul className="text-[#e0e7ef] text-sm space-y-1">
+              <li>• Live P&L tracking</li>
+              <li>• Trade execution logs</li>
+              <li>• Performance heatmaps</li>
+            </ul>
+          </div>
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">📈</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Historical Analysis</h4>
+            <ul className="text-[#e0e7ef] text-sm space-y-1">
+              <li>• Backtesting results</li>
+              <li>• Risk-adjusted returns</li>
+              <li>• Drawdown analysis</li>
+            </ul>
+          </div>
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">📄</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Custom Reports</h4>
+            <ul className="text-[#e0e7ef] text-sm space-y-1">
+              <li>• Exportable data</li>
+              <li>• Tax reporting tools</li>
+              <li>• Performance comparisons</li>
+            </ul>
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-green-500/10 to-yellow-500/10 p-4 rounded-lg border border-green-500/30">
+          <h4 className="text-green-400 font-semibold mb-2">📋 Key Metrics Tracked</h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">ROI %</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Sharpe Ratio</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Win Rate</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Max Drawdown</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "leaderboard",
+    icon: <FaTrophy />,
+    title: "Global Leaderboard",
+    summary: "Compete with traders worldwide and showcase your best performing strategies",
+    detail: (
+      <div className="space-y-4">
+        <p className="text-lg">
+          Rise through the ranks and earn recognition for your trading prowess. The leaderboard
+          showcases top performers and provides inspiration for improving your strategies.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">🏆</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Competition Categories</h4>
+            <ul className="text-[#e0e7ef] text-sm space-y-1">
+              <li>• Overall Performance</li>
+              <li>• Best Risk-Adjusted Returns</li>
+              <li>• Most Consistent Trader</li>
+              <li>• Rising Star (New Traders)</li>
+            </ul>
+          </div>
+          <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 hover:scale-105 transition-transform duration-300">
+            <div className="text-2xl mb-2">🎖️</div>
+            <h4 className="text-[#00ffe7] font-semibold mb-2">Achievements & Badges</h4>
+            <ul className="text-[#e0e7ef] text-sm space-y-1">
+              <li>• Performance milestones</li>
+              <li>• Strategy innovation awards</li>
+              <li>• Community contribution badges</li>
+              <li>• Exclusive NFT rewards</li>
+            </ul>
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-4 rounded-lg border border-purple-500/30">
+          <h4 className="text-purple-400 font-semibold mb-2">🌟 Leaderboard Benefits</h4>
+          <div className="flex flex-wrap gap-2">
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Reduced Fees</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Early Access</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">VIP Support</span>
+            <span className="bg-[#23263a] px-3 py-1 rounded text-[#b8eaff] text-sm">Premium Features</span>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+];
+
+export default GuideSection;

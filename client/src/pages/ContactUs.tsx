@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { FaEnvelope, FaRobot, FaUser, FaBriefcase, FaComment } from 'react-icons/fa';
+import { FaEnvelope, FaRobot, FaUser, FaBriefcase, FaComment, FaCheckCircle } from 'react-icons/fa';
 import LoadingScreenDots from '../components/LoadingScreenDots';
 import StatusFooter from '../components/StatusFooter';
+import SliderCaptcha from '../components/SliderCaptcha';
 
 interface FormData {
   name: string;
@@ -13,8 +14,8 @@ interface FormData {
 const ContactUs: React.FC = () => {
   const [showCaptcha, setShowCaptcha] = useState(false);
   const [captchaVerified, setCaptchaVerified] = useState(false);
-  const [captchaAnswer, setCaptchaAnswer] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [showStatusFooter, setShowStatusFooter] = useState(false);
   const [statusType, setStatusType] = useState<'loading' | 'success' | 'error'>('loading');
   const [statusMessage, setStatusMessage] = useState('');
@@ -26,28 +27,32 @@ const ContactUs: React.FC = () => {
     message: ''
   });
 
-  // Simple math captcha
-  const [num1] = useState(Math.floor(Math.random() * 10) + 1);
-  const [num2] = useState(Math.floor(Math.random() * 10) + 1);
-  const correctAnswer = num1 + num2;
-
   const handleContactClick = () => {
     setShowCaptcha(true);
   };
 
-  const handleCaptchaSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleCaptchaSuccess = () => {
+    setCaptchaVerified(true);
+    setShowSuccess(true);
     
+    // Start loading the form 1.5 seconds into the success display
+    // This ensures the form is ready before success disappears
     setTimeout(() => {
-      if (parseInt(captchaAnswer) === correctAnswer) {
-        setCaptchaVerified(true);
-      } else {
-        alert('Incorrect answer. Please try again.');
-        setCaptchaAnswer('');
-      }
-      setLoading(false);
-    }, 1000);
+      setShowForm(true);
+    }, 1500);
+    
+    // Hide success message after 2 seconds (500ms after form appears)
+    setTimeout(() => {
+      setShowSuccess(false);
+    }, 2000);
+  };
+
+  const handleCaptchaFail = () => {
+    console.log('Captcha failed');
+  };
+
+  const handleCaptchaRefresh = () => {
+    console.log('Captcha refreshed');
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -102,11 +107,15 @@ const ContactUs: React.FC = () => {
     }, 5000);
   };
 
-  if (captchaVerified) {
+  // Render the form when everything is complete
+  if (showForm) {
     return (
       <div className="min-h-screen py-10 text-neon-light">
         <div className="max-w-4xl mx-auto px-4 pt-6">
-          <div className="bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-6">
+          <div 
+            className="bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-6 opacity-0 animate-fade-in-up"
+            style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
+          >
             <h1 className="text-2xl font-bold text-[#00ffe7] mb-6 text-center">
               <FaEnvelope className="inline mr-2" />
               Contact Us
@@ -205,28 +214,58 @@ const ContactUs: React.FC = () => {
   return (
     <div className="min-h-screen text-neon-light">
       <div className="max-w-6xl mx-auto px-4 pt-6">
-        <div className="bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-8">
+        <div 
+          className={`bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-8 transition-all duration-700 ease-in-out ${
+            showCaptcha ? 'max-w-2xl mx-auto' : 'max-w-4xl mx-auto'
+          }`}
+        >
           <h1 className="text-2xl font-bold text-[#00ffe7] mb-8 text-center">
             <FaEnvelope className="inline mr-2" />
             Contact Us
           </h1>
           
           {!showCaptcha ? (
-            <div className="text-center">
+            <div 
+              className={`text-center transition-all duration-500 ${
+                showCaptcha ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
+              }`}
+            >
               <p className="text-[#e0e7ef] mb-6 text-lg">
                 We'd love to hear from you! Click the button below to get in touch with our team.
               </p>
               
               <button
                 onClick={handleContactClick}
-                className="btn-green flex items-center justify-center gap-2 mx-auto px-8 py-4 text-lg font-semibold"
+                className="btn-green flex items-center justify-center gap-2 mx-auto px-8 py-4 text-lg font-semibold transform transition-all duration-300 hover:scale-105"
               >
                 <FaEnvelope />
                 Contact Us
               </button>
             </div>
+          ) : showSuccess ? (
+            // Success indicator
+            <div 
+              className={`text-center transition-all duration-500 ${
+                showSuccess ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              }`}
+            >
+              <div className="bg-gradient-to-r from-green-500/20 to-green-500/10 border border-green-500/50 rounded-lg p-8">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
+                    <FaCheckCircle className="text-white text-2xl" />
+                  </div>
+                  <h3 className="text-green-400 font-bold text-xl">Verification Complete!</h3>
+                  <p className="text-[#e0e7ef]">Loading contact form...</p>
+                </div>
+              </div>
+            </div>
           ) : (
-            <div className="max-w-md mx-auto">
+            // Captcha container
+            <div 
+              className={`transition-all duration-700 ease-in-out ${
+                showCaptcha && !captchaVerified ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+              }`}
+            >
               <div className="bg-[#181a23] border border-[#00ffe7]/20 rounded-lg p-6">
                 <h3 className="text-lg font-bold text-[#00ffe7] mb-4 text-center">
                   <FaRobot className="inline mr-2" />
@@ -234,33 +273,28 @@ const ContactUs: React.FC = () => {
                 </h3>
                 
                 <p className="text-[#e0e7ef] mb-4 text-center">
-                  Please solve this simple math problem to continue:
+                  Complete the puzzle below to continue:
                 </p>
                 
-                <form onSubmit={handleCaptchaSubmit} className="space-y-4">
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-[#00ffe7]">
-                      {num1} + {num2} = ?
-                    </span>
-                  </div>
-                  
-                  <input
-                    type="number"
-                    value={captchaAnswer}
-                    onChange={(e) => setCaptchaAnswer(e.target.value)}
-                    placeholder="Enter your answer"
-                    className="w-full px-4 py-2 bg-[#23263a] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] text-center"
-                    required
+                <div 
+                  className={`transition-all duration-500 ${
+                    showCaptcha ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                  }`}
+                  style={{ 
+                    transitionDelay: showCaptcha ? '0.3s' : '0s',
+                  }}
+                >
+                  <SliderCaptcha
+                    width={320}
+                    height={180}
+                    loadingText="Loading puzzle..."
+                    failedText="Try again"
+                    barText="Slide to complete puzzle"
+                    onSuccess={handleCaptchaSuccess}
+                    onFail={handleCaptchaFail}
+                    onRefresh={handleCaptchaRefresh}
                   />
-                  
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-green w-full flex items-center justify-center gap-2"
-                  >
-                    {loading ? <LoadingScreenDots /> : 'Verify'}
-                  </button>
-                </form>
+                </div>
               </div>
             </div>
           )}
