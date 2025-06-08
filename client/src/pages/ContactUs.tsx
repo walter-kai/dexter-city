@@ -19,6 +19,7 @@ const ContactUs: React.FC = () => {
   const [showStatusFooter, setShowStatusFooter] = useState(false);
   const [statusType, setStatusType] = useState<'loading' | 'success' | 'error'>('loading');
   const [statusMessage, setStatusMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -66,6 +67,9 @@ const ContactUs: React.FC = () => {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Immediately disable form
+    setIsSubmitting(true);
+    
     // Show loading status
     setStatusType('loading');
     setStatusMessage('Sending your message...');
@@ -92,19 +96,39 @@ const ContactUs: React.FC = () => {
         setStatusMessage('Message sent successfully! We\'ll get back to you soon.');
         // Reset form
         setFormData({ name: '', email: '', business: '', message: '' });
+        
+        // After 3 seconds, reset everything back to initial state
+        setTimeout(() => {
+          setShowStatusFooter(false);
+          // Reset all states to initial
+          setTimeout(() => {
+            setShowForm(false);
+            setShowSuccess(false);
+            setCaptchaVerified(false);
+            setShowCaptcha(false);
+            setIsSubmitting(false);
+          }, 500);
+        }, 3000);
       } else {
         setStatusType('error');
         setStatusMessage('Failed to send message. Please try again.');
+        setIsSubmitting(false);
+        
+        // Auto-hide error after 5 seconds
+        setTimeout(() => {
+          setShowStatusFooter(false);
+        }, 5000);
       }
     } catch (error) {
       setStatusType('error');
       setStatusMessage('Network error. Please check your connection and try again.');
+      setIsSubmitting(false);
+      
+      // Auto-hide error after 5 seconds
+      setTimeout(() => {
+        setShowStatusFooter(false);
+      }, 5000);
     }
-
-    // Auto-hide status after 5 seconds
-    setTimeout(() => {
-      setShowStatusFooter(false);
-    }, 5000);
   };
 
   // Render the form when everything is complete
@@ -133,7 +157,10 @@ const ContactUs: React.FC = () => {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7]"
+                    disabled={isSubmitting}
+                    className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                     placeholder="Your full name"
                     required
                   />
@@ -149,7 +176,10 @@ const ContactUs: React.FC = () => {
                     name="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7]"
+                    disabled={isSubmitting}
+                    className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
                     placeholder="your.email@example.com"
                     required
                   />
@@ -166,7 +196,10 @@ const ContactUs: React.FC = () => {
                   name="business"
                   value={formData.business}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7]"
+                  disabled={isSubmitting}
+                  className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                   placeholder="Your company or organization (optional)"
                 />
               </div>
@@ -180,8 +213,11 @@ const ContactUs: React.FC = () => {
                   name="message"
                   value={formData.message}
                   onChange={handleInputChange}
+                  disabled={isSubmitting}
                   rows={6}
-                  className="w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] resize-vertical"
+                  className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] resize-vertical ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                   placeholder="Tell us about your project, questions, or how we can help you..."
                   required
                 />
@@ -190,10 +226,13 @@ const ContactUs: React.FC = () => {
               <div className="text-center">
                 <button
                   type="submit"
-                  className="btn-green px-8 py-4 text-lg font-semibold flex items-center justify-center gap-2 mx-auto"
+                  disabled={isSubmitting}
+                  className={`btn-green px-8 py-4 text-lg font-semibold flex items-center justify-center gap-2 mx-auto ${
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
                   <FaEnvelope />
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </button>
               </div>
             </form>

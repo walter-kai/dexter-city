@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <img src="logos/dexter.png" className="h-8 mb-4" alt="DexterCity" />
+            <img src="/logos/dexter.png" className="h-8 mb-4" alt="DexterCity" />
             <p className="text-[#e0e7ef] text-sm">
               Automated trading bots for the future of finance.
             </p>

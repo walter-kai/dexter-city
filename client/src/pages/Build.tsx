@@ -193,7 +193,7 @@ const BuildBot: React.FC = () => {
               {formData.botName.length > 0 ? (
                 <img src={generateLogoHash(formData.botName)} alt="profile pic" className="h-[150px]" />
               ) : (
-                <img src={"logos/dexter.png"} alt="profile pic" className="h-[150px]" />
+                <img src={"/logos/dexter.png"} alt="profile pic" className="h-[150px]" />
               )}
             </div>
           </div>

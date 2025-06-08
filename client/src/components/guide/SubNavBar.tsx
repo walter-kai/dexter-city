@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaExternalLinkAlt, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaHome, FaChevronDown, FaShoppingCart, FaTools, FaChartLine, FaTrophy } from 'react-icons/fa';
+import { FaExternalLinkAlt, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaHome, FaChevronDown, FaShoppingCart, FaTools, FaChartLine, FaTrophy, FaCog } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface NavLink {
@@ -24,13 +24,22 @@ const SubNavBar: React.FC = () => {
   const location = useLocation();
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  
+
   // Feature sections that match the ones in Features.tsx
   const featureSections: FeatureSection[] = [
     { id: 'bot-shop', title: 'Bot Shop Marketplace', icon: <FaShoppingCart /> },
     { id: 'bot-garage', title: 'Bot Garage Workshop', icon: <FaTools /> },
     { id: 'analytics', title: 'Advanced Analytics', icon: <FaChartLine /> },
     { id: 'leaderboard', title: 'Global Leaderboard', icon: <FaTrophy /> },
+  ];
+
+  // Custom subnav for dashboard
+  const dashboardNavLinks: NavLink[] = [
+    { text: 'SHOP', to: '/shop', icon: <FaShoppingCart /> },
+    { text: 'GARAGE', to: '/bots/garage', icon: <FaTools /> },
+    { text: 'LEADERBOARD', to: '/leaderboard', icon: <FaTrophy /> },
+    { text: 'STATS', to: '/stats', icon: <FaChartLine /> },
+    { text: 'SETTINGS', to: '/settings', icon: <FaCog /> },
   ];
 
   // Close dropdown when clicking outside
@@ -49,6 +58,9 @@ const SubNavBar: React.FC = () => {
 
   // Define navigation links for each route
   const getNavLinks = (): NavLink[] => {
+    if (currentRoute === '/bots/dashboard' || location.pathname === '/bots/dashboard') {
+      return dashboardNavLinks;
+    }
     switch (currentRoute) {
       case '/':
         return [
@@ -57,7 +69,6 @@ const SubNavBar: React.FC = () => {
           { text: 'FEATURES', to: '#features', isHash: true, icon: <FaBolt />, hasDropdown: true },
           { text: 'CONTACT US', to: '/contact', icon: <FaEnvelope /> }
         ];
-      
       case '/blog':
         return [
           { text: 'Home', to: '/', icon: <FaHome /> },
@@ -65,7 +76,6 @@ const SubNavBar: React.FC = () => {
           { text: 'FEATURES', to: '/#features', isHash: true, icon: <FaBolt />, hasDropdown: true },
           { text: 'CONTACT US', to: '/contact', icon: <FaEnvelope /> }
         ];
-      
       default:
         return [
           { text: 'Home', to: '/', icon: <FaHome /> },
@@ -280,6 +290,7 @@ const SubNavBar: React.FC = () => {
   };
 
   const navLinks = getNavLinks();
+  const isDashboard = currentRoute === '/bots/dashboard' || location.pathname === '/bots/dashboard';
   const isHomePage = currentRoute === '/';
 
   return (
@@ -296,12 +307,12 @@ const SubNavBar: React.FC = () => {
               >
                 {link.icon}
                 {link.text}
-                {link.hasDropdown && <FaChevronDown className={`text-xs transition-transform duration-200 ${showFeaturesDropdown ? 'rotate-180' : ''}`} />}
+                {link.hasDropdown && !isDashboard && <FaChevronDown className={`text-xs transition-transform duration-200 ${showFeaturesDropdown ? 'rotate-180' : ''}`} />}
                 {link.external && <FaExternalLinkAlt className="ml-1 text-xs" />}
               </button>
 
               {/* Features Dropdown */}
-              {link.hasDropdown && (
+              {link.hasDropdown && !isDashboard && (
                 <div
                   className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-72 bg-[#23263a] border border-[#00ffe7]/30 rounded-lg shadow-lg transition-all duration-300 ${
                     showFeaturesDropdown
