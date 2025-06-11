@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 import { BotConfig } from "../models/Bot";
 import { Subgraph } from "../models/Token";
-import LoadingScreenDots from "./LoadingScreenDots";
+import LoadingScreenDots from "./common/LoadingScreenDots";
 
 interface DropdownWithImagesProps {
   formData: BotConfig;

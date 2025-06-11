@@ -30,15 +30,12 @@ const SubNavBar: React.FC = () => {
     { id: 'bot-shop', title: 'Bot Shop Marketplace', icon: <FaShoppingCart /> },
     { id: 'bot-garage', title: 'Bot Garage Workshop', icon: <FaTools /> },
     { id: 'analytics', title: 'Advanced Analytics', icon: <FaChartLine /> },
-    { id: 'leaderboard', title: 'Global Leaderboard', icon: <FaTrophy /> },
   ];
 
-  // Custom subnav for dashboard
-  const dashboardNavLinks: NavLink[] = [
+  // Custom subnav for all main app sections
+  const mainNavLinks: NavLink[] = [
     { text: 'SHOP', to: '/shop', icon: <FaShoppingCart /> },
     { text: 'GARAGE', to: '/bots/garage', icon: <FaTools /> },
-    { text: 'LEADERBOARD', to: '/leaderboard', icon: <FaTrophy /> },
-    { text: 'STATS', to: '/stats', icon: <FaChartLine /> },
     { text: 'SETTINGS', to: '/settings', icon: <FaCog /> },
   ];
 
@@ -58,8 +55,14 @@ const SubNavBar: React.FC = () => {
 
   // Define navigation links for each route
   const getNavLinks = (): NavLink[] => {
-    if (currentRoute === '/bots/dashboard' || location.pathname === '/bots/dashboard') {
-      return dashboardNavLinks;
+    const path = location.pathname;
+    if (
+      path === '/bots/dashboard' ||
+      path === '/shop' ||
+      path === '/bots/garage' ||
+      path === '/settings'
+    ) {
+      return mainNavLinks;
     }
     switch (currentRoute) {
       case '/':
@@ -295,7 +298,7 @@ const SubNavBar: React.FC = () => {
 
   return (
     <div className={`fixed w-full z-20 mt-14 bg-[#23263a]/80 border-t border-[#00ffe7]/30 ${isHomePage ? 'my-4' : ''} shadow-[0_8px_12px_-8px_#faafe8] backdrop-blur-md`}>
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-wrap justify-center gap-4 text-sm h-16">
           {navLinks.map((link, index) => (
             <div key={index} className="relative" ref={link.hasDropdown ? dropdownRef : undefined}>

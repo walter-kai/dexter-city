@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaExternalLinkAlt } from 'react-icons/fa';
-import LoadingScreenDots from '../components/LoadingScreenDots';
+import LoadingScreenDots from '../components/common/LoadingScreenDots';
 import NewsFetcher from '../components/guide/NewsFetcher';
 import LinkPreviewCard from '../components/LinkPreviewCard';
 
@@ -82,7 +82,7 @@ const Blog: React.FC = () => {
 
   return (
     <div className="min-h-screen pb-10 text-neon-light">
-      <div className="space-y-6 mb-8 relative max-w-6xl mx-auto pt-6">
+      <div className="space-y-6 mb-8 relative max-w-7xl mx-auto pt-6">
         {/* Media News Section */}
         <div id="news-section">
           <NewsFetcher />

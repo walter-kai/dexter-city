@@ -11,12 +11,19 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true, // or false if you want TypeScript to emit JavaScript files
-    "baseUrl": "./",
+    "noEmit": true,
+    "baseUrl": "src",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["*"],
+      "@/components/*": ["components/*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/models/*": ["models/*"],
+      "@/pages/*": ["pages/*"],
+      "@/styles/*": ["styles/*"],
+      "@/utils/*": ["utils/*"],
+      "@/contexts/*": ["contexts/*"]
     }
   },
-  "include": ["src", "../src/routes/chain/UniswapV2.ts"],
+  "include": ["src"],
   "exclude": ["node_modules"]
 }

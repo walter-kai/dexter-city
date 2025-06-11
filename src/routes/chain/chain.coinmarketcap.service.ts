@@ -233,7 +233,7 @@ const reloadTokens = async (
 
       const json = await response.json();
 
-      if (json.status.error_code !== '0') {
+      if (json.status.error_code !== 0) {
         throw new Error(json.status.error_message || "Unknown API error");
       }
 
@@ -319,61 +319,10 @@ const getTokens = async (symbols: string[]): Promise<CoinMarketCap.Token[] | nul
   }
 };
 
-
-// Function to get pairs based on symbols
-const getPairs = async (): Promise<CoinMarketCap.Token[] | null> => {
-  try {
-    const tokensCollection = db.collection("pairs-cmc");
-
-    const tokenSnapshot = await tokensCollection.get();
-
-    if (tokenSnapshot.empty) {
-      logger.warn("No tokens found in the collection.");
-      return [];
-    }
-
-    const tokens: CoinMarketCap.Token[] = tokenSnapshot.docs.map((doc) => doc.data() as CoinMarketCap.Token);
-
-    return tokens;
-  } catch (err) {
-    logger.error(
-      `Error fetching tokens from the collection. ${
-        err instanceof Error ? err.message : "An error occurred"
-      }`
-    );
-    return null;
-  }
-};
-
-
-// Function to get all DEXs
-const getDexs = async (): Promise<any[] | null> => {
-  try {
-    const tokensCollection = db.collection("dexs-cmc");
-    const tokenSnapshot = await tokensCollection.get();
-
-    if (tokenSnapshot.empty) {
-      logger.warn("No tokens found in the collection.");
-      return [];
-    }
-
-    const tokens: any[] = tokenSnapshot.docs.map((doc) => doc.data());
-
-    return tokens;
-  } catch (err) {
-    logger.error(
-      `Error fetching all tokens from the collection. ${err instanceof Error ? err.message : "An error occurred"}`
-    );
-    return null;
-  }
-};
-
 export default {
   reloadDexs,
   reloadPairs,
   reloadTokens,
   getTokens,
-  getPairs,
-  getDexs,
   getTrades
 };

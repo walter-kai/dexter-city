@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { FaEnvelope, FaRobot, FaUser, FaBriefcase, FaComment, FaCheckCircle } from 'react-icons/fa';
-import LoadingScreenDots from '../components/LoadingScreenDots';
+import LoadingScreenDots from '../components/common/LoadingScreenDots';
 import StatusFooter from '../components/StatusFooter';
-import SliderCaptcha from '../components/SliderCaptcha';
+import SliderCaptcha from '../components/guide/SliderCaptcha';
 
 interface FormData {
   name: string;
@@ -252,7 +252,7 @@ const ContactUs: React.FC = () => {
 
   return (
     <div className="min-h-screen text-neon-light">
-      <div className="max-w-6xl mx-auto px-4 pt-6">
+      <div className="max-w-7xl mx-auto px-4 pt-6">
         <div 
           className={`bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-8 transition-all duration-700 ease-in-out ${
             showCaptcha ? 'max-w-2xl mx-auto' : 'max-w-4xl mx-auto'

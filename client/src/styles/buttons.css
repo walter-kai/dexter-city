@@ -1,0 +1,58 @@
+.btn-standard {
+  @apply text-center bg-[#23263a] text-[#e0e7ef] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#181a23] hover:text-[#00ffe7] border border-[#23263a] shadow-[0_0_8px_rgba(35,38,58,0.5)] hover:shadow-[0_0_12px_#00ffe7];
+}
+
+.btn-teal {
+  @apply text-center bg-[#00ffe7] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#23263a] hover:text-[#00ffe7] border border-[#00ffe7] shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#00ffe7];
+}
+
+.btn-pink {
+  @apply text-center bg-[#faafe8] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#23263a] hover:text-[#faafe8] border border-[#faafe8] shadow-[0_0_8px_#faafe8] hover:shadow-[0_0_12px_#faafe8];
+}
+
+.btn-purple {
+  @apply text-center bg-[#9945ff] text-white font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#23263a] hover:text-[#9945ff] border border-[#9945ff] shadow-[0_0_8px_#9945ff] hover:shadow-[0_0_16px_#9945ff];
+}
+
+.btn-red {
+  @apply text-center bg-[#ff005c] text-white font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#23263a] hover:text-[#ff005c] border border-[#ff005c] shadow-[0_0_8px_#ff005c] hover:shadow-[0_0_16px_#ff005c];
+}
+
+.btn-green {
+  @apply text-center bg-[#00ff88] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#23263a] hover:text-[#00ff88] border border-[#00ff88] shadow-[0_0_8px_#00ff88] hover:shadow-[0_0_16px_#00ff88];
+}
+
+.btn-green:hover {
+  @apply transform scale-105;
+}
+
+.btn-green:disabled {
+  @apply opacity-50 cursor-not-allowed hover:scale-100 hover:bg-[#00ff88] hover:text-[#181a23] hover:shadow-[0_0_8px_#00ff88];
+}
+
+.btn-blue {
+  @apply text-center bg-[#4dabf7] text-[#181a23] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#23263a] hover:text-[#4dabf7] border border-[#4dabf7] shadow-[0_0_8px_#4dabf7] hover:shadow-[0_0_16px_#4dabf7];
+}
+
+.btn-transparent {
+  @apply text-center bg-transparent text-[#00ffe7] font-bold py-2 px-4 rounded transition duration-200;
+  @apply hover:bg-[#00ffe7] hover:text-[#181a23] border border-[#00ffe7] shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#00ffe7];
+}
+
+.btn-nav {
+  @apply text-center bg-transparent text-[#faafe8]/80 font-bold py-2 px-4 transition duration-200;
+  @apply tracking-widest hover:bg-[#00ffe7]/30 hover:text-[#181a23];
+}
+
+/* HUD-style button */
+.btn-hud {
+  @apply flex items-center justify-center gap-2 bg-[#00ffe7] text-[#181a23] px-4 py-2 rounded-lg font-bold uppercase shadow-[0_0_8px_#00ffe7] border-2 border-[#00ffe7] text-sm transition-all;
+  @apply hover:bg-[#ff005c] hover:text-white hover:shadow-[0_0_16px_#ff005c] hover:border-[#ff005c];
+}

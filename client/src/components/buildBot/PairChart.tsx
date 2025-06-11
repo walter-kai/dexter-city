@@ -6,7 +6,7 @@ import "chartjs-adapter-date-fns";
 import { FaChartBar, FaChartLine, FaChartColumn } from "react-icons/fa6";
 import { LuChartColumnBig, LuChartCandlestick } from "react-icons/lu";
 import { Subgraph } from "../../models/Token";
-import LoadingScreenDots from "../LoadingScreenDots";
+import LoadingScreenDots from "../common/LoadingScreenDots";
 import { BotConfig } from "../../models/Bot";
 import { generateOHLCData, fillMissingDays, generateSafetyOrderAndProfitLines } from "./ChartUtil";
 

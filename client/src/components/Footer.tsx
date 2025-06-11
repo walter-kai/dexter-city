@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 const Footer: React.FC = () => {
   return (
     <footer className="bg-[#181a23] border-t border-[#00ffe7]/30 py-8 mt-auto">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <img src="/logos/dexter.png" className="h-8 mb-4" alt="DexterCity" />

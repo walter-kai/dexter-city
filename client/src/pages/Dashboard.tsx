@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog, FaExchangeAlt, FaChartPie } from "react-icons/fa";
-import LoadingScreenDots from "../components/LoadingScreenDots";
+import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog, FaExchangeAlt, FaChartPie, FaCrown, FaMedal, FaUser, FaFire } from "react-icons/fa";
+import LoadingScreenDots from "../components/common/LoadingScreenDots";
 import { useSDK } from "@metamask/sdk-react";
-import { WrappedTokenTable } from "../components/TokenTable";
+// import { WrappedTokenTable } from "../components/TokenTable";
 
 const statPresets = {
   "1d": {
@@ -36,6 +36,25 @@ const Dashboard: React.FC = () => {
   const [balancesLoaded, setBalancesLoaded] = useState(false);
   const [allBalancesLoaded, setAllBalancesLoaded] = useState(false);
   const [ethPrice, setEthPrice] = useState<number | null>(null);
+
+  const [leaderboardData] = useState([
+    { rank: 1, name: "CryptoKing", profit: "+125.8 ETH", winRate: 94.2, avatar: "https://robohash.org/cryptoking" },
+    { rank: 2, name: "TradeBot", profit: "+98.5 ETH", winRate: 91.7, avatar: "https://robohash.org/tradebot" },
+    { rank: 3, name: "AlphaTrader", profit: "+87.3 ETH", winRate: 89.4, avatar: "https://robohash.org/alphatrader" },
+    { rank: 4, name: "BotMaster", profit: "+76.1 ETH", winRate: 88.2, avatar: "https://robohash.org/botmaster" },
+    { rank: 5, name: "TradingPro", profit: "+65.9 ETH", winRate: 86.5, avatar: "https://robohash.org/tradingpro" },
+  ]);
+
+  const [userStats] = useState({
+    globalRank: 847,
+    totalTrades: 1247,
+    winRate: 73.8,
+    bestStreak: 12,
+    totalProfit: "+15.6 ETH",
+    avgTradeSize: "0.85 ETH",
+    activeDays: 45,
+    favoriteBot: "ScalpMaster Pro"
+  });
 
   // Fetch ETH price in USD
   const fetchEthPrice = async () => {
@@ -255,69 +274,169 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* User Info */}
-          <div className="relative w-full max-w-3xl mx-auto">
-            <div className="m-3 text-center">
-              <div className="bg-black/50 p-3 rounded shadow-md text-left text-white">
-                <div className="flex items-center gap-4 mb-4">
-                  <img src={user?.photoUrl} className="h-12 w-12 rounded-full border-2 border-[#00ffe7]/40" alt="your icon" />
-                  <div>
-                    <div className="text-xl font-bold text-[#00ffe7]">Your Information</div>
-                    <div className="text-xs text-[#b8eaff]">Wallet: <span className="font-mono">{user?.walletId}</span></div>
+          <div className="relative w-full max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+              {/* User Info Card */}
+              <div className="lg:col-span-1">
+                <div className="bg-[#181a23]/80 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_32px_#00ffe7] p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <img src={user?.photoUrl} className="h-16 w-16 rounded-full border-2 border-[#00ffe7]/40" alt="your icon" />
+                    <div>
+                      <div className="text-xl font-bold text-[#00ffe7]">Your Information</div>
+                      <div className="text-xs text-[#b8eaff]">Wallet: <span className="font-mono">{user?.walletId?.slice(0, 6)}...{user?.walletId?.slice(-4)}</span></div>
+                    </div>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
-                  <div>
-                    <p><strong>Handle:</strong> {user?.telegramHandle || "Not set"}</p>
-                    <p><strong>Firstname:</strong> {user?.firstName}</p>
-                    <p><strong>Telegram ID:</strong> {user?.telegramId}</p>
-                    <p><strong>Last Logged In:</strong> {user?.lastLoggedIn ? timeSince(user.lastLoggedIn) : "Unknown"}</p>
+                  
+                  <div className="space-y-2 mb-4">
+                    <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Handle:</strong> {user?.telegramHandle || "Not set"}</p>
+                    <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Name:</strong> {user?.firstName}</p>
+                    <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Last Login:</strong> {user?.lastLoggedIn ? timeSince(user.lastLoggedIn) : "Unknown"}</p>
                   </div>
-                  <div>
-                    <div className="mb-2">
-                      <strong>Balances:</strong>
-                      <div className="flex flex-wrap gap-2 mt-1">
-                        {!allBalancesLoaded
-                          ? <span className="text-[#faafe8]">Loading...</span>
-                          : allBalances.length === 0
-                            ? <span className="text-[#faafe8]">No balances found</span>
-                            : allBalances.map((bal, idx) => (
-                                <span key={idx} className="bg-[#23263a] border border-[#00ffe7]/30 rounded px-3 py-1 text-[#00ffe7] font-mono text-sm flex items-center gap-2">
-                                  {/* Show ETH and tokens with 4 decimals */}
-                                  {parseFloat(bal.balance).toFixed(4)} {bal.symbol}
-                                  {bal.symbol === "ETH" && ethPrice && (
-                                    <span className="text-[#b8eaff] text-xs ml-2">
-                                      (${getUsdValue(bal.symbol, bal.balance)})
-                                    </span>
-                                  )}
-                                </span>
-                              ))
-                        }
+
+                  <div className="mb-4">
+                    <strong className="text-[#00ffe7]">Balances:</strong>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {!allBalancesLoaded
+                        ? <span className="text-[#faafe8]">Loading...</span>
+                        : allBalances.length === 0
+                          ? <span className="text-[#faafe8]">No balances found</span>
+                          : allBalances.map((bal, idx) => (
+                              <span key={idx} className="bg-[#23263a] border border-[#00ffe7]/30 rounded px-3 py-1 text-[#00ffe7] font-mono text-sm flex items-center gap-2">
+                                {parseFloat(bal.balance).toFixed(4)} {bal.symbol}
+                                {bal.symbol === "ETH" && ethPrice && (
+                                  <span className="text-[#b8eaff] text-xs ml-2">
+                                    (${getUsdValue(bal.symbol, bal.balance)})
+                                  </span>
+                                )}
+                              </span>
+                            ))
+                      }
+                    </div>
+                    {ethPrice && (
+                      <div className="text-xs text-[#b8eaff] mt-2">
+                        ETH Price: ${ethPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
                       </div>
-                      {ethPrice && (
-                        <div className="text-xs text-[#b8eaff] mt-2">
-                          ETH Price: ${ethPrice.toLocaleString(undefined, { maximumFractionDigits: 2 })}
-                        </div>
-                      )}
+                    )}
+                  </div>
+
+                  <button
+                    className="w-full btn-hud"
+                    onClick={() => {
+                      setBalancesLoaded(false);
+                      setAllBalancesLoaded(false);
+                      fetchBalances(user.walletId);
+                      fetchAllBalances(user.walletId);
+                      fetchEthPrice();
+                    }}
+                  >
+                    Refresh Balances
+                  </button>
+                </div>
+              </div>
+
+              {/* Account Stats Card */}
+              <div className="lg:col-span-1">
+                <div className="bg-[#181a23]/80 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_32px_#00ffe7] p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <FaChartLine className="text-2xl text-[#00ffe7]" />
+                    <h3 className="text-xl font-bold text-[#00ffe7]">Account Stats</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-400">#{userStats.globalRank}</div>
+                      <div className="text-xs text-[#e0e7ef]">Global Rank</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-[#00ffe7]">{userStats.totalTrades}</div>
+                      <div className="text-xs text-[#e0e7ef]">Total Trades</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-400">{userStats.winRate}%</div>
+                      <div className="text-xs text-[#e0e7ef]">Win Rate</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-[#faafe8]">{userStats.bestStreak}</div>
+                      <div className="text-xs text-[#e0e7ef]">Best Streak</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-[#e0e7ef]">Total Profit:</span>
+                      <span className="text-green-400 font-bold">{userStats.totalProfit}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#e0e7ef]">Avg Trade:</span>
+                      <span className="text-[#00ffe7] font-bold">{userStats.avgTradeSize}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#e0e7ef]">Active Days:</span>
+                      <span className="text-[#faafe8] font-bold">{userStats.activeDays}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-[#e0e7ef]">Favorite Bot:</span>
+                      <span className="text-[#ff005c] font-bold text-sm">{userStats.favoriteBot}</span>
                     </div>
                   </div>
                 </div>
-                <button
-                  className="mt-4 px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 transition"
-                  onClick={() => {
-                    setBalancesLoaded(false);
-                    setAllBalancesLoaded(false);
-                    fetchBalances(user.walletId);
-                    fetchAllBalances(user.walletId);
-                    fetchEthPrice();
-                  }}
-                >
-                  Refresh Balances
-                </button>
               </div>
-              <WrappedTokenTable />
+
+              {/* Leaderboard Card */}
+              <div className="lg:col-span-1">
+                <div className="bg-[#181a23]/80 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_32px_#00ffe7] p-6">
+                  <div className="flex items-center gap-3 mb-6">
+                    <FaTrophy className="text-2xl text-[#00ffe7]" />
+                    <h3 className="text-xl font-bold text-[#00ffe7]">Top Traders</h3>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {leaderboardData.map((trader, idx) => (
+                      <div key={trader.rank} className="flex items-center gap-3 p-2 rounded-lg bg-[#23263a]/50">
+                        <div className="flex items-center gap-2">
+                          {trader.rank === 1 && <FaCrown className="text-yellow-400" />}
+                          {trader.rank === 2 && <FaMedal className="text-gray-400" />}
+                          {trader.rank === 3 && <FaMedal className="text-amber-600" />}
+                          {trader.rank > 3 && <span className="text-[#e0e7ef] font-bold">#{trader.rank}</span>}
+                        </div>
+                        <img 
+                          src={trader.avatar} 
+                          alt={trader.name}
+                          className="w-8 h-8 rounded-full border border-[#00ffe7]/40"
+                        />
+                        <div className="flex-1">
+                          <div className="text-[#00ffe7] font-bold text-sm">{trader.name}</div>
+                          <div className="text-xs text-green-400">{trader.profit}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-[#e0e7ef]">{trader.winRate}%</div>
+                          <div className="text-xs text-[#b8eaff]">win rate</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-[#00ffe7]/20">
+                    <div className="flex items-center gap-3 p-2 rounded-lg bg-[#00ffe7]/10">
+                      <FaUser className="text-[#00ffe7]" />
+                      <div className="flex-1">
+                        <div className="text-[#00ffe7] font-bold text-sm">You</div>
+                        <div className="text-xs text-green-400">{userStats.totalProfit}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs text-[#e0e7ef]">#{userStats.globalRank}</div>
+                        <div className="text-xs text-[#b8eaff]">rank</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+            
+            {/* <div className="w-full">
+              <WrappedTokenTable />
+            </div> */}
           </div>
-          {/* Do NOT render a local subnav here. SubNavBar is global and should be customized for /bots/dashboard route. */}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center min-h-screen">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Subgraph } from "../../models/Token";
-import LoadingScreenDots from "../LoadingScreenDots";
+import LoadingScreenDots from "../common/LoadingScreenDots";
 
 interface TokenInfoProps {
   tokenAddress: string;
@@ -46,7 +46,7 @@ const TokenInfo: React.FC<TokenInfoProps> = ({ tokenAddress }) => {
   }
 
   return (
-    <div className="p-4 bg-gray-800 rounded text-white w-[400px]">
+    <div className="p-4 bg-gray-800 rounded text-white">
       <h2 className="text-lg font-bold mb-2">{tokenData.name || "N/A"}</h2>
       <p><strong>Address:</strong> {tokenData.address || "N/A"}</p>
       <p><strong>Symbol:</strong> {tokenData.symbol || "N/A"}</p>

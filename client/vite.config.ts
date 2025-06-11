@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
@@ -20,11 +21,18 @@ export default defineConfig({
 
   },
   esbuild: {
-    sourcemap: true, // Ensure esbuild generates source maps
+    sourcemap: true,
   },
   resolve: {
     alias: {
-      '@': '/src', // Optional: Add an alias for cleaner imports
+      '@': path.resolve(__dirname, './src'),
+      '@/components': path.resolve(__dirname, './src/components'),
+      '@/hooks': path.resolve(__dirname, './src/hooks'),
+      '@/models': path.resolve(__dirname, './src/models'),
+      '@/pages': path.resolve(__dirname, './src/pages'),
+      '@/styles': path.resolve(__dirname, './src/styles'),
+      '@/utils': path.resolve(__dirname, './src/utils'),
+      '@/contexts': path.resolve(__dirname, './src/contexts')
     },
   },
 });

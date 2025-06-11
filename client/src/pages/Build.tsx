@@ -9,7 +9,7 @@ import { generateLogoHash } from "../hooks/Robohash";
 import PairChart from "../components/buildBot/PairChart";
 import TokenInfo from "../components/buildBot/TokenInfo"; // Import the updated TokenInfo component
 
-import LoadingScreenDots from "@/components/LoadingScreenDots";
+import LoadingScreenDots from "@/components/common/LoadingScreenDots";
 
 const BuildBot: React.FC = () => {
   const [formData, setFormData] = useState<BotConfig>({

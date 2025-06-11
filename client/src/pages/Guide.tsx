@@ -4,8 +4,8 @@ import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from "../contexts/AuthContext";
 import GuideSection, { featuresData } from "../components/guide/Features";
 import Hero from "../components/guide/Hero";
-import GetStarted from "../components/guide/GetStarted";
-import FAQSection from "../components/guide/faqSection";
+import GetStarted from "@/components/guide/GetStarted";
+import FAQSection from "../components/guide/FaqSection";
 import TestimonialCard from "../components/guide/TestimonialCard";
 
 const Guide: React.FC = () => {
@@ -46,7 +46,7 @@ const Guide: React.FC = () => {
 	// Show the full guide content
 	return (
 		<div className="min-h-screen tracking-wide py-10 text-neon-light">
-			<div className="max-w-6xl mx-auto px-4">
+			<div className="max-w-7xl mx-auto px-4">
 				{/* Hero Section */}
 				<Hero />
 

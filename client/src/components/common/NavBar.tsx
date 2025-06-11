@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSDK } from "@metamask/sdk-react";
-import { useAuth } from '../contexts/AuthContext';
-import LoginModal from './LoginModal';
+import { useAuth } from '../../contexts/AuthContext';
+import LoginModal from '../LoginModal';
 
 interface NavBarProps {
   telegramUser: any;
@@ -74,7 +74,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
         {/* Left section */}
         <div className="flex">
           <button className="" type="button" onClick={() => handleNavigation('/')}>
-            <img src="logos/dexter.png" className="h-10 -my-4 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
+            <img src="/logos/dexter.png" className="h-10 -my-4 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
           </button>
         </div>
         

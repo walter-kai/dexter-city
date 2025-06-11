@@ -7,9 +7,17 @@
       "esModuleInterop": true,
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
+      "moduleResolution": "node",
       "baseUrl": ".", // Set the base URL for module resolution
       "paths": {
-        "@/*": ["client/src/*"] // Map '@' to the 'client/src' directory
+        "@/*": ["client/src/*"], // Map '@' to the 'client/src' directory
+        "@/components/*": ["client/src/components/*"],
+        "@/hooks/*": ["client/src/hooks/*"],
+        "@/models/*": ["client/src/models/*"],
+        "@/pages/*": ["client/src/pages/*"],
+        "@/styles/*": ["client/src/styles/*"],
+        "@/utils/*": ["client/src/utils/*"],
+        "@/contexts/*": ["client/src/contexts/*"]
       }
     },
     "include": ["src/**/*.ts"],    // Include all your TypeScript files inside the src directory

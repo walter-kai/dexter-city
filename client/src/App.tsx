@@ -3,14 +3,14 @@ import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { MetaMaskProvider, useSDK } from '@metamask/sdk-react';
 import { AuthProvider } from './contexts/AuthContext';
 import { login } from './hooks/FirestoreUser';
-import NavBar from './components/NavBar';
+import NavBar from './components/common/NavBar';
 import Footer from './components/Footer';
 import SubNavBar from './components/guide/SubNavBar';
 // Import components
 // import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Shop from './pages/Shop';
-import MyBots from './pages/MyBots';
+import Garage from './pages/Garage';
 import BuildBot from './pages/Build';
 import Guide from './pages/Guide';
 import Support from './pages/Support';
@@ -21,6 +21,7 @@ import TermsOfService from './pages/legal/TermsOfService';
 import NotFound from './pages/NotFound';
 import Quit from './pages/Quit';
 import TokenPairs from './pages/TokenPairs';
+import Settings from './pages/Settings';
 
 // Main App component inside MetaMask context
 const AppContent: React.FC = () => {
@@ -91,13 +92,13 @@ const AppContent: React.FC = () => {
               
               {/* Bot-related routes under /bots/ */}
               <Route path="/bots/dashboard" element={<Dashboard />} />
-              <Route path="/bots/garage" element={<MyBots />} />
+              <Route path="/bots/garage" element={<Garage />} />
               <Route path="/bots/build" element={<BuildBot />} />
               
               {/* Backward compatibility routes */}
               <Route path="/dash" element={<Dashboard />} />
               <Route path="/build" element={<BuildBot />} />
-              <Route path="/bots" element={<MyBots />} />
+              <Route path="/bots" element={<Garage />} />
               
               {/* Other routes */}
               <Route path="/shop" element={<Shop />} />
@@ -108,6 +109,7 @@ const AppContent: React.FC = () => {
               <Route path="/contact" element={<ContactUs />} />
               <Route path="/tokens" element={<TokenPairs />} />
               <Route path="/quit" element={<Quit />} />
+              <Route path="/settings" element={<Settings />} />
               
               {/* Legal routes under /legal/ */}
               <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />

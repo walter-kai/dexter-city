@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaYoutube, FaTwitter, FaEye, FaHeart, FaRetweet, FaFilter, FaSort, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import LoadingScreenDots from '../LoadingScreenDots';
+import LoadingScreenDots from '../common/LoadingScreenDots';
 
 interface Author {
   id: string;
@@ -257,7 +257,7 @@ const NewsFetcher: React.FC = () => {
         `}
       >
         {filteredAndSortedNews.length === 0 ? (
-          <div className="text-center py-8 text-[#e0e7ef] bg-[#23263a] border border-[#00ffe7]/30 rounded-lg max-w-6xl mx-auto">
+          <div className="text-center py-8 text-[#e0e7ef] bg-[#23263a] border border-[#00ffe7]/30 rounded-lg max-w-7xl mx-auto">
             No news items found for the selected filter.
           </div>
         ) : (

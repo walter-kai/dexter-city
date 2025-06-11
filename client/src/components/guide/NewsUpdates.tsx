@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FaYoutube, FaTwitter, FaEye, FaHeart, FaComment, FaRetweet, FaFilter, FaSort, FaChevronDown, FaChevronUp, FaCode, FaNewspaper } from 'react-icons/fa';
-import LoadingScreenDots from '../LoadingScreenDots';
+import LoadingScreenDots from '../common/LoadingScreenDots';
 
 interface Author {
   id: string;
@@ -328,7 +328,7 @@ const NewsUpdates: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 mb-8 relative max-w-6xl mx-auto">
+    <div className="space-y-6 mb-8 relative max-w-7xl mx-auto">
       {/* Header and Controls */}
       <div className="mb-2">
         <h2 className="text-center">
