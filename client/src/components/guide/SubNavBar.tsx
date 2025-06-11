@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaExternalLinkAlt, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaHome, FaChevronDown, FaShoppingCart, FaTools, FaChartLine, FaTrophy, FaCog } from 'react-icons/fa';
+import { FaExternalLinkAlt, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaHome, FaChevronDown, FaShoppingCart, FaTools, FaChartLine, FaTrophy, FaCog, FaTachometerAlt } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface NavLink {
@@ -34,6 +34,7 @@ const SubNavBar: React.FC = () => {
 
   // Custom subnav for all main app sections
   const mainNavLinks: NavLink[] = [
+    { text: 'DASHBOARD', to: '/bots/dashboard', icon: <FaTachometerAlt /> },
     { text: 'SHOP', to: '/shop', icon: <FaShoppingCart /> },
     { text: 'GARAGE', to: '/bots/garage', icon: <FaTools /> },
     { text: 'SETTINGS', to: '/settings', icon: <FaCog /> },

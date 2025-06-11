@@ -1,23 +1,6 @@
 import { Request, Response } from "express";
 import coinMarketCapService from "./chain.coinmarketcap.service";
-// import botConfig from "../../client/src/models/Bot"
 
-const reloadDexs = async (req: Request, res: Response): Promise<Response> => {
-  try {
-
-    // Fetch bot by botName using the botService's get method
-    const bot = await coinMarketCapService.reloadDexs(); // Ensure botName is treated as a string
-
-    // if (!bot) {
-    //   return res.status(404).json({ error: "Bot not found" });
-    // }
-
-    return res.json(bot);
-  } catch (error) {
-    console.error("Error fetching bot:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
 
 const reloadTokens = async (req: Request, res: Response): Promise<Response> => {
   try {
@@ -32,30 +15,6 @@ const reloadTokens = async (req: Request, res: Response): Promise<Response> => {
     return res.json(bot);
   } catch (error) {
     console.error("Error fetching bot:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-const reloadPairs = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    // Fetch pairs for Solana
-    const solanaSuccess = await coinMarketCapService.reloadPairs('solana');
-    if (!solanaSuccess) {
-      console.error("Failed to reload pairs for Solana.");
-      return res.status(500).json({ error: "Failed to reload pairs for Solana." });
-    }
-
-    // Fetch pairs for Ethereum
-    const ethereumSuccess = await coinMarketCapService.reloadPairs('ethereum');
-    if (!ethereumSuccess) {
-      console.error("Failed to reload pairs for Ethereum.");
-      return res.status(500).json({ error: "Failed to reload pairs for Ethereum." });
-    }
-
-    // If both succeeded, return success response
-    return res.status(200).json({ message: "Pairs reloaded successfully for Solana and Ethereum." });
-  } catch (error) {
-    console.error("Error reloading pairs:", error);
     return res.status(500).json({ error: "Internal server error" });
   }
 };
@@ -80,40 +39,7 @@ const getTokenBySymbol = async (req: Request, res: Response): Promise<Response> 
 };
 
 
-
-
-const getTrades = async (req: Request, res: Response): Promise<Response> => {
-  const { network, contractAddress } = req.query; // Extract network and contractAddress from query parameters
-
-  try {
-    // Check if the required parameters are provided
-    if (!network || !contractAddress) {
-      return res.status(400).json({ error: "Missing required parameters: network and contractAddress" });
-    }
-
-    // Fetch the cryptocurrency data using the service's getTrades method
-    const tradesList = await coinMarketCapService.getTrades(network as string, contractAddress as string);
-
-    // Check if the dexList is null
-    if (!tradesList) {
-      return res.status(404).json({ error: "Dex list not found" });
-    }
-
-    // Return the fetched data
-    return res.json({ data: tradesList });
-  } catch (error) {
-    console.error("Error fetching trades:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-
 export default {
-  reloadDexs,
   reloadTokens,
-  reloadPairs,
   getTokenBySymbol,
-  // getDexs,
-  // getPairs,
-  getTrades
 };

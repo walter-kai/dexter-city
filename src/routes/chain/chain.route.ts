@@ -5,11 +5,7 @@ import chainController from "./chain.controller";
 
 const router = express.Router();
 
-// router.route("/dexs").put(chainController.reloadDexs);
-// router.route("/swaps").get(subgraphController.getSwaps);
-// router.route("/uni/pairs").get(subgraphController.getPairs);
-// router.route("/cmc/reloadPairs").get(coinMarketCapController.reloadPairs);
-// router.route("/uni/reloadPairs").get(subgraphController.reloadPairs);
+
 router.route("/reload").get(chainController.reloadToDb);
 // router.route("/cmc/reloadTokens").put(coinMarketCapController.reloadTokens);
 // router.route("/uni/reloadPools").get(subgraphController.reloadPools);

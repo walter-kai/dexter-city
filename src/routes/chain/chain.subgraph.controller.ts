@@ -3,23 +3,6 @@ import subgraphService from "./chain.subgraph.service";
 import firebaseService from "../firebase/firebase.service";
 import ApiError from "../../utils/api-error";
 
-const getPairs = async (req: Request, res: Response): Promise<Response> => {
-  // const { symbol } = req.params; // Get the symbol from the URL params
-
-  try {
-    // Fetch the cryptocurrency id by symbol using the service's get method
-    const pairList = await subgraphService.getPairs();
-
-    if (pairList === null) {
-      return res.status(404).json({ error: `Dex list not found` });
-    }
-
-    return res.json({ pairs: pairList }); // Respond with the id of the token
-  } catch (error) {
-    console.error("Error fetching token:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
 
 const getPools = async (req: Request, res: Response): Promise<Response> => {
   // const { symbol } = req.params; // Get the symbol from the URL params
@@ -54,7 +37,7 @@ const getSwaps = async (req: Request, res: Response): Promise<Response> => {
       return res.status(400).json({ error: "Missing required parameters: network and contractAddress" });
     }
 
-    // Fetch the cryptocurrency data using the service's getTrades method
+
     const tradesList = await subgraphService.getSwapsV3(contractAddress as string);
 
     // Check if the dexList is null
@@ -71,32 +54,12 @@ const getSwaps = async (req: Request, res: Response): Promise<Response> => {
 };
 
 
-// const reloadPairs = async (req: Request, res: Response): Promise<Response> => {
-
-
-//   try {
-//     // Fetch the cryptocurrency data using the service's getTrades method
-//     const pairsList = await subgraphService.reloadPairs();
-
-//     // Check if the dexList is null
-//     if (!pairsList) {
-//       return res.status(404).json({ error: "Dex pair list not found" });
-//     }
-
-//     // Return the fetched data
-//     return res.json({ data: pairsList });
-//   } catch (error) {
-//     console.error("Error fetching pairs:", error);
-//     return res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
 
 const reloadPools = async (req: Request, res: Response): Promise<Response> => {
 
 
   try {
-    // Fetch the cryptocurrency data using the service's getTrades method
+
     const poolsList = await subgraphService.reloadPools();
 
     // Check if the dexList is null
@@ -114,9 +77,7 @@ const reloadPools = async (req: Request, res: Response): Promise<Response> => {
 
 
 export default {
-  getPairs,
   getPools,
   getSwaps,
-  // reloadPairs,
   reloadPools
 };

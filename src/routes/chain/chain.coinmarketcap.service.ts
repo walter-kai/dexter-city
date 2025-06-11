@@ -1,6 +1,6 @@
 import { db } from "../../config/firebase";
 // import admin from "firebase-admin";
-import { Timestamp } from "@google-cloud/firestore";
+import { Timestamp, FieldPath } from "@google-cloud/firestore";
 import logger from "../../config/logger";
 import { CoinMarketCap } from "../../../client/src/models/Token"
 
@@ -9,201 +9,6 @@ const BASE_URL = "https://pro-api.coinmarketcap.com";
 const API_KEY = "f669f32d-181b-495b-865c-97eb53373232"; // Your API key
 // const BASE_URL = "https://api.coingecko.com/api/v3";
 // const API_KEY = "f669f32d-181b-495b-865c-97eb53373232"; // Your API key
-
-const getTrades = async (
-  network: string,
-  contractAddress: string
-): Promise<CoinMarketCap.Trades[]> => {
-  const endpoint = "/v4/dex/pairs/trade/latest";
-  const tokensCollection = db.collection("pairs-cmc");
-  const tokenRef = tokensCollection.doc(`${network}:${contractAddress}`);
-
-  try {
-    // Fetch the existing document from Firestore
-    const tokenDoc = await tokenRef.get();
-
-    if (tokenDoc.exists) {
-      const tokenData = tokenDoc.data();
-
-      if (tokenData) {
-        const lastUpdated = new Date(tokenData.lastUpdated);
-        const currentTime = new Date();
-
-        // Check if lastUpdated is within 10 seconds
-        if (currentTime.getTime() - lastUpdated.getTime() < 10000) {
-          logger.info("Data was updated within the last 10 seconds. Returning cached data.");
-          return tokenData.trades as CoinMarketCap.Trades[];
-        }
-      }
-    }
-
-    // Prepare query parameters for the API call
-    const queryParams = new URLSearchParams({
-      network_slug: network,
-      contract_address: contractAddress,
-    });
-
-    // Make the API request
-    const response = await fetch(`${BASE_URL}${endpoint}?${queryParams.toString()}`, {
-      headers: {
-        "X-CMC_PRO_API_KEY": API_KEY,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const json = await response.json();
-
-    if (json.status.error_code !== "0") {
-      throw new Error(json.status.error_message || "Unknown API error");
-    }
-
-    logger.info(`Fetched ${json.data[0].trades.length} trade entries.`);
-
-    if (!json.data || json.data[0].trades.length === 0) {
-      logger.warn("No data returned from the API.");
-      return [];
-    }
-
-    // Save the fetched data to Firestore
-    const tradeData = {
-      // network_slug: network,
-      // contract_address: contractAddress,
-      trades: json.data[0].trades
-    };
-
-    await tokenRef.set(tradeData, { merge: true });
-    logger.info("Trade data successfully updated in Firestore.");
-
-    return json.data[0].trades;
-  } catch (err) {
-    logger.error(
-      `Error fetching trade data: ${err instanceof Error ? err.message : "An error occurred"}`
-    );
-    return [];
-  }
-};
-
-
-
-const reloadDexs = async (): Promise<void> => {
-  const endpoint = "/v4/dex/listings/quotes";
-
-  try {
-    const response = await fetch(`${BASE_URL}${endpoint}`, {
-      headers: {
-        "X-CMC_PRO_API_KEY": API_KEY,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const json = await response.json();
-
-    logger.info(`Fetched ${json.data.length} cryptocurrency entries.`);
-
-    const tokensCollection = db.collection("dexs-cmc");
-    const batchWrite = db.batch();
-
-    json.data.forEach((token: any) => {
-      const modifiedName = token.slug;
-      const tokenRef = tokensCollection.doc(token.id.toString() + ":" + modifiedName);
-
-      batchWrite.set(tokenRef, {
-        ...token,
-        lastUpdated: Timestamp.now(),
-      }, { merge: true });
-    });
-
-    await batchWrite.commit();
-    logger.info("Batch write completed for current batch.");
-  } catch (err) {
-    logger.error(
-      `Error fetching cryptocurrency data: ${err instanceof Error ? err.message : "An error occurred"}`
-    );
-  }
-  logger.info("Successfully updated tokens:cmc collection.");
-};
-
-const reloadPairs = async (network: string): Promise<boolean> => {
-  const endpoint = "/v4/dex/spot-pairs/latest";
-  let hasMoreData = true;
-  let start: number = 1;
-  let limit: number = 1000;
-
-  while (hasMoreData) {
-    const queryParams = new URLSearchParams({
-      network_slug: network,
-      // start: start.toString(),
-      // limit: limit.toString(),
-    });
-
-    try {
-      const response = await fetch(`${BASE_URL}${endpoint}?${queryParams.toString()}`, {
-        headers: {
-          "X-CMC_PRO_API_KEY": API_KEY,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const json = await response.json();
-
-      if (json.status.error_code !== '0') {
-        throw new Error(json.status.error_message || "Unknown API error");
-      }
-
-      logger.info(`Fetched ${json.data.length} cryptocurrency entries.`);
-
-      if (!json.data || json.data.length === 0) {
-        logger.warn("No data returned from the API.");
-        break;
-      }
-
-      const tokensCollection = db.collection("pairs-cmc");
-      const batchWrite = db.batch();
-
-      json.data.forEach((token: any) => {
-        // const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
-        // const modifiedSymbol = token.base_asset_symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
-
-        const tokenRef = tokensCollection.doc(
-          `${token.network_slug}:${token.contract_address}`
-        );
-
-        const tokenData = {
-          ...token,
-          lastUpdated: Timestamp.now(),
-        };
-
-        batchWrite.set(tokenRef, tokenData, { merge: true });
-      });
-
-      await batchWrite.commit();
-      logger.info("Batch write completed for current batch.");
-
-      if (json.data.length < limit) {
-        hasMoreData = false;
-      } else {
-        start += limit;
-      }
-    } catch (err) {
-      logger.error(
-        `Error fetching cryptocurrency data: ${err instanceof Error ? err.message : "An error occurred"}`
-      );
-      return false;
-    }
-  }
-
-  logger.info("Successfully updated tokens:cmc collection.");
-  return true;
-};
 
 const reloadTokens = async (
   start: number = 1,
@@ -241,23 +46,52 @@ const reloadTokens = async (
 
       const tokensCollection = db.collection("tokens-cmc");
       const batchWrite = db.batch();
+      let addedCount = 0;
+      let skippedCount = 0;
+
+      // Check existing tokens in batch to avoid individual reads
+      const tokenIds = json.data.map((token: any) => {
+        const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
+        const modifiedSymbol = token.symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
+        return token.id.toString() + ":" + modifiedSymbol + ":" + modifiedName;
+      });
+
+      // Get existing documents
+      const existingTokensSnapshot = await tokensCollection.where(FieldPath.documentId(), "in", tokenIds.slice(0, 10)).get();
+      const existingTokenIds = new Set(existingTokensSnapshot.docs.map(doc => doc.id));
+
+      // Process remaining tokens in chunks of 10 (Firestore 'in' query limit)
+      for (let i = 10; i < tokenIds.length; i += 10) {
+        const chunk = tokenIds.slice(i, Math.min(i + 10, tokenIds.length));
+        const chunkSnapshot = await tokensCollection.where(FieldPath.documentId(), "in", chunk).get();
+        chunkSnapshot.docs.forEach(doc => existingTokenIds.add(doc.id));
+      }
 
       json.data.forEach((token: any) => {
         const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
         const modifiedSymbol = token.symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
+        const docId = token.id.toString() + ":" + modifiedSymbol + ":" + modifiedName;
 
-        const tokenRef = tokensCollection.doc(
-          token.id.toString() + ":" + modifiedSymbol + ":" + modifiedName
-        );
+        // Skip if token already exists
+        if (existingTokenIds.has(docId)) {
+          skippedCount++;
+          return;
+        }
 
+        const tokenRef = tokensCollection.doc(docId);
         batchWrite.set(tokenRef, {
           ...token,
           lastUpdated: Timestamp.now(),
         }, { merge: true });
+        addedCount++;
       });
 
-      await batchWrite.commit();
-      logger.info("Batch write completed for current batch.");
+      if (addedCount > 0) {
+        await batchWrite.commit();
+        logger.info(`Batch write completed. Added: ${addedCount}, Skipped: ${skippedCount}`);
+      } else {
+        logger.info(`No new tokens to add. Skipped: ${skippedCount} existing tokens.`);
+      }
 
       if (json.data.length < limit) {
         hasMoreData = false;
@@ -320,9 +154,6 @@ const getTokens = async (symbols: string[]): Promise<CoinMarketCap.Token[] | nul
 };
 
 export default {
-  reloadDexs,
-  reloadPairs,
   reloadTokens,
   getTokens,
-  getTrades
 };
