@@ -6,8 +6,6 @@ import { login } from './hooks/FirestoreUser';
 import NavBar from './components/common/NavBar';
 import Footer from './components/Footer';
 import SubNavBar from './components/SubNavBar';
-// Import components
-// import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Shop from './pages/Shop';
 import Garage from './pages/Garage';
@@ -29,6 +27,8 @@ const AppContent: React.FC = () => {
   const { connected, sdk } = useSDK();
   const navigate = useNavigate();
   const location = useLocation();
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
   // Reset scroll position on route change (except for hash navigation)
   useEffect(() => {
@@ -42,6 +42,13 @@ const AppContent: React.FC = () => {
     if (storedUser && storedUser !== 'undefined') {
       setUser(JSON.parse(storedUser));
     }
+  }, []);
+
+  // Preload garage background image
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setBackgroundLoaded(true);
+    img.src = '/bg/garage.png';
   }, []);
 
   const connectWallet = async () => {
@@ -67,18 +74,65 @@ const AppContent: React.FC = () => {
     }
   };
 
+  // Handle scroll for parallax effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Determine background image based on current route
+  const getBackgroundImage = () => {
+    if (location.pathname === '/bots/garage' || location.pathname === '/bots') {
+      return backgroundLoaded ? "url('/bg/garage.png')" : "url('/bg/city.jpg')";
+    }
+    return "url('/bg/city.jpg')";
+  };
+
+  // Calculate parallax transform with bounds
+  const getParallaxTransform = (multiplier: number) => {
+    const documentHeight = document.documentElement.scrollHeight;
+    const windowHeight = window.innerHeight;
+    const maxScroll = documentHeight - windowHeight;
+    
+    // Prevent division by zero and ensure we have scrollable content
+    if (maxScroll <= 0) return 'translateY(0px)';
+    
+    // Calculate scroll progress (0 to 1)
+    const scrollProgress = Math.min(scrollY / maxScroll, 1);
+    
+    // Limit transform to a small percentage of viewport height
+    const maxTransform = windowHeight * 0.1; // Reduced from 0.3 to 0.1
+    const transform = scrollProgress * maxTransform * multiplier;
+    
+    return `translateY(${transform}px)`;
+  };
+
   return (
     <AuthProvider>
       <div className="App min-h-screen relative">
-        {/* Background Container */}
-        <div className="fixed inset-0 z-0">
+        {/* Background Container with Parallax */}
+        <div className="fixed inset-0 z-0 overflow-hidden">
           <div 
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
             style={{
-              backgroundImage: "url('./bg/city.jpg')",
+              backgroundImage: getBackgroundImage(),
+              transform: getParallaxTransform(0.5),
+              willChange: 'transform',
+              height: '110%', // Slightly larger to accommodate transform
+              top: '-5%',
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90" />
+          <div 
+            className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90"
+            style={{
+              transform: getParallaxTransform(0.3),
+              willChange: 'transform',
+            }}
+          />
         </div>
         
         {/* Content Container */}

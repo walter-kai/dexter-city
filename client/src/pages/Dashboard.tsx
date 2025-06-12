@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog, FaExchangeAlt, FaChartPie, FaCrown, FaMedal, FaUser, FaFire } from "react-icons/fa";
 import LoadingScreenDots from "../components/common/LoadingScreenDots";
 import { useSDK } from "@metamask/sdk-react";
-// import { WrappedTokenTable } from "../components/TokenTable";
+import { useAuth } from "../contexts/AuthContext";
 
 const statPresets = {
   "1d": {
@@ -28,8 +28,8 @@ const statPresets = {
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
   const { sdk, connected, connecting } = useSDK();
+  const { user } = useAuth(); // Use the user from AuthContext instead of local state
   const [balances, setBalances] = useState<{ balance: string, currency: string }[]>([]);
   const [statRange, setStatRange] = useState<'1d' | '7d' | '30d'>('1d');
   const [allBalances, setAllBalances] = useState<{ symbol: string, balance: string }[]>([]);
@@ -73,23 +73,44 @@ const Dashboard: React.FC = () => {
     try {
       const provider = sdk?.getProvider();
       if (!provider) {
+        console.error("Ethereum provider not available.");
         setBalancesLoaded(true);
         return;
       }
+
+      // Verify wallet connection first
       const accounts = await provider.request({ method: "eth_accounts" }) as string[];
       if (!accounts || accounts.length === 0) {
+        console.error("No connected accounts found.");
         setBalancesLoaded(true);
         return;
       }
+
+      // Ensure the walletId matches one of the connected accounts
+      const normalizedWalletId = walletId.toLowerCase();
+      const accountFound = accounts.some(account => account.toLowerCase() === normalizedWalletId);
+      
+      if (!accountFound) {
+        console.error("Wallet ID not in connected accounts:", walletId);
+        console.error("Connected accounts:", accounts);
+        setBalancesLoaded(true);
+        return;
+      }
+
       const ethBalance = await provider.request({
         method: "eth_getBalance",
         params: [walletId, "latest"],
       }) as string;
+
       // Always show 4 decimals for ETH
       const ethBalanceInEth = (parseInt(ethBalance, 16) / 1e18).toFixed(4);
       setBalances([{ balance: ethBalanceInEth, currency: "ETH" }]);
+      console.log("Dashboard balance fetched successfully:", ethBalanceInEth, "ETH");
     } catch (err) {
       console.error("Error fetching balances:", err);
+      console.error("WalletId used:", walletId);
+      console.error("Connected:", connected);
+      console.error("SDK available:", !!sdk);
     }
     setBalancesLoaded(true);
   };
@@ -99,9 +120,19 @@ const Dashboard: React.FC = () => {
     try {
       const provider = sdk?.getProvider();
       if (!provider) {
+        console.error("Provider not available for fetchAllBalances");
         setAllBalancesLoaded(true);
         return;
       }
+
+      // Verify connection first
+      const accounts = await provider.request({ method: "eth_accounts" }) as string[];
+      if (!accounts || accounts.length === 0) {
+        console.error("No accounts for fetchAllBalances");
+        setAllBalancesLoaded(true);
+        return;
+      }
+
       // ETH balance
       const ethBalance = await provider.request({
         method: "eth_getBalance",
@@ -156,26 +187,47 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    const storedUser = sessionStorage.getItem("currentUser");
-    if (storedUser && storedUser !== 'undefined') {
-      setUser(JSON.parse(storedUser));
-    }
+    // Remove the sessionStorage logic since we're using AuthContext
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    if (user) {
+    if (user && user.walletId && connected && sdk) {
+      console.log("Fetching balances for user:", user.walletId);
       setBalancesLoaded(false);
       setAllBalancesLoaded(false);
-      fetchBalances(user.walletId);
-      fetchAllBalances(user.walletId);
-      fetchEthPrice();
+      if (user && user.walletId) {
+        fetchBalances(user.walletId);
+        fetchAllBalances(user.walletId);
+        fetchEthPrice();
+      }
+    } else {
+      console.log("Missing requirements for balance fetch:", {
+        user: !!user,
+        walletId: user?.walletId,
+        connected,
+        sdk: !!sdk
+      });
     }
-  }, [user]);
+  }, [user, connected, sdk]);
 
-  const timeSince = (date: string) => {
+  // Save all balances to sessionStorage when they update
+  useEffect(() => {
+    if (allBalances.length > 0 && ethPrice) {
+      const balancesWithUsd = allBalances.map(bal => ({
+        ...bal,
+        usdValue: bal.symbol === "ETH" ? getUsdValue(bal.symbol, bal.balance) : null,
+        timestamp: Date.now()
+      }));
+      
+      sessionStorage.setItem('user_balances', JSON.stringify(balancesWithUsd));
+      sessionStorage.setItem('eth_price', JSON.stringify({ price: ethPrice, timestamp: Date.now() }));
+    }
+  }, [allBalances, ethPrice]);
+
+  const timeSince = (date: string | Date) => {
     const now = new Date();
-    const lastLogin = new Date(date);
+    const lastLogin = typeof date === "string" ? new Date(date) : date;
     const seconds = Math.floor((now.getTime() - lastLogin.getTime()) / 1000);
     if (seconds < 60) return `${seconds} seconds ago`;
     const minutes = Math.floor(seconds / 60);
@@ -223,7 +275,19 @@ const Dashboard: React.FC = () => {
     if (!ethPrice) return null;
     // Only ETH is supported for USD conversion here, but you can expand this
     if (symbol === "ETH") {
-      return (parseFloat(balance) * ethPrice).toFixed(2);
+      const usdValue = (parseFloat(balance) * ethPrice).toFixed(2);
+      
+      // Save to sessionStorage
+      const balanceData = {
+        symbol,
+        balance,
+        usdValue,
+        ethPrice,
+        timestamp: Date.now()
+      };
+      sessionStorage.setItem(`balance_${symbol}`, JSON.stringify(balanceData));
+      
+      return usdValue;
     }
     return null;
   };
@@ -280,7 +344,7 @@ const Dashboard: React.FC = () => {
               <div className="lg:col-span-1">
                 <div className="bg-[#181a23]/80 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_32px_#00ffe7] p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    <img src={user?.photoUrl} className="h-16 w-16 rounded-full border-2 border-[#00ffe7]/40" alt="your icon" />
+                    <img src={user?.photoUrl || undefined} className="h-16 w-16 rounded-full border-2 border-[#00ffe7]/40" alt="your icon" />
                     <div>
                       <div className="text-xl font-bold text-[#00ffe7]">Your Information</div>
                       <div className="text-xs text-[#b8eaff]">Wallet: <span className="font-mono">{user?.walletId?.slice(0, 6)}...{user?.walletId?.slice(-4)}</span></div>
@@ -297,7 +361,7 @@ const Dashboard: React.FC = () => {
                     <strong className="text-[#00ffe7]">Balances:</strong>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {!allBalancesLoaded
-                        ? <span className="text-[#faafe8]">Loading...</span>
+                        ? <div className="flex items-center"><LoadingScreenDots /></div>
                         : allBalances.length === 0
                           ? <span className="text-[#faafe8]">No balances found</span>
                           : allBalances.map((bal, idx) => (
@@ -322,11 +386,20 @@ const Dashboard: React.FC = () => {
                   <button
                     className="w-full btn-hud"
                     onClick={() => {
-                      setBalancesLoaded(false);
-                      setAllBalancesLoaded(false);
-                      fetchBalances(user.walletId);
-                      fetchAllBalances(user.walletId);
-                      fetchEthPrice();
+                      if (user?.walletId && connected && sdk) {
+                        setBalancesLoaded(false);
+                        setAllBalancesLoaded(false);
+                        fetchBalances(user.walletId);
+                        fetchAllBalances(user.walletId);
+                        fetchEthPrice();
+                      } else {
+                        console.error("Cannot refresh balances: missing requirements", {
+                          hasUser: !!user,
+                          hasWalletId: !!user?.walletId,
+                          connected,
+                          hasSDK: !!sdk
+                        });
+                      }
                     }}
                   >
                     Refresh Balances

@@ -327,7 +327,7 @@ const SubNavBar: React.FC = () => {
   const isHomePage = currentRoute === '/';
 
   return (
-    <div className={`fixed w-full z-20 mt-14 bg-[#23263a]/80 border-t border-[#00ffe7]/30 ${isHomePage ? 'my-4' : ''} shadow-[0_8px_12px_-8px_#faafe8] backdrop-blur-md`}>
+    <div className={`fixed w-full z-10 mt-14 bg-[#23263a]/80 border-t border-[#00ffe7]/30 ${isHomePage ? 'my-4' : ''} shadow-[0_8px_12px_-8px_#faafe8] backdrop-blur-md`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-wrap justify-center gap-4 text-sm h-16">
           {navLinks.map((link, index) => (

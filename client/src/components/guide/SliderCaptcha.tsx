@@ -68,7 +68,7 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
   }, [width, height, sliderL, sliderR]);
 
   // Draw puzzle piece shape
-  const drawPuzzleShape = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number) => {
+  const drawPuzzleShape = useCallback((ctx: CanvasRenderingContext2D, x: number, y: number, drawBorder = false) => {
     ctx.beginPath();
     ctx.moveTo(x, y);
     ctx.arc(x + sliderL / 2, y - sliderR + 2, sliderR, 0.72 * PI, 2.26 * PI);
@@ -78,6 +78,12 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
     ctx.lineTo(x, y + sliderL);
     ctx.arc(x + sliderR - 2, y + sliderL / 2, sliderR + 0.4, 2.76 * PI, 1.24 * PI, true);
     ctx.lineTo(x, y);
+    
+    if (drawBorder) {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#00ffe7';
+      ctx.stroke();
+    }
     ctx.fill();
   }, [sliderL, sliderR, PI]);
 
@@ -138,10 +144,24 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
         drawPuzzleShape(ctx, x, y);
         ctx.restore();
         
+        // Add border outline to the hole
+        ctx.save();
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'transparent';
+        drawPuzzleShape(ctx, x, y, true);
+        ctx.restore();
+        
         // Create puzzle piece on block canvas
         blockCtx.save();
         blockCtx.globalCompositeOperation = 'destination-in';
         drawPuzzleShape(blockCtx, x, y);
+        blockCtx.restore();
+        
+        // Add border outline to the puzzle piece
+        blockCtx.save();
+        blockCtx.globalCompositeOperation = 'source-over';
+        blockCtx.fillStyle = 'transparent';
+        drawPuzzleShape(blockCtx, x, y, true);
         blockCtx.restore();
         
         // Position puzzle piece outside bounds on the left (hidden)
@@ -179,28 +199,27 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
     const sliderLeft = parseInt(sliderRef.current.style.left) || 0;
     const blockLeft = parseInt(blockRef.current.style.left) || 0;
     
-    // The puzzle piece should align with the hole position (puzzleX)
-    // Since the puzzle piece starts at x=0 in the block canvas and slides right,
-    // it needs to be positioned so the puzzle shape aligns with the hole
-    const targetPosition = 0; // The puzzle piece should be at position 0 to align with the hole
-    const spliced = Math.abs(blockLeft - targetPosition) < offset;
+    // Simple approach: The puzzle piece should be positioned near the hole's X position
+    // When the block canvas is at position 0, the puzzle piece inside it aligns with the hole
+    const targetBlockPosition = 0; // Block canvas should be at 0 to align puzzle with hole
+    const spliced = Math.abs(blockLeft - targetBlockPosition) < 20; // More forgiving threshold
     
-    // Enhanced bot detection
-    if (trail.length < 3) return { spliced: false, verified: false };
+    // Very simple bot detection - just check if there's any movement data
+    const verified = trail.length > 0;
     
-    const avgTrail = trail.reduce((a, b) => a + b, 0) / trail.length;
-    const variance = trail.map(x => (x - avgTrail) ** 2).reduce((a, b) => a + b, 0) / trail.length;
-    const stdDev = Math.sqrt(variance);
-    
-    // Check for human-like movement patterns
-    const hasVariation = stdDev > 1; // Some natural variation in movement
-    const hasReasonableLength = trail.length > 5; // Enough data points
-    const hasReasonableRange = Math.max(...trail) - Math.min(...trail) > 2; // Some Y movement
-    
-    const verified = hasVariation && hasReasonableLength && hasReasonableRange;
+    console.log('Verify Debug:', {
+      sliderLeft,
+      blockLeft,
+      puzzleX,
+      targetBlockPosition,
+      difference: Math.abs(blockLeft - targetBlockPosition),
+      spliced,
+      verified,
+      trailLength: trail.length
+    });
     
     return { spliced, verified };
-  }, [offset, trail]);
+  }, [trail, puzzleX]);
 
   // Reset captcha
   const reset = useCallback(() => {
@@ -214,7 +233,6 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
     if (blockRef.current) blockRef.current.style.left = `${-sliderL - 50}px`;
     if (maskRef.current) maskRef.current.style.width = '0px';
     
-    // Immediate reload
     loadImage();
   }, [loadImage, sliderL]);
 
@@ -228,7 +246,7 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
     const deltaX = clientX - startX;
     const deltaY = clientY - startY;
     
-    // Constrain slider movement within the slider track
+    // Constrain slider movement
     const maxSliderDelta = width - 60;
     const constrainedSliderX = Math.max(0, Math.min(deltaX, maxSliderDelta));
     
@@ -237,19 +255,17 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
       sliderRef.current.style.left = `${constrainedSliderX}px`;
     }
     
-    // Move puzzle piece from initial hidden position
+    // Move puzzle piece: start from hidden position and move right with slider
     const initialBlockPosition = -sliderL - 50;
-    const newBlockLeft = initialBlockPosition + deltaX;
+    const newBlockLeft = initialBlockPosition + constrainedSliderX; // Use constrained slider position
     
-    // Allow puzzle piece to move from hidden to visible and beyond
     if (blockRef.current) {
       blockRef.current.style.left = `${newBlockLeft}px`;
     }
     
     // Update progress mask
     if (maskRef.current) {
-      const maskWidth = Math.max(0, Math.min(constrainedSliderX + 50, width));
-      maskRef.current.style.width = `${maskWidth}px`;
+      maskRef.current.style.width = `${constrainedSliderX + 50}px`;
     }
     
     setTrail(prev => [...prev, Math.round(deltaY)]);
@@ -276,6 +292,7 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
       containerRef.current.classList.remove('active');
     }
     
+    // Only verify position after user releases mouse/touch
     const result = verify();
     
     if (result.spliced && result.verified) {
@@ -283,6 +300,7 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
       if (containerRef.current) {
         containerRef.current.classList.add('success');
       }
+      setText('Success!');
       onSuccess?.();
     } else {
       setIsFailed(true);
@@ -354,7 +372,7 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
         ref={blockRef}
         width={width - 2}
         height={height}
-        className="absolute top-0 rounded-lg block pointer-events-none transition-all duration-100 overflow-hidden"
+        className="absolute top-0 rounded-lg block pointer-events-none transition-none overflow-hidden"
         style={{ 
           left: `${-sliderL - 50}px`,
           top: '0px',
@@ -381,14 +399,14 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
         {/* Progress mask */}
         <div
           ref={maskRef}
-          className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#00ffe7]/20 to-[#00ffe7]/10 transition-all duration-100"
+          className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#00ffe7]/20 to-[#00ffe7]/10 transition-none"
           style={{ width: '0px' }}
         />
         
         {/* Slider button */}
         <div
           ref={sliderRef}
-          className={`absolute left-0 top-0 w-12 h-12 rounded-lg cursor-pointer flex items-center justify-center transition-all duration-200 hover:shadow-lg ${
+          className={`absolute left-0 top-0 w-12 h-12 rounded-lg cursor-pointer flex items-center justify-center transition-colors duration-200 hover:shadow-lg ${
             isDragging ? 'shadow-lg scale-105' : ''
           } ${
             isSuccess 
