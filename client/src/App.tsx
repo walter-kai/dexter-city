@@ -5,7 +5,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { login } from './hooks/FirestoreUser';
 import NavBar from './components/common/NavBar';
 import Footer from './components/Footer';
-import SubNavBar from './components/guide/SubNavBar';
+import SubNavBar from './components/SubNavBar';
 // Import components
 // import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';

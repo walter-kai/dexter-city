@@ -51,7 +51,7 @@ const GetStarted: React.FC = () => {
     <div 
       ref={sectionRef}
       id="getting-started" 
-      className="bg-[#23263a]/90 border border-[#00ffe7]/30 rounded-xl shadow-lg p-8 mb-12 hover:shadow-[0_0_32px_rgba(0,255,231,0.2)] transition-all duration-300"
+      className="bg-[#23263a]/70 border border-[#00ffe7]/30 rounded-xl shadow-lg p-8 mb-12 hover:shadow-[0_0_32px_rgba(0,255,231,0.2)] transition-all duration-300"
     >
       <h2 className="text-3xl font-bold text-[#00ffe7] mb-8 text-center drop-shadow-[0_0_8px_#00ffe7] opacity-0 animate-fade-in-up">
         🚀 Getting Started with DexterCity

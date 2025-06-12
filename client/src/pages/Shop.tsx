@@ -1,8 +1,14 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BotForSale } from '../models/Bot';
-import ShopDetail from './ShopDetail';
-import { FaEye, FaTimes, FaShoppingCart, FaCheckCircle, FaSearch, FaFilter } from 'react-icons/fa';
+import { BotConfig } from '../models/Bot';
+import ShopDetail from '../components/shop/BuyBotModal';
+import SellBotModal from '../components/shop/SellBotModal';
+import BuyingTab from '../components/shop/BuyingTab';
+import SellingTab from '../components/shop/SellingTab';
+import ShoppingCartModal from '../components/shop/ShoppingCartModal';
+import CheckoutModal from '../components/shop/CheckoutModal';
+import { FaTimes, FaShoppingCart, FaTag } from 'react-icons/fa';
 
 // Helper to generate random bots
 const categoriesList = [
@@ -58,7 +64,13 @@ const MAX = 499;
 const Shop = () => {
 	const { botId } = useParams<{ botId?: string }>();
 	const navigate = useNavigate();
+	const [activeTab, setActiveTab] = useState<'buying' | 'selling'>('buying');
 	const [bots] = useState(defaultBots);
+	const [myBots, setMyBots] = useState<BotConfig[]>([]);
+	const [myListings, setMyListings] = useState<any[]>([]);
+	const [user, setUser] = useState<{ walletId: string } | null>(null);
+	const [showSellModal, setShowSellModal] = useState(false);
+	const [selectedBotToSell, setSelectedBotToSell] = useState<BotConfig | null>(null);
 	const [cart, setCart] = useState<typeof defaultBots>([]);
 	const [showCart, setShowCart] = useState(false);
 	const [showCheckout, setShowCheckout] = useState(false);
@@ -66,7 +78,7 @@ const Shop = () => {
 	const [search, setSearch] = useState('');
 	const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
 	const [priceRange, setPriceRange] = useState<[number, number]>([MIN, MAX]);
-	const sliderTrack = useRef<HTMLDivElement>(null);
+	const [dragging, setDragging] = useState<null | 'min' | 'max'>(null);
 
 	const selectedBot = bots.find((bot) => bot.id === botId);
 
@@ -110,49 +122,58 @@ const Shop = () => {
 	);
 	const filteredBotsWithRemoved = filteredBots.filter((_, idx) => idx !== 0 && idx !== 6);
 
-	// --- Custom Double Knob Slider Logic ---
-	const [dragging, setDragging] = useState<null | 'min' | 'max'>(null);
+	useEffect(() => {
+		const storedUser = sessionStorage.getItem('currentUser');
+		if (storedUser && storedUser !== 'undefined') {
+			const parsedUser = JSON.parse(storedUser);
+			setUser(parsedUser);
+		}
+	}, []);
 
-	const getPercent = (val: number) => ((val - MIN) / (MAX - MIN)) * 100;
+	useEffect(() => {
+		const fetchMyBots = async () => {
+			if (!user?.walletId) return;
 
-	const handleSliderMouseDown = (type: 'min' | 'max') => (e: React.MouseEvent) => {
-		e.preventDefault();
-		setDragging(type);
+			try {
+				const response = await fetch(`/api/bot/mine?walletId=${user.walletId}`);
+				if (response.ok) {
+					const data = await response.json();
+					setMyBots(data);
+				}
+			} catch (error) {
+				console.error('Error fetching my bots:', error);
+			}
+		};
+
+		fetchMyBots();
+	}, [user]);
+
+	const handleSellBot = (bot: BotConfig) => {
+		setSelectedBotToSell(bot);
+		setShowSellModal(true);
 	};
 
-	const handleSliderMouseMove = (e: MouseEvent) => {
-		if (!sliderTrack.current || !dragging) return;
-		const rect = sliderTrack.current.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const percent = clamp(x / rect.width, 0, 1);
-		const value = Math.round(percent * (MAX - MIN) + MIN);
-
-		if (dragging === 'min') {
-			const newMin = clamp(value, MIN, priceRange[1] - 1);
-			setPriceRange([newMin, priceRange[1]]);
-		} else if (dragging === 'max') {
-			const newMax = clamp(value, priceRange[0] + 1, MAX);
-			setPriceRange([priceRange[0], newMax]);
-		}
+	const handleSellSubmit = (listingData: any) => {
+		const newListing = {
+			id: Date.now().toString(),
+			bot: selectedBotToSell,
+			...listingData,
+			listedDate: new Date().toISOString()
+		};
+		setMyListings([...myListings, newListing]);
+		setShowSellModal(false);
+		setSelectedBotToSell(null);
+		alert('Bot listed for sale successfully!');
 	};
 
-	const handleSliderMouseUp = () => setDragging(null);
-
-	React.useEffect(() => {
-		if (dragging) {
-			window.addEventListener('mousemove', handleSliderMouseMove);
-			window.addEventListener('mouseup', handleSliderMouseUp);
-			return () => {
-				window.removeEventListener('mousemove', handleSliderMouseMove);
-				window.removeEventListener('mouseup', handleSliderMouseUp);
-			};
-		}
-	}, [dragging, priceRange]);
+	const handleRemoveListing = (listingId: string) => {
+		setMyListings(myListings.filter(listing => listing.id !== listingId));
+	};
 
 	return (
 		<div className="min-h-screen bg-transparent flex flex-col items-center pt-20 pb-8 font-lato">
 			<div className="w-full max-w-[1600px] mx-auto px-2">
-				<div className="flex items-center justify-between mb-4">
+				<div className="flex items-center justify-between mb-6">
 					<h1 className="text-3xl font-extrabold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] tracking-widest hud-title">
 						BOT MARKETPLACE
 					</h1>
@@ -165,183 +186,64 @@ const Shop = () => {
 						<span className="text-green-400">{cart.length}</span>
 					</button>
 				</div>
-				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-					{/* Filter panel replaces the first card (top-left) */}
-					<div className="col-span-2 sm:col-span-1 md:col-span-1 lg:col-span-1 row-span-2 flex flex-col justify-center items-center">
-						<div className="w-full h-full flex flex-col justify-center items-center">
-							<div className="p-3 h-full w-full bg-[#23263a]/80 border border-[#00ffe7]/20 rounded-xl shadow-[0_0_8px_#00ffe7] flex flex-col gap-3 items-center">
-								<div className="flex items-center gap-2 w-full">
-									<FaSearch className="text-[#00ffe7]" />
-									<input
-										type="text"
-										placeholder="Search name..."
-										value={search}
-										onChange={e => setSearch(e.target.value)}
-										className="bg-[#181a23] border border-[#00ffe7]/20 rounded px-2 py-1 text-[#e0e7ef] focus:outline-none w-full"
-									/>
-								</div>
-								<div className="flex items-center gap-2 w-full">
-									<FaFilter className="text-[#00ffe7]" />
-									<span className="text-[#e0e7ef] text-xs">Risk:</span>
-									<select
-										value={riskFilter ?? ''}
-										onChange={e => setRiskFilter(e.target.value ? Number(e.target.value) : null)}
-										className="bg-[#181a23] border border-[#00ffe7]/20 rounded px-2 py-1 text-[#e0e7ef] w-full"
-									>
-										<option value="">All</option>
-										{[1, 2, 3, 4, 5].map(risk => (
-											<option key={risk} value={risk}>{risk}</option>
-										))}
-									</select>
-								</div>
-								{/* True double-knob price range slider */}
-								<div className="flex flex-col gap-1 w-full">
-									<span className="text-[#e0e7ef] text-xs mb-1">Price Range:</span>
-									<div className="relative w-full h-12 flex flex-col justify-center select-none">
-										<div
-											ref={sliderTrack}
-											className="relative w-full h-2 mt-5 bg-[#181a23] rounded"
-											style={{ cursor: 'pointer' }}
-											onMouseDown={e => {
-												// Allow clicking on the track to move the closest knob
-												const rect = sliderTrack.current!.getBoundingClientRect();
-												const x = e.clientX - rect.left;
-												const percent = clamp(x / rect.width, 0, 1);
-												const value = Math.round(percent * (MAX - MIN) + MIN);
-												const distToMin = Math.abs(value - priceRange[0]);
-												const distToMax = Math.abs(value - priceRange[1]);
-												if (distToMin < distToMax) {
-													setPriceRange([clamp(value, MIN, priceRange[1] - 1), priceRange[1]]);
-													setDragging('min');
-												} else {
-													setPriceRange([priceRange[0], clamp(value, priceRange[0] + 1, MAX)]);
-													setDragging('max');
-												}
-											}}
-										>
-											<div
-												className="absolute h-2 bg-[#00ffe7] rounded"
-												style={{
-													left: `${getPercent(priceRange[0])}%`,
-													width: `${getPercent(priceRange[1]) - getPercent(priceRange[0])}%`,
-												}}
-											/>
-											{/* Min handle */}
-											<div
-												className="absolute w-4 h-4 bg-[#00ffe7] border-2 border-[#fff] rounded-full shadow -top-1 cursor-pointer"
-												style={{
-													left: `calc(${getPercent(priceRange[0])}% - 8px)`,
-													zIndex: dragging === 'min' ? 50 : 40,
-												}}
-												onMouseDown={handleSliderMouseDown('min')}
-											/>
-											{/* Max handle */}
-											<div
-												className="absolute w-4 h-4 bg-[#ff005c] border-2 border-[#fff] rounded-full shadow -top-1 cursor-pointer"
-												style={{
-													left: `calc(${getPercent(priceRange[1])}% - 8px)`,
-													zIndex: dragging === 'max' ? 50 : 40,
-												}}
-												onMouseDown={handleSliderMouseDown('max')}
-											/>
-										</div>
-										<div className="absolute w-full flex justify-between top-9 text-xs text-[#00ffe7] pointer-events-none z-0">
-											<span>{priceRange[0]}</span>
-											<span>{priceRange[1]}</span>
-										</div>
-									</div>
-								</div>
-								<div className="flex flex-wrap gap-1 w-full">
-									<span className="text-[#e0e7ef] text-xs">Categories:</span>
-									{allCategories.map(cat => (
-										<button
-											key={cat}
-											onClick={() =>
-												setCategoryFilter(categoryFilter.includes(cat)
-													? categoryFilter.filter(c => c !== cat)
-													: [...categoryFilter, cat])
-											}
-											className={`px-2 py-1 rounded text-xs font-bold border ${
-												categoryFilter.includes(cat)
-													? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7]'
-													: 'bg-[#181a23] text-[#00ffe7] border-[#00ffe7]/30'
-											} transition`}
-										>
-											{cat}
-										</button>
-									))}
-								</div>
-							</div>
-						</div>
-					</div>
-					{/* Cards, skipping the first (idx 0) and seventh (idx 6) */}
-					{filteredBotsWithRemoved.map((bot, idx) => (
-						<div
-							key={bot.id}
-							className="relative group bg-[#181a23]/80 border-2 border-[#00ffe7]/30 rounded-xl shadow-[0_0_12px_#00ffe7] hover:shadow-[0_0_24px_#ff005c] transition-shadow overflow-hidden hud-panel p-2 flex flex-col items-center"
-							style={{ minHeight: 260 }}
-						>
-							<img
-								src={bot.image}
-								alt={bot.name}
-								className="w-16 h-16 object-cover rounded-full border-2 border-[#00ffe7]/30 shadow-[0_0_8px_#00ffe7] mb-1"
-							/>
-							<h2 className="text-base font-bold text-[#00ffe7] tracking-wide mb-0.5 text-center">
-								{bot.name}
-							</h2>
-							<div className="flex flex-wrap gap-1 mb-1 justify-center">
-								{bot.categories.map((cat) => (
-									<span
-										key={cat}
-										className="bg-[#00ffe7]/10 text-[#00ffe7] px-1 py-0.5 rounded text-[10px] font-bold border border-[#00ffe7]/20"
-									>
-										{cat}
-									</span>
-								))}
-							</div>
-							{renderRiskMeter(bot.risk)}
-							<p className="text-[#e0e7ef] text-xs my-1 text-center line-clamp-2">
-								{bot.description}
-							</p>
-							<div className="flex flex-col gap-0.5 w-full mt-auto">
-								<div className="flex justify-between text-[10px] text-[#e0e7ef]">
-									<span>Trades</span>
-									<span className="font-bold">{bot.stats.trades}</span>
-								</div>
-								<div className="flex justify-between text-[10px] text-[#e0e7ef]">
-									<span>Win</span>
-									<span className="font-bold">{bot.stats.winRate}%</span>
-								</div>
-								<div className="flex justify-between text-[10px] text-[#e0e7ef]">
-									<span>Uptime</span>
-									<span className="font-bold">{bot.stats.uptime}%</span>
-								</div>
-							</div>
-							<div className="flex items-center justify-between mt-1 w-full">
-								<span className="text-base font-extrabold text-green-400 drop-shadow-[0_0_4px_#00ffe7]">
-									{bot.price}{' '}
-									<span className="text-[#00ffe7]">{currency}</span>
-								</span>
-								<div className="flex gap-1">
-									<button
-										onClick={() => handleOpenModal(bot.id)}
-										className="hud-btn flex items-center gap-1 bg-[#00ffe7] text-[#181a23] px-2 py-1 rounded font-bold uppercase shadow-[0_0_4px_#00ffe7] hover:bg-[#ff005c] hover:text-white hover:shadow-[0_0_8px_#ff005c] transition-all border border-[#00ffe7] text-xs"
-									>
-										<FaEye />
-									</button>
-									<button
-										onClick={() => handleAddToCart(bot)}
-										className="hud-btn flex items-center gap-1 bg-green-400 text-[#181a23] px-2 py-1 rounded font-bold uppercase shadow-[0_0_4px_#00ffe7] hover:bg-green-600 hover:text-white hover:shadow-[0_0_8px_#00ffe7] transition-all border border-green-400 text-xs"
-									>
-										<FaShoppingCart />
-									</button>
-								</div>
-							</div>
-							<div className="absolute inset-0 pointer-events-none border border-[#00ffe7]/20 rounded-xl hud-glow"></div>
-						</div>
-					))}
+
+				{/* Tab Navigation */}
+				<div className="flex justify-center gap-2 mb-6">
+					<button
+						onClick={() => setActiveTab('buying')}
+						className={`px-6 py-3 rounded-lg font-bold border-2 transition-all duration-200 ${
+							activeTab === 'buying'
+								? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7] shadow-[0_0_8px_#00ffe7]'
+								: 'bg-[#23263a] text-[#e0e7ef] border-[#00ffe7]/40 hover:bg-[#00ffe7]/20'
+						}`}
+					>
+						<FaShoppingCart className="inline mr-2" />
+						BUYING
+					</button>
+					<button
+						onClick={() => setActiveTab('selling')}
+						className={`px-6 py-3 rounded-lg font-bold border-2 transition-all duration-200 ${
+							activeTab === 'selling'
+								? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7] shadow-[0_0_8px_#00ffe7]'
+								: 'bg-[#23263a] text-[#e0e7ef] border-[#00ffe7]/40 hover:bg-[#00ffe7]/20'
+						}`}
+					>
+						<FaTag className="inline mr-2" />
+						SELLING
+					</button>
 				</div>
+
+				{/* Tab Content */}
+				{activeTab === 'buying' ? (
+					<BuyingTab
+						filteredBotsWithRemoved={filteredBotsWithRemoved}
+						currency={currency}
+						onOpenModal={handleOpenModal}
+						onAddToCart={handleAddToCart}
+						search={search}
+						setSearch={setSearch}
+						riskFilter={riskFilter}
+						setRiskFilter={setRiskFilter}
+						priceRange={priceRange}
+						setPriceRange={setPriceRange}
+						categoryFilter={categoryFilter}
+						setCategoryFilter={setCategoryFilter}
+						allCategories={allCategories}
+						dragging={dragging}
+						setDragging={setDragging}
+						MIN={MIN}
+						MAX={MAX}
+					/>
+				) : (
+					<SellingTab
+						myBots={myBots}
+						myListings={myListings}
+						onSellBot={handleSellBot}
+						onRemoveListing={handleRemoveListing}
+					/>
+				)}
 			</div>
+
 			{/* Modal */}
 			{selectedBot && (
 				<div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
@@ -357,104 +259,31 @@ const Shop = () => {
 					</div>
 				</div>
 			)}
-			{/* Shopping Cart Modal */}
-			{showCart && (
-				<div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-					<div className="bg-[#23263a] w-full max-w-md rounded-2xl p-8 relative border-4 border-[#00ffe7]/40 shadow-[0_0_48px_#00ffe7] hud-panel">
-						<button
-							onClick={() => setShowCart(false)}
-							className="absolute top-4 right-4 bg-[#181a23] p-2 rounded-full hover:bg-[#00ffe7] hover:text-[#181a23] text-[#00ffe7] border-2 border-[#00ffe7] transition-all text-xl"
-							aria-label="Close"
-						>
-							<FaTimes />
-						</button>
-						<h2 className="text-2xl font-bold text-[#00ffe7] mb-4 flex items-center gap-2">
-							<FaShoppingCart /> Shopping Cart
-						</h2>
-						{cart.length === 0 ? (
-							<div className="text-[#e0e7ef] text-center py-8">
-								Your cart is empty.
-							</div>
-						) : (
-							<>
-								<ul className="divide-y divide-[#00ffe7]/20 mb-4">
-									{cart.map((bot) => (
-										<li
-											key={bot.id}
-											className="flex items-center justify-between py-2"
-										>
-											<div className="flex items-center gap-2">
-												<img
-													src={bot.image}
-													alt={bot.name}
-													className="w-10 h-10 rounded-full border-2 border-[#00ffe7]/40"
-												/>
-												<span className="text-[#00ffe7] font-bold">
-													{bot.name}
-												</span>
-											</div>
-											<div className="flex items-center gap-2">
-												<span className="text-green-400 font-bold">
-													{bot.price} {currency}
-												</span>
-												<button
-													onClick={() => handleRemoveFromCart(bot.id)}
-													className="text-[#ff005c] hover:text-red-600 text-lg"
-													aria-label="Remove"
-												>
-													<FaTimes />
-												</button>
-											</div>
-										</li>
-									))}
-								</ul>
-								<div className="flex justify-between items-center mb-4">
-									<span className="text-[#e0e7ef] font-bold">Total:</span>
-									<span className="text-green-400 font-bold text-lg">
-										{cart.reduce((sum, b) => sum + b.price, 0)} {currency}
-									</span>
-								</div>
-								<button
-									onClick={handleCheckout}
-									className="w-full hud-btn flex items-center justify-center gap-2 bg-[#00ffe7] text-[#181a23] px-4 py-3 rounded-lg font-bold uppercase shadow-[0_0_8px_#00ffe7] hover:bg-[#ff005c] hover:text-white hover:shadow-[0_0_16px_#ff005c] transition-all border-2 border-[#00ffe7] text-lg"
-								>
-									<FaCheckCircle />
-									Checkout
-								</button>
-							</>
-						)}
-					</div>
-				</div>
-			)}
-			{/* Checkout Modal */}
-			{showCheckout && (
-				<div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
-					<div className="bg-[#23263a] w-full max-w-md rounded-2xl p-10 relative border-4 border-[#00ffe7]/40 shadow-[0_0_48px_#00ffe7] hud-panel flex flex-col items-center">
-						<button
-							onClick={handleCloseCheckout}
-							className="absolute top-4 right-4 bg-[#181a23] p-2 rounded-full hover:bg-[#00ffe7] hover:text-[#181a23] text-[#00ffe7] border-2 border-[#00ffe7] transition-all text-xl"
-							aria-label="Close"
-						>
-							<FaTimes />
-						</button>
-						<FaCheckCircle className="text-green-400 text-5xl mb-4" />
-						<h2 className="text-2xl font-bold text-[#00ffe7] mb-2">
-							Checkout Complete!
-						</h2>
-						<div className="text-[#e0e7ef] text-center mb-4">
-							Thank you for your purchase.
-							<br />
-							Your bots will be available in your{' '}
-							<span className="text-[#00ffe7] font-bold">Garage</span>.
-						</div>
-						<button
-							onClick={handleCloseCheckout}
-							className="hud-btn bg-[#00ffe7] text-[#181a23] px-6 py-2 rounded-lg font-bold uppercase shadow-[0_0_8px_#00ffe7] hover:bg-[#ff005c] hover:text-white hover:shadow-[0_0_16px_#ff005c] transition-all border-2 border-[#00ffe7] text-lg"
-						>
-							Close
-						</button>
-					</div>
-				</div>
+
+			<ShoppingCartModal
+				isOpen={showCart}
+				onClose={() => setShowCart(false)}
+				cart={cart}
+				currency={currency}
+				onRemoveFromCart={handleRemoveFromCart}
+				onCheckout={handleCheckout}
+			/>
+
+			<CheckoutModal
+				isOpen={showCheckout}
+				onClose={handleCloseCheckout}
+			/>
+
+			{/* Sell Bot Modal */}
+			{showSellModal && selectedBotToSell && (
+				<SellBotModal
+					bot={selectedBotToSell}
+					onClose={() => {
+						setShowSellModal(false);
+						setSelectedBotToSell(null);
+					}}
+					onSubmit={handleSellSubmit}
+				/>
 			)}
 		</div>
 	);

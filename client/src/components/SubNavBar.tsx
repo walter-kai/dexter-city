@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaExternalLinkAlt, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaHome, FaChevronDown, FaShoppingCart, FaTools, FaChartLine, FaTrophy, FaCog, FaTachometerAlt, FaPlus } from 'react-icons/fa';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface NavLink {
   text: string;
@@ -74,6 +74,8 @@ const SubNavBar: React.FC = () => {
     const path = location.pathname;
     if (
       path === '/bots/dashboard' ||
+      path === '/build' ||
+      path === '/bots/build' ||
       path === '/shop' ||
       path === '/bots/garage' ||
       path === '/settings'
@@ -107,12 +109,10 @@ const SubNavBar: React.FC = () => {
 
   const handleClick = (link: NavLink) => {
     if (link.hasDropdown && link.text === 'FEATURES') {
-      // Features dropdown behavior remains the same (click)
       setShowFeaturesDropdown(!showFeaturesDropdown);
       return;
     }
-    
-    // For other dropdowns or regular navigation
+
     if (link.isHash) {
       const sectionId = link.to.replace('#', '').replace('/#', '');
       
@@ -149,13 +149,13 @@ const SubNavBar: React.FC = () => {
     }
     
     // Default navigation for non-hash links - reset scroll position
-    if (!link.isHash && !link.hasDropdown) {
+    if (!link.isHash) {
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
-      navigate(link.to);
     }
+    navigate(link.to);
   };
 
   const handleMouseEnter = (link: NavLink) => {

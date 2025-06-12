@@ -56,3 +56,9 @@
   @apply flex items-center justify-center gap-2 bg-[#00ffe7] text-[#181a23] px-4 py-2 rounded-lg font-bold uppercase shadow-[0_0_8px_#00ffe7] border-2 border-[#00ffe7] text-sm transition-all;
   @apply hover:bg-[#ff005c] hover:text-white hover:shadow-[0_0_16px_#ff005c] hover:border-[#ff005c];
 }
+
+/* Link-style button */
+.btn-link {
+  @apply text-[#00ffe7] text-xs underline cursor-pointer font-medium transition-colors duration-200;
+  @apply hover:text-[#ff005c] hover:no-underline;
+}
