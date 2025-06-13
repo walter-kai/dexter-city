@@ -15,7 +15,7 @@ interface SellBotModalProps {
 }
 
 const SellBotModal: React.FC<SellBotModalProps> = ({ bot, onClose, onSubmit }) => {
-  const [price, setPrice] = useState<number>(99);
+  const [price, setPrice] = useState<number>(0.1);
   const [description, setDescription] = useState<string>('');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -47,8 +47,8 @@ const SellBotModal: React.FC<SellBotModalProps> = ({ bot, onClose, onSubmit }) =
       return;
     }
     
-    if (price < 1) {
-      setError('Price must be at least 1 DCX.');
+    if (price < 0.01) {
+      setError('Price must be at least 0.01 ETH.');
       return;
     }
 
@@ -94,16 +94,21 @@ const SellBotModal: React.FC<SellBotModalProps> = ({ bot, onClose, onSubmit }) =
           {/* Price */}
           <div>
             <label className="flex items-center gap-2 text-[#00ffe7] font-bold text-sm mb-2">
-              <FaDollarSign /> Price (DCX)
+              <FaDollarSign /> Price (ETH)
             </label>
             <input
               type="number"
-              min="1"
+              min="0.01"
+              step="0.01"
               value={price}
               onChange={(e) => setPrice(Number(e.target.value))}
               className="w-full p-3 bg-[#181a23] border-2 border-[#00ffe7]/40 text-[#e0e7ef] rounded-lg font-bold focus:outline-none focus:border-[#00ffe7]"
-              placeholder="Enter price in DCX"
+              placeholder="Enter price in ETH"
             />
+            <div className="text-xs text-[#e0e7ef]/60 mt-1 flex items-center gap-1">
+              ≈ ${(price * 3500).toFixed(2)} USD 
+              <span className="text-[#b8eaff]">(estimated)</span>
+            </div>
           </div>
 
           {/* Description */}

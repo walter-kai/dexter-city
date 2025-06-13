@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaShopify, FaRobot, FaTools, FaChartLine, FaTrophy, FaCog, FaExchangeAlt, FaChartPie, FaCrown, FaMedal, FaUser, FaFire } from "react-icons/fa";
+import { SiEthereum } from 'react-icons/si';
 import LoadingScreenDots from "../components/common/LoadingScreenDots";
 import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from "../contexts/AuthContext";
+import { formatLargeNumberEth } from "../utils/formatEthNumber";
 
 const statPresets = {
   "1d": {
@@ -364,16 +366,38 @@ const Dashboard: React.FC = () => {
                         ? <div className="flex items-center"><LoadingScreenDots /></div>
                         : allBalances.length === 0
                           ? <span className="text-[#faafe8]">No balances found</span>
-                          : allBalances.map((bal, idx) => (
-                              <span key={idx} className="bg-[#23263a] border border-[#00ffe7]/30 rounded px-3 py-1 text-[#00ffe7] font-mono text-sm flex items-center gap-2">
-                                {parseFloat(bal.balance).toFixed(4)} {bal.symbol}
-                                {bal.symbol === "ETH" && ethPrice && (
-                                  <span className="text-[#b8eaff] text-xs ml-2">
-                                    (${getUsdValue(bal.symbol, bal.balance)})
-                                  </span>
-                                )}
-                              </span>
-                            ))
+                          : allBalances.map((bal, idx) => {
+                              const formatted = formatLargeNumberEth(bal.balance);
+                              const usdValue = bal.symbol === "ETH" && ethPrice 
+                                ? (parseFloat(bal.balance) * ethPrice).toFixed(2)
+                                : null;
+                              
+                              return (
+                                <span key={idx} className="bg-[#23263a] border border-[#00ffe7]/30 rounded px-3 py-1 text-[#00ffe7] text-sm flex items-center gap-2">
+                                  <div className="flex items-center gap-1">
+                                    {formatted.hasSubscript && formatted.subscriptParts ? (
+                                      <span className="font-mono">
+                                        {formatted.subscriptParts.before}
+                                        <sub className="text-[10px]">{formatted.subscriptParts.subscript}</sub>
+                                        {formatted.subscriptParts.after}
+                                      </span>
+                                    ) : (
+                                      <span className="font-mono">{formatted.formatted}</span>
+                                    )}
+                                    {bal.symbol === "ETH" ? (
+                                      <SiEthereum className="w-4 h-4 text-[#627eea]" />
+                                    ) : (
+                                      <span className="font-bold">{bal.symbol}</span>
+                                    )}
+                                  </div>
+                                  {usdValue && (
+                                    <span className="text-[#b8eaff] text-xs">
+                                      (${usdValue})
+                                    </span>
+                                  )}
+                                </span>
+                              );
+                            })
                       }
                     </div>
                     {ethPrice && (

@@ -4,6 +4,8 @@ import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from '../../contexts/AuthContext';
 import LoginModal from '../LoginModal';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope } from 'react-icons/fa';
+import { SiEthereum } from 'react-icons/si';
+import { formatLargeNumberEth } from '../../utils/formatEthNumber';
 
 interface NavBarProps {
   telegramUser: any;
@@ -12,7 +14,8 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [balances, setBalances] = useState<{ balance: string; currency: string }[]>([]);
+  const [balances, setBalances] = useState<{ balance: string; currency: string; usdValue?: string }[]>([]);
+  const [ethPrice, setEthPrice] = useState<number | null>(null);
   const { sdk, connected, connecting } = useSDK();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -33,10 +36,24 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
     };
   }, [showDropdown]);
 
+  // Fetch ETH price
+  const fetchEthPrice = async () => {
+    try {
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+      const data = await res.json();
+      if (data.ethereum && data.ethereum.usd) {
+        setEthPrice(data.ethereum.usd);
+      }
+    } catch (err) {
+      console.error('Error fetching ETH price:', err);
+    }
+  };
+
   // Fetch balances when user is available
   useEffect(() => {
     if (user && user.walletId && connected && sdk) {
       fetchBalances(user.walletId);
+      fetchEthPrice();
     }
   }, [user, connected, sdk]);
 
@@ -61,7 +78,13 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
       }) as string;
 
       const ethBalanceInEth = parseFloat((parseInt(ethBalance, 16) / 1e18).toFixed(4));
-      setBalances([{ balance: ethBalanceInEth.toString(), currency: "ETH" }]);
+      const usdValue = ethPrice ? (ethBalanceInEth * ethPrice).toFixed(2) : undefined;
+      
+      setBalances([{ 
+        balance: ethBalanceInEth.toString(), 
+        currency: "ETH",
+        usdValue 
+      }]);
       console.log("Balance fetched successfully:", ethBalanceInEth, "ETH");
     } catch (err) {
       console.error("Error fetching balances:", err);
@@ -144,6 +167,32 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
                 className="flex items-center gap-2 bg-[#23263a] hover:bg-[#00ffe7]/20 text-[#00ffe7] font-bold py-2 px-3 rounded border border-[#00ffe7]/40 transition-all duration-200"
               >
                 <img src="/logos/dexter.png" className="h-6 drop-shadow-[0_0_8px_#00ffe7]" alt="Profile" />
+                {balances.length > 0 && (
+                  <div className="flex items-center gap-1 text-xs">
+                    {(() => {
+                      const formatted = formatLargeNumberEth(balances[0].balance);
+                      return (
+                        <div className="flex flex-col items-end">
+                          <div className="flex items-center gap-1">
+                            {formatted.hasSubscript && formatted.subscriptParts ? (
+                              <span className="font-mono">
+                                {formatted.subscriptParts.before}
+                                <sub className="text-[8px]">{formatted.subscriptParts.subscript}</sub>
+                                {formatted.subscriptParts.after}
+                              </span>
+                            ) : (
+                              <span className="font-mono">{formatted.formatted}</span>
+                            )}
+                            <SiEthereum className="w-3 h-3 text-[#627eea]" />
+                          </div>
+                          {balances[0].usdValue && (
+                            <span className="text-[#b8eaff] text-[10px]">${balances[0].usdValue}</span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
                 <FaChevronDown className={`text-xs transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
               </button>
               

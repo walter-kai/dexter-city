@@ -1,47 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import BotCard from './BotCard';
 import FilterPanel from './FilterPanel';
 
 interface BuyingTabProps {
-  filteredBotsWithRemoved: any[];
-  currency: string;
-  onOpenModal: (botId: string) => void;
-  onAddToCart: (bot: any) => void;
-  // Filter props
-  search: string;
-  setSearch: (value: string) => void;
-  riskFilter: number | null;
-  setRiskFilter: (value: number | null) => void;
-  priceRange: [number, number];
-  setPriceRange: (value: [number, number]) => void;
-  categoryFilter: string[];
-  setCategoryFilter: (value: string[]) => void;
+  bots: any[];
   allCategories: string[];
-  dragging: null | 'min' | 'max';
-  setDragging: (value: null | 'min' | 'max') => void;
-  MIN: number;
-  MAX: number;
+  onOpenModal: (botId: string) => void;
+  onBuyBot: (bot: any) => void;
+  onHireBot: (bot: any) => void;
 }
 
 const BuyingTab: React.FC<BuyingTabProps> = ({
-  filteredBotsWithRemoved,
-  currency,
-  onOpenModal,
-  onAddToCart,
-  search,
-  setSearch,
-  riskFilter,
-  setRiskFilter,
-  priceRange,
-  setPriceRange,
-  categoryFilter,
-  setCategoryFilter,
+  bots,
   allCategories,
-  dragging,
-  setDragging,
-  MIN,
-  MAX,
+  onOpenModal,
+  onBuyBot,
+  onHireBot,
 }) => {
+  const [search, setSearch] = useState('');
+  const [riskFilter, setRiskFilter] = useState<number | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0.003, 0.006]);
+  const [dragging, setDragging] = useState<null | 'min' | 'max'>(null);
+
+  const MIN = 0.003;
+  const MAX = 0.006;
+
+  // Filter bots based on current filter criteria
+  const filteredBots = bots.filter(bot => {
+    const riskMatch = !riskFilter || bot.risk === riskFilter;
+    const priceMatch = bot.buyPrice >= priceRange[0] && bot.buyPrice <= priceRange[1];
+    const searchMatch = search === '' || bot.name.toLowerCase().includes(search.toLowerCase());
+    const categoryMatch = categoryFilter.length === 0 || categoryFilter.every(cat => bot.categories.includes(cat));
+    
+    return riskMatch && priceMatch && searchMatch && categoryMatch;
+  });
+
+  // Remove first two bots for demo purposes
+  const filteredBotsWithRemoved = filteredBots.filter((_, idx) => idx !== 0 && idx !== 6);
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
       <FilterPanel
@@ -63,9 +60,10 @@ const BuyingTab: React.FC<BuyingTabProps> = ({
         <BotCard
           key={bot.id}
           bot={bot}
-          currency={currency}
+          currency="ETH"
           onView={onOpenModal}
-          onAddToCart={onAddToCart}
+          onBuy={onBuyBot}
+          onHire={onHireBot}
         />
       ))}
     </div>

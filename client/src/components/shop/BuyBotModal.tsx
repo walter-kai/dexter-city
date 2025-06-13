@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { BotForSale } from '../../models/Bot';
 import { FaRobot, FaShoppingCart, FaCheckCircle, FaClock, FaUser, FaStar, FaCalendar, FaCodeBranch, FaExchangeAlt, FaChartLine, FaArrowUp, FaShieldAlt, FaWifi, FaCog } from 'react-icons/fa';
+import { SiEthereum } from 'react-icons/si';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 
 interface ShopDetailProps {
@@ -294,8 +295,8 @@ const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
           <h1 className="text-3xl font-bold text-[#00ffe7] mb-2">{bot.name}</h1>
           <p className="text-[#e0e7ef] text-lg mb-4">{bot.description}</p>
           <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-            <div className="text-3xl font-bold text-green-400">
-              {bot.price} <span className="text-[#00ffe7] text-lg">DCX</span>
+            <div className="text-3xl font-bold text-green-400 flex items-center gap-2">
+              {bot.price} <SiEthereum className="w-6 h-6 text-[#627eea]" />
             </div>
             <button
               onClick={handleAddToCart}

@@ -3,11 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { BotForSale } from '../models/Bot';
 import { BotConfig } from '../models/Bot';
 import ShopDetail from '../components/shop/BuyBotModal';
-import SellBotModal from '../components/shop/SellBotModal';
 import BuyingTab from '../components/shop/BuyingTab';
 import SellingTab from '../components/shop/SellingTab';
-import ShoppingCartModal from '../components/shop/ShoppingCartModal';
-import CheckoutModal from '../components/shop/CheckoutModal';
+import PurchaseModal from '../components/shop/PurchaseModal';
 import { FaTimes, FaShoppingCart, FaTag } from 'react-icons/fa';
 
 // Helper to generate random bots
@@ -19,6 +17,7 @@ const categoriesList = [
 	['Options', 'Momentum', 'Quant'],
 	['Forex', 'Scalping', 'Trend'],
 ];
+
 const botNames = [
 	'Crypto Bot', 'Stock Bot', 'Fantasy Football Bot', 'NFT Sniper', 'Options Wizard', 'Forex Falcon',
 	'Momentum Master', 'Trend Tracker', 'DeFi Defender', 'Arbiter', 'Swing King', 'AI Alpha',
@@ -27,21 +26,33 @@ const botNames = [
 	'Profit Pilot', 'Trade Titan', 'Alpha Wolf', 'Beta Bot', 'Gamma Guru', 'Delta Dealer',
 	'Omega Operator', 'Sigma Sniper', 'Theta Thinker', 'Lambda Logic'
 ];
+
 function getRandomInt(min: number, max: number) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
 const defaultBots: (BotForSale & {
 	stats: { trades: number; winRate: number; uptime: number };
 	categories: string[];
 	risk: number;
+	buyPrice: number;
+	hirePrice: number;
+	isPublic: boolean;
 })[] = Array.from({ length: 36 }).map((_, i) => {
 	const name = botNames[i % botNames.length];
 	const categories = categoriesList[i % categoriesList.length];
+	const minEth = 0.003;
+	const maxEth = 0.006;
+	const buyPrice = Math.round((Math.random() * (maxEth - minEth) + minEth) * 1000) / 1000;
+	const isPublic = Math.random() > 0.7;
 	return {
 		id: (i + 1).toString(),
 		name,
 		description: `This is ${name}, your automated trading assistant for ${categories.join(', ')}.`,
-		price: getRandomInt(99, 499),
+		price: buyPrice, // Use the same price for compatibility
+		buyPrice: buyPrice,
+		hirePrice: 0,
+		isPublic,
 		image: `https://robohash.org/${encodeURIComponent(name)}?size=120x120`,
 		stats: {
 			trades: getRandomInt(100, 5000),
@@ -52,14 +63,8 @@ const defaultBots: (BotForSale & {
 		risk: getRandomInt(1, 5),
 	};
 });
-const currency = 'DCX';
-const allCategories = Array.from(new Set(categoriesList.flat()));
-function clamp(val: number, min: number, max: number) {
-	return Math.max(min, Math.min(max, val));
-}
 
-const MIN = 99;
-const MAX = 499;
+const allCategories = Array.from(new Set(categoriesList.flat()));
 
 const Shop = () => {
 	const { botId } = useParams<{ botId?: string }>();
@@ -69,58 +74,33 @@ const Shop = () => {
 	const [myBots, setMyBots] = useState<BotConfig[]>([]);
 	const [myListings, setMyListings] = useState<any[]>([]);
 	const [user, setUser] = useState<{ walletId: string } | null>(null);
-	const [showSellModal, setShowSellModal] = useState(false);
-	const [selectedBotToSell, setSelectedBotToSell] = useState<BotConfig | null>(null);
-	const [cart, setCart] = useState<typeof defaultBots>([]);
-	const [showCart, setShowCart] = useState(false);
-	const [showCheckout, setShowCheckout] = useState(false);
-	const [riskFilter, setRiskFilter] = useState<number | null>(null);
-	const [search, setSearch] = useState('');
-	const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
-	const [priceRange, setPriceRange] = useState<[number, number]>([MIN, MAX]);
-	const [dragging, setDragging] = useState<null | 'min' | 'max'>(null);
+	const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+	const [selectedBotToPurchase, setSelectedBotToPurchase] = useState<any>(null);
+	const [purchaseType, setPurchaseType] = useState<'buy' | 'hire'>('buy');
 
 	const selectedBot = bots.find((bot) => bot.id === botId);
 
 	const handleCloseModal = () => navigate('/shop');
 	const handleOpenModal = (botId: string) => navigate(`/shop/${botId}`);
-	const handleAddToCart = (bot: typeof defaultBots[0]) => {
-		if (!cart.find((b) => b.id === bot.id)) setCart([...cart, bot]);
-		setShowCart(true);
+	
+	const handleBuyBot = (bot: any) => {
+		setSelectedBotToPurchase(bot);
+		setPurchaseType('buy');
+		setShowPurchaseModal(true);
 	};
-	const handleRemoveFromCart = (botId: string) => setCart(cart.filter((b) => b.id !== botId));
-	const handleCheckout = () => { setShowCart(false); setShowCheckout(true); };
-	const handleCloseCheckout = () => { setShowCheckout(false); setCart([]); };
 
-	const renderRiskMeter = (risk: number) => (
-		<div className="flex items-center gap-0.5">
-			{[1, 2, 3, 4, 5].map((lvl) => (
-				<div
-					key={lvl}
-					className={`w-2 h-2 rounded-full border ${
-						lvl <= risk
-							? lvl >= 4
-								? 'bg-red-500 border-red-400'
-								: lvl === 3
-								? 'bg-yellow-400 border-yellow-300'
-								: 'bg-green-400 border-green-300'
-							: 'bg-gray-700 border-gray-500'
-					}`}
-				/>
-			))}
-			<span className="ml-1 text-[10px] text-[#e0e7ef]">Risk: {risk}/5</span>
-		</div>
-	);
+	const handleHireBot = (bot: any) => {
+		setSelectedBotToPurchase(bot);
+		setPurchaseType('hire');
+		setShowPurchaseModal(true);
+	};
 
-	// Filtering logic
-	const filteredBots = bots.filter(bot =>
-		(!riskFilter || bot.risk === riskFilter) &&
-		bot.price >= priceRange[0] &&
-		bot.price <= priceRange[1] &&
-		(search === '' || bot.name.toLowerCase().includes(search.toLowerCase())) &&
-		(categoryFilter.length === 0 || categoryFilter.every(cat => bot.categories.includes(cat)))
-	);
-	const filteredBotsWithRemoved = filteredBots.filter((_, idx) => idx !== 0 && idx !== 6);
+	const handlePurchaseConfirm = () => {
+		console.log(`${purchaseType}ing bot:`, selectedBotToPurchase);
+		alert(`${purchaseType === 'buy' ? 'Purchase' : 'Hire'} successful! (Placeholder)`);
+		setShowPurchaseModal(false);
+		setSelectedBotToPurchase(null);
+	};
 
 	useEffect(() => {
 		const storedUser = sessionStorage.getItem('currentUser');
@@ -148,21 +128,13 @@ const Shop = () => {
 		fetchMyBots();
 	}, [user]);
 
-	const handleSellBot = (bot: BotConfig) => {
-		setSelectedBotToSell(bot);
-		setShowSellModal(true);
-	};
-
 	const handleSellSubmit = (listingData: any) => {
 		const newListing = {
 			id: Date.now().toString(),
-			bot: selectedBotToSell,
 			...listingData,
 			listedDate: new Date().toISOString()
 		};
 		setMyListings([...myListings, newListing]);
-		setShowSellModal(false);
-		setSelectedBotToSell(null);
 		alert('Bot listed for sale successfully!');
 	};
 
@@ -177,14 +149,6 @@ const Shop = () => {
 					<h1 className="text-3xl font-extrabold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] tracking-widest hud-title">
 						BOT MARKETPLACE
 					</h1>
-					<button
-						className="relative hud-bar bg-[#00ffe7]/30 border border-[#00ffe7] rounded px-3 py-1 shadow-[0_0_12px_#00ffe7] text-[#181a23] font-bold text-base uppercase tracking-wider flex items-center gap-1"
-						onClick={() => setShowCart(true)}
-					>
-						<FaShoppingCart className="text-[#00ffe7]" />
-						<span className="text-[#00ffe7]">CART</span>
-						<span className="text-green-400">{cart.length}</span>
-					</button>
 				</div>
 
 				{/* Tab Navigation */}
@@ -216,35 +180,23 @@ const Shop = () => {
 				{/* Tab Content */}
 				{activeTab === 'buying' ? (
 					<BuyingTab
-						filteredBotsWithRemoved={filteredBotsWithRemoved}
-						currency={currency}
-						onOpenModal={handleOpenModal}
-						onAddToCart={handleAddToCart}
-						search={search}
-						setSearch={setSearch}
-						riskFilter={riskFilter}
-						setRiskFilter={setRiskFilter}
-						priceRange={priceRange}
-						setPriceRange={setPriceRange}
-						categoryFilter={categoryFilter}
-						setCategoryFilter={setCategoryFilter}
+						bots={bots}
 						allCategories={allCategories}
-						dragging={dragging}
-						setDragging={setDragging}
-						MIN={MIN}
-						MAX={MAX}
+						onOpenModal={handleOpenModal}
+						onBuyBot={handleBuyBot}
+						onHireBot={handleHireBot}
 					/>
 				) : (
 					<SellingTab
 						myBots={myBots}
 						myListings={myListings}
-						onSellBot={handleSellBot}
+						onSellSubmit={handleSellSubmit}
 						onRemoveListing={handleRemoveListing}
 					/>
 				)}
 			</div>
 
-			{/* Modal */}
+			{/* Bot Details Modal */}
 			{selectedBot && (
 				<div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-50">
 					<div className="bg-[#23263a] w-full max-w-3xl rounded-2xl p-10 relative border-4 border-[#00ffe7]/40 shadow-[0_0_48px_#00ffe7] hud-panel">
@@ -260,31 +212,17 @@ const Shop = () => {
 				</div>
 			)}
 
-			<ShoppingCartModal
-				isOpen={showCart}
-				onClose={() => setShowCart(false)}
-				cart={cart}
-				currency={currency}
-				onRemoveFromCart={handleRemoveFromCart}
-				onCheckout={handleCheckout}
+			{/* Purchase Modal */}
+			<PurchaseModal
+				isOpen={showPurchaseModal}
+				onClose={() => {
+					setShowPurchaseModal(false);
+					setSelectedBotToPurchase(null);
+				}}
+				bot={selectedBotToPurchase}
+				type={purchaseType}
+				onConfirm={handlePurchaseConfirm}
 			/>
-
-			<CheckoutModal
-				isOpen={showCheckout}
-				onClose={handleCloseCheckout}
-			/>
-
-			{/* Sell Bot Modal */}
-			{showSellModal && selectedBotToSell && (
-				<SellBotModal
-					bot={selectedBotToSell}
-					onClose={() => {
-						setShowSellModal(false);
-						setSelectedBotToSell(null);
-					}}
-					onSubmit={handleSellSubmit}
-				/>
-			)}
 		</div>
 	);
 };
