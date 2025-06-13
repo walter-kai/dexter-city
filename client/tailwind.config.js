@@ -8,6 +8,7 @@ module.exports = {
     extend: {
       fontFamily: {
         lato: ['Lato'],
+        savate: ['Savate'],
       },
       colors: {
         // Neon theme color presets

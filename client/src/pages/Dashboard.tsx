@@ -2,31 +2,10 @@ import React, { useState } from "react";
 import LoadingScreenDots from "../components/common/LoadingScreenDots";
 import { useAuth } from "../contexts/AuthContext";
 import { useBalances } from "../contexts/BalanceProvider";
-import StatCards from "../components/dashboard/StatCards";
+import InvestmentOverview from "../components/dashboard/InvestmentOverview";
 import UserInfoCard from "../components/dashboard/UserInfoCard";
-import AccountStatsCard from "../components/dashboard/AccountStatsCard";
+import BotsList from "../components/dashboard/BotsList";
 import LeaderboardCard from "../components/dashboard/LeaderboardCard";
-
-const statPresets = {
-  "1d": {
-    pl: "+0.42 ETH",
-    botsRunning: 2,
-    botsGarage: 5,
-    orders: 14,
-  },
-  "7d": {
-    pl: "+2.13 ETH",
-    botsRunning: 3,
-    botsGarage: 7,
-    orders: 82,
-  },
-  "30d": {
-    pl: "+7.88 ETH",
-    botsRunning: 4,
-    botsGarage: 9,
-    orders: 312,
-  },
-};
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -43,23 +22,8 @@ const Dashboard: React.FC = () => {
 
   const [userStats] = useState({
     globalRank: 847,
-    totalTrades: 1247,
-    winRate: 73.8,
-    bestStreak: 12,
     totalProfit: "+15.6 ETH",
-    avgTradeSize: "0.85 ETH",
-    activeDays: 45,
-    favoriteBot: "ScalpMaster Pro"
   });
-
-  // Show loading if balances haven't been loaded yet
-  // if (!balancesLoaded && user) {
-  //   return (
-  //     <div className="h-[270px]">
-  //       <LoadingScreenDots />
-  //     </div>
-  //   );
-  // }
 
   if (!user) {
     return (
@@ -74,21 +38,24 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center animate-fadeIn w-full">
-      {/* Game-style HUD stats */}
-      <StatCards 
-        statRange={statRange}
-        onStatRangeChange={setStatRange}
-        statPresets={statPresets}
-      />
 
-      {/* User Info */}
+            {/* Combined User Info and Leaderboard */}
       <div className="relative w-full max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <UserInfoCard user={user} />
-          <AccountStatsCard userStats={userStats} />
           <LeaderboardCard leaderboardData={leaderboardData} userStats={userStats} />
         </div>
       </div>
+      {/* Investment Overview with Chart */}
+      <InvestmentOverview 
+        statRange={statRange}
+        onStatRangeChange={setStatRange}
+      />
+
+      {/* Bots List with Status Tracking */}
+      <BotsList />
+
+
     </div>
   );
 };

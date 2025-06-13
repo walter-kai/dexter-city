@@ -35,9 +35,51 @@ export const BalanceProvider: React.FC<BalanceProviderProps> = ({ children }) =>
   const { sdk, connected } = useSDK();
   const { user } = useAuth();
   
-  const [balances, setBalances] = useState<Balance[]>([]);
-  const [ethPrice, setEthPrice] = useState<number | null>(null);
-  const [balancesLoaded, setBalancesLoaded] = useState(false);
+  const [balances, setBalances] = useState<Balance[]>(() => {
+    // Initialize from session storage
+    try {
+      const stored = sessionStorage.getItem('user_balances');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Check if data is not too old (5 minutes)
+        const now = Date.now();
+        if (parsed.timestamp && (now - parsed.timestamp) < 5 * 60 * 1000) {
+          return parsed.balances || [];
+        }
+      }
+    } catch (err) {
+      console.error('Error loading balances from session storage:', err);
+    }
+    return [];
+  });
+  
+  const [ethPrice, setEthPrice] = useState<number | null>(() => {
+    // Initialize ETH price from session storage
+    try {
+      const stored = sessionStorage.getItem('eth_price');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Check if data is not too old (5 minutes)
+        const now = Date.now();
+        if (parsed.timestamp && (now - parsed.timestamp) < 5 * 60 * 1000) {
+          return parsed.price || null;
+        }
+      }
+    } catch (err) {
+      console.error('Error loading ETH price from session storage:', err);
+    }
+    return null;
+  });
+  
+  const [balancesLoaded, setBalancesLoaded] = useState(() => {
+    // If we have balances from storage, consider them loaded
+    try {
+      const stored = sessionStorage.getItem('user_balances');
+      return !!stored;
+    } catch {
+      return false;
+    }
+  });
   const [showLoadingTooltip, setShowLoadingTooltip] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -160,15 +202,24 @@ export const BalanceProvider: React.FC<BalanceProviderProps> = ({ children }) =>
 
       setBalances(balancesArr);
       
-      // Save to sessionStorage
-      if (balancesArr.length > 0 && currentEthPrice) {
-        const balancesWithUsd = balancesArr.map(bal => ({
-          ...bal,
-          timestamp: Date.now()
-        }));
+      // Save to sessionStorage with timestamp
+      try {
+        const balanceData = {
+          balances: balancesArr,
+          timestamp: Date.now(),
+          walletId: walletId
+        };
+        sessionStorage.setItem('user_balances', JSON.stringify(balanceData));
         
-        sessionStorage.setItem('user_balances', JSON.stringify(balancesWithUsd));
-        sessionStorage.setItem('eth_price', JSON.stringify({ price: currentEthPrice, timestamp: Date.now() }));
+        if (currentEthPrice) {
+          const priceData = {
+            price: currentEthPrice,
+            timestamp: Date.now()
+          };
+          sessionStorage.setItem('eth_price', JSON.stringify(priceData));
+        }
+      } catch (err) {
+        console.error('Error saving balances to session storage:', err);
       }
       
     } catch (err) {
@@ -182,15 +233,32 @@ export const BalanceProvider: React.FC<BalanceProviderProps> = ({ children }) =>
             params: [walletId, "latest"],
           }) as string;
           const ethBalanceInEth = (parseInt(ethBalance, 16) / 1e18).toFixed(4);
-          setBalances([{ 
+          const fallbackBalance = [{ 
             symbol: "ETH", 
             balance: ethBalanceInEth,
             usdValue: currentEthPrice ? (parseFloat(ethBalanceInEth) * currentEthPrice).toFixed(2) : undefined
-          }]);
+          }];
+          setBalances(fallbackBalance);
+          
+          // Save fallback to storage too
+          try {
+            const balanceData = {
+              balances: fallbackBalance,
+              timestamp: Date.now(),
+              walletId: walletId
+            };
+            sessionStorage.setItem('user_balances', JSON.stringify(balanceData));
+          } catch (saveErr) {
+            console.error('Error saving fallback balances:', saveErr);
+          }
         }
       } catch (fallbackErr) {
         console.error("Even ETH balance failed:", fallbackErr);
         setBalances([]);
+        // Clear storage on failure
+        try {
+          sessionStorage.removeItem('user_balances');
+        } catch {}
       }
     } finally {
       // Clear timeout and hide tooltip
@@ -240,6 +308,28 @@ export const BalanceProvider: React.FC<BalanceProviderProps> = ({ children }) =>
       }
     };
   }, [loadingTimeout]);
+
+  // Clear storage when user changes
+  useEffect(() => {
+    if (user?.walletId) {
+      // Check if stored data is for a different wallet
+      try {
+        const stored = sessionStorage.getItem('user_balances');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.walletId && parsed.walletId !== user.walletId) {
+            // Different wallet, clear storage
+            sessionStorage.removeItem('user_balances');
+            sessionStorage.removeItem('eth_price');
+            setBalances([]);
+            setBalancesLoaded(false);
+          }
+        }
+      } catch (err) {
+        console.error('Error checking wallet ID in storage:', err);
+      }
+    }
+  }, [user?.walletId]);
 
   const value: BalanceContextType = {
     balances,

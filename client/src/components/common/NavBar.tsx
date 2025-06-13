@@ -4,6 +4,7 @@ import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from '../../contexts/AuthContext';
 import { useBalances } from '../../contexts/BalanceProvider';
 import LoginModal from '../LoginModal';
+import NeonText from './NeonText';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
@@ -94,9 +95,13 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
         {/* Left section - Title */}
         <div className="flex items-center">
           <button className="" type="button" onClick={() => handleNavigation('/')}>
-            <span className="text-2xl font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] tracking-widest">
+            <NeonText 
+              className="text-2xl tracking-widest font-savate"
+              intensity="high"
+              
+            >
               DexterCity
-            </span>
+            </NeonText>
           </button>
         </div>
         
