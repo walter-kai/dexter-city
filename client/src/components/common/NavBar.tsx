@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from '../../contexts/AuthContext';
+import { useBalances } from '../../contexts/BalanceProvider';
 import LoginModal from '../LoginModal';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
@@ -14,12 +15,11 @@ interface NavBarProps {
 const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [balances, setBalances] = useState<{ balance: string; currency: string; usdValue?: string }[]>([]);
-  const [ethPrice, setEthPrice] = useState<number | null>(null);
   const { sdk, connected, connecting } = useSDK();
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const { user, logout } = useAuth();
+  const { balances, ethPrice } = useBalances();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -36,66 +36,8 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
     };
   }, [showDropdown]);
 
-  // Fetch ETH price
-  const fetchEthPrice = async () => {
-    try {
-      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
-      const data = await res.json();
-      if (data.ethereum && data.ethereum.usd) {
-        setEthPrice(data.ethereum.usd);
-      }
-    } catch (err) {
-      console.error('Error fetching ETH price:', err);
-    }
-  };
-
-  // Fetch balances when user is available
-  useEffect(() => {
-    if (user && user.walletId && connected && sdk) {
-      fetchBalances(user.walletId);
-      fetchEthPrice();
-    }
-  }, [user, connected, sdk]);
-
-  const fetchBalances = async (walletId: string) => {
-    try {
-      const provider = sdk?.getProvider();
-      if (!provider) {
-        console.error("Ethereum provider not available.");
-        return;
-      }
-
-      // Verify wallet connection first
-      const accounts = await provider.request({ method: "eth_accounts" }) as string[];
-      if (!accounts || accounts.length === 0) {
-        console.error("No connected accounts found.");
-        return;
-      }
-
-      const ethBalance = await provider.request({
-        method: "eth_getBalance",
-        params: [walletId, "latest"],
-      }) as string;
-
-      const ethBalanceInEth = parseFloat((parseInt(ethBalance, 16) / 1e18).toFixed(4));
-      const usdValue = ethPrice ? (ethBalanceInEth * ethPrice).toFixed(2) : undefined;
-      
-      setBalances([{ 
-        balance: ethBalanceInEth.toString(), 
-        currency: "ETH",
-        usdValue 
-      }]);
-      console.log("Balance fetched successfully:", ethBalanceInEth, "ETH");
-    } catch (err) {
-      console.error("Error fetching balances:", err);
-      console.error("WalletId used:", walletId);
-      console.error("Provider available:", !!sdk?.getProvider());
-    }
-  };
-
   const disconnectWallet = () => {
     sdk?.disconnect();
-    setBalances([]);
     logout();
     setShowDropdown(false);
     console.log("Wallet disconnected");
@@ -170,7 +112,10 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
                 {balances.length > 0 && (
                   <div className="flex items-center gap-1 text-xs">
                     {(() => {
-                      const formatted = formatLargeNumberEth(balances[0].balance);
+                      const ethBalance = balances.find(b => b.symbol === "ETH");
+                      if (!ethBalance) return null;
+                      
+                      const formatted = formatLargeNumberEth(ethBalance.balance);
                       return (
                         <div className="flex flex-col items-end">
                           <div className="flex items-center gap-1">
@@ -185,9 +130,9 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
                             )}
                             <SiEthereum className="w-3 h-3 text-[#627eea]" />
                           </div>
-                          {balances[0].usdValue && (
-                            <span className="text-[#b8eaff] text-[10px]">${balances[0].usdValue}</span>
-                          )}
+                          {/* {ethBalance.usdValue && (
+                            <span className="text-[#b8eaff] text-[10px]">${ethBalance.usdValue}</span>
+                          )} */}
                         </div>
                       );
                     })()}

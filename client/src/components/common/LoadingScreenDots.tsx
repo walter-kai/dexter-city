@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Player } from '@lottiefiles/react-lottie-player';
 
-const LoadingScreenDots = () => {
+interface LoadingScreenDotsProps {
+  size?: number; // Size of the largest dot in Tailwind units (e.g., 4 = w-4 h-4)
+}
+
+const LoadingScreenDots: React.FC<LoadingScreenDotsProps> = ({ size = 4 }) => {
   const [visible, setVisible] = useState(false);
-  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -13,38 +15,44 @@ const LoadingScreenDots = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleError = () => {
-    console.error('Lottie animation failed to load');
-    setHasError(true);
-  };
+  // Calculate dot sizes based on the largest size
+  const largestSize = size;
+  const mediumSize = Math.max(1, Math.round(size * 0.75)); // 75% of largest
+  const smallSize = Math.max(1, Math.round(size * 0.5)); // 50% of largest
 
-  // Fallback CSS animation if Lottie fails
-  // if (hasError) {
-  //   return (
-  //     <div className="w-full items-center relative">
-  //       <div className="flex justify-center items-center space-x-1">
-  //         <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-  //         <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-  //         <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  // Calculate spacing proportional to size
+  const spacing = Math.max(1, Math.round(size * 0.375)); // Proportional spacing
+
+  // Generate Tailwind classes
+  const largestClasses = `w-${largestSize} h-${largestSize}`;
+  const mediumClasses = `w-${mediumSize} h-${mediumSize}`;
+  const smallClasses = `w-${smallSize} h-${smallSize}`;
+  const spacingClass = `space-x-${spacing}`;
 
   return (
-    <div className={`w-full items-center relative`}>
-      <Player
-        src='lottie/loadingDots.json'
-        className="w-[80px]"
-        loop
-        autoplay
-        speed={0.8}
-        onEvent={(event) => {
-          if (event === 'error') {
-            handleError();
-          }
-        }}
-      />
+    <div className="w-full items-center relative">
+      <div className={`flex justify-center items-center ${spacingClass}`}>
+        <div 
+          className={`${smallClasses} bg-[#8b5cf6] rounded-full animate-bounce shadow-[0_0_6px_#8b5cf6] border border-[#8b5cf6]/30`}
+          style={{ animationDelay: '0ms' }}
+        ></div>
+        <div 
+          className={`${mediumClasses} bg-[#faafe8] rounded-full animate-bounce shadow-[0_0_8px_#faafe8] border border-[#faafe8]/30`}
+          style={{ animationDelay: '150ms' }}
+        ></div>
+        <div 
+          className={`${largestClasses} bg-[#00ffe7] rounded-full animate-bounce shadow-[0_0_10px_#00ffe7] border border-[#00ffe7]/30`}
+          style={{ animationDelay: '300ms' }}
+        ></div>
+        <div 
+          className={`${mediumClasses} bg-[#faafe8] rounded-full animate-bounce shadow-[0_0_8px_#faafe8] border border-[#faafe8]/30`}
+          style={{ animationDelay: '450ms' }}
+        ></div>
+        <div 
+          className={`${smallClasses} bg-[#8b5cf6] rounded-full animate-bounce shadow-[0_0_6px_#8b5cf6] border border-[#8b5cf6]/30`}
+          style={{ animationDelay: '600ms' }}
+        ></div>
+      </div>
     </div>
   );
 };

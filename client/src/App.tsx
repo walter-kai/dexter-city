@@ -20,6 +20,7 @@ import NotFound from './pages/NotFound';
 import Quit from './pages/Quit';
 import TokenPairs from './pages/TokenPairs';
 import Settings from './pages/Settings';
+import { BalanceProvider } from './contexts/BalanceProvider';
 
 // Main App component inside MetaMask context
 const AppContent: React.FC = () => {
@@ -113,69 +114,71 @@ const AppContent: React.FC = () => {
 
   return (
     <AuthProvider>
-      <div className="App min-h-screen relative">
-        {/* Background Container with Parallax */}
-        <div className="fixed inset-0 z-0 overflow-hidden">
-          <div 
-            className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
-            style={{
-              backgroundImage: getBackgroundImage(),
-              transform: getParallaxTransform(0.5),
-              willChange: 'transform',
-              height: '110%', // Slightly larger to accommodate transform
-              top: '-5%',
-            }}
-          />
-          <div 
-            className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90"
-            style={{
-              transform: getParallaxTransform(0.3),
-              willChange: 'transform',
-            }}
-          />
-        </div>
-        
-        {/* Content Container */}
-        <div className="relative z-10 flex flex-col min-h-screen">
-          <NavBar telegramUser={user} />
-          <SubNavBar />
+      <BalanceProvider>
+        <div className="App min-h-screen relative">
+          {/* Background Container with Parallax */}
+          <div className="fixed inset-0 z-0 overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+              style={{
+                backgroundImage: getBackgroundImage(),
+                transform: getParallaxTransform(0.5),
+                willChange: 'transform',
+                height: '110%', // Slightly larger to accommodate transform
+                top: '-5%',
+              }}
+            />
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90"
+              style={{
+                transform: getParallaxTransform(0.3),
+                willChange: 'transform',
+              }}
+            />
+          </div>
           
-          <main className="flex-1 pt-32">
-            <Routes>
-              <Route path="/" element={<Guide />} />
-              
-              {/* Bot-related routes under /bots/ */}
-              <Route path="/bots/dashboard" element={<Dashboard />} />
-              <Route path="/garage" element={<Garage />} />
-              <Route path="/garage/build" element={<BuildBot />} />
-              
-              {/* Backward compatibility routes */}
-              <Route path="/dash" element={<Dashboard />} />
-              <Route path="/build" element={<BuildBot />} />
-              <Route path="/bots" element={<Garage />} />
-              
-              {/* Other routes */}
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/shop/:botId" element={<Shop />} />
-              <Route path="/guide" element={<Guide />} />
-              <Route path="/support" element={<Support />} />
-              <Route path="/blog" element={<Blog />} />
-              <Route path="/contact" element={<ContactUs />} />
-              <Route path="/tokens" element={<TokenPairs />} />
-              <Route path="/quit" element={<Quit />} />
-              <Route path="/settings" element={<Settings />} />
-              
-              {/* Legal routes under /legal/ */}
-              <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/legal/terms-of-service" element={<TermsOfService />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          
-          <Footer />
+          {/* Content Container */}
+          <div className="relative z-10 flex flex-col min-h-screen">
+            <NavBar telegramUser={user} />
+            <SubNavBar />
+            
+            <main className="flex-1 pt-32">
+              <Routes>
+                <Route path="/" element={<Guide />} />
+                
+                {/* Bot-related routes under /bots/ */}
+                <Route path="/bots/dashboard" element={<Dashboard />} />
+                <Route path="/garage" element={<Garage />} />
+                <Route path="/garage/build" element={<BuildBot />} />
+                
+                {/* Backward compatibility routes */}
+                <Route path="/dash" element={<Dashboard />} />
+                <Route path="/build" element={<BuildBot />} />
+                <Route path="/bots" element={<Garage />} />
+                
+                {/* Other routes */}
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/shop/:botId" element={<Shop />} />
+                <Route path="/guide" element={<Guide />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/blog" element={<Blog />} />
+                <Route path="/contact" element={<ContactUs />} />
+                <Route path="/tokens" element={<TokenPairs />} />
+                <Route path="/quit" element={<Quit />} />
+                <Route path="/settings" element={<Settings />} />
+                
+                {/* Legal routes under /legal/ */}
+                <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/legal/terms-of-service" element={<TermsOfService />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+            
+            <Footer />
+          </div>
         </div>
-      </div>
+      </BalanceProvider>
     </AuthProvider>
   );
 };
