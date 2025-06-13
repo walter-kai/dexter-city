@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
     <div className="flex flex-col items-center animate-fadeIn w-full">
 
             {/* Combined User Info and Leaderboard */}
-      <div className="relative w-full max-w-6xl mx-auto">
+      <div className="relative w-full max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <UserInfoCard user={user} />
           <LeaderboardCard leaderboardData={leaderboardData} userStats={userStats} />

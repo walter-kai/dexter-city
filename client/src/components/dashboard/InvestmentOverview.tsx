@@ -107,7 +107,7 @@ const InvestmentOverview: React.FC<InvestmentOverviewProps> = ({ statRange, onSt
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto mt-10 mb-8">
+    <div className="w-full max-w-7xl mx-auto mt-10 mb-8">
       <div className="bg-[#181a23]/80 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_32px_#00ffe7] p-6">
         <div className="flex items-center gap-3 mb-6">
           <FaChartLine className="text-2xl text-[#00ffe7]" />

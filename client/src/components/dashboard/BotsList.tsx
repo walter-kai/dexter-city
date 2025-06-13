@@ -174,7 +174,7 @@ const BotsList: React.FC = () => {
   const garageBots = bots.filter(bot => bot.status === 'garage').length;
 
   return (
-    <div className="w-full max-w-6xl mx-auto mb-8">
+    <div className="w-full max-w-7xl mx-auto mb-8">
       <div className="bg-[#181a23]/80 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_32px_#00ffe7] p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
