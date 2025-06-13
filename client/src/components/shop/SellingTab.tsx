@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { BotConfig } from '../../models/Bot';
 import { generateLogoHash } from '../../hooks/Robohash';
-import { FaTag, FaTrash } from 'react-icons/fa';
-import { SiEthereum } from 'react-icons/si';
+import BotCard from './BotCard';
 import SellBotModal from './SellBotModal';
 
 interface SellingTabProps {
@@ -21,9 +20,13 @@ const SellingTab: React.FC<SellingTabProps> = ({
   const [showSellModal, setShowSellModal] = useState(false);
   const [selectedBotToSell, setSelectedBotToSell] = useState<BotConfig | null>(null);
 
-  const handleSellBot = (bot: BotConfig) => {
-    setSelectedBotToSell(bot);
-    setShowSellModal(true);
+  const handleSellBot = (bot: any) => {
+    // Find the original BotConfig from the transformed data
+    const originalBot = myBots.find(b => b.botName === bot.name);
+    if (originalBot) {
+      setSelectedBotToSell(originalBot);
+      setShowSellModal(true);
+    }
   };
 
   const handleSellModalSubmit = (listingData: any) => {
@@ -36,37 +39,62 @@ const SellingTab: React.FC<SellingTabProps> = ({
     setSelectedBotToSell(null);
   };
 
+  // Transform BotConfig to match BotCard interface
+  const transformBotConfigToBotCard = (bot: BotConfig) => ({
+    id: bot.botName,
+    name: bot.botName,
+    description: `Trading pair: ${bot.tradingPool || 'N/A'} | Status: ${bot.status}`,
+    price: 0.1, // Default price for selling
+    buyPrice: 0.1,
+    hirePrice: 0,
+    image: generateLogoHash(bot.botName),
+    stats: {
+      trades: Math.floor(Math.random() * 500 + 100), // Mock data
+      tradesPerDay: Math.floor(Math.random() * 50 + 10),
+      profitLoss: parseFloat((Math.random() * 30 - 5).toFixed(1)),
+      avgTradeTime: Math.floor(Math.random() * 120 + 30),
+      age: Math.floor(Math.random() * 180 + 30),
+    },
+    categories: ['Custom'], // Default category for user bots
+    risk: Math.floor(Math.random() * 5) + 1,
+  });
+
+  // Transform listing to match BotCard interface
+  const transformListingToBotCard = (listing: any) => ({
+    id: listing.id,
+    name: listing.bot.botName,
+    description: listing.description,
+    price: listing.price,
+    buyPrice: listing.price,
+    hirePrice: 0,
+    image: generateLogoHash(listing.bot.botName),
+    stats: {
+      trades: Math.floor(Math.random() * 500 + 100), // Mock data
+      tradesPerDay: Math.floor(Math.random() * 50 + 10),
+      profitLoss: parseFloat((Math.random() * 30 - 5).toFixed(1)),
+      avgTradeTime: Math.floor(Math.random() * 120 + 30),
+      age: Math.floor(Math.random() * 180 + 30),
+    },
+    categories: listing.categories,
+    risk: Math.floor(Math.random() * 5) + 1,
+  });
+
   return (
     <>
       <div className="space-y-6">
         {/* My Bots Available to Sell */}
         <div>
           <h2 className="text-2xl font-bold text-[#00ffe7] mb-4">My Bots Available to Sell</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {myBots.map((bot) => (
-              <div
+              <BotCard
                 key={bot.botName}
-                className="relative group bg-[#181a23]/80 border-2 border-[#00ffe7]/30 rounded-xl shadow-[0_0_12px_#00ffe7] hover:shadow-[0_0_24px_#ff005c] transition-shadow overflow-hidden p-2 flex flex-col items-center"
-                style={{ minHeight: 200 }}
-              >
-                <img
-                  src={generateLogoHash(bot.botName)}
-                  alt={bot.botName}
-                  className="w-16 h-16 object-cover rounded-full border-2 border-[#00ffe7]/30 shadow-[0_0_8px_#00ffe7] mb-2"
-                />
-                <h3 className="text-sm font-bold text-[#00ffe7] text-center mb-2">{bot.botName}</h3>
-                <p className="text-xs text-[#e0e7ef] text-center mb-2">
-                  {bot.tradingPool || 'No trading pair'}
-                </p>
-                <div className="mt-auto w-full">
-                  <button
-                    onClick={() => handleSellBot(bot)}
-                    className="w-full btn-hud bg-green-500 text-white border-green-400 hover:bg-green-600 text-xs py-1 px-2"
-                  >
-                    <FaTag /> Sell Bot
-                  </button>
-                </div>
-              </div>
+                bot={transformBotConfigToBotCard(bot)}
+                currency="ETH"
+                mode="myBots"
+                onView={() => {}} // No view for own bots
+                onSell={handleSellBot}
+              />
             ))}
             {myBots.length === 0 && (
               <div className="col-span-full text-center text-[#e0e7ef] py-8">
@@ -79,44 +107,16 @@ const SellingTab: React.FC<SellingTabProps> = ({
         {/* My Active Listings */}
         <div>
           <h2 className="text-2xl font-bold text-[#00ffe7] mb-4">My Active Listings</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {myListings.map((listing) => (
-              <div
+              <BotCard
                 key={listing.id}
-                className="relative group bg-[#181a23]/80 border-2 border-green-400/30 rounded-xl shadow-[0_0_12px_green] hover:shadow-[0_0_24px_green] transition-shadow overflow-hidden p-2 flex flex-col items-center"
-                style={{ minHeight: 220 }}
-              >
-                <img
-                  src={generateLogoHash(listing.bot.botName)}
-                  alt={listing.bot.botName}
-                  className="w-16 h-16 object-cover rounded-full border-2 border-green-400/30 shadow-[0_0_8px_green] mb-2"
-                />
-                <h3 className="text-sm font-bold text-green-400 text-center mb-1">{listing.bot.botName}</h3>
-                <div className="flex flex-wrap gap-1 mb-2 justify-center">
-                  {listing.categories.slice(0, 2).map((cat: string) => (
-                    <span
-                      key={cat}
-                      className="bg-green-400/10 text-green-400 px-1 py-0.5 rounded text-[10px] font-bold border border-green-400/20"
-                    >
-                      {cat}
-                    </span>
-                  ))}
-                </div>
-                <p className="text-xs text-[#e0e7ef] text-center mb-2 line-clamp-2">
-                  {listing.description}
-                </p>
-                <div className="text-lg font-bold text-green-400 mb-2 flex items-center gap-1">
-                  {listing.price} <SiEthereum className="w-4 h-4 text-[#627eea]" />
-                </div>
-                <div className="mt-auto w-full">
-                  <button
-                    onClick={() => onRemoveListing(listing.id)}
-                    className="w-full btn-hud bg-red-500 text-white border-red-400 hover:bg-red-600 text-xs py-1 px-2"
-                  >
-                    <FaTrash /> Remove
-                  </button>
-                </div>
-              </div>
+                bot={transformListingToBotCard(listing)}
+                currency="ETH"
+                mode="listing"
+                onView={() => {}} // No view for listings
+                onRemoveListing={onRemoveListing}
+              />
             ))}
             {myListings.length === 0 && (
               <div className="col-span-full text-center text-[#e0e7ef] py-8">

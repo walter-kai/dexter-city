@@ -6,21 +6,29 @@ import { Line, Bar, Pie } from 'react-chartjs-2';
 
 interface ShopDetailProps {
   bot: BotForSale & {
-    stats: { trades: number; winRate: number; uptime: number };
+    stats: { 
+      trades: number; 
+      tradesPerDay: number;
+      profitLoss: number;
+      avgTradeTime: number;
+      age: number;
+    };
     categories: string[];
     risk: number;
   };
 }
 
-const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
+const BotDetail: React.FC<ShopDetailProps> = ({ bot }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'performance' | 'history' | 'reviews'>('overview');
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Expanded bot stats for detailed view
   const expandedStats = {
     totalTrades: bot.stats.trades,
-    winRate: bot.stats.winRate,
-    uptime: bot.stats.uptime,
+    tradesPerDay: bot.stats.tradesPerDay,
+    profitLoss: bot.stats.profitLoss,
+    avgTradeTime: bot.stats.avgTradeTime,
+    age: bot.stats.age,
     avgDailyProfit: (Math.random() * 50 + 20).toFixed(2),
     maxDrawdown: (Math.random() * 15 + 5).toFixed(1),
     sharpeRatio: (Math.random() * 2 + 1).toFixed(2),
@@ -30,7 +38,7 @@ const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
     createdDate: '2023-08-15',
     version: '2.4.1',
     avgExecutionTime: (Math.random() * 2 + 0.5).toFixed(1),
-    successfulOrders: Math.floor(bot.stats.trades * (bot.stats.winRate / 100)),
+    successfulOrders: Math.floor(bot.stats.trades * (bot.stats.profitLoss > 0 ? 0.7 : 0.3)),
     totalVolume: (bot.stats.trades * 150).toLocaleString(),
     fees: (Math.random() * 5 + 2).toFixed(2),
   };
@@ -53,7 +61,7 @@ const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
     labels: ['Profitable', 'Break-even', 'Loss'],
     datasets: [
       {
-        data: [bot.stats.winRate, 5, 100 - bot.stats.winRate - 5],
+        data: [Math.max(0, bot.stats.profitLoss + 60), 10, Math.max(0, 30 - bot.stats.profitLoss)], // Approximate distribution based on P/L
         backgroundColor: ['#00ff88', '#faafe8', '#ff005c'],
         borderColor: '#23263a',
         borderWidth: 2,
@@ -100,6 +108,17 @@ const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
     </div>
   );
 
+  const formatTradeTime = (minutes: number) => {
+    if (minutes < 60) return `${minutes} minutes`;
+    const hours = Math.floor(minutes / 60);
+    const remainingMins = minutes % 60;
+    return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours} hours`;
+  };
+
+  const formatAge = (days: number) => {
+    return `${days} days`;
+  };
+
   const tabContent = {
     overview: (
       <div className="space-y-6">
@@ -111,8 +130,8 @@ const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { icon: <FaExchangeAlt />, label: 'Total Trades', value: expandedStats.totalTrades.toLocaleString() },
-              { icon: <FaArrowUp />, label: 'Win Rate', value: `${expandedStats.winRate}%` },
-              { icon: <FaWifi />, label: 'Uptime', value: `${expandedStats.uptime}%` },
+              { icon: <FaArrowUp />, label: 'Trades/Day', value: expandedStats.tradesPerDay.toString() },
+              { icon: <FaChartLine />, label: 'P/L', value: `${expandedStats.profitLoss >= 0 ? '+' : ''}${expandedStats.profitLoss.toFixed(1)}%` },
               { icon: <FaUser />, label: 'Active Users', value: expandedStats.totalUsers.toLocaleString() },
             ].map((stat, idx) => (
               <div key={idx} className="bg-[#181a23] rounded-lg p-4 border border-[#00ffe7]/20">
@@ -120,7 +139,13 @@ const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
                   {stat.icon}
                   <span className="text-sm">{stat.label}</span>
                 </div>
-                <div className="text-2xl font-bold text-white">{stat.value}</div>
+                <div className={`text-2xl font-bold ${
+                  stat.label === 'P/L' 
+                    ? expandedStats.profitLoss >= 0 ? 'text-green-400' : 'text-red-400'
+                    : 'text-white'
+                }`}>
+                  {stat.value}
+                </div>
               </div>
             ))}
           </div>
@@ -145,11 +170,11 @@ const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
           <h4 className="text-lg font-bold text-[#00ffe7] mb-3">Key Metrics</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[
-              { label: 'Average Daily Profit', value: `${expandedStats.avgDailyProfit}%`, icon: <FaArrowUp /> },
+              { label: 'Average Trade Time', value: formatTradeTime(expandedStats.avgTradeTime), icon: <FaClock /> },
+              { label: 'Bot Age', value: formatAge(expandedStats.age), icon: <FaCalendar /> },
               { label: 'Max Drawdown', value: `${expandedStats.maxDrawdown}%`, icon: <FaChartLine /> },
               { label: 'Sharpe Ratio', value: expandedStats.sharpeRatio, icon: <FaStar /> },
               { label: 'Average Order Size', value: `$${expandedStats.avgOrderSize}`, icon: <FaExchangeAlt /> },
-              { label: 'Execution Time', value: `${expandedStats.avgExecutionTime}s`, icon: <FaClock /> },
               { label: 'Trading Fees', value: `${expandedStats.fees}%`, icon: <FaCog /> },
             ].map((metric, idx) => (
               <div key={idx} className="flex items-center justify-between p-3 bg-[#181a23] rounded border border-[#00ffe7]/20">
@@ -350,4 +375,4 @@ const ShopDetail: React.FC<ShopDetailProps> = ({ bot }) => {
   );
 };
 
-export default ShopDetail;
+export default BotDetail;

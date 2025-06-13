@@ -86,7 +86,7 @@ const AppContent: React.FC = () => {
 
   // Determine background image based on current route
   const getBackgroundImage = () => {
-    if (location.pathname === '/bots/garage' || location.pathname === '/bots') {
+    if (location.pathname === '/garage' || location.pathname === '/bots') {
       return backgroundLoaded ? "url('/bg/garage.png')" : "url('/bg/city.jpg')";
     }
     return "url('/bg/city.jpg')";
@@ -146,8 +146,8 @@ const AppContent: React.FC = () => {
               
               {/* Bot-related routes under /bots/ */}
               <Route path="/bots/dashboard" element={<Dashboard />} />
-              <Route path="/bots/garage" element={<Garage />} />
-              <Route path="/bots/build" element={<BuildBot />} />
+              <Route path="/garage" element={<Garage />} />
+              <Route path="/garage/build" element={<BuildBot />} />
               
               {/* Backward compatibility routes */}
               <Route path="/dash" element={<Dashboard />} />

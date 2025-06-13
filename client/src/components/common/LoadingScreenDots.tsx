@@ -19,22 +19,22 @@ const LoadingScreenDots = () => {
   };
 
   // Fallback CSS animation if Lottie fails
-  if (hasError) {
-    return (
-      <div className="w-full items-center relative">
-        <div className="flex justify-center items-center space-x-1">
-          <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-          <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-          <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-        </div>
-      </div>
-    );
-  }
+  // if (hasError) {
+  //   return (
+  //     <div className="w-full items-center relative">
+  //       <div className="flex justify-center items-center space-x-1">
+  //         <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+  //         <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+  //         <div className="w-2 h-2 bg-[#00ffe7] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className={`w-full items-center relative`}>
       <Player
-        src='lottie/lottie-loadingDots.json'
+        src='lottie/loadingDots.json'
         className="w-[80px]"
         loop
         autoplay

@@ -41,12 +41,12 @@ const SubNavBar: React.FC = () => {
     { text: 'SHOP', to: '/shop', icon: <FaShoppingCart /> },
     { 
       text: 'GARAGE', 
-      to: '/bots/garage', 
+      to: '/garage', 
       icon: <FaTools />, 
       hasDropdown: true,
       dropdownItems: [
-        { text: 'View Garage', to: '/bots/garage', icon: <FaTools /> },
-        { text: 'Create Bot', to: '/bots/build', icon: <FaPlus /> },
+        { text: 'View Garage', to: '/garage', icon: <FaTools /> },
+        { text: 'Create Bot', to: '/garage/build', icon: <FaPlus /> },
       ]
     },
     { text: 'SETTINGS', to: '/settings', icon: <FaCog /> },
@@ -75,9 +75,9 @@ const SubNavBar: React.FC = () => {
     if (
       path === '/bots/dashboard' ||
       path === '/build' ||
-      path === '/bots/build' ||
+      path === '/garage/build' ||
       path === '/shop' ||
-      path === '/bots/garage' ||
+      path === '/garage' ||
       path === '/settings'
     ) {
       return mainNavLinks;

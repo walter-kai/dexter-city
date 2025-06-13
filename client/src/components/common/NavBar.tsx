@@ -128,8 +128,8 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
       return [
         { text: 'DASHBOARD', to: '/bots/dashboard', icon: <FaTachometerAlt /> },
         { text: 'SHOP', to: '/shop', icon: <FaShoppingCart /> },
-        { text: 'GARAGE', to: '/bots/garage', icon: <FaTools /> },
-        { text: 'BUILD BOT', to: '/bots/build', icon: <FaPlus /> },
+        { text: 'GARAGE', to: '/garage', icon: <FaTools /> },
+        { text: 'BUILD BOT', to: '/garage/build', icon: <FaPlus /> },
         { text: 'SETTINGS', to: '/settings', icon: <FaCog /> },
         { text: 'SEPARATOR' }, // Special separator item
         { text: 'BLOG', to: '/blog', icon: <FaNewspaper /> },

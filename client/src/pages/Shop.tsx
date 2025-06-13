@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BotForSale } from '../models/Bot';
 import { BotConfig } from '../models/Bot';
-import ShopDetail from '../components/shop/BuyBotModal';
+import BotDetail from '../components/shop/BotDetail';
 import BuyingTab from '../components/shop/BuyingTab';
 import SellingTab from '../components/shop/SellingTab';
 import PurchaseModal from '../components/shop/PurchaseModal';
@@ -32,7 +32,13 @@ function getRandomInt(min: number, max: number) {
 }
 
 const defaultBots: (BotForSale & {
-	stats: { trades: number; winRate: number; uptime: number };
+	stats: { 
+		trades: number; 
+		tradesPerDay: number;
+		profitLoss: number;
+		avgTradeTime: number;
+		age: number;
+	};
 	categories: string[];
 	risk: number;
 	buyPrice: number;
@@ -45,19 +51,23 @@ const defaultBots: (BotForSale & {
 	const maxEth = 0.006;
 	const buyPrice = Math.round((Math.random() * (maxEth - minEth) + minEth) * 1000) / 1000;
 	const isPublic = Math.random() > 0.7;
+	const totalTrades = getRandomInt(100, 5000);
+	const age = getRandomInt(10, 365);
 	return {
 		id: (i + 1).toString(),
 		name,
 		description: `This is ${name}, your automated trading assistant for ${categories.join(', ')}.`,
-		price: buyPrice, // Use the same price for compatibility
+		price: buyPrice,
 		buyPrice: buyPrice,
 		hirePrice: 0,
 		isPublic,
 		image: `https://robohash.org/${encodeURIComponent(name)}?size=120x120`,
 		stats: {
-			trades: getRandomInt(100, 5000),
-			winRate: getRandomInt(60, 99),
-			uptime: parseFloat((Math.random() * 5 + 95).toFixed(1)),
+			trades: totalTrades,
+			tradesPerDay: Math.round(totalTrades / Math.max(age, 1)),
+			profitLoss: parseFloat((Math.random() * 40 - 10).toFixed(1)), // -10% to +30%
+			avgTradeTime: getRandomInt(5, 240), // 5 minutes to 4 hours
+			age: age,
 		},
 		categories,
 		risk: getRandomInt(1, 5),
@@ -149,33 +159,33 @@ const Shop = () => {
 					<h1 className="text-3xl font-extrabold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] tracking-widest hud-title">
 						BOT MARKETPLACE
 					</h1>
+					{/* Tab Navigation */}
+					<div className="gap-2 flex">
+						<button
+							onClick={() => setActiveTab('buying')}
+							className={`px-6 py-3 rounded-lg font-bold border-2 transition-all duration-200 ${
+								activeTab === 'buying'
+									? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7] shadow-[0_0_8px_#00ffe7]'
+									: 'bg-[#23263a] text-[#e0e7ef] border-[#00ffe7]/40 hover:bg-[#00ffe7]/20'
+							}`}
+						>
+							<FaShoppingCart className="inline mr-2" />
+							BUYING
+						</button>
+						<button
+							onClick={() => setActiveTab('selling')}
+							className={`px-6 py-3 rounded-lg font-bold border-2 transition-all duration-200 ${
+								activeTab === 'selling'
+									? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7] shadow-[0_0_8px_#00ffe7]'
+									: 'bg-[#23263a] text-[#e0e7ef] border-[#00ffe7]/40 hover:bg-[#00ffe7]/20'
+							}`}
+						>
+							<FaTag className="inline mr-2" />
+							SELLING
+						</button>
+					</div>
 				</div>
 
-				{/* Tab Navigation */}
-				<div className="flex justify-center gap-2 mb-6">
-					<button
-						onClick={() => setActiveTab('buying')}
-						className={`px-6 py-3 rounded-lg font-bold border-2 transition-all duration-200 ${
-							activeTab === 'buying'
-								? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7] shadow-[0_0_8px_#00ffe7]'
-								: 'bg-[#23263a] text-[#e0e7ef] border-[#00ffe7]/40 hover:bg-[#00ffe7]/20'
-						}`}
-					>
-						<FaShoppingCart className="inline mr-2" />
-						BUYING
-					</button>
-					<button
-						onClick={() => setActiveTab('selling')}
-						className={`px-6 py-3 rounded-lg font-bold border-2 transition-all duration-200 ${
-							activeTab === 'selling'
-								? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7] shadow-[0_0_8px_#00ffe7]'
-								: 'bg-[#23263a] text-[#e0e7ef] border-[#00ffe7]/40 hover:bg-[#00ffe7]/20'
-						}`}
-					>
-						<FaTag className="inline mr-2" />
-						SELLING
-					</button>
-				</div>
 
 				{/* Tab Content */}
 				{activeTab === 'buying' ? (
@@ -202,12 +212,12 @@ const Shop = () => {
 					<div className="bg-[#23263a] w-full max-w-3xl rounded-2xl p-10 relative border-4 border-[#00ffe7]/40 shadow-[0_0_48px_#00ffe7] hud-panel">
 						<button
 							onClick={handleCloseModal}
-							className="absolute top-6 right-6 bg-[#181a23] p-3 rounded-full hover:bg-[#00ffe7] hover:text-[#181a23] text-[#00ffe7] shadow-[0_0_8px_#00ffe7] border-2 border-[#00ffe7] transition-all text-2xl"
+							className="absolute z-10 top-6 right-6 bg-[#181a23] p-3 rounded-full hover:bg-[#00ffe7] hover:text-[#181a23] text-[#00ffe7] shadow-[0_0_8px_#00ffe7] border-2 border-[#00ffe7] transition-all text-2xl"
 							aria-label="Close"
 						>
 							<FaTimes />
 						</button>
-						<ShopDetail bot={selectedBot} />
+						<BotDetail bot={selectedBot} />
 					</div>
 				</div>
 			)}
