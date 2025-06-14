@@ -27,7 +27,7 @@ const Blog: React.FC = () => {
 
   const fetchPlatformUpdates = async () => {
     try {
-      const response = await fetch('/data/blog.json');
+      const response = await fetch('/blog/blog.json');
       const updates = await response.json();
       setPlatformUpdates(updates);
     } catch (err) {
