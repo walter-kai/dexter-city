@@ -7,6 +7,7 @@ import Hero from "@/components/guide/Hero";
 import GetStarted from "@/components/guide/GetStarted";
 import FAQSection from "@/components/guide/FaqSection";
 import TestimonialCard from "@/components/guide/TestimonialCard";
+import TelegramSocialSection from "@/components/guide/TelegramSocialSection";
 
 const Guide: React.FC = () => {
 	const [visibleSections, setVisibleSections] = useState<{ [key: string]: boolean }>({});
@@ -138,6 +139,9 @@ const Guide: React.FC = () => {
 				>
 					<FAQSection />
 				</div>
+
+				{/* Telegram Social Section */}
+				<TelegramSocialSection />
 
 				{/* Testimonial */}
 				<div 
