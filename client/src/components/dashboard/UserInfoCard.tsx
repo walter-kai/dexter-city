@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { SiEthereum } from 'react-icons/si';
 import { FaCopy, FaChartLine } from 'react-icons/fa';
 import LoadingScreenDots from '../common/LoadingScreenDots';
-import StatusFooter from '../StatusFooter';
+import StatusFooter from '../common/StatusFooter';
 import { useBalances } from '../../contexts/BalanceProvider';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
 import User from '../../models/User';

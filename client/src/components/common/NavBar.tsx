@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from '../../contexts/AuthContext';
 import { useBalances } from '../../contexts/BalanceProvider';
-import LoginModal from '../LoginModal';
+import LoginModal from './LoginModal';
 import NeonText from './NeonText';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
@@ -69,16 +69,16 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
     // Only show app navigation links if user is logged in
     if (connected && user) {
       return [
-        { text: 'DASHBOARD', to: '/bots/dashboard', icon: <FaTachometerAlt /> },
-        { text: 'SHOP', to: '/shop', icon: <FaShoppingCart /> },
-        { text: 'GARAGE', to: '/garage', icon: <FaTools /> },
-        { text: 'BUILD BOT', to: '/garage/build', icon: <FaPlus /> },
+        { text: 'DASHBOARD', to: '/i/dashboard', icon: <FaTachometerAlt /> },
+        { text: 'SHOP', to: '/i/shop', icon: <FaShoppingCart /> },
+        { text: 'GARAGE', to: '/i/garage', icon: <FaTools /> },
+        { text: 'BUILD BOT', to: '/i/garage/build', icon: <FaPlus /> },
         { text: 'SETTINGS', to: '/settings', icon: <FaCog /> },
         { text: 'SEPARATOR' }, // Special separator item
-        { text: 'BLOG', to: '/blog', icon: <FaNewspaper /> },
+        { text: 'BLOG', to: '/x/blog', icon: <FaNewspaper /> },
         { text: 'GET STARTED', to: '/#getting-started', icon: <FaRocket /> },
         { text: 'FEATURES', to: '/#features', icon: <FaBolt /> },
-        { text: 'CONTACT US', to: '/contact', icon: <FaEnvelope /> },
+        { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> },
       ];
     }
     
@@ -86,6 +86,9 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
   };
 
   const navLinks = getNavLinks();
+  
+  // Check if we're on an /i/ route
+  const isOnAppRoute = location.pathname.startsWith('/i/');
 
   return (
     <>
@@ -107,13 +110,24 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
         
         {/* Right section - Logo/Profile Dropdown */}
         <div className="flex items-center space-x-4">
+          {/* Dashboard button for non-/i/ routes when user is connected */}
+          {connected && user && !isOnAppRoute && (
+            <button
+              onClick={() => handleNavigation('/i/dashboard')}
+              className="bg-[#00ffe7]/10 hover:bg-[#00ffe7]/20 text-[#00ffe7] font-bold py-2 px-4 rounded border border-[#00ffe7]/40 transition-all duration-200 flex items-center gap-2"
+            >
+              <FaTachometerAlt className="text-sm" />
+              <span>Dashboard</span>
+            </button>
+          )}
+          
           {connected && user ? (
             <div className="relative z-50 dropdown-container">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center gap-2 bg-[#23263a] hover:bg-[#00ffe7]/20 text-[#00ffe7] font-bold py-2 px-3 rounded border border-[#00ffe7]/40 transition-all duration-200"
               >
-                <img src="/logos/dexter.png" className="h-6 drop-shadow-[0_0_8px_#00ffe7]" alt="Profile" />
+                <img src="/logos/dexter.svg" className="h-4 drop-shadow-[0_0_8px_#00ffe7]" alt="Profile" />
                 {balances.length > 0 && (
                   <div className="flex items-center gap-1 text-xs">
                     {(() => {
@@ -188,7 +202,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <img src="/logos/dexter.png" className="h-8 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
+              <img src="/logos/dexter.svg" className="h-4 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
               <button
                 onClick={handleLoginClick}
                 disabled={connecting}

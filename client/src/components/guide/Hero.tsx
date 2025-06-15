@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Player } from "@lottiefiles/react-lottie-player";
-import RandomRobohashCard from '../RandomRobohashCard';
+import RandomRobohashCard from './RandomRobohashCard';
 
 // Hero lines data moved here from Features.tsx
 const heroLines = [

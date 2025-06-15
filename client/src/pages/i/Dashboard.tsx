@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-import LoadingScreenDots from "../components/common/LoadingScreenDots";
-import { useAuth } from "../contexts/AuthContext";
-import { useBalances } from "../contexts/BalanceProvider";
-import InvestmentOverview from "../components/dashboard/InvestmentOverview";
-import UserInfoCard from "../components/dashboard/UserInfoCard";
-import BotsList from "../components/dashboard/BotsList";
-import LeaderboardCard from "../components/dashboard/LeaderboardCard";
+import LoadingScreenDots from "../../components/common/LoadingScreenDots";
+import { useAuth } from "../../contexts/AuthContext";
+import { useBalances } from "../../contexts/BalanceProvider";
+import InvestmentOverview from "../../components/dashboard/InvestmentOverview";
+import UserInfoCard from "../../components/dashboard/UserInfoCard";
+import BotsList from "../../components/dashboard/BotsList";
+import LeaderboardCard from "../../components/dashboard/LeaderboardCard";
+import SentimentWidget from "../../components/dashboard/SentimentWidget";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -44,6 +45,7 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <UserInfoCard user={user} />
           <LeaderboardCard leaderboardData={leaderboardData} userStats={userStats} />
+          <SentimentWidget />
         </div>
       </div>
       {/* Investment Overview with Chart */}

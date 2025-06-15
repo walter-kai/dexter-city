@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { BotConfig } from "../models/Bot";
-import { CoinMarketCap, Subgraph } from "../models/Token";
-import User from "../models/User";
-import { generateLogoHash } from "../hooks/Robohash";
-import PairChart from "../components/buildBot/PairChart";
-import TokenInfo from "../components/buildBot/TokenInfo";
-import LoadingScreenDots from "../components/common/LoadingScreenDots";
+import { BotConfig } from "../../models/Bot";
+import { CoinMarketCap, Subgraph } from "../../models/Token";
+import User from "../../models/User";
+import { generateLogoHash } from "../../hooks/Robohash";
+import PairChart from "../../components/buildBot/PairChart";
+import TokenInfo from "../../components/buildBot/TokenInfo";
+import LoadingScreenDots from "../../components/common/LoadingScreenDots";
 import { FaCheckCircle, FaExclamationTriangle, FaRobot, FaArrowLeft, FaSearch, FaChevronDown } from "react-icons/fa";
 
 const hudPanel =
@@ -172,7 +172,7 @@ const BuildBot: React.FC = () => {
             <div className="flex flex-col items-center gap-2">
               <div className="relative">
                 <img
-                  src={formData.botName.length > 0 ? generateLogoHash(formData.botName) : "/logos/dexter.png"}
+                  src={formData.botName.length > 0 ? generateLogoHash(formData.botName) : "/logos/dexter.svg"}
                   alt="profile pic"
                   className="h-32 w-32 rounded-full border-4 border-[#00ffe7]/60 shadow-[0_0_16px_#00ffe7] bg-[#23263a]"
                 />

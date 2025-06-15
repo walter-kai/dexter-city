@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useSDK } from "@metamask/sdk-react";
-import { login } from "../hooks/FirestoreUser";
+import { login } from "../../hooks/FirestoreUser";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -46,7 +46,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setUser(user);
 
         // Navigate to dashboard
-        navigate("/bots/dashboard");
+        navigate("/i/dashboard");
         
         // Close modal only after successful login
         onClose();

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { BotForSale } from '../models/Bot';
-import { BotConfig } from '../models/Bot';
-import BotDetail from '../components/shop/BotDetail';
-import BuyingTab from '../components/shop/BuyingTab';
-import SellingTab from '../components/shop/SellingTab';
-import PurchaseModal from '../components/shop/PurchaseModal';
+import { BotForSale } from '../../models/Bot';
+import { BotConfig } from '../../models/Bot';
+import BotDetail from '../../components/shop/BotDetail';
+import BuyingTab from '../../components/shop/BuyingTab';
+import SellingTab from '../../components/shop/SellingTab';
+import PurchaseModal from '../../components/shop/PurchaseModal';
 import { FaTimes, FaShoppingCart, FaTag } from 'react-icons/fa';
 
 // Helper to generate random bots
@@ -90,8 +90,8 @@ const Shop = () => {
 
 	const selectedBot = bots.find((bot) => bot.id === botId);
 
-	const handleCloseModal = () => navigate('/shop');
-	const handleOpenModal = (botId: string) => navigate(`/shop/${botId}`);
+	const handleCloseModal = () => navigate('/i/shop');
+	const handleOpenModal = (botId: string) => navigate(`/i/shop/${botId}`);
 	
 	const handleBuyBot = (bot: any) => {
 		setSelectedBotToPurchase(bot);

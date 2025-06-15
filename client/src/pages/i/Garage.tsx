@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BotConfig } from '../models/Bot';
+import { BotConfig } from '../../models/Bot';
 import { Chart, LineElement, PointElement, LinearScale, CategoryScale, ArcElement, Tooltip, Legend } from 'chart.js';
-import StatusFooter from '../components/StatusFooter';
-import BotCard from '../components/garage/BotCard';
-import CreateBotCard from '../components/garage/CreateBotCard';
-import BotDetails from '../components/garage/BotDetails';
-import DeleteModal from '../components/garage/DeleteModal';
-import EmptyState from '../components/garage/EmptyState';
+import StatusFooter from '../../components/common/StatusFooter';
+import BotCard from '../../components/garage/BotCard';
+import CreateBotCard from '../../components/garage/CreateBotCard';
+import BotDetails from '../../components/garage/BotDetails';
+import DeleteModal from '../../components/garage/DeleteModal';
+import EmptyState from '../../components/garage/EmptyState';
 
 Chart.register(LineElement, PointElement, LinearScale, CategoryScale, ArcElement, Tooltip, Legend);
 

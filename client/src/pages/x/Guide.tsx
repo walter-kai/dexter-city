@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSDK } from "@metamask/sdk-react";
-import { useAuth } from "../contexts/AuthContext";
-import GuideSection, { featuresData } from "../components/guide/Features";
-import Hero from "../components/guide/Hero";
+import { useAuth } from "@/contexts/AuthContext";
+import GuideSection, { featuresData } from "@/components/guide/Features";
+import Hero from "@/components/guide/Hero";
 import GetStarted from "@/components/guide/GetStarted";
-import FAQSection from "../components/guide/FaqSection";
-import TestimonialCard from "../components/guide/TestimonialCard";
+import FAQSection from "@/components/guide/FaqSection";
+import TestimonialCard from "@/components/guide/TestimonialCard";
 
 const Guide: React.FC = () => {
 	const [visibleSections, setVisibleSections] = useState<{ [key: string]: boolean }>({});

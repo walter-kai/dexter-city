@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { FaEnvelope, FaRobot, FaUser, FaBriefcase, FaComment, FaCheckCircle } from 'react-icons/fa';
-import LoadingScreenDots from '../components/common/LoadingScreenDots';
-import StatusFooter from '../components/StatusFooter';
-import SliderCaptcha from '../components/guide/SliderCaptcha';
+
+import StatusFooter from '@/components/common/StatusFooter';
+import SliderCaptcha from '@/components/guide/SliderCaptcha';
 
 interface FormData {
   name: string;

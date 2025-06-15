@@ -61,7 +61,7 @@ export const getSocialPosts = async (req: Request, res: Response) => {
     const { limit = 20, offset = 0 } = req.query;
     
     const response = await axios.get<TalkwalkerResponse>(
-      'https://talkwalker-collector-882290629693.us-central1.run.app/posts',
+      'https://talkwalker-collector-882290629693.us-central1.run.app/social/posts',
       {
         params: {
           limit,

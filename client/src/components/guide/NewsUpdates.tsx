@@ -125,7 +125,7 @@ const NewsUpdates: React.FC = () => {
 
   const fetchPlatformUpdates = async () => {
     try {
-      const response = await fetch('/blog/blog.json');
+      const response = await fetch('/x/blog/x/blog.json');
       const updates = await response.json();
       setPlatformUpdates(updates);
     } catch (err) {

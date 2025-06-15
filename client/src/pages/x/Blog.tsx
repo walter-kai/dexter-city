@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FaExternalLinkAlt } from 'react-icons/fa';
-import LoadingScreenDots from '../components/common/LoadingScreenDots';
-import NewsFetcher from '../components/guide/NewsFetcher';
-import LinkPreviewCard from '../components/LinkPreviewCard';
+import LoadingScreenDots from '@/components/common/LoadingScreenDots';
+import NewsFetcher from '@/components/guide/NewsFetcher';
+import LinkPreviewCard from '@/components/blog/LinkPreviewCard';
 
 interface PlatformUpdate {
   version: string;

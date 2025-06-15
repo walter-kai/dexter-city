@@ -4,22 +4,20 @@ import { MetaMaskProvider, useSDK } from '@metamask/sdk-react';
 import { AuthProvider } from './contexts/AuthContext';
 import { login } from './hooks/FirestoreUser';
 import NavBar from './components/common/NavBar';
-import Footer from './components/Footer';
-import SubNavBar from './components/SubNavBar';
-import Dashboard from './pages/Dashboard';
-import Shop from './pages/Shop';
-import Garage from './pages/Garage';
-import BuildBot from './pages/Build';
-import Guide from './pages/Guide';
-import Support from './pages/Support';
-import Blog from './pages/Blog';
-import ContactUs from './pages/ContactUs';
-import PrivacyPolicy from './pages/legal/PrivacyPolicy';
-import TermsOfService from './pages/legal/TermsOfService';
+import Footer from './components/common/Footer';
+import SubNavBar from './components/common/SubNavBar';
+import Dashboard from './pages/i/Dashboard';
+import Shop from './pages/i/Shop';
+import Garage from './pages/i/Garage';
+import BuildBot from './pages/i/Build';
+import Guide from './pages/x/Guide';
+import Blog from './pages/x/Blog';
+import ContactUs from './pages/x/ContactUs';
+import PrivacyPolicy from './pages/x/legal/PrivacyPolicy';
+import TermsOfService from './pages/x/legal/TermsOfService';
 import NotFound from './pages/NotFound';
-import Quit from './pages/Quit';
-import TokenPairs from './pages/TokenPairs';
-import Settings from './pages/Settings';
+
+import Settings from './pages/i/Settings';
 import { BalanceProvider } from './contexts/BalanceProvider';
 
 // Main App component inside MetaMask context
@@ -49,7 +47,7 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     const img = new Image();
     img.onload = () => setBackgroundLoaded(true);
-    img.src = '/bg/garage.png';
+    img.src = '/bg/i/garage.png';
   }, []);
 
   const connectWallet = async () => {
@@ -66,7 +64,7 @@ const AppContent: React.FC = () => {
         const user = await login(walletId);
         sessionStorage.setItem('currentUser', JSON.stringify(user));
         setUser(user);
-        navigate('/bots/dashboard');
+        navigate('/i/dashboard');
       } else {
         console.log('No accounts found.');
       }
@@ -87,8 +85,8 @@ const AppContent: React.FC = () => {
 
   // Determine background image based on current route
   const getBackgroundImage = () => {
-    if (location.pathname === '/garage' || location.pathname === '/bots') {
-      return backgroundLoaded ? "url('/bg/garage.png')" : "url('/bg/city.jpg')";
+    if (location.pathname === '/i/garage' || location.pathname === '/bots') {
+      return backgroundLoaded ? "url('/bg/i/garage.png')" : "url('/bg/city.jpg')";
     }
     return "url('/bg/city.jpg')";
   };
@@ -147,9 +145,9 @@ const AppContent: React.FC = () => {
                 <Route path="/" element={<Guide />} />
                 
                 {/* Bot-related routes under /bots/ */}
-                <Route path="/bots/dashboard" element={<Dashboard />} />
-                <Route path="/garage" element={<Garage />} />
-                <Route path="/garage/build" element={<BuildBot />} />
+                <Route path="/i/dashboard" element={<Dashboard />} />
+                <Route path="/i/garage" element={<Garage />} />
+                <Route path="/i/garage/build" element={<BuildBot />} />
                 
                 {/* Backward compatibility routes */}
                 <Route path="/dash" element={<Dashboard />} />
@@ -157,14 +155,11 @@ const AppContent: React.FC = () => {
                 <Route path="/bots" element={<Garage />} />
                 
                 {/* Other routes */}
-                <Route path="/shop" element={<Shop />} />
-                <Route path="/shop/:botId" element={<Shop />} />
-                <Route path="/guide" element={<Guide />} />
-                <Route path="/support" element={<Support />} />
-                <Route path="/blog" element={<Blog />} />
-                <Route path="/contact" element={<ContactUs />} />
-                <Route path="/tokens" element={<TokenPairs />} />
-                <Route path="/quit" element={<Quit />} />
+                <Route path="/i/shop" element={<Shop />} />
+                <Route path="/i/shop/:botId" element={<Shop />} />
+                {/* <Route path="/guide" element={<Guide />} /> */}
+                <Route path="/x/blog" element={<Blog />} />
+                <Route path="/x/contact" element={<ContactUs />} />
                 <Route path="/settings" element={<Settings />} />
                 
                 {/* Legal routes under /legal/ */}

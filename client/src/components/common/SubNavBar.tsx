@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaExternalLinkAlt, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaHome, FaChevronDown, FaShoppingCart, FaTools, FaChartLine, FaTrophy, FaCog, FaTachometerAlt, FaPlus, FaCommentAlt, FaStar, FaBug, FaLightbulb, FaQuestion } from 'react-icons/fa';
+import { FaExternalLinkAlt, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaHome, FaChevronDown, FaShoppingCart, FaTools, FaChartLine, FaTrophy, FaCog, FaTachometerAlt, FaPlus } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface NavLink {
@@ -25,10 +25,8 @@ const SubNavBar: React.FC = () => {
   const location = useLocation();
   const [showFeaturesDropdown, setShowFeaturesDropdown] = useState(false);
   const [showGarageDropdown, setShowGarageDropdown] = useState(false);
-  const [showFeedbackDropdown, setShowFeedbackDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const garageDropdownRef = useRef<HTMLDivElement>(null);
-  const feedbackDropdownRef = useRef<HTMLDivElement>(null);
 
   // Feature sections that match the ones in Features.tsx
   const featureSections: FeatureSection[] = [
@@ -39,16 +37,16 @@ const SubNavBar: React.FC = () => {
 
   // Custom subnav for all main app sections
   const mainNavLinks: NavLink[] = [
-    { text: 'DASHBOARD', to: '/bots/dashboard', icon: <FaTachometerAlt /> },
-    { text: 'SHOP', to: '/shop', icon: <FaShoppingCart /> },
+    { text: 'DASHBOARD', to: '/i/dashboard', icon: <FaTachometerAlt /> },
+    { text: 'SHOP', to: '/i/shop', icon: <FaShoppingCart /> },
     { 
       text: 'GARAGE', 
-      to: '/garage', 
+      to: '/i/garage', 
       icon: <FaTools />, 
       hasDropdown: true,
       dropdownItems: [
-        { text: 'View Garage', to: '/garage', icon: <FaTools /> },
-        { text: 'Create Bot', to: '/garage/build', icon: <FaPlus /> },
+        { text: 'View Garage', to: '/i/garage', icon: <FaTools /> },
+        { text: 'Create Bot', to: '/i/garage/build', icon: <FaPlus /> },
       ]
     },
     { text: 'SETTINGS', to: '/settings', icon: <FaCog /> },
@@ -63,9 +61,6 @@ const SubNavBar: React.FC = () => {
       if (garageDropdownRef.current && !garageDropdownRef.current.contains(event.target as Node)) {
         setShowGarageDropdown(false);
       }
-      if (feedbackDropdownRef.current && !feedbackDropdownRef.current.contains(event.target as Node)) {
-        setShowFeedbackDropdown(false);
-      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -74,101 +69,15 @@ const SubNavBar: React.FC = () => {
     };
   }, []);
 
-  // Get feedback options based on current route
-  const getFeedbackOptions = () => {
-    const path = location.pathname;
-    
-    if (path === '/shop' || path.startsWith('/shop/')) {
-      return [
-        { id: 'bug-shop', text: 'Report Shop Bug', icon: <FaBug />, type: 'bug' },
-        { id: 'feature-shop', text: 'Suggest Shop Feature', icon: <FaLightbulb />, type: 'feature' },
-        { id: 'rating-shop', text: 'Rate Shop Experience', icon: <FaStar />, type: 'rating' },
-      ];
-    }
-    
-    if (path === '/garage' || path.startsWith('/garage/')) {
-      return [
-        { id: 'bug-garage', text: 'Report Garage Bug', icon: <FaBug />, type: 'bug' },
-        { id: 'feature-garage', text: 'Suggest Garage Feature', icon: <FaLightbulb />, type: 'feature' },
-        { id: 'help-garage', text: 'Need Help Building?', icon: <FaQuestion />, type: 'help' },
-      ];
-    }
-    
-    if (path === '/bots/dashboard') {
-      return [
-        { id: 'bug-dashboard', text: 'Report Dashboard Bug', icon: <FaBug />, type: 'bug' },
-        { id: 'feature-dashboard', text: 'Suggest Dashboard Feature', icon: <FaLightbulb />, type: 'feature' },
-        { id: 'rating-dashboard', text: 'Rate Dashboard', icon: <FaStar />, type: 'rating' },
-      ];
-    }
-    
-    if (path === '/settings') {
-      return [
-        { id: 'bug-settings', text: 'Report Settings Bug', icon: <FaBug />, type: 'bug' },
-        { id: 'feature-settings', text: 'Suggest Settings Feature', icon: <FaLightbulb />, type: 'feature' },
-      ];
-    }
-    
-    // Default feedback for home/blog pages
-    return [
-      { id: 'bug-general', text: 'Report Website Bug', icon: <FaBug />, type: 'bug' },
-      { id: 'feature-general', text: 'Suggest New Feature', icon: <FaLightbulb />, type: 'feature' },
-      { id: 'rating-general', text: 'Rate Our Platform', icon: <FaStar />, type: 'rating' },
-      { id: 'contact', text: 'General Inquiry', icon: <FaEnvelope />, type: 'contact' },
-    ];
-  };
-
-  const handleFeedbackClick = (option: any) => {
-    setShowFeedbackDropdown(false);
-    
-    // Handle different feedback types
-    switch (option.type) {
-      case 'bug':
-        // Open bug report modal or navigate to bug report form
-        console.log(`Bug report for ${location.pathname}:`, option);
-        alert(`Bug report feature coming soon! Context: ${option.text}`);
-        break;
-      case 'feature':
-        // Open feature suggestion modal
-        console.log(`Feature suggestion for ${location.pathname}:`, option);
-        alert(`Feature suggestion feature coming soon! Context: ${option.text}`);
-        break;
-      case 'rating':
-        // Open rating modal
-        console.log(`Rating for ${location.pathname}:`, option);
-        alert(`Rating feature coming soon! Context: ${option.text}`);
-        break;
-      case 'help':
-        // Open help documentation or chat
-        console.log(`Help request for ${location.pathname}:`, option);
-        alert(`Help feature coming soon! Context: ${option.text}`);
-        break;
-      case 'contact':
-        // Navigate to contact page
-        navigate('/contact');
-        break;
-      default:
-        console.log('Unknown feedback type:', option);
-    }
-  };
-
-  // Get feedback button text based on route
-  const getFeedbackButtonText = () => {
-    const path = location.pathname;
-    if (path === '/shop' || path.startsWith('/shop/')) return 'SHOP FEEDBACK';
-    if (path === '/garage' || path.startsWith('/garage/')) return 'GARAGE FEEDBACK';
-    if (path === '/bots/dashboard') return 'DASHBOARD FEEDBACK';
-    if (path === '/settings') return 'SETTINGS FEEDBACK';
-    return 'FEEDBACK';
-  };
-
   // Define navigation links for each route
   const getNavLinks = (): NavLink[] => {
     const path = location.pathname;
     if (
-      path === '/bots/dashboard' ||
-      path === '/shop' ||
-      path === '/garage' ||
+      path === '/i/dashboard' ||
+      path === '/build' ||
+      path === '/i/garage/build' ||
+      path === '/i/shop' ||
+      path === '/i/garage' ||
       path === '/settings'
     ) {
       return mainNavLinks;
@@ -176,36 +85,34 @@ const SubNavBar: React.FC = () => {
     switch (currentRoute) {
       case '/':
         return [
-          { text: 'BLOG', to: '/blog', icon: <FaNewspaper /> },
+          { text: 'BLOG', to: '/x/blog', icon: <FaNewspaper /> },
           { text: 'GET STARTED', to: '#getting-started', isHash: true, icon: <FaRocket /> },
           { text: 'FEATURES', to: '#features', isHash: true, icon: <FaBolt />, hasDropdown: true },
-          { text: 'CONTACT US', to: '/contact', icon: <FaEnvelope /> }
+          { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> }
         ];
-      case '/blog':
+      case '/x/blog':
         return [
           { text: 'Home', to: '/', icon: <FaHome /> },
           { text: 'GET STARTED', to: '/#getting-started', isHash: true, icon: <FaRocket /> },
           { text: 'FEATURES', to: '/#features', isHash: true, icon: <FaBolt />, hasDropdown: true },
-          { text: 'CONTACT US', to: '/contact', icon: <FaEnvelope /> }
+          { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> }
         ];
       default:
         return [
           { text: 'Home', to: '/', icon: <FaHome /> },
           { text: 'GET STARTED', to: '/#getting-started', isHash: true, icon: <FaRocket /> },
           { text: 'FEATURES', to: '/#features', isHash: true, icon: <FaBolt />, hasDropdown: true },
-          { text: 'CONTACT US', to: '/contact', icon: <FaEnvelope /> }
+          { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> }
         ];
     }
   };
 
   const handleClick = (link: NavLink) => {
     if (link.hasDropdown && link.text === 'FEATURES') {
-      // Features dropdown behavior remains the same (click)
       setShowFeaturesDropdown(!showFeaturesDropdown);
       return;
     }
-    
-    // For other dropdowns or regular navigation
+
     if (link.isHash) {
       const sectionId = link.to.replace('#', '').replace('/#', '');
       
@@ -242,13 +149,13 @@ const SubNavBar: React.FC = () => {
     }
     
     // Default navigation for non-hash links - reset scroll position
-    if (!link.isHash && !link.hasDropdown) {
+    if (!link.isHash) {
       window.scrollTo({
         top: 0,
         behavior: 'smooth'
       });
-      navigate(link.to);
     }
+    navigate(link.to);
   };
 
   const handleMouseEnter = (link: NavLink) => {
@@ -416,17 +323,11 @@ const SubNavBar: React.FC = () => {
   };
 
   const navLinks = getNavLinks();
-  const isDashboard = currentRoute === '/bots/dashboard' || location.pathname === '/bots/dashboard';
+  const isDashboard = currentRoute === '/i/dashboard' || location.pathname === '/i/dashboard';
   const isHomePage = currentRoute === '/';
-  const isAppRoute = location.pathname === '/bots/dashboard' || 
-                   location.pathname === '/shop' || 
-                   location.pathname.startsWith('/shop/') ||
-                   location.pathname === '/garage' || 
-                   location.pathname.startsWith('/garage/') ||
-                   location.pathname === '/settings';
 
   return (
-    <div className={`fixed w-full z-20 mt-14 bg-[#23263a]/80 border-t border-[#00ffe7]/30 ${isHomePage ? 'my-4' : ''} shadow-[0_8px_12px_-8px_#faafe8] backdrop-blur-md`}>
+    <div className={`fixed w-full z-10 mt-14 bg-[#23263a]/80 border-t border-[#00ffe7]/30 ${isHomePage ? 'my-4' : ''} shadow-[0_8px_12px_-8px_#faafe8] backdrop-blur-md`}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex flex-wrap justify-center gap-4 text-sm h-16">
           {navLinks.map((link, index) => (
@@ -518,64 +419,6 @@ const SubNavBar: React.FC = () => {
               )}
             </div>
           ))}
-          
-          {/* Feedback Button - Show on all routes */}
-          <div 
-            className="relative" 
-            ref={feedbackDropdownRef}
-            onMouseEnter={() => setShowFeedbackDropdown(true)}
-            onMouseLeave={() => setShowFeedbackDropdown(false)}
-          >
-            <button
-              onClick={() => setShowFeedbackDropdown(!showFeedbackDropdown)}
-              className={`btn-nav flex items-center justify-center gap-2 h-full min-w-32 text-center uppercase cursor-pointer ${
-                showFeedbackDropdown ? 'bg-[#00ffe7]/30 text-[#181a23]' : ''
-              }`}
-            >
-              <FaCommentAlt />
-              {getFeedbackButtonText()}
-              <FaChevronDown className={`text-xs transition-transform duration-200 ${
-                showFeedbackDropdown ? 'rotate-180' : ''
-              }`} />
-            </button>
-
-            {/* Feedback Dropdown */}
-            <div
-              className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-64 bg-[#23263a] border border-[#00ffe7]/30 rounded-lg shadow-lg transition-all duration-300 ${
-                showFeedbackDropdown
-                  ? 'opacity-100 translate-y-0 visible'
-                  : 'opacity-0 -translate-y-2 invisible'
-              }`}
-            >
-              <div className="py-2">
-                <div className="px-4 py-2 border-b border-[#00ffe7]/20">
-                  <span className="text-[#00ffe7] font-semibold text-xs uppercase tracking-wider">
-                    Help Us Improve
-                  </span>
-                </div>
-                {getFeedbackOptions().map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => handleFeedbackClick(option)}
-                    className="w-full px-4 py-3 text-left hover:bg-[#00ffe7]/20 transition-colors duration-200 flex items-center gap-3"
-                  >
-                    <div className={`text-lg ${
-                      option.type === 'bug' ? 'text-red-400' :
-                      option.type === 'feature' ? 'text-yellow-400' :
-                      option.type === 'rating' ? 'text-green-400' :
-                      option.type === 'help' ? 'text-blue-400' :
-                      'text-[#00ffe7]'
-                    }`}>
-                      {option.icon}
-                    </div>
-                    <span className="text-[#e0e7ef] font-medium text-sm">
-                      {option.text}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

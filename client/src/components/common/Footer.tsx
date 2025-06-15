@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <img src="/logos/dexter.png" className="h-8 mb-4" alt="DexterCity" />
+            <img src="/logos/dexter.svg" className="h-8 mb-4" alt="DexterCity" />
             <p className="text-[#e0e7ef] text-sm">
               Automated trading bots for the future of finance.
             </p>
@@ -22,7 +22,7 @@ const Footer: React.FC = () => {
               <Link to="/guide" className="block text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">
                 Guide
               </Link>
-              <Link to="/shop" className="block text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">
+              <Link to="/i/shop" className="block text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">
                 Bot Shop
               </Link>
               <Link to="/support" className="block text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">
@@ -40,7 +40,7 @@ const Footer: React.FC = () => {
               <Link to="/legal/terms-of-service" className="block text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">
                 Terms of Service
               </Link>
-              <Link to="/blog" className="block text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">
+              <Link to="/x/blog" className="block text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">
                 Blog
               </Link>
             </div>
