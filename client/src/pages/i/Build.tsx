@@ -4,8 +4,8 @@ import { BotConfig } from "../../models/Bot";
 import { CoinMarketCap, Subgraph } from "../../models/Token";
 import User from "../../models/User";
 import { generateLogoHash } from "../../hooks/Robohash";
-import PairChart from "../../components/buildBot/PairChart";
-import TokenInfo from "../../components/buildBot/TokenInfo";
+import PairChart from "../../components/build/chart/PairChart";
+import TokenInfo from "../../components/build/TokenInfo";
 import LoadingScreenDots from "../../components/common/LoadingScreenDots";
 import { FaCheckCircle, FaExclamationTriangle, FaRobot, FaArrowLeft, FaSearch, FaChevronDown } from "react-icons/fa";
 
@@ -341,7 +341,7 @@ const BuildBot: React.FC = () => {
             {/* Chart - Right Side */}
             <div className="w-full lg:w-2/3">
               <div className="bg-[#23263a] border-2 border-[#00ffe7]/20 rounded-xl p-4">
-                <PairChart botForm={formData} pool={tradingPool} className="h-[300px]" />
+                <PairChart botForm={formData} pool={tradingPool} />
               </div>
             </div>
           </div>

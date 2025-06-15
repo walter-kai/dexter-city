@@ -1,5 +1,5 @@
-import { Subgraph } from "../../models/Token";
-import { BotConfig } from "../../models/Bot";
+import { Subgraph } from "../../../models/Token";
+import { BotConfig } from "../../../models/Bot";
 
 export const generateOHLCData = (swaps: Subgraph.SwapDataV3[], priceType: "tradeToken" | "USD") => {
   const barData: { x: number; o: number; h: number; l: number; c: number }[] = [];

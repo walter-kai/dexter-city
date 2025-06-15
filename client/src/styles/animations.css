@@ -74,6 +74,46 @@
   }
 }
 
+/* Chart-specific animations */
+@keyframes scan {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(1000%);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes tooltip-pulse {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Animation Classes */
 .animate-slide-in-right {
   animation: slide-in-right 0.3s ease-out;
@@ -101,6 +141,31 @@
 
 .animate-scale-in {
   animation: scale-in 0.5s ease-out;
+}
+
+/* Chart animation classes */
+.animate-scan {
+  animation: scan 5s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-tooltip-pulse {
+  animation: tooltip-pulse 2s infinite;
+}
+
+.chart-fade-in {
+  transition: opacity 2s;
+}
+
+.chart-fade-in.visible {
+  opacity: 1;
+}
+
+.chart-fade-in.hidden {
+  opacity: 0;
 }
 
 /* Utility Animation Classes */

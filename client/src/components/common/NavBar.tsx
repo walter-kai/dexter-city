@@ -5,10 +5,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBalances } from '../../contexts/BalanceProvider';
 import LoginModal from './LoginModal';
 import NeonText from './NeonText';
-import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaChartLine, FaChevronLeft, FaTelegramPlane } from 'react-icons/fa';
+import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaChartLine, FaChevronLeft } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
-import TelegramSocialSection from '../guide/TelegramSocialSection';
 
 interface NavBarProps {
   telegramUser: any;
@@ -27,7 +26,6 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showFeaturesSubDropdown, setShowFeaturesSubDropdown] = useState(false);
-  const [showTelegramModal, setShowTelegramModal] = useState(false);
   const { user, logout } = useAuth();
   const { balances, ethPrice } = useBalances();
 
@@ -75,6 +73,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
 
   // Get navigation options based on authentication status
   const getNavLinks = () => {
+    // Only show app navigation links if user is logged in
     if (connected && user) {
       return [
         { text: 'DASHBOARD', to: '/i/dashboard', icon: <FaTachometerAlt /> },
@@ -82,15 +81,14 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
         { text: 'GARAGE', to: '/i/garage', icon: <FaTools /> },
         { text: 'BUILD BOT', to: '/i/garage/build', icon: <FaPlus /> },
         { text: 'SETTINGS', to: '/settings', icon: <FaCog /> },
-        { text: 'SEPARATOR' },
+        { text: 'SEPARATOR' }, // Special separator item
         { text: 'BLOG', to: '/x/blog', icon: <FaNewspaper /> },
-        // Place TELEGRAM button below BLOG
-        { text: 'TELEGRAM', isTelegram: true, icon: <FaTelegramPlane /> },
         { text: 'GET STARTED', to: '/#getting-started', icon: <FaRocket /> },
         { text: 'FEATURES', to: '/#features', icon: <FaBolt /> },
         { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> },
       ];
     }
+    
     return [];
   };
 
@@ -235,29 +233,9 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
                 <div className="absolute right-0 top-full mt-2 w-48 bg-[#23263a] border border-[#00ffe7]/30 rounded-lg shadow-lg z-[200]">
                   <div className="py-2">
                     {/* Navigation Links */}
-                    {navLinks.map((link, index) =>
+                    {navLinks.map((link, index) => (
                       link.text === 'SEPARATOR' ? (
                         <div key={index} className="border-t border-[#00ffe7]/20 my-2"></div>
-                      ) : link.isTelegram ? (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            setShowDropdown(false);
-                            // Only open modal if not already open
-                            if (!showTelegramModal) setShowTelegramModal(true);
-                          }}
-                          className={`w-full px-4 py-3 text-left hover:bg-[#00ffe7]/20 transition-colors duration-200 flex items-center gap-3 font-semibold ${
-                            location.pathname === link.to
-                              ? 'bg-[#00ffe7]/10 text-[#00ffe7]'
-                              : 'text-[#e0e7ef]'
-                          }`}
-                          type="button"
-                        >
-                          <div className="text-[#00ffe7] text-sm">
-                            {link.icon}
-                          </div>
-                          <span className="font-medium text-sm">{link.text}</span>
-                        </button>
                       ) : link.text === 'FEATURES' ? (
                         <div
                           key={index}
@@ -322,7 +300,7 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
                           <span className="font-medium text-sm">{link.text}</span>
                         </button>
                       )
-                    )}
+                    ))}
                     
                     {navLinks.length > 0 && (
                       <div className="border-t border-[#00ffe7]/20 my-2"></div>
@@ -359,22 +337,6 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
         isOpen={showLoginModal} 
         onClose={handleCloseModal} 
       />
-
-      {/* Telegram Modal - only one instance, outside dropdown */}
-      {showTelegramModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 transition-opacity duration-300 animate-fadein">
-          <div className="bg-[#23263a]/90 border border-[#00ffe7]/30 rounded-xl shadow-lg w-full mx-4 p-5 relative max-w-lg transition-all duration-300 animate-fadein-modal">
-            <button
-              className="absolute top-3 right-3 text-[#00ffe7] hover:text-[#ff005c] text-xl font-bold z-10"
-              onClick={() => setShowTelegramModal(false)}
-              aria-label="Close"
-            >
-              ×
-            </button>
-            <TelegramSocialSection asModal />
-          </div>
-        </div>
-      )}
     </>
   );
 };
