@@ -7,6 +7,7 @@ import UserInfoCard from "../../components/dashboard/UserInfoCard";
 import BotsList from "../../components/dashboard/BotsList";
 import LeaderboardCard from "../../components/dashboard/LeaderboardCard";
 import SentimentWidget from "../../components/dashboard/SentimentWidget";
+import DailyPoolActivity from "../../components/dashboard/DailyPoolActivity";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -40,12 +41,17 @@ const Dashboard: React.FC = () => {
   return (
     <div className="flex flex-col items-center animate-fadeIn w-full">
 
-            {/* Combined User Info and Leaderboard */}
+      {/* Combined User Info, Leaderboard and Market Data */}
       <div className="relative w-full max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <UserInfoCard user={user} />
           <LeaderboardCard leaderboardData={leaderboardData} userStats={userStats} />
+          {/* <div className="grid grid-cols- gap-6"> */}
+          {/* </div> */}
+        </div>
+        <div className="flex flex-col lg:flex-row gap-6">
           <SentimentWidget />
+          <DailyPoolActivity />
         </div>
       </div>
       {/* Investment Overview with Chart */}

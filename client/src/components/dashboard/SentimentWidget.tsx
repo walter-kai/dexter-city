@@ -56,7 +56,7 @@ const SentimentGauge: React.FC<{
       width={88}
       height={88}
       style={{
-        filter: "drop-shadow(0 0 8px #00ffe7cc)",
+        filter: "drop-shadow(0 0 8px rgba(255, 0, 0, 0.8))",
         background: GAUGE_BG,
         borderRadius: "50%",
         boxShadow: GAUGE_SHADOW
@@ -103,7 +103,7 @@ const SentimentGauge: React.FC<{
           width={2}
           height={4}
           rx={1}
-          fill="#00ffe7"
+          fill="#000000"
           opacity={i % 3 === 0 ? 0.7 : 0.25}
           transform={`rotate(${i * 30} 22 22)`}
         />

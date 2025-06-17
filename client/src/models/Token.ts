@@ -161,6 +161,7 @@ export namespace Subgraph {
     address: string;
     volumeUSD: number;
     txCount: number;
+    date: string;
     // volumeToken0: number;
     // token0Price: number;
     // token0Symbol: string;
@@ -212,18 +213,8 @@ export namespace Subgraph {
     // token1ImgId: number,
     
   }
-
   
-  export interface SwapDataV2 {
-    amount0In: number;
-    amount0Out: number;
-    amount1In: number;
-    amount1Out: number;
-    amountUSD: number;
-    timestamp: number;
-  }
-  
-  export interface SwapDataV3 {
+  export interface SwapDataV4 {
     amount0: number;
     amount1: number;
     amountUSD: number;

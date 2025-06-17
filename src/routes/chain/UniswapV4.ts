@@ -1,25 +1,6 @@
 import { createClient, cacheExchange, fetchExchange } from 'urql';
 import { Subgraph } from '../../../client/src/models/Token';
 
-interface uniswapV3Pair { 
-  id: any; 
-  volumeUSD: any; 
-  token0Price: any; 
-  token1Price: any;
-  token0: { 
-    id: any; 
-    symbol: any; 
-    name: any; 
-    volumeUSD: any; 
-  }; 
-  token1: { 
-    id: any; 
-    symbol: any; 
-    name: any; 
-    volumeUSD: any; 
-  }; 
-}
-
 // Don't create the client immediately - create it lazily when needed
 let client: any = null;
 
@@ -47,7 +28,7 @@ export const fetchSwaps = async (
   skip: number = 0,
   startTime?: Date,
   endTime?: Date,
-): Promise<Subgraph.SwapDataV3[]> => {
+): Promise<Subgraph.SwapDataV4[]> => {
   const startTimestamp = startTime ? Math.floor(startTime.getTime() / 1000) : Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
   const endTimestamp = endTime ? Math.floor(endTime.getTime() / 1000) : Math.floor(Date.now() / 1000);
 
@@ -74,10 +55,10 @@ export const fetchSwaps = async (
 };
 
 // Function to fetch recent swaps with a specific pairId and skip parameter
-export const fetchTopPools = async (skip: number = 0, first: number = 100): Promise<Subgraph.PoolData[]> => {
+export const fetchTopAlltimePools = async (skip: number = 0, first: number = 100): Promise<Subgraph.PoolData[]> => {
 
     const query = `{
-    pools(first: ${first}, skip: ${skip}, orderBy: volumeUSD, orderDirection: desc) {
+    pools(first: ${first}, skip: ${skip}, orderBy: txCount, orderDirection: desc, where: { token0: "0x0000000000000000000000000000000000000000" }) {
       id
       token0 {
         symbol
@@ -105,8 +86,8 @@ export const fetchTopPools = async (skip: number = 0, first: number = 100): Prom
       throw new Error(result.error.message);
     }
 
-    const pools: Subgraph.PoolData[] = result.data?.pools.map((pool: uniswapV3Pair) => ({
-      address: pool.id,
+    const pools: Subgraph.PoolData[] = result.data?.pools.map((pool: Subgraph.PairData) => ({
+      address: pool.address,
       name: sanitizeDocId(`ETH:${pool.token0.symbol}:${pool.token1.symbol}`),
       lastUpdated: new Date(),
       network: "Ethereum",
@@ -115,21 +96,63 @@ export const fetchTopPools = async (skip: number = 0, first: number = 100): Prom
         address: pool.token0.id, 
         symbol: pool.token0.symbol,
         name: pool.token0.name,
-        volume: pool.token0.volumeUSD,
-        price: pool.token0Price,
+        // volume: pool.token0.volumeUSD,
+        // price: pool.token0Price,
       },
       token1: {
         address: pool.token1.id, 
         symbol: pool.token1.symbol,
         name: pool.token1.name,
-        volume: pool.token1.volumeUSD,
-        price: pool.token1Price,
+        // volume: pool.token1.,
+        // price: pool.token1Price,
       },
     })) || [];
 
     return pools;
   } catch (error) {
     console.error('Error fetching recent swaps:', error);
+    throw error;
+  }
+};
+
+export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000): Promise<any[]> => {
+  const query = `{
+    poolDayDatas(first: ${first}, skip: ${skip}, orderBy: date, orderDirection: desc) {
+      pool {
+        id
+        token0 {
+          symbol
+          id
+          name
+          volumeUSD
+        }
+        token1 {
+          symbol
+          id
+          name
+          volumeUSD
+        }
+        feeTier
+        volumeUSD
+        token0Price
+        token1Price
+        liquidity
+      }
+      txCount
+      volumeUSD
+      date
+    }
+  }`;
+
+  try {
+    const result = await getClient().query(query, { skip }).toPromise();
+    if (result.error) {
+      throw new Error(result.error.message);
+    }
+
+    return result.data?.poolDayDatas || [];
+  } catch (error) {
+    console.error('Error fetching daily pools data:', error);
     throw error;
   }
 };

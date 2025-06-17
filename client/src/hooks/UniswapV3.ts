@@ -112,7 +112,7 @@ export const fetchSwapsV3 = async (
   skip: number = 0,
   startTime?: Date,
   endTime?: Date,
-): Promise<Subgraph.SwapDataV3[]> => {
+): Promise<Subgraph.SwapDataV4[]> => {
   const startTimestamp = startTime ? Math.floor(startTime.getTime() / 1000) : Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
   const endTimestamp = endTime ? Math.floor(endTime.getTime() / 1000) : Math.floor(Date.now() / 1000);
 

@@ -8,10 +8,10 @@ import ApiError from "../../utils/api-error";
  * Updates swaps in the Firestore database for the matching pool document.
  *
  * @param {string} address - The pool address.
- * @param {Subgraph.SwapDataV3[]} swaps - Array of swap data to update.
+ * @param {Subgraph.SwapDataV4[]} swaps - Array of swap data to update.
  * @returns {Promise<boolean>} - Returns true if successful.
  */
-export async function updateSwapsToPools(address: string, swaps: Subgraph.SwapDataV3[]): Promise<boolean> {
+export async function updateSwapsToPools(address: string, swaps: Subgraph.SwapDataV4[]): Promise<boolean> {
   try {
     const poolsCollection = db.collection("pools-uniswap");
     const querySnapshot = await poolsCollection.where("address", "==", address).get();
@@ -77,7 +77,7 @@ const getPoolsUniswap = async (): Promise<Subgraph.PoolData[] | null> => {
         .sort((a, b) => b.txCount - a.txCount);
   
       // Take the top 100 by volume
-      const top100Pools = sortedByTxCount.slice(0, 200);
+      const top100Pools = sortedByTxCount.slice(0, 500);
   
       // Sort the top 100 pools by token0.symbol in descending order
       top100Pools.sort((a, b) => b.token0.symbol.localeCompare(a.token0.symbol));
@@ -117,6 +117,6 @@ export const getTokenByAddress = async (tokenAddress: string): Promise<Subgraph.
 };
 
 export default {
-    getPools: getPoolsUniswap,
+    getPoolsUniswap,
     getTokenByAddress, // Export the renamed function
 };

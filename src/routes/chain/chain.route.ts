@@ -5,13 +5,16 @@ import chainController from "./chain.controller";
 
 const router = express.Router();
 
+// Reload endpoints
+router.route("/reload").put(chainController.reloadAll);
+router.route("/reload/tokens").put(chainController.reloadTokens);
+router.route("/reload/poolsAll").put(chainController.reloadPools);
+router.route("/reload/poolsDay").get(chainController.reloadPoolsDay);
 
-router.route("/reload").get(chainController.reloadToDb);
-// router.route("/cmc/reloadTokens").put(coinMarketCapController.reloadTokens);
-// router.route("/uni/reloadPools").get(subgraphController.reloadPools);
+// Data fetch endpoints
 router.route("/uni/swaps/:contractAddress").get(subgraphController.getSwaps);
 router.route("/uni/pools").get(subgraphController.getPools);
+router.route("/uni/dailyPools").get(subgraphController.getDailyPools); // New endpoint
 router.route("/tokens/:symbol").get(coinMarketCapController.getTokenBySymbol);
-
 
 export default router;

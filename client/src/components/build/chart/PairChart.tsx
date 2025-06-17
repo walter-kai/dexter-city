@@ -120,7 +120,7 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
   const [lineState, setLine] = useState<boolean>(false);
   const [barType, setBarType] = useState<boolean>(false);
   const [scaleType, setScaleType] = useState<"linear" | "logarithmic">("linear");
-  const [swaps, setSwaps] = useState<Subgraph.SwapDataV3[]>([]);
+  const [swaps, setSwaps] = useState<Subgraph.SwapDataV4[]>([]);
   const [percentChange, setPercentChange] = useState<number | null>(null);
   const [fadeIn, setFadeIn] = useState<boolean>(false);
   const [priceType, setPriceType] = useState<"tradeToken" | "USD">("tradeToken");

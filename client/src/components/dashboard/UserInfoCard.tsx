@@ -99,7 +99,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
                         <div className="relative flex items-center mx-auto">
                           <LoadingScreenDots size={3} />
                           {showLoadingTooltip && (
-                            <div className={`absolute left-full ml-4 bg-[#23263a] border-2 border-[#faafe8]/40 rounded-lg p-3 shadow-[0_0_16px_#faafe8] z-10 min-w-[280px] transition-all duration-300 ${
+                            <div className={`absolute left-full ml-4 bg-[#23263a] border-2 border-[#faafe8]/40 rounded-lg p-3 shadow-[0_0_16px_#faafe8] min-w-[280px] transition-all duration-300 ${
                               tooltipFading ? 'opacity-0 scale-95' : 'opacity-100 scale-100 animate-fadeIn'
                             }`}>
                               <div className="text-[#faafe8] text-sm font-bold mb-2">
