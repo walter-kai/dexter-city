@@ -145,7 +145,7 @@ const SentimentWidget: React.FC = () => {
         const tokenResults: Record<string, TokenInfo> = {};
         await Promise.all(res.data.data.map(async (topic) => {
           try {
-            const tokenRes = await axios.get(`/api/chain/tokens/${topic.id}`);
+            const tokenRes = await axios.get(`/api/chain/cmc/tokens/${topic.id}`);
             const arr = Array.isArray(tokenRes.data?.id) ? tokenRes.data.id : [];
             let best = arr[0];
             for (const t of arr) {

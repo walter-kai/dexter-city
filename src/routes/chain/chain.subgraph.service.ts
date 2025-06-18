@@ -128,7 +128,7 @@ const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
         // Load token images once before looping
         const { symbolMap, nameMap } = await preloadTokenImages();
 
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 3; i++) {
           const pools = await fetchTopAlltimePools(skip);
           const batch = db.batch();
 

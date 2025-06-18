@@ -55,7 +55,7 @@ export const fetchSwaps = async (
 };
 
 // Function to fetch recent swaps with a specific pairId and skip parameter
-export const fetchTopAlltimePools = async (skip: number = 0, first: number = 100): Promise<Subgraph.PoolData[]> => {
+export const fetchTopAlltimePools = async (skip: number = 0, first: number = 1000): Promise<Subgraph.PoolData[]> => {
 
     const query = `{
     pools(first: ${first}, skip: ${skip}, orderBy: txCount, orderDirection: desc, where: { token0: "0x0000000000000000000000000000000000000000" }) {
