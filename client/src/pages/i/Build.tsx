@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../../models/Bot";
-import { CoinMarketCap, Subgraph } from "../../models/Token";
+import { Subgraph } from "../../models/Token";
 import User from "../../models/User";
 import { generateLogoHash } from "../../hooks/Robohash";
 import PairChart from "../../components/build/chart/PairChart";
@@ -152,7 +152,7 @@ const BuildBot: React.FC = () => {
     : "Select Trading Pair";
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-24 pb-12 font-lato bg-transparent">
+    <div className="min-h-screen flex flex-col items-center pt-24 pb-12 bg-transparent">
       <div className="w-full max-w-7xl mx-auto px-2">
         <div className="flex items-center justify-between mb-8">
           <button

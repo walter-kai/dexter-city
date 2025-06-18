@@ -6,9 +6,9 @@ import chainController from "./chain.controller";
 const router = express.Router();
 
 // Reload endpoints
-router.route("/reload").put(chainController.reloadAll);
-router.route("/reload/tokens").put(chainController.reloadTokens);
-router.route("/reload/poolsAll").put(chainController.reloadPools);
+router.route("/reload").get(chainController.reloadAll);
+router.route("/reload/tokens").get(chainController.reloadTokens);
+router.route("/reload/poolsAll").get(chainController.reloadPools);
 router.route("/reload/poolsDay").get(chainController.reloadPoolsDay);
 
 // Data fetch endpoints

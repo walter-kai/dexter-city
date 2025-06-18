@@ -7,23 +7,34 @@ import { fetchSwaps, fetchTopAlltimePools, fetchTopDailyPools } from "./UniswapV
 import { updateSwapsToPools } from "../firebase/firebase.service";
 
 /**
- * Preload token symbols and their imgIds from tokens-cmc collection
- * Centralized function to avoid code duplication
+ * Preload token symbols and their imgIds from tokens-cmc collection.
+ * If multiple tokens have the same symbol, also index by name for fallback.
  */
-const preloadTokenImages = async (): Promise<Map<string, number | null>> => {
-  const tokenMap = new Map<string, number | null>();
+const preloadTokenImages = async (): Promise<{
+  symbolMap: Map<string, number[]>;
+  nameMap: Map<string, number>;
+}> => {
+  const symbolMap = new Map<string, number[]>();
+  const nameMap = new Map<string, number>();
   const tokensCmcCollection = db.collection("tokens-cmc");
   const snapshot = await tokensCmcCollection.get();
 
   snapshot.forEach((doc) => {
     const data = doc.data();
     if (data.symbol) {
-      const imgId = Number(data.id); // Ensure it's a number
-      tokenMap.set(data.symbol, isNaN(imgId) ? null : imgId);
+      const imgId = Number(data.id);
+      if (!isNaN(imgId)) {
+        // Map symbol to array of imgIds (for non-unique symbols)
+        const upperSymbol = data.symbol.toUpperCase();
+        if (!symbolMap.has(upperSymbol)) symbolMap.set(upperSymbol, []);
+        symbolMap.get(upperSymbol)!.push(imgId);
+        // Map name to imgId for fallback
+        if (data.name) nameMap.set(data.name, imgId);
+      }
     }
   });
 
-  return tokenMap;
+  return { symbolMap, nameMap };
 };
 
 // Function to fetch recent swaps from the subgraph
@@ -115,15 +126,39 @@ const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
 
       try {
         // Load token images once before looping
-        const tokenImageMap = await preloadTokenImages();
+        const { symbolMap, nameMap } = await preloadTokenImages();
 
         for (let i = 0; i < 1; i++) {
           const pools = await fetchTopAlltimePools(skip);
           const batch = db.batch();
 
           for (const pool of pools) {
-            const token0ImgId = tokenImageMap.get(pool.token0.symbol.toUpperCase()) ?? 0;
-            const token1ImgId = tokenImageMap.get(pool.token1.symbol.toUpperCase()) ?? 0;
+            // Try to get imgId by symbol (may be multiple)
+            let token0ImgId: number | undefined;
+            let token1ImgId: number | undefined;
+            const token0Symbol = pool.token0.symbol?.toUpperCase();
+            const token1Symbol = pool.token1.symbol?.toUpperCase();
+
+            const token0ImgIds = symbolMap.get(token0Symbol) || [];
+            const token1ImgIds = symbolMap.get(token1Symbol) || [];
+
+            if (token0ImgIds.length === 1) {
+              token0ImgId = token0ImgIds[0];
+            } else if (token0ImgIds.length > 1 && pool.token0.name) {
+              // Fallback: search by name
+              token0ImgId = nameMap.get(pool.token0.name);
+            } else {
+              token0ImgId = 0;
+            }
+
+            if (token1ImgIds.length === 1) {
+              token1ImgId = token1ImgIds[0];
+            } else if (token1ImgIds.length > 1 && pool.token1.name) {
+              // Fallback: search by name
+              token1ImgId = nameMap.get(pool.token1.name);
+            } else {
+              token1ImgId = 0;
+            }
 
             // Construct the pair document using interfaces
             const poolData: Subgraph.PoolData = {
@@ -132,11 +167,11 @@ const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
               network: "Ethereum",
               token0: {
                 ...pool.token0,
-                imgId: token0ImgId,
+                imgId: token0ImgId ?? 0,
               },
               token1: {
                 ...pool.token1,
-                imgId: token1ImgId,
+                imgId: token1ImgId ?? 0,
               },
             };
 
@@ -197,7 +232,7 @@ const reloadPoolsDay = async (): Promise<any | null> => {
      * Fetch daily pool data from the subgraph
      */
     const fetchDailyPoolsFromSubgraph = async (): Promise<any> => {
-      const tokenImageMap = await preloadTokenImages();
+      const { symbolMap, nameMap } = await preloadTokenImages();
       let skip = 0;
       
       try {
@@ -228,9 +263,31 @@ const reloadPoolsDay = async (): Promise<any | null> => {
         for (const dayData of todayData) {
           // Convert pool data to the right format
           const pool = dayData.pool;
-          const token0ImgId = tokenImageMap.get(pool.token0.symbol) ?? 0;
-          const token1ImgId = tokenImageMap.get(pool.token1.symbol) ?? 0;
-          
+          // Use improved imgId logic
+          let token0ImgId: number | undefined;
+          let token1ImgId: number | undefined;
+          const token0Symbol = pool.token0.symbol?.toUpperCase();
+          const token1Symbol = pool.token1.symbol?.toUpperCase();
+
+          const token0ImgIds = symbolMap.get(token0Symbol) || [];
+          const token1ImgIds = symbolMap.get(token1Symbol) || [];
+
+          if (token0ImgIds.length === 1) {
+            token0ImgId = token0ImgIds[0];
+          } else if (token0ImgIds.length > 1 && pool.token0.name) {
+            token0ImgId = nameMap.get(pool.token0.name);
+          } else {
+            token0ImgId = 0;
+          }
+
+          if (token1ImgIds.length === 1) {
+            token1ImgId = token1ImgIds[0];
+          } else if (token1ImgIds.length > 1 && pool.token1.name) {
+            token1ImgId = nameMap.get(pool.token1.name);
+          } else {
+            token1ImgId = 0;
+          }
+
           const poolData: Subgraph.PoolData = {
             address: pool.id,
             name: `ETH:${pool.token0.symbol}:${pool.token1.symbol}`.replace(/[^a-zA-Z0-9:-]/g, "_"),
@@ -238,7 +295,7 @@ const reloadPoolsDay = async (): Promise<any | null> => {
             network: "Ethereum",
             volumeUSD: parseFloat(dayData.volumeUSD || 0),
             txCount: parseInt(dayData.txCount || 0),
-            date: today, // Include date in each pool data record
+            date: today,
             token0: {
               address: pool.token0.id,
               symbol: pool.token0.symbol,
@@ -246,14 +303,13 @@ const reloadPoolsDay = async (): Promise<any | null> => {
               imgId: token0ImgId,
             } as Subgraph.TokenDetails,
             token1: {
-              address: pool.token1.id, 
+              address: pool.token1.id,
               symbol: pool.token1.symbol,
               name: pool.token1.name,
               imgId: token1ImgId,
             } as Subgraph.TokenDetails,
           };
-          
-          // Store in map, overwriting any previous entry with the same address
+
           poolsMap.set(pool.id, poolData);
         }
         

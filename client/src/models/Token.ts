@@ -179,7 +179,7 @@ export namespace Subgraph {
     name: string;
     lastUpdated: Date;
     network: "Ethereum";
-    address: string;
+    id: string;
     volumeUSD: number;
     // volumeToken0: number;
     // token0Price: number;

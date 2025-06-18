@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SiEthereum } from 'react-icons/si';
 import { FaCopy, FaChartLine } from 'react-icons/fa';
 import LoadingScreenDots from '../common/LoadingScreenDots';
@@ -12,7 +12,7 @@ interface UserInfoCardProps {
 }
 
 const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
-  const { balances, balancesLoaded, showLoadingTooltip, tooltipFading, refreshBalances } = useBalances();
+  const { balances, balancesLoaded, refreshBalances } = useBalances();
   const [statusMessage, setStatusMessage] = useState<{type: 'success' | 'error' | 'loading', message: string} | null>(null);
 
   const [userStats] = useState({
@@ -59,6 +59,25 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
     setStatusMessage(null);
   };
 
+  // Loading state for balances
+  const [showLongWait, setShowLongWait] = useState(false);
+  const [fade, setFade] = useState<'wait' | 'transition' | 'long'>('wait');
+
+  useEffect(() => {
+    if (!balancesLoaded) {
+      setShowLongWait(false);
+      setFade('wait');
+      const timer = setTimeout(() => {
+        setFade('transition');
+        setTimeout(() => {
+          setShowLongWait(true);
+          setFade('long');
+        }, 400); // match transition duration
+      }, 7000);
+      return () => clearTimeout(timer);
+    }
+  }, [balancesLoaded]);
+
   return (
     <>
       <div className="lg:col-span-2">
@@ -93,61 +112,63 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
 
                 <div className="mb-6">
                   <strong className="text-[#00ffe7]">Balances:</strong>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {!balancesLoaded
-                      ? (
-                        <div className="relative flex items-center mx-auto">
+                  <div className="flex flex-wrap gap-2 mt-2 min-h-[48px]">
+                    {!balancesLoaded ? (
+                      <div className="w-full flex flex-col items-center justify-center relative min-h-[70px]">
+                        <div
+                          className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-400 ${
+                            fade === 'wait' ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                          }`}
+                        >
                           <LoadingScreenDots size={3} />
-                          {showLoadingTooltip && (
-                            <div className={`absolute left-full ml-4 bg-[#23263a] border-2 border-[#faafe8]/40 rounded-lg p-3 shadow-[0_0_16px_#faafe8] min-w-[280px] transition-all duration-300 ${
-                              tooltipFading ? 'opacity-0 scale-95' : 'opacity-100 scale-100 animate-fadeIn'
-                            }`}>
-                              <div className="text-[#faafe8] text-sm font-bold mb-2">
-                                ⏱️ Taking longer than expected...
-                              </div>
-                              <div className="text-[#e0e7ef] text-xs">
-                                If you logged in with <strong className="text-[#ff005c]">MetaMask Mobile</strong>, 
-                                please open the MetaMask app to refresh the balance.
-                              </div>
-                              <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-2">
-                                <div className="w-0 h-0 border-t-[8px] border-b-[8px] border-r-[8px] border-t-transparent border-b-transparent border-r-[#faafe8]/40"></div>
-                              </div>
-                            </div>
-                          )}
+                          <p className="text-[#e0e7ef] font-semibold mt-2 mb-1">Please wait</p>
+                          <p className="text-[#e0e7ef]/60 text-sm">Loading your balance data...</p>
                         </div>
-                      )
-                      : balances.length === 0
-                        ? <span className="text-[#faafe8]">No balances found</span>
-                        : balances.map((bal, idx) => {
-                            const formatted = formatLargeNumberEth(bal.balance);
-                            
-                            return (
-                              <span key={idx} className="bg-[#23263a] border border-[#00ffe7]/30 rounded px-3 py-1 text-[#00ffe7] text-sm flex items-center gap-2">
-                                <div className="flex items-center gap-1">
-                                  {formatted.hasSubscript && formatted.subscriptParts ? (
-                                    <span className="font-mono">
-                                      {formatted.subscriptParts.before}
-                                      <sub className="text-[10px]">{formatted.subscriptParts.subscript}</sub>
-                                      {formatted.subscriptParts.after}
-                                    </span>
-                                  ) : (
-                                    <span className="font-mono">{formatted.formatted}</span>
-                                  )}
-                                  {bal.symbol === "ETH" ? (
-                                    <SiEthereum className="w-4 h-4 text-[#627eea]" />
-                                  ) : (
-                                    <span className="font-bold">{bal.symbol}</span>
-                                  )}
-                                </div>
-                                {bal.usdValue && (
-                                  <span className="text-[#b8eaff] text-xs">
-                                    (${bal.usdValue})
-                                  </span>
-                                )}
+                        <div
+                          className={`absolute inset-0 flex flex-col items-center justify-center transition-opacity duration-400 ${
+                            fade === 'long' ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                          }`}
+                        >
+                          <span className="text-2xl mb-2 animate-pulse">⏱️</span>
+                          <p className="text-[#e0e7ef] font-semibold mb-1">Taking longer than expected...</p>
+                          <p className="text-[#e0e7ef]/60 text-xs mt-1 text-center">
+                            If you're using MetaMask Mobile, you may need to open the app to refresh balances.
+                          </p>
+                        </div>
+                      </div>
+                    ) : balances.length === 0 ? (
+                      <span className="text-[#faafe8]">No balances found</span>
+                    ) : (
+                      balances.map((bal, idx) => {
+                        const formatted = formatLargeNumberEth(bal.balance);
+                        
+                        return (
+                          <span key={idx} className="bg-[#23263a] border border-[#00ffe7]/30 rounded px-3 py-1 text-[#00ffe7] text-sm flex items-center gap-2">
+                            <div className="flex items-center gap-1">
+                              {formatted.hasSubscript && formatted.subscriptParts ? (
+                                <span className="font-mono">
+                                  {formatted.subscriptParts.before}
+                                  <sub className="text-[10px]">{formatted.subscriptParts.subscript}</sub>
+                                  {formatted.subscriptParts.after}
+                                </span>
+                              ) : (
+                                <span className="font-mono">{formatted.formatted}</span>
+                              )}
+                              {bal.symbol === "ETH" ? (
+                                <SiEthereum className="w-4 h-4 text-[#627eea]" />
+                              ) : (
+                                <span className="font-bold">{bal.symbol}</span>
+                              )}
+                            </div>
+                            {bal.usdValue && (
+                              <span className="text-[#b8eaff] text-xs">
+                                (${bal.usdValue})
                               </span>
-                            );
-                          })
-                    }
+                            )}
+                          </span>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>

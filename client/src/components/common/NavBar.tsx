@@ -8,6 +8,7 @@ import NeonText from './NeonText';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaChartLine, FaChevronLeft } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
+import { FaCity } from 'react-icons/fa6';
 
 interface NavBarProps {
   telegramUser: any;
@@ -182,10 +183,10 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
           {connected && user && !isOnAppRoute && (
             <button
               onClick={() => handleNavigation('/i/dashboard')}
-              className="bg-[#00ffe7]/10 hover:bg-[#00ffe7]/20 text-[#00ffe7] font-bold py-2 px-4 rounded border border-[#00ffe7]/40 transition-all duration-200 flex items-center gap-2"
+              className="bg-[#00ffe7]/10 hover:bg-[#00ffe7]/20 text-[#00ffe7] py-1 px-4 rounded border border-[#00ffe7]/40 transition-all duration-200 flex items-center gap-2"
             >
-              <FaTachometerAlt className="text-sm" />
-              <span>Dashboard</span>
+              <FaCity className="text-sm" />
+              <span>Enter the city</span>
             </button>
           )}
           

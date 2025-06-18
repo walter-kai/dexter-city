@@ -87,7 +87,7 @@ export const fetchTopAlltimePools = async (skip: number = 0, first: number = 100
     }
 
     const pools: Subgraph.PoolData[] = result.data?.pools.map((pool: Subgraph.PairData) => ({
-      address: pool.address,
+      address: pool.id,
       name: sanitizeDocId(`ETH:${pool.token0.symbol}:${pool.token1.symbol}`),
       lastUpdated: new Date(),
       network: "Ethereum",

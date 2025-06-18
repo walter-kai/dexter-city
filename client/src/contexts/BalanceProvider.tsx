@@ -14,8 +14,9 @@ interface BalanceContextType {
   balancesLoaded: boolean;
   showLoadingTooltip: boolean;
   tooltipFading: boolean;
-  refreshBalances: () => void;
+  refreshBalances: () => Promise<void>;
   isLoading: boolean;
+  isLoadingLongTime: boolean;  // Add this new state
 }
 
 const BalanceContext = createContext<BalanceContextType | undefined>(undefined);
@@ -85,6 +86,7 @@ export const BalanceProvider: React.FC<BalanceProviderProps> = ({ children }) =>
   const [tooltipFading, setTooltipFading] = useState(false);
   const [loadingTimeout, setLoadingTimeout] = useState<NodeJS.Timeout | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingLongTime, setIsLoadingLongTime] = useState<boolean>(false); // Add this new state
 
   // Fetch ETH price
   const fetchEthPrice = async () => {
@@ -367,6 +369,7 @@ export const BalanceProvider: React.FC<BalanceProviderProps> = ({ children }) =>
     tooltipFading,
     refreshBalances,
     isLoading,
+    isLoadingLongTime,
   };
 
   return (
