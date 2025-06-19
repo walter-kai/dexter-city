@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../../models/Bot";
-import { Subgraph } from "../../models/Token";
+import { Subgraph } from "../../models/Uniswap";
 import User from "../../models/User";
 import { generateLogoHash } from "../../hooks/Robohash";
 import PairChart from "../../components/build/chart/PairChart";
-import TokenInfo from "../../components/build/TokenInfo";
+import TokenInfo from "../../components/build/MarketInfo";
 import LoadingScreenDots from "../../components/common/LoadingScreenDots";
-import { FaCheckCircle, FaExclamationTriangle, FaRobot, FaArrowLeft, FaSearch, FaChevronDown } from "react-icons/fa";
+import { FaCheckCircle, FaExclamationTriangle, FaRobot, FaArrowLeft } from "react-icons/fa";
+import { CoinGecko } from "../../models/CoinGecko";
+import PoolDropdown from "../../components/build/PoolDropdown";
 
 const hudPanel =
   "bg-[#181a23]/90 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_32px_#00ffe7] p-6 md:p-10 flex flex-col items-center relative";
@@ -40,8 +42,6 @@ const BuildBot: React.FC = () => {
   const [tradingPool, setTradingPool] = useState<Subgraph.PoolData | undefined>(undefined);
   const [profitBase, setProfitBase] = useState<"token0" | "token1" | null>(null);
   const [availablePools, setAvailablePools] = useState<Subgraph.PoolData[] | null>(null);
-  const [showPairDropdown, setShowPairDropdown] = useState(false);
-  const [pairSearch, setPairSearch] = useState("");
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -69,6 +69,12 @@ const BuildBot: React.FC = () => {
     };
     fetchPools();
   }, []);
+
+  // Helper function to get CMC icon
+  const getCmcIcon = (imgId: number | undefined) =>
+    imgId
+      ? `https://s2.coinmarketcap.com/static/img/coins/64x64/${imgId}.png`
+      : "/logos/dexter.svg";
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -142,10 +148,6 @@ const BuildBot: React.FC = () => {
     setProfitBase(selectedToken);
   };
 
-  const filteredPools = availablePools?.filter(pool => 
-    pool.token0.symbol.toLowerCase().includes(pairSearch.toLowerCase()) ||
-    pool.token1.symbol.toLowerCase().includes(pairSearch.toLowerCase())
-  ) || [];
 
   const selectedPoolDisplay = tradingPool 
     ? `${tradingPool.token0.symbol} ↔️ ${tradingPool.token1.symbol}`
@@ -208,91 +210,25 @@ const BuildBot: React.FC = () => {
               </select>
               
               <label className="text-[#00ffe7] font-bold text-sm mt-4 mb-1">Trading Pair</label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowPairDropdown(!showPairDropdown)}
-                  className="w-full h-12 bg-[#23263a] border-2 border-[#00ffe7]/40 text-[#e0e7ef] rounded px-3 font-bold flex items-center justify-between hover:border-[#00ffe7] transition-colors"
-                >
-                  <span>{selectedPoolDisplay}</span>
-                  <FaChevronDown className={`transition-transform ${showPairDropdown ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {showPairDropdown && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-[#23263a] border-2 border-[#00ffe7]/40 rounded-lg shadow-lg z-20">
-                    {/* Search Bar */}
-                    <div className="p-3 border-b border-[#00ffe7]/20">
-                      <div className="relative">
-                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-[#00ffe7]/60" />
-                        <input
-                          type="text"
-                          placeholder="Search pairs..."
-                          value={pairSearch}
-                          onChange={(e) => setPairSearch(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 bg-[#181a23] border border-[#00ffe7]/20 rounded text-[#e0e7ef] text-sm focus:outline-none focus:border-[#00ffe7]"
-                        />
-                      </div>
-                    </div>
-                    
-                    {/* Dropdown Content */}
-                    <div className="max-h-48 overflow-y-auto">
-                      {availablePools ? (
-                        filteredPools.length > 0 ? (
-                          filteredPools.map((pool) => (
-                            <div
-                              key={pool.address}
-                              className={`flex items-center p-3 cursor-pointer transition-all ${
-                                formData.tradingPool === pool.name.split(":")[1]
-                                  ? "bg-[#00ffe7]/20 border-l-4 border-[#00ffe7]"
-                                  : "hover:bg-[#00ffe7]/10"
-                              }`}
-                              onClick={() => {
-                                setTradingPool(pool);
-                                setFormData({
-                                  ...formData,
-                                  tradingPool: pool.name.split(":")[1],
-                                });
-                                setShowPairDropdown(false);
-                                setPairSearch("");
-                              }}
-                            >
-                              <img
-                                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pool.token0.imgId || "default"}.png`}
-                                alt={`${pool.token0.symbol} icon`}
-                                className="w-6 h-6 mr-2"
-                              />
-                              <span className="text-[#e0e7ef] font-bold">{pool.token0.symbol}</span>
-                              <span className="text-[#00ffe7] mx-2">↔️</span>
-                              <img
-                                src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${pool.token1.imgId || "default"}.png`}
-                                alt={`${pool.token1.symbol} icon`}
-                                className="w-6 h-6 mx-2"
-                              />
-                              <span className="text-[#e0e7ef] font-bold">{pool.token1.symbol}</span>
-                            </div>
-                            
-                          ))
-                        ) : (
-                          <div className="p-4 text-center text-[#e0e7ef]/60">
-                            No pairs found matching "{pairSearch}"
-                          </div>
-                        )
-                      ) : (
-                        <div className="p-4">
-                          <LoadingScreenDots />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
+              <PoolDropdown
+                availablePools={availablePools}
+                selectedPool={tradingPool}
+                onSelect={(pool) => {
+                  setTradingPool(pool);
+                  setFormData({
+                    ...formData,
+                    tradingPool: pool.name.split(":")[1],
+                  });
+                }}
+                formData={formData}
+              />
             </div>
-            {/* Profit Currency Selection */}
+            {/* Payout Currency Selection */}
             {tradingPool && (
               <div className="flex flex-col items-center w-full">
                 <label className="text-[#00ffe7] font-bold text-sm mb-3">Payout Currency</label>
                 <div className="flex gap-4 mb-4">
-                  {tradingPool?.token0.imgId && (
+                  {tradingPool?.token0.address && (
                     <div
                       className={`cursor-pointer p-3 flex rounded-lg items-center border-2 transition-all ${
                         profitBase === "token0"
@@ -302,14 +238,14 @@ const BuildBot: React.FC = () => {
                       onClick={() => handleProfitBaseToggle("token0")}
                     >
                       <img
-                        src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token0.imgId}.png`}
+                        src={getCmcIcon(tradingPool.token0.imgId)}
                         alt="Token 0"
                         className="w-8 h-8 rounded-full"
                       />
                       <p className="text-[#e0e7ef] text-sm font-bold ml-3">{tradingPool?.token0.symbol}</p>
                     </div>
                   )}
-                  {tradingPool?.token1.imgId && (
+                  {tradingPool?.token1.address && (
                     <div
                       className={`cursor-pointer p-3 flex rounded-lg items-center border-2 transition-all ${
                         profitBase === "token1"
@@ -319,7 +255,7 @@ const BuildBot: React.FC = () => {
                       onClick={() => handleProfitBaseToggle("token1")}
                     >
                       <img
-                        src={`https://s2.coinmarketcap.com/static/img/coins/64x64/${tradingPool?.token1.imgId}.png`}
+                        src={getCmcIcon(tradingPool.token1.imgId)}
                         alt="Token 1"
                         className="w-8 h-8 rounded-full"
                       />
@@ -335,9 +271,8 @@ const BuildBot: React.FC = () => {
           <div className="w-full flex flex-col lg:flex-row gap-6 items-start">
             {/* Token Info - Left Side */}
             <div className="w-full lg:w-1/3">
-              <TokenInfo tokenAddress={tradingPool?.token0.address || ""} />
+              <TokenInfo tokenAddress={tradingPool?.token1.address || ""} />
             </div>
-            
             {/* Chart - Right Side */}
             <div className="w-full lg:w-2/3">
               <div className="bg-[#23263a] border-2 border-[#00ffe7]/20 rounded-xl p-4">

@@ -1,5 +1,5 @@
 import { createClient, cacheExchange, fetchExchange } from 'urql';
-import { Subgraph } from '../../../client/src/models/Token';
+import { Subgraph } from '../../../client/src/models/Uniswap';
 
 // Don't create the client immediately - create it lazily when needed
 let client: any = null;
@@ -93,14 +93,14 @@ export const fetchTopAlltimePools = async (skip: number = 0, first: number = 100
       network: "Ethereum",
       volumeUSD: pool.volumeUSD,
       token0: {
-        address: pool.token0.id, 
+        address: pool.token0.address, 
         symbol: pool.token0.symbol,
         name: pool.token0.name,
         // volume: pool.token0.volumeUSD,
         // price: pool.token0Price,
       },
       token1: {
-        address: pool.token1.id, 
+        address: pool.token1.address, 
         symbol: pool.token1.symbol,
         name: pool.token1.name,
         // volume: pool.token1.,

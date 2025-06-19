@@ -1,7 +1,7 @@
 import { db } from "../../config/firebase";
 import admin from "firebase-admin";
 import logger from "../../config/logger";
-import { CoinMarketCap, Subgraph } from "../../../client/src/models/Token";
+import { CoinMarketCap, Subgraph } from "../../../client/src/models/Uniswap";
 import coinMarketCapService from "./chain.coinmarketcap.service";
 import { fetchSwaps, fetchTopAlltimePools, fetchTopDailyPools } from "./UniswapV4";
 import { updateSwapsToPools } from "../firebase/firebase.service";
@@ -147,6 +147,9 @@ const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
             } else if (token0ImgIds.length > 1 && pool.token0.name) {
               // Fallback: search by name
               token0ImgId = nameMap.get(pool.token0.name);
+              if (token0ImgId === undefined) {
+                token0ImgId = token0ImgIds[0];
+              }
             } else {
               token0ImgId = 0;
             }
@@ -156,6 +159,9 @@ const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
             } else if (token1ImgIds.length > 1 && pool.token1.name) {
               // Fallback: search by name
               token1ImgId = nameMap.get(pool.token1.name);
+              if (token1ImgId === undefined) {
+                token1ImgId = token1ImgIds[0];
+              }
             } else {
               token1ImgId = 0;
             }
@@ -273,18 +279,22 @@ const reloadPoolsDay = async (): Promise<any | null> => {
           const token1ImgIds = symbolMap.get(token1Symbol) || [];
 
           if (pool.token0.name) {
-            token0ImgId = nameMap.get(pool.token0.name)
+            token0ImgId = nameMap.get(pool.token0.name);
+            if (token0ImgId === undefined) {
+              token0ImgId = token0ImgIds[0];
+            }
           } else {
             token0ImgId = token0ImgIds[0];
-          
-          } 
+          }
 
           if (pool.token1.name) {
-            token1ImgId = nameMap.get(pool.token1.name)
+            token1ImgId = nameMap.get(pool.token1.name);
+            if (token1ImgId === undefined) {
+              token1ImgId = token1ImgIds[0];
+            }
           } else {
             token1ImgId = token1ImgIds[0];
-          
-          } 
+          }
 
           const poolData: Subgraph.PoolData = {
             address: pool.id,
@@ -300,13 +310,13 @@ const reloadPoolsDay = async (): Promise<any | null> => {
             token0Price: pool.token0Price,
             token1Price: pool.token1Price,
             token0: {
-              id: pool.token0.id,
+              address: pool.token0.id,
               symbol: pool.token0.symbol,
               name: pool.token0.name,
               imgId: token0ImgId || 0,
             } as Subgraph.TokenDetails,
             token1: {
-              id: pool.token1.id,
+              address: pool.token1.id,
               symbol: pool.token1.symbol,
               name: pool.token1.name,
               imgId: token1ImgId || 0,

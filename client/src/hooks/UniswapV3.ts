@@ -1,6 +1,6 @@
 import { createClient, cacheExchange, fetchExchange } from 'urql';
 import { PublicClient } from 'viem';
-import { Subgraph } from '../models/Token';
+import { Subgraph } from '../models/Uniswap';
 
 interface uniswapV3Pair { 
   id: number; 

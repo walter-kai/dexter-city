@@ -106,7 +106,7 @@ export namespace Subgraph {
   }
 
   export interface TokenDetails {
-    // address: string;
+    address: string;
     symbol: string;
     name: string;
     imgId: number;
@@ -115,7 +115,7 @@ export namespace Subgraph {
     // circulating_supply: number;
     // cmc_rank: number;
     date_added: string;
-    id: string;
+    // id: string;
     // infinite_supply: boolean;
     // lastUpdated: string; // Timestamp
     // last_updated: string;

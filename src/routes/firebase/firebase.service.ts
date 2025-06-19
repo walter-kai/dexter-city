@@ -1,7 +1,7 @@
 import { Timestamp } from "firebase-admin/firestore";
 import logger from "../../config/logger";
 import { db } from "../../config/firebase";
-import { Subgraph } from "../../../client/src/models/Token";
+import { Subgraph } from "../../../client/src/models/Uniswap";
 import ApiError from "../../utils/api-error";
 
 /**

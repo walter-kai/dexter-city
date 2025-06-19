@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaArrowUp, FaArrowDown, FaExchangeAlt } from 'react-icons/fa';
-import { Subgraph } from '../../models/Token';
+import { Subgraph } from '../../models/Uniswap';
 import LoadingScreenDots from '../common/LoadingScreenDots';
 
 interface DailyPoolsData {
