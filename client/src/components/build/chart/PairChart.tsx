@@ -324,53 +324,6 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
             ctx.restore();
           }
         }
-
-        // Draw flat bars with different colors based on type
-        // if (Array.isArray(filledBarData) && filledBarData.length > 0) {
-        //   // We only want to process bars that are within the visible range
-        //   const visibleBars = filledBarData.filter(bar => {
-        //     const barTime = new Date(bar.x).getTime();
-        //     return barTime >= xScale.min && barTime <= xScale.max;
-        //   });
-          
-        //   // For each visible bar that has equal OHLC values, draw a specially colored line
-        //   visibleBars.forEach((bar, index) => {
-        //     if (bar.o === bar.h && bar.h === bar.l && bar.l === bar.c) {
-        //       // This is a flat bar
-        //       if (xScale && yScale) {
-        //         const x = xScale.getPixelForValue(bar.x);
-        //         const y = yScale.getPixelForValue(bar.c);
-                
-        //         // Set color based on type: yellow for actual flat trades, white for gap fillers
-        //         let lineColor = bar.isGapFiller ? "#ffffff" : "#ffcc00";
-                
-        //         // If this is the active bar (tooltip is showing for it), make it brighter
-        //         if (index === activeBarIndex) {
-        //           lineColor = bar.isGapFiller ? "#ffffff" : "#ffff00"; // Brighter yellow for active
-        //           ctx.save();
-        //           // Draw highlight circle behind the line
-        //           ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-        //           ctx.beginPath();
-        //           ctx.arc(x, y, 8, 0, Math.PI * 2);
-        //           ctx.fill();
-        //           ctx.restore();
-        //         }
-                
-        //         // Draw line with appropriate color
-        //         ctx.save();
-        //         ctx.strokeStyle = lineColor;
-        //         ctx.lineWidth = 2.5;
-        //         ctx.setLineDash(bar.isGapFiller ? [2, 2] : []);
-        //         ctx.beginPath();
-        //         ctx.moveTo(x - 8, y);
-        //         ctx.lineTo(x + 8, y);
-        //         ctx.stroke();
-        //         ctx.restore();
-        //       }
-        //     }
-        //   });
-        // }
-
         ctx.restore();
       }
     };
@@ -398,7 +351,7 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
         newTooltipEl.style.pointerEvents = 'none';
         newTooltipEl.style.transition = 'all 0.2s ease';
         newTooltipEl.style.transform = 'translate(-50%, -100%)';
-        newTooltipEl.style.zIndex = '999';
+        newTooltipEl.style.zIndex = '0';
         
         chart.canvas.parentNode?.appendChild(newTooltipEl);
       }
@@ -743,7 +696,7 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
             <div className="h-[2px] w-full bg-[#00ffe7] animate-scan"></div>
           </div>
           
-          <div className="relative z-10">
+          <div className="relative">
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-[#00ffe7] font-bold uppercase tracking-wider text-sm">Live Market Data</h3>
               <span className="text-xs text-[#00ffe7]/60 flex items-center gap-1">

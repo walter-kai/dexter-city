@@ -55,7 +55,7 @@ const PoolDropdown: React.FC<PoolDropdownProps> = ({
         <FaChevronDown className={`transition-transform ${showDropdown ? "rotate-180" : ""}`} />
       </button>
       {showDropdown && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-[#23263a] border-2 border-[#00ffe7]/40 rounded-lg shadow-lg z-20">
+        <div className="absolute z-10 top-full left-0 right-0 mt-1 bg-[#23263a] border-2 border-[#00ffe7]/40 rounded-lg shadow-lg">
           {/* Search Bar */}
           <div className="p-3 border-b border-[#00ffe7]/20">
             <div className="relative">
