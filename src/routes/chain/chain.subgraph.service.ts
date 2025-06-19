@@ -115,7 +115,7 @@ export const getSwapsV4 = async (contractAddress: string): Promise<Subgraph.Swap
  */
 const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
   try {
-    const tokensCollection = db.collection("pools-uniswap");
+    const tokensCollection = db.collection("masterPool-uniswap");
   
     /**
      * Fetch recent pairs from the subgraph and get the corresponding token images
@@ -300,13 +300,13 @@ const reloadPoolsDay = async (): Promise<any | null> => {
               address: pool.token0.id,
               symbol: pool.token0.symbol,
               name: pool.token0.name,
-              imgId: token0ImgId,
+              imgId: token0ImgId || 0,
             } as Subgraph.TokenDetails,
             token1: {
               address: pool.token1.id,
               symbol: pool.token1.symbol,
               name: pool.token1.name,
-              imgId: token1ImgId,
+              imgId: token1ImgId || 0,
             } as Subgraph.TokenDetails,
           };
 

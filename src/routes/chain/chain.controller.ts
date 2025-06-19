@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import coinMarketCapService from "./chain.coinmarketcap.service";
 import subgraphService from "./chain.subgraph.service";
 import logger from "../../config/logger";
+import { db } from "../../config/firebase";
 
 // Combined endpoint for reloading both tokens and pools
 const reloadAll = async (req: Request, res: Response): Promise<Response> => {
@@ -178,9 +179,55 @@ const reloadPoolsDay = async (req: Request, res: Response): Promise<Response> =>
   }
 };
 
+/**
+ * Import pools from dayPools-uniswap/{date} to masterPool-uniswap, overwriting by address.
+ * Expects a POST with { date: "YYYY-MM-DD" } in the body or as a query param.
+ */
+const importMasterPool = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { date } = req.params; // Get the symbol from the URL params
+    // const date = req.body.date || req.query.date;
+    if (!date || typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ error: "Missing or invalid 'date' parameter (YYYY-MM-DD)" });
+    }
+
+    const dayDocRef = db.collection("dayPools-uniswap").doc(date);
+    const dayDoc = await dayDocRef.get();
+    if (!dayDoc.exists) {
+      return res.status(404).json({ error: `No dayPools-uniswap data for ${date}` });
+    }
+    const data = dayDoc.data();
+    if (!data || !Array.isArray(data.pools)) {
+      return res.status(404).json({ error: `No pools array in dayPools-uniswap/${date}` });
+    }
+
+    const poolsUniswap = db.collection("masterPool-uniswap");
+    const batch = db.batch();
+    let updated = 0;
+
+    for (const pool of data.pools) {
+      if (!pool.address) continue;
+      const poolDoc = poolsUniswap.doc(pool.address);
+      batch.set(poolDoc, pool, { merge: true });
+      updated++;
+    }
+
+    await batch.commit();
+
+    return res.json({
+      message: `Imported ${updated} pools from dayPools-uniswap/${date} to masterPool-uniswap.`,
+      imported: updated,
+      date,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Internal server error", details: error instanceof Error ? error.message : error });
+  }
+};
+
 export default {
   reloadAll,
   reloadTokens,
   reloadPools,
-  reloadPoolsDay // Add the new function to exports
+  reloadPoolsDay,
+  importMasterPool, // Add the new function to exports
 };
