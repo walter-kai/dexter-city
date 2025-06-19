@@ -290,7 +290,7 @@ const BuildBot: React.FC = () => {
             {/* Profit Currency Selection */}
             {tradingPool && (
               <div className="flex flex-col items-center w-full">
-                <label className="text-[#00ffe7] font-bold text-sm mb-3">Profit Currency</label>
+                <label className="text-[#00ffe7] font-bold text-sm mb-3">Payout Currency</label>
                 <div className="flex gap-4 mb-4">
                   {tradingPool?.token0.imgId && (
                     <div

@@ -118,6 +118,8 @@ export const fetchTopAlltimePools = async (skip: number = 0, first: number = 100
 export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000): Promise<any[]> => {
   const query = `{
     poolDayDatas(first: ${first}, skip: ${skip}, orderBy: date, orderDirection: desc) {
+      txCount
+      date
       pool {
         id
         token0 {
@@ -137,10 +139,8 @@ export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000)
         token0Price
         token1Price
         liquidity
+        createdAtTimestamp
       }
-      txCount
-      volumeUSD
-      date
     }
   }`;
 

@@ -272,38 +272,41 @@ const reloadPoolsDay = async (): Promise<any | null> => {
           const token0ImgIds = symbolMap.get(token0Symbol) || [];
           const token1ImgIds = symbolMap.get(token1Symbol) || [];
 
-          if (token0ImgIds.length === 1) {
+          if (pool.token0.name) {
+            token0ImgId = nameMap.get(pool.token0.name)
+          } else {
             token0ImgId = token0ImgIds[0];
-          } else if (token0ImgIds.length > 1 && pool.token0.name) {
-            token0ImgId = nameMap.get(pool.token0.name);
-          } else {
-            token0ImgId = 0;
-          }
+          
+          } 
 
-          if (token1ImgIds.length === 1) {
-            token1ImgId = token1ImgIds[0];
-          } else if (token1ImgIds.length > 1 && pool.token1.name) {
-            token1ImgId = nameMap.get(pool.token1.name);
+          if (pool.token1.name) {
+            token1ImgId = nameMap.get(pool.token1.name)
           } else {
-            token1ImgId = 0;
-          }
+            token1ImgId = token1ImgIds[0];
+          
+          } 
 
           const poolData: Subgraph.PoolData = {
             address: pool.id,
             name: `ETH:${pool.token0.symbol}:${pool.token1.symbol}`.replace(/[^a-zA-Z0-9:-]/g, "_"),
             lastUpdated: new Date(),
+            createdAtTimestamp: new Date(pool.createdAtTimestamp * 1000),
             network: "Ethereum",
             volumeUSD: parseFloat(dayData.volumeUSD || 0),
             txCount: parseInt(dayData.txCount || 0),
             date: today,
+            feeTier: parseInt(dayData.feeTier || 0),
+            liquidity: pool.liquidity,
+            token0Price: pool.token0Price,
+            token1Price: pool.token1Price,
             token0: {
-              address: pool.token0.id,
+              id: pool.token0.id,
               symbol: pool.token0.symbol,
               name: pool.token0.name,
               imgId: token0ImgId || 0,
             } as Subgraph.TokenDetails,
             token1: {
-              address: pool.token1.id,
+              id: pool.token1.id,
               symbol: pool.token1.symbol,
               name: pool.token1.name,
               imgId: token1ImgId || 0,
