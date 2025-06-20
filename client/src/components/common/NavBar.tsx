@@ -9,6 +9,7 @@ import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, 
 import { SiEthereum } from 'react-icons/si';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
 import { FaCity } from 'react-icons/fa6';
+import LoadingScreenDots from './LoadingScreenDots';
 
 interface NavBarProps {
   telegramUser: any;
@@ -166,13 +167,15 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
       ">
         {/* Left section - Title */}
         <div className="flex items-center">
-          <button className="" type="button" onClick={() => handleNavigation('/')}>
+          <button className="flex items-center gap-2" 
+          type="button" onClick={() => handleNavigation('/')}>
+            <img src="/logos/dexter.svg" className="h-4 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
             <NeonText 
               className="text-2xl tracking-widest font-savate"
               intensity="high"
               
             >
-              DexterCity
+              D<span className='text-base'>EXTER</span>C<span className='text-base'>ITY</span>
             </NeonText>
           </button>
         </div>
@@ -321,13 +324,12 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <img src="/logos/dexter.svg" className="h-4 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
               <button
                 onClick={handleLoginClick}
                 disabled={connecting}
-                className="bg-[#00ffe7] text-[#181a23] font-bold py-2 px-4 rounded hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c] transition disabled:opacity-50"
+                className="btn-purple w-20 h-6 text-sm py-0"
               >
-                {connecting ? "Connecting..." : "Login"}
+                {connecting ? <LoadingScreenDots size={2} />: 'Enter'}
               </button>
             </div>
           )}
