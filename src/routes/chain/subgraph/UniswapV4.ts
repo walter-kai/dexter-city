@@ -1,5 +1,37 @@
 import { createClient, cacheExchange, fetchExchange } from 'urql';
-import { Subgraph } from '../../../client/src/models/Uniswap';
+
+import { PoolData } from '@/models/subgraph/Pools';
+import { SwapDataV4 } from '@/models/subgraph/Swaps';
+
+// Define the interface for the returned pool day data
+export interface PoolDayData {
+  __typename: string;
+  date: number;
+  pool: {
+    __typename: string;
+    id: string;
+    token0: {
+      __typename: string;
+      id: string;
+      name: string;
+      symbol: string;
+      volumeUSD: string;
+    };
+    token1: {
+      __typename: string;
+      id: string;
+      name: string;
+      symbol: string;
+      volumeUSD: string;
+    };
+    feeTier: string;
+    volumeUSD: string;
+    token0Price: string;
+    token1Price: string;
+    liquidity: string;
+    createdAtTimestamp: string;
+  };
+}
 
 // Don't create the client immediately - create it lazily when needed
 let client: any = null;
@@ -28,7 +60,7 @@ export const fetchSwaps = async (
   skip: number = 0,
   startTime?: Date,
   endTime?: Date,
-): Promise<Subgraph.SwapDataV4[]> => {
+): Promise<SwapDataV4[]> => {
   const startTimestamp = startTime ? Math.floor(startTime.getTime() / 1000) : Math.floor((Date.now() - 7 * 24 * 60 * 60 * 1000) / 1000);
   const endTimestamp = endTime ? Math.floor(endTime.getTime() / 1000) : Math.floor(Date.now() / 1000);
 
@@ -54,81 +86,24 @@ export const fetchSwaps = async (
   }
 };
 
-// Function to fetch recent swaps with a specific pairId and skip parameter
-export const fetchTopAlltimePools = async (skip: number = 0, first: number = 1000): Promise<Subgraph.PoolData[]> => {
 
-    const query = `{
-    pools(first: ${first}, skip: ${skip}, orderBy: txCount, orderDirection: desc, where: { token0: "0x0000000000000000000000000000000000000000" }) {
-      id
-      token0 {
-        symbol
-        id
-        name
-        volumeUSD
-      }
-      token1 {
-        symbol
-        id
-        name
-        volumeUSD
-      }
-      feeTier
-      volumeUSD
-      token0Price
-      token1Price
-      liquidity
-    }
-  }`;
-
-  try {
-    const result = await getClient().query(query, { skip }).toPromise();
-    if (result.error) {
-      throw new Error(result.error.message);
-    }
-
-    const pools: Subgraph.PoolData[] = result.data?.pools.map((pool: Subgraph.PairData) => ({
-      address: pool.id,
-      name: sanitizeDocId(`ETH:${pool.token0.symbol}:${pool.token1.symbol}`),
-      lastUpdated: new Date(),
-      network: "Ethereum",
-      volumeUSD: pool.volumeUSD,
-      token0: {
-        address: pool.token0.address, 
-        symbol: pool.token0.symbol,
-        name: pool.token0.name,
-        // volume: pool.token0.volumeUSD,
-        // price: pool.token0Price,
-      },
-      token1: {
-        address: pool.token1.address, 
-        symbol: pool.token1.symbol,
-        name: pool.token1.name,
-        // volume: pool.token1.,
-        // price: pool.token1Price,
-      },
-    })) || [];
-
-    return pools;
-  } catch (error) {
-    console.error('Error fetching recent swaps:', error);
-    throw error;
-  }
-};
-
-export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000): Promise<any[]> => {
+export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000): Promise<PoolDayData[]> => {
   const query = `{
     poolDayDatas(first: ${first}, skip: ${skip}, orderBy: date, orderDirection: desc) {
-      txCount
+      __typename
       date
       pool {
+        __typename
         id
         token0 {
+          __typename
           symbol
           id
           name
           volumeUSD
         }
         token1 {
+          __typename
           symbol
           id
           name

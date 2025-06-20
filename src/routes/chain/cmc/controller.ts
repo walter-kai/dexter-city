@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import coinMarketCapService from "./chain.coinmarketcap.service";
+import coinMarketCapService from "./service";
+import logger from "../../../config/logger";
 
 
 const reloadTokens = async (req: Request, res: Response): Promise<Response> => {
@@ -16,6 +17,36 @@ const reloadTokens = async (req: Request, res: Response): Promise<Response> => {
   } catch (error) {
     console.error("Error fetching bot:", error);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+
+const reloadCmcTokens = async (req: Request, res: Response): Promise<Response> => {
+  const startTime = Date.now();
+  
+  try {
+    logger.info("Starting CoinMarketCap token reload...");
+    await coinMarketCapService.reloadTokens();
+    
+    const totalTime = (Date.now() - startTime) / 1000;
+    logger.info(`CoinMarketCap tokens reloaded successfully in ${totalTime}s`);
+    
+    return res.json({
+      message: "CoinMarketCap tokens reloaded successfully",
+      timing: {
+        totalTime: `${totalTime}s`
+      },
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    const totalTime = (Date.now() - startTime) / 1000;
+    logger.error("Error during token reload:", error);
+    return res.status(500).json({ 
+      error: "Internal server error during token reload",
+      details: error instanceof Error ? error.message : "Unknown error",
+      totalTime: `${totalTime}s`
+    });
   }
 };
 
@@ -41,5 +72,6 @@ const getTokenBySymbol = async (req: Request, res: Response): Promise<Response> 
 
 export default {
   reloadTokens,
+  reloadCmcTokens,
   getTokenBySymbol,
 };

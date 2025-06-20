@@ -1,23 +1,23 @@
 import React, { useState } from "react";
-import { Subgraph } from "../../models/Uniswap";
+import { PoolData } from "../../models/subgraph/Pools";
 import LoadingScreenDots from "../common/LoadingScreenDots";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
+import { usePools } from "../../contexts/PoolContext";
 
 interface PoolDropdownProps {
-  availablePools: Subgraph.PoolData[] | null;
-  selectedPool: Subgraph.PoolData | undefined;
-  onSelect: (pool: Subgraph.PoolData) => void;
+  selectedPool: PoolData | undefined;
+  onSelect: (pool: PoolData) => void;
   formData: any;
 }
 
 const PoolDropdown: React.FC<PoolDropdownProps> = ({
-  availablePools,
   selectedPool,
   onSelect,
   formData,
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [pairSearch, setPairSearch] = useState("");
+  const { availablePools, loading } = usePools();
 
   // Filtered pools
   const filteredPools =
@@ -34,7 +34,7 @@ const PoolDropdown: React.FC<PoolDropdownProps> = ({
       : "/logos/dexter.svg";
 
   // When a pool is selected, just call onSelect
-  const handleSelect = (pool: Subgraph.PoolData) => {
+  const handleSelect = (pool: PoolData) => {
     onSelect(pool);
     setShowDropdown(false);
     setPairSearch("");
@@ -71,7 +71,11 @@ const PoolDropdown: React.FC<PoolDropdownProps> = ({
           </div>
           {/* Dropdown Content */}
           <div className="max-h-48 overflow-y-auto">
-            {availablePools ? (
+            {loading ? (
+              <div className="p-4">
+                <LoadingScreenDots />
+              </div>
+            ) : (
               filteredPools.length > 0 ? (
                 filteredPools.map((pool) => (
                   <div
@@ -103,10 +107,6 @@ const PoolDropdown: React.FC<PoolDropdownProps> = ({
                   No pairs found matching "{pairSearch}"
                 </div>
               )
-            ) : (
-              <div className="p-4">
-                <LoadingScreenDots />
-              </div>
             )}
           </div>
         </div>

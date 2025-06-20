@@ -72,7 +72,7 @@ const Hero: React.FC = () => {
           autoplay
           speed={1}
         />
-        <div className="absolute bottom-[150px] right-[121px]">
+        <div className="absolute top-[60%] right-[8.5%]">
           <RandomRobohashCard />
         </div>
       </div>

@@ -4,7 +4,6 @@ import authRoute from "./auth/auth.route";
 import userRoute from "./user/user.route";
 import telegramRoute from "./telegram/telegram.route";
 import chainRoute from "./chain/chain.route";
-import firebaseRoute from "./firebase/firebase.route";
 import socialNewsRoute from "./socialNews/socialNews.route";
 import sentimentRoute from "./sentiment/sentiment.route";
 import linkRoute from "./link/link.route";
@@ -36,10 +35,6 @@ const defaultRoutes: ReadonlyArray<RouteObj> = [
   {
     path: "/telegram",
     route: telegramRoute,
-  },
-  {
-    path: "/firebase",
-    route: firebaseRoute,
   },
   {
     path: "/social-news",

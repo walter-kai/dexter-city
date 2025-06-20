@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaArrowUp, FaArrowDown, FaExchangeAlt } from 'react-icons/fa';
-import { Subgraph } from '../../models/Uniswap';
+
 import LoadingScreenDots from '../common/LoadingScreenDots';
+import { PoolData } from '@/models/subgraph/Pools';
 
 interface DailyPoolsData {
   dates: {
@@ -13,18 +14,18 @@ interface DailyPoolsData {
       date: string;
       poolCount: number;
       lastUpdated: any;
-      pools: Subgraph.PoolData[];
+      pools: PoolData[];
     } | null;
     yesterday: {
       date: string;
       poolCount: number;
       lastUpdated: any;
-      pools: Subgraph.PoolData[];
+      pools: PoolData[];
     } | null;
   };
 }
 
-interface PoolWithChange extends Subgraph.PoolData {
+interface PoolWithChange extends PoolData {
   txCountChange?: number;
   txCountChangePercent?: number;
   volumeUSDChange?: number;
@@ -81,20 +82,20 @@ const DailyPoolActivity: React.FC = () => {
       const isNew = !yesterdayPool;
       
       // Calculate changes
-      const txCountChange = yesterdayPool 
-        ? todayPool.txCount - yesterdayPool.txCount
-        : todayPool.txCount;
+      const txCountChange: number = yesterdayPool 
+        ? Number(todayPool.txCount) - Number(yesterdayPool.txCount)
+        : Number(todayPool.txCount);
         
-      const txCountChangePercent = yesterdayPool && yesterdayPool.txCount > 0
-        ? ((todayPool.txCount - yesterdayPool.txCount) / yesterdayPool.txCount) * 100
+      const txCountChangePercent: number = yesterdayPool && Number(yesterdayPool.txCount) > 0
+        ? ((Number(todayPool.txCount) - Number(yesterdayPool.txCount)) / Number(yesterdayPool.txCount)) * 100
         : 100;
         
-      const volumeUSDChange = yesterdayPool
-        ? todayPool.volumeUSD - yesterdayPool.volumeUSD
-        : todayPool.volumeUSD;
+      const volumeUSDChange: number = yesterdayPool
+        ? Number(todayPool.volumeUSD) - Number(yesterdayPool.volumeUSD)
+        : Number(todayPool.volumeUSD);
         
-      const volumeUSDChangePercent = yesterdayPool && yesterdayPool.volumeUSD > 0
-        ? ((todayPool.volumeUSD - yesterdayPool.volumeUSD) / yesterdayPool.volumeUSD) * 100
+      const volumeUSDChangePercent: number = yesterdayPool && Number(yesterdayPool.volumeUSD) > 0
+        ? ((Number(todayPool.volumeUSD) - Number(yesterdayPool.volumeUSD)) / Number(yesterdayPool.volumeUSD)) * 100
         : 100;
         
       return {
@@ -128,11 +129,11 @@ const DailyPoolActivity: React.FC = () => {
     // Apply sort
     const sorted = filtered.sort((a, b) => {
       if (criteria === 'txCount') {
-        return b.txCount - a.txCount;
+        return Number(b.txCount) - Number(a.txCount);
       } else if (criteria === 'txCountChange') {
         return (b.txCountChange || 0) - (a.txCountChange || 0);
       } else {
-        return b.volumeUSD - a.volumeUSD;
+        return Number(b.volumeUSD) - Number(a.volumeUSD);
       }
     });
     
@@ -297,7 +298,7 @@ const DailyPoolActivity: React.FC = () => {
                     {pool.token0.symbol} / {pool.token1.symbol}
                   </div>
                   <div className="text-xs text-[#e0e7ef]/60">
-                    {formatCurrency(pool.volumeUSD)}
+                    {formatCurrency(Number(pool.volumeUSD))}
                   </div>
                 </div>
                 
@@ -347,7 +348,7 @@ const DailyPoolActivity: React.FC = () => {
         <div className="bg-[#23263a]/50 p-2 rounded-lg text-center">
           <div className="text-xs text-[#00ffe7]/70">Total Transactions</div>
           <div className="text-xl font-bold text-[#e0e7ef]">
-            {sortedPools.reduce((sum, pool) => sum + pool.txCount, 0).toLocaleString()}
+            {sortedPools.reduce((sum, pool) => sum + Number(pool.txCount), 0).toLocaleString()}
           </div>
         </div>
       </div>

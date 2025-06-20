@@ -1,8 +1,11 @@
 import { Timestamp } from "firebase-admin/firestore";
 import logger from "../../config/logger";
 import { db } from "../../config/firebase";
-import { Subgraph } from "../../../client/src/models/Uniswap";
+
 import ApiError from "../../utils/api-error";
+import { PoolData } from "@/models/subgraph/Pools";
+import { TokenDetails } from "@/models/TokenDetails";
+import { SwapDataV4 } from "@/models/subgraph/Swaps";
 
 /**
  * Updates swaps in the Firestore database for the matching pool in dayPools-uniswap/2025-06-18.
@@ -11,7 +14,7 @@ import ApiError from "../../utils/api-error";
  * @param {Subgraph.SwapDataV4[]} swaps - Array of swap data to update.
  * @returns {Promise<boolean>} - Returns true if successful.
  */
-export async function updateSwapsToPools(address: string, swaps: Subgraph.SwapDataV4[]): Promise<boolean> {
+export async function updateSwapsToPools(address: string, swaps: SwapDataV4[]): Promise<boolean> {
   try {
     const docRef = db.collection("dayPools-uniswap").doc("2025-06-18");
     const doc = await docRef.get();
@@ -48,7 +51,7 @@ export async function updateSwapsToPools(address: string, swaps: Subgraph.SwapDa
  * Get top 100 pools from Firestore, sorted by volumeUSD in descending order first,
  * then sorted by token0.symbol in descending order.
  */
-const getPoolsUniswap = async (): Promise<Subgraph.PoolData[] | null> => {
+const getPoolsUniswap = async (): Promise<PoolData[] | null> => {
     try {
       const poolsCollection = db.collection("masterPool-uniswap");
   
@@ -61,9 +64,9 @@ const getPoolsUniswap = async (): Promise<Subgraph.PoolData[] | null> => {
       }
   
       // Extract data and sort by volumeUSD (descending)
-      const sortedByTxCount: Subgraph.PoolData[] = poolSnapshot.docs
-        .map((doc) => doc.data() as Subgraph.PoolData)
-        .sort((a, b) => b.txCount - a.txCount);
+      const sortedByTxCount: PoolData[] = poolSnapshot.docs
+        .map((doc) => doc.data() as PoolData)
+        .sort((a, b) => Number(b.txCount) - Number(a.txCount));
   
       // Take the top 500 by volume
       const top500Pools = sortedByTxCount.slice(0, 500);
@@ -88,7 +91,7 @@ const getPoolsUniswap = async (): Promise<Subgraph.PoolData[] | null> => {
  * @param {string} tokenAddress - The contract address of the token.
  * @returns {Promise<Subgraph.TokenDetails | null>} - Returns the token data if found, otherwise null.
  */
-export const getTokenByAddress = async (tokenAddress: string): Promise<Subgraph.TokenDetails | null> => {
+export const getTokenByAddress = async (tokenAddress: string): Promise<TokenDetails | null> => {
   try {
     const tokensCollection = db.collection("tokens-cmc");
     const querySnapshot = await tokensCollection.where("platform.token_address", "==", tokenAddress).get();
@@ -98,12 +101,14 @@ export const getTokenByAddress = async (tokenAddress: string): Promise<Subgraph.
     }
 
     const tokenDoc = querySnapshot.docs[0];
-    return tokenDoc.data() as Subgraph.TokenDetails;
+    return tokenDoc.data() as TokenDetails;
   } catch (error) {
     logger.error(`Error fetching token with address ${tokenAddress}: ${error}`);
     throw error;
   }
 };
+
+
 
 export default {
     getPoolsUniswap,

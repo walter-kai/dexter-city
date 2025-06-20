@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../../models/Bot";
-import { Subgraph } from "../../models/Uniswap";
+import { PoolData } from "../../models/subgraph/Pools";
 import User from "../../models/User";
 import { generateLogoHash } from "../../hooks/Robohash";
 import PairChart from "../../components/build/chart/PairChart";
@@ -39,9 +39,9 @@ const BuildBot: React.FC = () => {
   const [botNameError, setBotNameError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [tradingPool, setTradingPool] = useState<Subgraph.PoolData | undefined>(undefined);
+  const [tradingPool, setTradingPool] = useState<PoolData | undefined>(undefined);
   const [profitBase, setProfitBase] = useState<"token0" | "token1" | null>(null);
-  const [availablePools, setAvailablePools] = useState<Subgraph.PoolData[] | null>(null);
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -55,20 +55,6 @@ const BuildBot: React.FC = () => {
     checkBotNameAvailability(formData.botName);
     // eslint-disable-next-line
   }, [botConfig]);
-
-  useEffect(() => {
-    const fetchPools = async () => {
-      try {
-        const response = await fetch("/api/chain/uni/pools");
-        if (!response.ok) throw new Error("Failed to fetch pools");
-        const data = await response.json();
-        setAvailablePools(data.pools);
-      } catch (error) {
-        // ignore
-      }
-    };
-    fetchPools();
-  }, []);
 
   // Helper function to get CMC icon
   const getCmcIcon = (imgId: number | undefined) =>
@@ -148,11 +134,6 @@ const BuildBot: React.FC = () => {
     setProfitBase(selectedToken);
   };
 
-
-  const selectedPoolDisplay = tradingPool 
-    ? `${tradingPool.token0.symbol} ↔️ ${tradingPool.token1.symbol}`
-    : "Select Trading Pair";
-
   return (
     <div className="min-h-screen flex flex-col items-center pt-24 pb-12 bg-transparent">
       <div className="w-full max-w-7xl mx-auto px-2">
@@ -211,7 +192,6 @@ const BuildBot: React.FC = () => {
               
               <label className="text-[#00ffe7] font-bold text-sm mt-4 mb-1">Trading Pair</label>
               <PoolDropdown
-                availablePools={availablePools}
                 selectedPool={tradingPool}
                 onSelect={(pool) => {
                   setTradingPool(pool);
@@ -280,8 +260,6 @@ const BuildBot: React.FC = () => {
               </div>
             </div>
           </div>
-
-
 
           {/* Bot Settings */}
           <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6">

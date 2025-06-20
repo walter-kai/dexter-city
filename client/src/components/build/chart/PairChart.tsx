@@ -3,9 +3,9 @@ import Chart, { TooltipItem } from "chart.js/auto";
 import { CandlestickController, OhlcController, CandlestickElement, OhlcElement } from "chartjs-chart-financial";
 import "chartjs-chart-financial";
 import "chartjs-adapter-date-fns";
-import { FaChartBar, FaChartLine, FaChartColumn } from "react-icons/fa6";
-import { LuChartColumnBig, LuChartCandlestick } from "react-icons/lu";
-import { Subgraph } from "../../../models/Uniswap";
+
+import { PoolData } from "../../../models/subgraph/Pools";
+import { SwapDataV4 } from "@/models/subgraph/Swaps";
 import LoadingScreenDots from "../../common/LoadingScreenDots";
 import { BotConfig } from "../../../models/Bot";
 import { generateOHLCData, fillMissingDays, generateSafetyOrderAndProfitLines } from "./ChartUtil";
@@ -109,7 +109,7 @@ const fillMissingHours = (data: any[]): any[] => {
 
 interface PairDetailsProps {
   botForm: BotConfig;
-  pool: Subgraph.PoolData | undefined;
+  pool: PoolData | undefined;
   className?: string; // Added className prop
 }
 
@@ -120,7 +120,7 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
   const [lineState, setLine] = useState<boolean>(false);
   const [barType, setBarType] = useState<boolean>(false);
   const [scaleType, setScaleType] = useState<"linear" | "logarithmic">("linear");
-  const [swaps, setSwaps] = useState<Subgraph.SwapDataV4[]>([]);
+  const [swaps, setSwaps] = useState<SwapDataV4[]>([]);
   const [percentChange, setPercentChange] = useState<number | null>(null);
   const [fadeIn, setFadeIn] = useState<boolean>(false);
   const [priceType, setPriceType] = useState<"tradeToken" | "USD">("tradeToken");

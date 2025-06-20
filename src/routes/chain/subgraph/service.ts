@@ -1,16 +1,16 @@
-import { db } from "../../config/firebase";
+import { db } from "../../../config/firebase";
 import admin from "firebase-admin";
-import logger from "../../config/logger";
-import { CoinMarketCap, Subgraph } from "../../../client/src/models/Uniswap";
-import coinMarketCapService from "./chain.coinmarketcap.service";
-import { fetchSwaps, fetchTopAlltimePools, fetchTopDailyPools } from "./UniswapV4";
-import { updateSwapsToPools } from "../firebase/firebase.service";
+import logger from "../../../config/logger";
+import { fetchSwaps, fetchTopDailyPools } from "./UniswapV4";
+import { updateSwapsToPools } from "../../firebase/firebase.service";
+import { SwapDataV4 } from "@/models/subgraph/Swaps";
+import { PoolData } from "@/models/subgraph/Pools";
 
 /**
  * Preload token symbols and their imgIds from tokens-cmc collection.
  * If multiple tokens have the same symbol, also index by name for fallback.
  */
-const preloadTokenImages = async (): Promise<{
+export const preloadTokenImages = async (): Promise<{
   symbolMap: Map<string, number[]>;
   nameMap: Map<string, number>;
 }> => {
@@ -38,15 +38,15 @@ const preloadTokenImages = async (): Promise<{
 };
 
 // Function to fetch recent swaps from the subgraph
-export const getSwapsV4 = async (contractAddress: string): Promise<Subgraph.SwapDataV4[] | null> => {
+export const getSwapsV4 = async (contractAddress: string): Promise<SwapDataV4[] | null> => {
   try {
     /**
      * Fetch recent swaps from the subgraph for a specific pair.
      * This will attempt to fetch the data 5 times, similar to the previous pairs fetching logic.
      */
-    const fetchSwapsFromSubgraph = async (contractAddress: string): Promise<Subgraph.SwapDataV4[]> => {
+    const fetchSwapsFromSubgraph = async (contractAddress: string): Promise<SwapDataV4[]> => {
       let skip = 0;
-      let allSwaps: Subgraph.SwapDataV4[] = [];
+      let allSwaps: SwapDataV4[] = [];
 
       try {
         // Fetch swaps 5 times
@@ -113,117 +113,117 @@ export const getSwapsV4 = async (contractAddress: string): Promise<Subgraph.Swap
 /**
  * Reload pairs from the subgraph and write to Firestore.
  */
-const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
-  try {
-    const tokensCollection = db.collection("masterPool-uniswap");
+// const reloadPools = async (): Promise<Subgraph.PoolData[] | null> => {
+//   try {
+//     const tokensCollection = db.collection("masterPool-uniswap");
   
-    /**
-     * Fetch recent pairs from the subgraph and get the corresponding token images
-     */
-    const fetchPoolsFromSubgraph = async (): Promise<Subgraph.PoolData[]> => {
-      let skip = 0;
-      let allPools: Subgraph.PoolData[] = [];
+//     /**
+//      * Fetch recent pairs from the subgraph and get the corresponding token images
+//      */
+//     const fetchPoolsFromSubgraph = async (): Promise<Subgraph.PoolData[]> => {
+//       let skip = 0;
+//       let allPools: Subgraph.PoolData[] = [];
 
-      try {
-        // Load token images once before looping
-        const { symbolMap, nameMap } = await preloadTokenImages();
+//       try {
+//         // Load token images once before looping
+//         const { symbolMap, nameMap } = await preloadTokenImages();
 
-        for (let i = 0; i < 3; i++) {
-          const pools = await fetchTopAlltimePools(skip);
-          const batch = db.batch();
+//         for (let i = 0; i < 3; i++) {
+//           const pools = await fetchTopAlltimePools(skip);
+//           const batch = db.batch();
 
-          for (const pool of pools) {
-            // Try to get imgId by symbol (may be multiple)
-            let token0ImgId: number | undefined;
-            let token1ImgId: number | undefined;
-            const token0Symbol = pool.token0.symbol?.toUpperCase();
-            const token1Symbol = pool.token1.symbol?.toUpperCase();
+//           for (const pool of pools) {
+//             // Try to get imgId by symbol (may be multiple)
+//             let token0ImgId: number | undefined;
+//             let token1ImgId: number | undefined;
+//             const token0Symbol = pool.token0.symbol?.toUpperCase();
+//             const token1Symbol = pool.token1.symbol?.toUpperCase();
 
-            const token0ImgIds = symbolMap.get(token0Symbol) || [];
-            const token1ImgIds = symbolMap.get(token1Symbol) || [];
+//             const token0ImgIds = symbolMap.get(token0Symbol) || [];
+//             const token1ImgIds = symbolMap.get(token1Symbol) || [];
 
-            if (token0ImgIds.length === 1) {
-              token0ImgId = token0ImgIds[0];
-            } else if (token0ImgIds.length > 1 && pool.token0.name) {
-              // Fallback: search by name
-              token0ImgId = nameMap.get(pool.token0.name);
-              if (token0ImgId === undefined) {
-                token0ImgId = token0ImgIds[0];
-              }
-            } else {
-              token0ImgId = 0;
-            }
+//             if (token0ImgIds.length === 1) {
+//               token0ImgId = token0ImgIds[0];
+//             } else if (token0ImgIds.length > 1 && pool.token0.name) {
+//               // Fallback: search by name
+//               token0ImgId = nameMap.get(pool.token0.name);
+//               if (token0ImgId === undefined) {
+//                 token0ImgId = token0ImgIds[0];
+//               }
+//             } else {
+//               token0ImgId = 0;
+//             }
 
-            if (token1ImgIds.length === 1) {
-              token1ImgId = token1ImgIds[0];
-            } else if (token1ImgIds.length > 1 && pool.token1.name) {
-              // Fallback: search by name
-              token1ImgId = nameMap.get(pool.token1.name);
-              if (token1ImgId === undefined) {
-                token1ImgId = token1ImgIds[0];
-              }
-            } else {
-              token1ImgId = 0;
-            }
+//             if (token1ImgIds.length === 1) {
+//               token1ImgId = token1ImgIds[0];
+//             } else if (token1ImgIds.length > 1 && pool.token1.name) {
+//               // Fallback: search by name
+//               token1ImgId = nameMap.get(pool.token1.name);
+//               if (token1ImgId === undefined) {
+//                 token1ImgId = token1ImgIds[0];
+//               }
+//             } else {
+//               token1ImgId = 0;
+//             }
 
-            // Construct the pair document using interfaces
-            const poolData: Subgraph.PoolData = {
-              ...pool,
-              lastUpdated: new Date(),
-              network: "Ethereum",
-              token0: {
-                ...pool.token0,
-                imgId: token0ImgId ?? 0,
-              },
-              token1: {
-                ...pool.token1,
-                imgId: token1ImgId ?? 0,
-              },
-            };
+//             // Construct the pair document using interfaces
+//             const poolData: Subgraph.PoolData = {
+//               ...pool,
+//               lastUpdated: new Date(),
+//               network: "Ethereum",
+//               token0: {
+//                 ...pool.token0,
+//                 imgId: token0ImgId ?? 0,
+//               },
+//               token1: {
+//                 ...pool.token1,
+//                 imgId: token1ImgId ?? 0,
+//               },
+//             };
 
-            const poolDocRef = tokensCollection.doc(pool.name);
-            batch.set(poolDocRef, poolData, { merge: true });
+//             const poolDocRef = tokensCollection.doc(pool.name);
+//             batch.set(poolDocRef, poolData, { merge: true });
 
-            allPools.push(poolData);
-          }
+//             allPools.push(poolData);
+//           }
 
-          // Commit all Firestore writes in a batch
-          await batch.commit();
+//           // Commit all Firestore writes in a batch
+//           await batch.commit();
 
-          if (pools.length < 1000) break;
+//           if (pools.length < 1000) break;
 
-          skip += 1000;
-          logger.info(`Downloading pools: ${skip} of 1000`);
-        }
+//           skip += 1000;
+//           logger.info(`Downloading pools: ${skip} of 1000`);
+//         }
 
-        return allPools;
-      } catch (err: unknown) {
-        logger.error(
-          `Error fetching pools from subgraph: ${
-            err instanceof Error ? err.message : "Unknown error"
-          }`
-        );
-        return [];
-      }
-    };
+//         return allPools;
+//       } catch (err: unknown) {
+//         logger.error(
+//           `Error fetching pools from subgraph: ${
+//             err instanceof Error ? err.message : "Unknown error"
+//           }`
+//         );
+//         return [];
+//       }
+//     };
 
-    // Fetch pairs from the subgraph and store them
-    const pools = await fetchPoolsFromSubgraph();
+//     // Fetch pairs from the subgraph and store them
+//     const pools = await fetchPoolsFromSubgraph();
   
-    if (pools.length === 0) {
-      logger.warn("No pairs found for the given query.");
-      return [];
-    }
+//     if (pools.length === 0) {
+//       logger.warn("No pairs found for the given query.");
+//       return [];
+//     }
   
-    return pools;
-  } catch (err: unknown) {
-    logger.error(
-      `Error reloading pairs: ${err instanceof Error ? err.message : "Unknown error"}`
-    );
-    return null;
-  }
+//     return pools;
+//   } catch (err: unknown) {
+//     logger.error(
+//       `Error reloading pairs: ${err instanceof Error ? err.message : "Unknown error"}`
+//     );
+//     return null;
+//   }
   
-};
+// };
 
 /**
  * Reload daily pool stats from the subgraph and write to Firestore.
@@ -263,67 +263,78 @@ const reloadPoolsDay = async (): Promise<any | null> => {
         
         // Use a map to track the latest data for each pool address
         // This ensures we only keep the most recent data when duplicates exist
-        const poolsMap = new Map<string, Subgraph.PoolData>();
+        const poolsMap = new Map<string, PoolData>();
         
         // Process all pools for today
         for (const dayData of todayData) {
-          // Convert pool data to the right format
+          // Extract pool data from the dayData
           const pool = dayData.pool;
-          // Use improved imgId logic
-          let token0ImgId: number | undefined;
-          let token1ImgId: number | undefined;
+          
+          // Find token image IDs
           const token0Symbol = pool.token0.symbol?.toUpperCase();
           const token1Symbol = pool.token1.symbol?.toUpperCase();
-
+          
+          // Get imgId for token0
+          let token0ImgId = 0;
           const token0ImgIds = symbolMap.get(token0Symbol) || [];
-          const token1ImgIds = symbolMap.get(token1Symbol) || [];
-
-          if (pool.token0.name) {
-            token0ImgId = nameMap.get(pool.token0.name);
-            if (token0ImgId === undefined) {
-              token0ImgId = token0ImgIds[0];
-            }
-          } else {
+          if (pool.token0.name && nameMap.has(pool.token0.name)) {
+            token0ImgId = nameMap.get(pool.token0.name) || token0ImgIds[0] || 0;
+          } else if (token0ImgIds.length > 0) {
             token0ImgId = token0ImgIds[0];
           }
-
-          if (pool.token1.name) {
-            token1ImgId = nameMap.get(pool.token1.name);
-            if (token1ImgId === undefined) {
-              token1ImgId = token1ImgIds[0];
-            }
-          } else {
+          
+          // Get imgId for token1
+          let token1ImgId = 0;
+          const token1ImgIds = symbolMap.get(token1Symbol) || [];
+          if (pool.token1.name && nameMap.has(pool.token1.name)) {
+            token1ImgId = nameMap.get(pool.token1.name) || token1ImgIds[0] || 0;
+          } else if (token1ImgIds.length > 0) {
             token1ImgId = token1ImgIds[0];
           }
-
-          const poolData: Subgraph.PoolData = {
+          
+          // Create a sanitized pool name
+          const poolName = `ETH:${pool.token0.symbol}:${pool.token1.symbol}`.replace(/[^a-zA-Z0-9:-]/g, "_");
+          
+          // Create TokenDetails objects with all required properties
+          const token0 = {
+            address: pool.token0.id,
+            symbol: pool.token0.symbol,
+            name: pool.token0.name,
+            imgId: token0ImgId,
+            volume: Number(pool.token0.volumeUSD),
+            price: 0,
+            date_added: "",
+            tags: []
+          };
+          
+          const token1 = {
+            address: pool.token1.id,
+            symbol: pool.token1.symbol,
+            name: pool.token1.name,
+            imgId: token1ImgId,
+            volume: Number(pool.token1.volumeUSD),
+            price: 0,
+            date_added: "",
+            tags: []
+          };
+          
+          // Directly create the PoolData object with minimal conversions
+          poolsMap.set(pool.id, {
             address: pool.id,
-            name: `ETH:${pool.token0.symbol}:${pool.token1.symbol}`.replace(/[^a-zA-Z0-9:-]/g, "_"),
-            lastUpdated: new Date(),
-            createdAtTimestamp: new Date(pool.createdAtTimestamp * 1000),
+            name: poolName,
+            lastUpdated: new Date().toISOString(),
+            createdAtTimestamp: pool.createdAtTimestamp,
             network: "Ethereum",
-            volumeUSD: parseFloat(dayData.volumeUSD || 0),
-            txCount: parseInt(dayData.txCount || 0),
+            volumeUSD: pool.volumeUSD,
+            txCount: '0', // Default since it's not available
             date: today,
-            feeTier: parseInt(dayData.feeTier || 0),
+            feeTier: pool.feeTier,
             liquidity: pool.liquidity,
             token0Price: pool.token0Price,
             token1Price: pool.token1Price,
-            token0: {
-              address: pool.token0.id,
-              symbol: pool.token0.symbol,
-              name: pool.token0.name,
-              imgId: token0ImgId || 0,
-            } as Subgraph.TokenDetails,
-            token1: {
-              address: pool.token1.id,
-              symbol: pool.token1.symbol,
-              name: pool.token1.name,
-              imgId: token1ImgId || 0,
-            } as Subgraph.TokenDetails,
-          };
-
-          poolsMap.set(pool.id, poolData);
+            token0: token0, // Use the fully constructed token0 object
+            token1: token1  // Use the fully constructed token1 object
+          });
         }
         
         // Convert map values to array
@@ -344,8 +355,8 @@ const reloadPoolsDay = async (): Promise<any | null> => {
           const existingPools = existingData?.pools || [];
           
           // Create a map of existing pools by address for quick lookup
-          const existingPoolsMap = new Map<string, Subgraph.PoolData>();
-          existingPools.forEach((pool: Subgraph.PoolData) => {
+          const existingPoolsMap = new Map<string, PoolData>();
+          existingPools.forEach((pool: PoolData) => {
             existingPoolsMap.set(pool.address, pool);
           });
           
@@ -409,6 +420,7 @@ const reloadPoolsDay = async (): Promise<any | null> => {
 
 export default {
   getSwapsV4,
-  reloadPools,
-  reloadPoolsDay
+  // reloadPools,
+  reloadPoolsDay,
+  preloadTokenImages
 };

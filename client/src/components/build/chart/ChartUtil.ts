@@ -1,7 +1,7 @@
-import { Subgraph } from "../../../models/Uniswap";
 import { BotConfig } from "../../../models/Bot";
+import { SwapDataV4 } from "@/models/subgraph/Swaps";
 
-export const generateOHLCData = (swaps: Subgraph.SwapDataV4[], priceType: "tradeToken" | "USD") => {
+export const generateOHLCData = (swaps: SwapDataV4[], priceType: "tradeToken" | "USD") => {
   const barData: { x: number; o: number; h: number; l: number; c: number }[] = [];
   const lineData: { x: number; y: number }[] = [];
 

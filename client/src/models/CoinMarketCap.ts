@@ -31,14 +31,3 @@ export namespace CoinMarketCap {
   
 }
 
-export namespace Subgraph {
-
-    // Define TypeScript types for queries
-
-
-
-
-
-
-
-}

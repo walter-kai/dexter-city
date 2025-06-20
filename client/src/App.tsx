@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import { MetaMaskProvider, useSDK } from '@metamask/sdk-react';
-import { AuthProvider } from './contexts/AuthContext';
+import { useSDK } from '@metamask/sdk-react';
 import { login } from './hooks/FirestoreUser';
 import NavBar from './components/common/NavBar';
 import Footer from './components/common/Footer';
@@ -16,12 +15,11 @@ import ContactUs from './pages/x/ContactUs';
 import PrivacyPolicy from './pages/x/legal/PrivacyPolicy';
 import TermsOfService from './pages/x/legal/TermsOfService';
 import NotFound from './pages/NotFound';
-
 import Settings from './pages/i/Settings';
-import { BalanceProvider } from './contexts/BalanceProvider';
+import DailyPoolActivity from './components/dashboard/DailyPoolActivity';
 
-// Main App component inside MetaMask context
-const AppContent: React.FC = () => {
+// Main App component
+const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const { connected, sdk } = useSDK();
   const navigate = useNavigate();
@@ -111,88 +109,66 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <AuthProvider>
-      <BalanceProvider>
-        <div className="App min-h-screen relative">
-          {/* Background Container with Parallax */}
-          <div className="fixed inset-0 z-0 overflow-hidden">
-            <div 
-              className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
-              style={{
-                backgroundImage: getBackgroundImage(),
-                transform: getParallaxTransform(0.5),
-                willChange: 'transform',
-                height: '110%', // Slightly larger to accommodate transform
-                top: '-5%',
-              }}
-            />
-            <div 
-              className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90"
-              style={{
-                transform: getParallaxTransform(0.3),
-                willChange: 'transform',
-              }}
-            />
-          </div>
-          
-          {/* Content Container */}
-          <div className="relative z-10 flex flex-col min-h-screen">
-            <NavBar telegramUser={user} />
-            <SubNavBar />
+    <div className="App min-h-screen relative">
+      {/* Background Container with Parallax */}
+      <div className="fixed inset-0 z-0 overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+          style={{
+            backgroundImage: getBackgroundImage(),
+            transform: getParallaxTransform(0.5),
+            willChange: 'transform',
+            height: '110%', // Slightly larger to accommodate transform
+            top: '-5%',
+          }}
+        />
+        <div 
+          className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90"
+          style={{
+            transform: getParallaxTransform(0.3),
+            willChange: 'transform',
+          }}
+        />
+      </div>
+      
+      {/* Content Container */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <NavBar telegramUser={user} />
+        <SubNavBar />
+        
+        <main className="flex-1 pt-32">
+          <Routes>
+            <Route path="/" element={<Guide />} />
             
-            <main className="flex-1 pt-32">
-              <Routes>
-                <Route path="/" element={<Guide />} />
-                
-                {/* Bot-related routes under /bots/ */}
-                <Route path="/i/dashboard" element={<Dashboard />} />
-                <Route path="/i/garage" element={<Garage />} />
-                <Route path="/i/garage/build" element={<BuildBot />} />
-                
-                {/* Backward compatibility routes */}
-                <Route path="/dash" element={<Dashboard />} />
-                <Route path="/build" element={<BuildBot />} />
-                <Route path="/bots" element={<Garage />} />
-                
-                {/* Other routes */}
-                <Route path="/i/shop" element={<Shop />} />
-                <Route path="/i/shop/:botId" element={<Shop />} />
-                {/* <Route path="/guide" element={<Guide />} /> */}
-                <Route path="/x/blog" element={<Blog />} />
-                <Route path="/x/contact" element={<ContactUs />} />
-                <Route path="/settings" element={<Settings />} />
-                
-                {/* Legal routes under /legal/ */}
-                <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/legal/terms-of-service" element={<TermsOfService />} />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </main>
+            {/* Bot-related routes under /bots/ */}
+            <Route path="/i/dashboard" element={<Dashboard />} />
+            <Route path="/i/garage" element={<Garage />} />
+            <Route path="/i/garage/build" element={<BuildBot />} />
             
-            <Footer />
-          </div>
-        </div>
-      </BalanceProvider>
-    </AuthProvider>
-  );
-};
-
-// Root App component with MetaMaskProvider
-const App: React.FC = () => {
-  return (
-    <MetaMaskProvider
-      debug={false}
-      sdkOptions={{
-        dappMetadata: {
-          name: "DexterCity",
-          url: window.location.href,
-        },
-        // infuraAPIKey: process.env.REACT_APP_INFURA_API_KEY,
-      }}
-    >
-      <AppContent />
-    </MetaMaskProvider>
+            {/* Backward compatibility routes */}
+            <Route path="/dash" element={<Dashboard />} />
+            <Route path="/build" element={<BuildBot />} />
+            <Route path="/bots" element={<Garage />} />
+            
+            {/* Other routes */}
+            <Route path="/i/shop" element={<Shop />} />
+            <Route path="/i/shop/:botId" element={<Shop />} />
+            <Route path="/x/pools" element={<DailyPoolActivity />} />
+            <Route path="/x/blog" element={<Blog />} />
+            <Route path="/x/contact" element={<ContactUs />} />
+            <Route path="/settings" element={<Settings />} />
+            
+            {/* Legal routes under /legal/ */}
+            <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/legal/terms-of-service" element={<TermsOfService />} />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        
+        <Footer />
+      </div>
+    </div>
   );
 };
 
