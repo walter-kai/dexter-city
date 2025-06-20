@@ -3,27 +3,7 @@ import { FaChartBar, FaArrowUp, FaArrowDown, FaExchangeAlt } from 'react-icons/f
 
 import LoadingScreenDots from '../common/LoadingScreenDots';
 import { PoolData } from '@/models/subgraph/Pools';
-
-interface DailyPoolsData {
-  dates: {
-    today: string;
-    yesterday: string;
-  };
-  pools: {
-    today: {
-      date: string;
-      poolCount: number;
-      lastUpdated: any;
-      pools: PoolData[];
-    } | null;
-    yesterday: {
-      date: string;
-      poolCount: number;
-      lastUpdated: any;
-      pools: PoolData[];
-    } | null;
-  };
-}
+import { usePools, DailyPoolsData } from '../../contexts/PoolContext';
 
 interface PoolWithChange extends PoolData {
   txCountChange?: number;
@@ -34,6 +14,7 @@ interface PoolWithChange extends PoolData {
 }
 
 const DailyPoolActivity: React.FC = () => {
+  const { getDailyPools, dailyPoolsLoading } = usePools();
   const [data, setData] = useState<DailyPoolsData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,14 +23,14 @@ const DailyPoolActivity: React.FC = () => {
   const [viewMode, setViewMode] = useState<'all' | 'gainers' | 'losers'>('all');
 
   useEffect(() => {
-    const fetchDailyPools = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/chain/uni/dailyPools');
-        if (!response.ok) throw new Error('Failed to fetch daily pools data');
-        const data: DailyPoolsData = await response.json();
-        setData(data);
-        processPools(data);
+        const poolsData = await getDailyPools();
+        if (poolsData) {
+          setData(poolsData);
+          processPools(poolsData);
+        }
       } catch (err) {
         setError('Error fetching daily pools data');
         console.error(err);
@@ -58,8 +39,8 @@ const DailyPoolActivity: React.FC = () => {
       }
     };
 
-    fetchDailyPools();
-  }, []);
+    fetchData();
+  }, [getDailyPools]);
 
   const processPools = (data: DailyPoolsData) => {
     if (!data.pools.today || !data.pools.today.pools) {
@@ -169,7 +150,7 @@ const DailyPoolActivity: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (loading || dailyPoolsLoading) {
     return (
       <div className="bg-[#181a23]/90 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_12px_#00ffe7] p-6 flex flex-col h-full">
         <h2 className="text-xl font-bold text-[#00ffe7] mb-4 flex items-center gap-2">

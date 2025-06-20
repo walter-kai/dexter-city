@@ -20,23 +20,19 @@ export interface PoolData {
   export interface PoolResponse {
     __typename: string;
     id: string;
-    createdAtTimestamp: number;
-    feeTier: number;
-    liquidity: number;
+    createdAtTimestamp: string;
+    feeTier: string;
+    liquidity: string;
     token0: TokenResponse;
     token1: TokenResponse;
-    token0Price: number;
-    token1Price: number;
-    volumeUSD: number;
+    token0Price: string;
+    token1Price: string;
+    volumeUSD: string;
   }
 
-  export interface PoolDayData {
+  export interface PoolDayDataResponse {
     __typename: string;
     date: number;
+    txCount: string;
     pool: PoolResponse;
-  }
-
-  // Updated to match actual GraphQL response
-  export interface PoolsResponseData {
-    poolDayDatas: PoolDayData[];
   }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PoolData } from "../../models/subgraph/Pools";
 import LoadingScreenDots from "../common/LoadingScreenDots";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
@@ -17,11 +17,26 @@ const PoolDropdown: React.FC<PoolDropdownProps> = ({
 }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [pairSearch, setPairSearch] = useState("");
-  const { availablePools, loading } = usePools();
+  const [pools, setPools] = useState<PoolData[] | null>(null);
+  const [localLoading, setLocalLoading] = useState(false);
+  const { getPools } = usePools();
+
+  useEffect(() => {
+    const loadPools = async () => {
+      setLocalLoading(true);
+      const fetchedPools = await getPools();
+      setPools(fetchedPools);
+      setLocalLoading(false);
+    };
+
+    if (showDropdown && !pools) {
+      loadPools();
+    }
+  }, [showDropdown, pools, getPools]);
 
   // Filtered pools
   const filteredPools =
-    availablePools?.filter(
+    pools?.filter(
       (pool) =>
         pool.token0.symbol.toLowerCase().includes(pairSearch.toLowerCase()) ||
         pool.token1.symbol.toLowerCase().includes(pairSearch.toLowerCase())
@@ -71,7 +86,7 @@ const PoolDropdown: React.FC<PoolDropdownProps> = ({
           </div>
           {/* Dropdown Content */}
           <div className="max-h-48 overflow-y-auto">
-            {loading ? (
+            {localLoading ? (
               <div className="p-4">
                 <LoadingScreenDots />
               </div>

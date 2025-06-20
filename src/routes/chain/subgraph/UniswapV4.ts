@@ -1,37 +1,9 @@
 import { createClient, cacheExchange, fetchExchange } from 'urql';
 
-import { PoolData } from '@/models/subgraph/Pools';
+import { PoolData, PoolDayDataResponse } from '@/models/subgraph/Pools';
 import { SwapDataV4 } from '@/models/subgraph/Swaps';
 
 // Define the interface for the returned pool day data
-export interface PoolDayData {
-  __typename: string;
-  date: number;
-  pool: {
-    __typename: string;
-    id: string;
-    token0: {
-      __typename: string;
-      id: string;
-      name: string;
-      symbol: string;
-      volumeUSD: string;
-    };
-    token1: {
-      __typename: string;
-      id: string;
-      name: string;
-      symbol: string;
-      volumeUSD: string;
-    };
-    feeTier: string;
-    volumeUSD: string;
-    token0Price: string;
-    token1Price: string;
-    liquidity: string;
-    createdAtTimestamp: string;
-  };
-}
 
 // Don't create the client immediately - create it lazily when needed
 let client: any = null;
@@ -87,11 +59,12 @@ export const fetchSwaps = async (
 };
 
 
-export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000): Promise<PoolDayData[]> => {
+export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000): Promise<PoolDayDataResponse[]> => {
   const query = `{
     poolDayDatas(first: ${first}, skip: ${skip}, orderBy: date, orderDirection: desc) {
       __typename
       date
+      txCount
       pool {
         __typename
         id
@@ -100,6 +73,7 @@ export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000)
           symbol
           id
           name
+          txCount
           volumeUSD
         }
         token1 {
@@ -107,8 +81,10 @@ export const fetchTopDailyPools = async (skip: number = 0, first: number = 1000)
           symbol
           id
           name
+          txCount
           volumeUSD
         }
+        
         feeTier
         volumeUSD
         token0Price

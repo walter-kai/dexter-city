@@ -1,5 +1,4 @@
-import { PoolData, PoolDayData, PoolResponse, PoolsResponseData } from './subgraph/Pools';
-import { TokenDetails, TokenResponse, TokenData } from './TokenDetails';
+
 
 export namespace CoinMarketCap {
   export interface Platform {

@@ -4,10 +4,11 @@ import firebaseService from "../../firebase/firebase.service";
 import ApiError from "../../../utils/api-error";
 import { db } from "../../../config/firebase"; 
 import logger from "../../../config/logger";
-import { fetchTopDailyPools, PoolDayData } from "./UniswapV4";
+import { fetchTopDailyPools } from "./UniswapV4";
 
 // Import the preloadTokenImages function from subgraph service
 import { preloadTokenImages } from "./service";
+import { PoolDayDataResponse } from "@/models/subgraph/Pools";
 
 
 const getPools = async (req: Request, res: Response): Promise<Response> => {
@@ -133,7 +134,7 @@ const reloadPoolsDay = async (req: Request, res: Response): Promise<Response> =>
     logger.info(`Preloaded token images: ${symbolMap.size} symbols, ${nameMap.size} names`);
     
     // 1. Fetch pool day data from Uniswap subgraph
-    const poolDayDatas: PoolDayData[] = await fetchTopDailyPools(0, 500); // Get top 500 pools
+    const poolDayDatas: PoolDayDataResponse[] = await fetchTopDailyPools(0, 500); // Get top 500 pools
     
     // 2. Get today's date for document ID
     const today = new Date().toISOString().split('T')[0];
@@ -141,6 +142,7 @@ const reloadPoolsDay = async (req: Request, res: Response): Promise<Response> =>
     // 3. Transform the data into our PoolData format
     const transformedPools = poolDayDatas.map(data => {     
       const pool = data.pool; 
+      const txCount = data.txCount;
       
       // Find token image IDs - first try by name, then by symbol
       let token0ImgId = 0;
@@ -180,7 +182,7 @@ const reloadPoolsDay = async (req: Request, res: Response): Promise<Response> =>
         network: "Ethereum",
         address: pool.id, // Using id as the address
         volumeUSD: pool.volumeUSD,
-        txCount: 0, // Note: txCount might need to be fetched separately
+        txCount: txCount, // Note: txCount might need to be fetched separately
         date: data.date.toString(),
         feeTier: Number(pool.feeTier),
         liquidity: pool.liquidity,
@@ -190,6 +192,7 @@ const reloadPoolsDay = async (req: Request, res: Response): Promise<Response> =>
           symbol: pool.token0.symbol,
           name: pool.token0.name,
           imgId: token0ImgId, // Use the found imgId
+          txCount: pool.token0.txCount, // Use txCount if available
           volume: pool.token0.volumeUSD,
           price: 0, // This would need to be computed or fetched elsewhere
           date_added: "", // This would need additional data
@@ -201,6 +204,7 @@ const reloadPoolsDay = async (req: Request, res: Response): Promise<Response> =>
           symbol: pool.token1.symbol,
           name: pool.token1.name,
           imgId: token1ImgId, // Use the found imgId
+          txCount: pool.token1.txCount, // Use txCount if available
           volume: pool.token1.volumeUSD,
           price: 0, // This would need to be computed or fetched elsewhere
           date_added: "", // This would need additional data
