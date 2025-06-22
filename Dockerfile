@@ -16,6 +16,9 @@ COPY models/ ./models
 # Copy the client source code to the container
 COPY client/ ./
 
+# Copy models into client/src/models for frontend build compatibility
+COPY models/ ./src/models
+
 # Build the React app
 RUN npm run build
 
