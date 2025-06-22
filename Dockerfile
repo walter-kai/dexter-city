@@ -30,6 +30,7 @@ RUN npm install --include=dev
 # Copy server source code and shared models/types
 COPY ./server/ ./server
 COPY ./client/models/ ./models
+COPY ./client/models/ ./client/models/
 
 # Build server TypeScript
 RUN npm run build
