@@ -1,4 +1,4 @@
-import User, { UserArgs, TelegramUser } from "../../../models/User";
+import User, { UserArgs, TelegramUser } from "../../models/User";
 
 /**
  * Updates an existing user based on the provided User object.

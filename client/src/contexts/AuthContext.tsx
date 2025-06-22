@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import User from '../../../models/User';
+import User from '../../models/User';
 
 interface AuthContextType {
   user: User | null;

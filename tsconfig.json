@@ -13,7 +13,7 @@
         "@/*": ["client/src/*"], // Map '@' to the 'client/src' directory
         "@/components/*": ["client/src/components/*"],
         "@/hooks/*": ["client/src/hooks/*"],
-        "@/models/*": ["models/*"],
+        "@/models/*": ["client/models/*"],
         "@/pages/*": ["client/src/pages/*"],
         "@/styles/*": ["client/src/styles/*"],
         "@/utils/*": ["client/src/utils/*"],

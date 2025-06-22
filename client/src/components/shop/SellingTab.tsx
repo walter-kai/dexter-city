@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BotConfig } from '../../../../models/Bot';
+import { BotConfig } from '../../../models/Bot';
 import { generateLogoHash } from '../../hooks/Robohash';
 import BotCard from './BotCard';
 import SellBotModal from './SellBotModal';

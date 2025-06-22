@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { PoolData } from "../../../../models/subgraph/Pools";
+import { PoolData } from "../../../models/subgraph/Pools";
 import LoadingScreenDots from "../common/LoadingScreenDots";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
 import { usePools } from "../../contexts/PoolContext";

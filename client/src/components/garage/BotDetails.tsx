@@ -1,5 +1,5 @@
 import React from 'react';
-import { BotConfig } from '../../../../models/Bot';
+import { BotConfig } from '../../../models/Bot';
 import { generateLogoHash } from '../../hooks/Robohash';
 import { FaCopy, FaShieldAlt, FaCode, FaCog } from 'react-icons/fa';
 import { Line, Pie } from 'react-chartjs-2';

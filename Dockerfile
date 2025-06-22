@@ -9,7 +9,6 @@ RUN npm install
 
 # Copy client source code and shared models/types
 COPY ./client/ ./
-COPY ./models/ ./src/models
 
 # Pass environment variables for the client build
 ARG VITE_SERVER_HOSTNAME
@@ -30,7 +29,7 @@ RUN npm install --include=dev
 
 # Copy server source code and shared models/types
 COPY ./server/ ./server
-COPY ./models/ ./models
+COPY ./client/models/ ./models
 
 # Build server TypeScript
 RUN npm run build

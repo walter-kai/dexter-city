@@ -24,6 +24,6 @@
       "@/contexts/*": ["contexts/*"]
     }
   },
-  "include": ["src", "../models/**/*"],
+  "include": ["src", "models/**/*"],
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import userService from "./user.service";
+import userService from "../user/user.service";
 import ApiError from "../../utils/api-error";
 import catchAsync from "../../utils/catch-async";
 import User, { UserArgs } from "../../../client/models/User";
