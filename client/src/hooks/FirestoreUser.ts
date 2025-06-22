@@ -1,6 +1,4 @@
 import User, { UserArgs, TelegramUser,  } from "../../../models/User";
-import { getTelegram } from "./Telegram";
-import { Timestamp } from "firebase-admin/firestore"; // Firestore's Timestamp object
 
 /**
  * Updates an existing user based on the provided User object.

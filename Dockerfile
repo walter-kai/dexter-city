@@ -10,6 +10,9 @@ COPY client/package.json client/package-lock.json ./
 # Install client dependencies
 RUN npm install
 
+# Copy models source code
+COPY models/ ./models
+
 # Copy the client source code to the container
 COPY client/ ./
 
@@ -27,9 +30,6 @@ COPY package.json package-lock.json tsconfig.json ./
 
 # Install server dependencies
 RUN npm install
-
-# Copy models source code
-COPY models/ ./models
 
 # Copy server source code
 COPY server/ ./server
