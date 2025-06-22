@@ -31,8 +31,7 @@
     "build": "rimraf dist && tsc --project tsconfig.json",
     "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
     "dev-server": "ts-node server/server.ts",
-    "dev-client": "cd client && npm start",
-    "heroku-postbuild": "npm run build && cd client && npm install && npm run build"
+    "dev-client": "cd client && npm start"
   },
   "devDependencies": {
     "@types/morgan": "^1.9.9",

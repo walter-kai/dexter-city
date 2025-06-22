@@ -37,7 +37,7 @@ app.post('/', (req: Request, res: Response) => {
 
 // Serve React application  
 app.get('*', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../client', 'index.html'));
 });
 
 // Start HTTP server
