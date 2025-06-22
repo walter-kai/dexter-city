@@ -1,62 +1,61 @@
-# Stage 1: Build the client (React app)
+# Stage 0: Build the client (React app)
 FROM node:20-alpine AS client-build
 
-# Set working directory
-WORKDIR /app/client
+WORKDIR /client
 
-# Copy the client dependencies and package.json
-COPY client/package.json client/package-lock.json ./
-
-# Install client dependencies
+# Copy client dependencies and install
+COPY ./client/package*.json ./
 RUN npm install
 
-# Copy models source code
-COPY models/ ./models
+# Copy client source code and shared models/types
+COPY ./client/ ./
+COPY ./models/ ./src/models
 
-# Copy the client source code to the container
-COPY client/ ./
-
-# Copy models into client/src/models for frontend build compatibility
-COPY models/ ./src/models
+# Pass environment variables for the client build
+ARG VITE_SERVER_HOSTNAME
+ENV VITE_SERVER_HOSTNAME=${VITE_SERVER_HOSTNAME:-https://dexter-city-882290629693.us-central1.run.app}
 
 # Build the React app
 RUN npm run build
 
-# Stage 2: Build the server (Node/Express with TypeScript)
+# Stage 1: Build the server (Node/Express with TypeScript)
 FROM node:20-alpine AS server-build
 
-# Set working directory for server
-WORKDIR /app
+WORKDIR /server
 
-# Copy server dependencies and package.json
-COPY package.json package-lock.json tsconfig.json ./
+# Copy root dependencies and install
+COPY ./package*.json ./
+COPY ./tsconfig.json ./
+RUN npm install --include=dev
 
-# Install server dependencies
-RUN npm install
-
-# Copy server source code
-COPY server/ ./server
+# Copy server source code and shared models/types
+COPY ./server/ ./server
+COPY ./models/ ./models
 
 # Build server TypeScript
 RUN npm run build
 
-# Stage 3: Final stage to run the app (server and serve React build)
-FROM node:20-alpine
+# Stage 2: Final stage with Nginx
+FROM nginx:stable-alpine
 
-# Set working directory
 WORKDIR /app
 
-# Copy server code from the build stage
-COPY --from=server-build /app/ ./
+# Copy React build files to Nginx HTML directory
+COPY --from=client-build /client/dist /usr/share/nginx/html
 
-# Copy client build from the client build stage
-COPY --from=client-build /app/client/build ./client/build
+# Copy server build files and shared models/types
+COPY --from=server-build /server/dist ./dist
+COPY --from=server-build /server/models ./models
 
-# Install production dependencies for server
-RUN npm install --only=production
+# Copy Nginx configuration
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
-# Expose the ports (frontend on 3000, backend on 3001)
-EXPOSE 3000 3001
+# Install production dependencies for the server
+COPY ./package*.json ./
+RUN apk add --no-cache nodejs npm && npm install --only=production
 
-# Start the server (which will also serve the React app)
-CMD ["npm", "run", "start"]
+# Expose ports for Nginx and backend server
+EXPOSE 3001 443
+
+# Start Nginx and backend server using the start script in package.json
+CMD ["sh", "-c", "npm run start & nginx -g 'daemon off;'"]
