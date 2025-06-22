@@ -4,16 +4,11 @@ import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from '../../contexts/AuthContext';
 import { useBalances } from '../../contexts/BalanceProvider';
 import LoginModal from './LoginModal';
-import NeonText from './NeonText';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaChartLine, FaChevronLeft } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
 import { FaCity } from 'react-icons/fa6';
 import LoadingScreenDots from './LoadingScreenDots';
-
-interface NavBarProps {
-  telegramUser: any;
-}
 
 const featureSections = [
   { id: 'bot-shop', title: 'Bot Shop Marketplace', icon: <FaShoppingCart /> },
@@ -21,7 +16,7 @@ const featureSections = [
   { id: 'analytics', title: 'Advanced Analytics', icon: <FaChartLine /> },
 ];
 
-const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
+const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { sdk, connected, connecting } = useSDK();
@@ -168,15 +163,14 @@ const NavBar: React.FC<NavBarProps> = ({ telegramUser }) => {
         {/* Left section - Title */}
         <div className="flex items-center">
           <button className="flex items-center gap-2" 
-          type="button" onClick={() => handleNavigation('/')}>
-            <img src="/logos/dexter.svg" className="h-4 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
-            <NeonText 
-              className="text-2xl tracking-widest font-savate"
-              intensity="high"
-              
+          type="button" onClick={() => handleNavigation('/')}
+          >
+            <img src="/logos/dexter3d.svg" className="h-4 drop-shadow-[0_0_8px_#00ffe7]" alt="DexterCity" />
+            <span 
+              className="neon-text text-2xl tracking-widest font-savate"
             >
               D<span className='text-base'>EXTER</span>C<span className='text-base'>ITY</span>
-            </NeonText>
+            </span>
           </button>
         </div>
         

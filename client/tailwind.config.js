@@ -9,6 +9,7 @@ module.exports = {
       fontFamily: {
         lato: ['Lato'],
         savate: ['Savate'],
+        dafoe: ['Mr Dafoe'],
       },
       colors: {
         // Neon theme color presets

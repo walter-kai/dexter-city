@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Player } from "@lottiefiles/react-lottie-player";
-import RandomRobohashCard from './RandomRobohashCard';
+import RandomRobohashCard from '../common/RandomRobohashCard';
 
 // Hero lines data moved here from Features.tsx
 const heroLines = [
   <div key="line-1" className='flex'>
     <p className="text-white">
-      Welcome to automatic trading on <span className="font-semibold text-[#b8eaff]">Ethereum</span>--powered by
+      Welcome to the <span className="font-semibold text-[#b8eaff]">Purely Decentralized</span> Automated Trading Bot city of
       <span className="font-semibold text-[#b8eaff]"> Uniswap!</span>
     </p>
     <img
@@ -16,9 +16,9 @@ const heroLines = [
       style={{ display: "inline-block", verticalAlign: "middle" }}
     />
   </div>,
-  <div key="line-2" className="btn-standard text-center">Login with MetaMask</div>,
-  <div key="line-3" className="btn-standard text-center">Buy and sell your bots</div>,
-  <div key="line-4" className="btn-standard text-center">Join the community</div>,
+  <div key="line-2" className="btn-standard text-center">Enter The City</div>,
+  <div key="line-3" className="btn-standard text-center">Simple Guide</div>,
+  <div key="line-4" className="btn-standard text-center">Community Chat</div>,
 ];
 
 const Hero: React.FC = () => {
@@ -39,7 +39,7 @@ const Hero: React.FC = () => {
         <div className="flex flex-col justify-center pointer-events-none -mr-32 z-10">
           <div className="bg-black/80 rounded-xl px-6 py-6 max-w-[800px] mx-auto">
             <div className="text-3xl md:text-4xl font-bold text-neon-cyan drop-shadow-[0_0_8px_#00ffe7] mb-2">
-              Dear citizen,
+              Greetings,
             </div>
             <div className="space-y-2 mt-2">
               {heroLines.map((line, idx) => {

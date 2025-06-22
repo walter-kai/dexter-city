@@ -13,7 +13,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const { sdk, connected, connecting } = useSDK();
   const navigate = useNavigate();
   const { setUser } = useAuth();
-  const [isConnecting, setIsConnecting] = useState(false);
+
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShow(false);
+      setTimeout(() => setShow(true), 10);
+    } else {
+      setShow(false);
+    }
+  }, [isOpen]);
 
   // Only close modal when we successfully connect AND login
   useEffect(() => {
@@ -23,7 +33,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
   const connectWallet = async () => {
     try {
-      setIsConnecting(true);
       
       if (!sdk) {
         console.error("MetaMask SDK not initialized.");
@@ -55,19 +64,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       }
     } catch (err) {
       console.error("Failed to connect MetaMask:", err);
-    } finally {
-      setIsConnecting(false);
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+    <div className={`fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 transition-opacity duration-500 ${show ? 'opacity-100' : 'opacity-0'}`}>
       <div className="bg-[#23263a] w-full max-w-md rounded-lg p-8 relative border border-[#00ffe7]/30 shadow-[0_0_24px_#00ffe7]">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 bg-[#181a23] p-2 rounded-full hover:bg-[#00ffe7] hover:text-[#181a23] text-[#00ffe7] shadow-[0_0_8px_#00ffe7] transition"
+          className="absolute z-10 top-4 right-4 bg-[#181a23] p-2 rounded-full hover:bg-[#00ffe7] hover:text-[#181a23] text-[#00ffe7] shadow-[0_0_8px_#00ffe7] transition"
         >
           ✕
         </button>
@@ -84,10 +91,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         
         <button
           onClick={connectWallet}
-          disabled={connecting || isConnecting}
+          disabled={connecting}
           className="w-full bg-[#00ffe7] text-[#181a23] font-bold py-3 px-6 rounded hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c] transition disabled:opacity-50"
         >
-          {connecting || isConnecting ? "Connecting..." : "Connect MetaMask"}
+          {connecting ? "Connecting..." : "Connect MetaMask"}
         </button>
         
         <div className="mt-4 text-center">

@@ -116,13 +116,7 @@ const Guide: React.FC = () => {
 							style={{ transitionDelay: `${index * 200}ms` }}
 							data-feature-id={feature.id}
 						>
-							<GuideSection
-								id={feature.id}
-								icon={feature.icon}
-								title={feature.title}
-								summary={feature.summary}
-								detail={feature.detail}
-							/>
+	
 						</div>
 					))}
 				</div>

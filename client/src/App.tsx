@@ -17,6 +17,7 @@ import TermsOfService from './pages/x/legal/TermsOfService';
 import NotFound from './pages/NotFound';
 import Settings from './pages/i/Settings';
 import DailyPoolActivity from './components/dashboard/DailyPoolActivity';
+import Landing from './pages/x/Landing';
 
 // Main App component
 const App: React.FC = () => {
@@ -111,34 +112,40 @@ const App: React.FC = () => {
   return (
     <div className="App min-h-screen relative">
       {/* Background Container with Parallax */}
-      <div className="fixed inset-0 z-0 overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
-          style={{
-            backgroundImage: getBackgroundImage(),
-            transform: getParallaxTransform(0.5),
-            willChange: 'transform',
-            height: '110%', // Slightly larger to accommodate transform
-            top: '-5%',
-          }}
-        />
-        <div 
-          className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90"
-          style={{
-            transform: getParallaxTransform(0.3),
-            willChange: 'transform',
-          }}
-        />
-      </div>
+        
+          <div className="fixed inset-0 z-0 overflow-hidden">
+            <div 
+              className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+              style={{
+                backgroundImage: getBackgroundImage(),
+                transform: getParallaxTransform(0.5),
+                willChange: 'transform',
+                height: '110%', // Slightly larger to accommodate transform
+                top: '-5%',
+              }}
+            />
+            <div 
+              className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90"
+              style={{
+                transform: getParallaxTransform(0.3),
+                willChange: 'transform',
+              }}
+            />
+          </div>
+        {/* )} */}
       
       {/* Content Container */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        <NavBar telegramUser={user} />
-        <SubNavBar />
+        {location.pathname !== "/" && (
+        <>
+          <NavBar />
+          <SubNavBar />
+        </>  
+        )}
         
         <main className="flex-1 pt-32">
           <Routes>
-            <Route path="/" element={<Guide />} />
+            <Route path="/" element={<Landing />} />
             
             {/* Bot-related routes under /bots/ */}
             <Route path="/i/dashboard" element={<Dashboard />} />
@@ -165,8 +172,7 @@ const App: React.FC = () => {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        
-        <Footer />
+        {location.pathname !== "/" && <Footer />}
       </div>
     </div>
   );

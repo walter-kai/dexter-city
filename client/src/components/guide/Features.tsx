@@ -30,149 +30,25 @@ const GuideSection: React.FC<GuideSectionProps> = ({ id, icon, title, summary, d
   );
 };
 
-// Getting Started Steps Data
-export const gettingStartedSteps = [
-  {
-    step: 1,
-    icon: <FaWallet />,
-    title: "Connect MetaMask Wallet",
-    description: "Securely connect your MetaMask wallet to access all DexterCity features",
-    detail: (
-      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 ">
-        <div className="flex text-[#00ffe7] font-semibold bg-[#23263a] p-3 rounded border border-[#00ffe7]/10">
-            
-          <div className="btn-blue w-fit h-fit mx-auto mt-2">
-            <img
-              src="logos/metamask-logo.png"
-              alt="MetaMask"
-              className="w-16 h-16 inline-block mr-3"
-            />  
-            Download Metamask
-          </div>
-
-        </div>
-      </div>
-    )
-  },
-  {
-    step: 2,
-    icon: <FaCog />,
-    title: "Configure or Buy a Bot",
-    description: "Create a custom bot or purchase a pre-built strategy from our Bot Shop",
-    detail: (
-      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex text-[#00ffe7] font-semibold bg-[#23263a] p-3 rounded border border-[#00ffe7]/10">
-            <img src='icons/building-garage.svg' alt='Bot Garage' className='w-24 h-24 inline-block' />
-            <h4 className="mb-2 gap-2">
-              Bot Garage
-            <p className="text-[#e0e7ef] text-sm">Customize a bot tailored to your preferences and store them for later use.</p>
-            </h4>
-          </div>
-          <div className="flex text-[#00ffe7] font-semibold bg-[#23263a] p-3 rounded border border-[#00ffe7]/10">
-            <img src='icons/building-garage.svg' alt='Bot Garage' className='w-24 h-24 inline-block' />
-            <h4 className="mb-2 gap-2">
-              Marketplace
-            <p className="text-[#e0e7ef] text-sm">
-              Buy a bot to learn strategies or <span className="text-yellow-300">earn commissions</span> for selling and hiring out bots!
-            </p>
-            </h4>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    step: 3,
-    icon: <FaCoins />,
-    title: "Choose Trading Pairs",
-    description: "Select from 50+ popular tokens including meme coins and established cryptocurrencies",
-    detail: (
-      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20">
-        <div className="flex items-center gap-3 mb-3">
-          <img
-            src="logos/uniswap-logo.png"
-            alt="Uniswap"
-            className="w-8 h-8"
-          />
-          <span className="text-[#00ffe7] font-semibold">Uniswap Integration</span>
-        </div>
-        <p className="text-[#e0e7ef] mb-3">
-          Trade on the most popular DEX with access to:
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
-          <span className="bg-[#23263a] px-2 py-1 rounded text-[#b8eaff]">🚀 ETH/USDC</span>
-          <span className="bg-[#23263a] px-2 py-1 rounded text-[#b8eaff]">🐸 PEPE/ETH</span>
-          <span className="bg-[#23263a] px-2 py-1 rounded text-[#b8eaff]">🐕 SHIB/ETH</span>
-          <span className="bg-[#23263a] px-2 py-1 rounded text-[#b8eaff]">⚡ WBTC/ETH</span>
-        </div>
-        <p className="text-[#faafe8] text-sm mt-2">
-          <Link to="/x/pools" className="hover:underline">View all 50+ supported pools →</Link>
-        </p>
-      </div>
-    )
-  },
-  {
-    step: 4,
-    icon: <FaRocket />,
-    title: "Deploy & Monitor",
-    description: "Launch your bot and manage strategies with real-time monitoring and reinforcements",
-    detail: (
-      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <span>🎯</span>
-            <span className="text-[#e0e7ef]">Deploy bots with custom strategy parameters</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>📊</span>
-            <span className="text-[#e0e7ef]">Real-time performance monitoring and analytics</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>🔧</span>
-            <span className="text-[#e0e7ef]">Inject new strategies during deployment</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span>🤖</span>
-            <span className="text-[#e0e7ef]">Bring reinforcement bots for complex strategies</span>
-          </div>
-        </div>
-      </div>
-    )
-  },
-  {
-    step: 5,
-    icon: <FaBell />,
-    title: "Direct Wallet Transfers",
-    description: "All profits go directly to your wallet with instant notifications",
-    detail: (
-      <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20">
-        <div className="bg-gradient-to-r from-green-500/20 to-green-500/10 border border-green-500/50 rounded p-3 mb-3">
-          <h4 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
-            <span>💚</span> Direct to Your Wallet
-          </h4>
-          <p className="text-[#e0e7ef] text-sm">
-            All transactions execute directly to your connected wallet - no intermediary custody required.
-          </p>
-        </div>
-        <ul className="space-y-2 text-[#b8eaff]">
-          <li className="flex items-center gap-2">
-            <span>⚡</span> Instant transaction execution
-          </li>
-          <li className="flex items-center gap-2">
-            <span>📱</span> Real-time mobile notifications
-          </li>
-          <li className="flex items-center gap-2">
-            <span>🔒</span> No custody risk - your keys, your coins
-          </li>
-          <li className="flex items-center gap-2">
-            <span>🌐</span> Works even when you're offline
-          </li>
-        </ul>
-      </div>
-    )
-  }
-];
+const Features: React.FC = () => {
+  return (
+    <div id="features" className="scroll-mt-24">
+      <h2 className="text-3xl font-bold text-[#00ffe7] mb-8 text-center drop-shadow-[0_0_8px_#00ffe7]">
+        Platform Features
+      </h2>
+      {featuresData.map((feature) => (
+        <GuideSection
+          key={feature.id}
+          id={feature.id}
+          icon={feature.icon}
+          title={feature.title}
+          summary={feature.summary}
+          detail={feature.detail}
+        />
+      ))}
+    </div>
+  );
+};
 
 // Features Data
 export const featuresData = [
@@ -360,4 +236,4 @@ export const featuresData = [
   },
 ];
 
-export default GuideSection;
+export default Features;
