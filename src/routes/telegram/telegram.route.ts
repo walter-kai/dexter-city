@@ -33,7 +33,7 @@ ${message}
 
     // Send to Telegram (you'll need to configure these environment variables)
     const accessToken = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    const chatId = process.env.MY_TELEGRAM_CHAT_ID;
 
     if (!accessToken || !chatId) {
       return res.status(500).json({
