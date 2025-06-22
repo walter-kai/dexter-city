@@ -30,20 +30,19 @@ RUN npm install --include=dev
 # Copy server source code and shared models/types
 COPY ./server/ ./server
 COPY ./client/models/ ./models
-COPY ./client/models/ ./client/models/
 
 # Build server TypeScript
 RUN npm run build
 
-# Stage 2: Final stage with Nginx
+# Stage 2: Final stage with Nginx and backend
 FROM nginx:stable-alpine
 
 WORKDIR /app
 
-# Copy React build files to Nginx HTML directory
+# Copy React build files to Nginx HTML directory (frontend only)
 COPY --from=client-build /client/dist /usr/share/nginx/html
 
-# Copy server build files and shared models/types
+# Copy server build files and shared models/types (backend only)
 COPY --from=server-build /server/dist ./dist
 COPY --from=server-build /server/models ./models
 
@@ -57,10 +56,8 @@ RUN apk add --no-cache nodejs npm && npm install --only=production
 # Set NODE_ENV to production for the final image
 ENV NODE_ENV=production
 
-# Ensure we are in /app before starting
 WORKDIR /app
 
-# Expose ports for Nginx and backend server
 EXPOSE 3001 443
 
 # Start Nginx and backend server using the start script in package.json
