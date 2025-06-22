@@ -23,7 +23,7 @@ const port = process.env.PORT || 3001;
 app.use(morgan('combined')); // Logs HTTP requests
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../client/build')));
+app.use(express.static(path.join(__dirname, '../client/dist')));
 app.use("/api", routes);
 
 // 404 handler for API routes
@@ -37,7 +37,12 @@ app.post('/', (req: Request, res: Response) => {
 
 // Serve React application
 app.get('*', (req: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  const indexPath = path.join(__dirname, '../client/dist', 'index.html');
+  if (!require('fs').existsSync(indexPath)) {
+    res.status(500).send('index.html not found. Did you run the React build? (cd client && npm run build)');
+    return;
+  }
+  res.sendFile(indexPath);
 });
 
 // Start HTTP server
