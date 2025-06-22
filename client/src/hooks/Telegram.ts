@@ -1,4 +1,4 @@
-import { TelegramUser } from "../models/User";
+import { TelegramUser } from "../../../models/User";
 
 export interface TelegramWebApp {
   initDataUnsafe?: {

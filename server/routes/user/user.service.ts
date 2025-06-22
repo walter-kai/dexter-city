@@ -1,5 +1,5 @@
 import admin from "firebase-admin"; // Import admin SDK
-import User, { FireStoreUser, UserArgs} from "../../../client/src/models/User";
+import User, { FireStoreUser, UserArgs} from "../../../models/User";
 
 import logger from "../../config/logger";
 import { db } from "../../config/firebase";

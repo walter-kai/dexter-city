@@ -28,8 +28,11 @@ COPY package.json package-lock.json tsconfig.json ./
 # Install server dependencies
 RUN npm install
 
+# Copy models source code
+COPY models/ ./models
+
 # Copy server source code
-COPY src/ ./src
+COPY server/ ./server
 
 # Build server TypeScript
 RUN npm run build

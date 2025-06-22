@@ -4,7 +4,7 @@ import { db } from "../../config/firebase";
 
 import ApiError from "../../utils/api-error";
 import { PoolData } from "@/models/subgraph/Pools";
-import { TokenDetails } from "@/models/TokenDetails";
+import { TokenDetails } from ".vscode/models/TokenDetails";
 import { SwapDataV4 } from "@/models/subgraph/Swaps";
 
 /**

@@ -4,10 +4,10 @@ import { CandlestickController, OhlcController, CandlestickElement, OhlcElement 
 import "chartjs-chart-financial";
 import "chartjs-adapter-date-fns";
 
-import { PoolData } from "../../../models/subgraph/Pools";
-import { SwapDataV4 } from "@/models/subgraph/Swaps";
+import { PoolData } from "../../../../../models/subgraph/Pools";
+import { SwapDataV4 } from "../../../../../models/subgraph/Swaps";
 import LoadingScreenDots from "../../common/LoadingScreenDots";
-import { BotConfig } from "../../../models/Bot";
+import { BotConfig } from "../../../../../models/Bot";
 import { generateOHLCData, fillMissingDays, generateSafetyOrderAndProfitLines } from "./ChartUtil";
 
 const calculatePercentChange = (currentPrice: number, previousPrice: number) => {

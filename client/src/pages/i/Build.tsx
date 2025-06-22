@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { BotConfig } from "../../models/Bot";
-import { PoolData } from "../../models/subgraph/Pools";
-import User from "../../models/User";
+import { BotConfig } from "../../../../models/Bot";
+import { PoolData } from "../../../../models/subgraph/Pools";
+import User from "../../../../models/User";
 import { generateLogoHash } from "../../hooks/Robohash";
 import PairChart from "../../components/build/chart/PairChart";
 import TokenInfo from "../../components/build/MarketInfo";
 import LoadingScreenDots from "../../components/common/LoadingScreenDots";
 import { FaCheckCircle, FaExclamationTriangle, FaRobot, FaArrowLeft } from "react-icons/fa";
-import { CoinGecko } from "../../models/CoinGecko";
+import { CoinGecko } from "../../../../models/CoinGecko";
 import PoolDropdown from "../../components/build/PoolDropdown";
 
 const hudPanel =

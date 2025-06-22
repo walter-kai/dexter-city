@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { PoolData } from '../models/subgraph/Pools';
+import { PoolData } from '../../../models/subgraph/Pools';
 
 export interface DailyPoolsData {
   dates: {

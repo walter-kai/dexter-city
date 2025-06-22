@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BotConfig } from '../../models/Bot';
+import { BotConfig } from '../../../../models/Bot';
 import { Chart, LineElement, PointElement, LinearScale, CategoryScale, ArcElement, Tooltip, Legend } from 'chart.js';
 import StatusPopup from '../../components/common/StatusPopup';
 import BotCard from '../../components/garage/BotCard';

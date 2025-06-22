@@ -1,4 +1,4 @@
-import { BotConfig } from "../../../models/Bot";
+import { BotConfig } from "../../../../../models/Bot";
 import { SwapDataV4 } from "@/models/subgraph/Swaps";
 
 export const generateOHLCData = (swaps: SwapDataV4[], priceType: "tradeToken" | "USD") => {

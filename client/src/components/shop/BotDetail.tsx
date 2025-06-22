@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BotForSale } from '../../models/Bot';
+import { BotForSale } from '../../../../models/Bot';
 import { FaRobot, FaShoppingCart, FaCheckCircle, FaClock, FaUser, FaStar, FaCalendar, FaCodeBranch, FaExchangeAlt, FaChartLine, FaArrowUp, FaShieldAlt, FaWifi, FaCog } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
 import { Line, Bar, Pie } from 'react-chartjs-2';

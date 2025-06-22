@@ -27,10 +27,10 @@
     "ws": "^8.18.0"
   },
   "scripts": {
-    "start": "node dist/src/server.js",
+    "start": "node dist/server/server.js",
     "build": "rimraf dist && tsc --project tsconfig.json",
     "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
-    "dev-server": "ts-node src/server.ts",
+    "dev-server": "ts-node server/server.ts",
     "dev-client": "cd client && npm start",
     "heroku-postbuild": "npm run build && cd client && npm install && npm run build"
   },

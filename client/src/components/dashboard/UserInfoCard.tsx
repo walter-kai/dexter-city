@@ -5,7 +5,7 @@ import LoadingScreenDots from '../common/LoadingScreenDots';
 import StatusPopup from '../common/StatusPopup';
 import { useBalances } from '../../contexts/BalanceProvider';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
-import User from '../../models/User';
+import User from '../../../../models/User';
 
 interface UserInfoCardProps {
   user: User | null;
