@@ -10,7 +10,6 @@
       "moduleResolution": "node",
       "baseUrl": ".", // Set the base URL for module resolution
       "paths": {
-        "@/*": ["client/src/*"],
         "@/models/*": ["client/models/*"]
       }
     },

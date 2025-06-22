@@ -17,13 +17,13 @@
       "@/*": ["*"],
       "@/components/*": ["components/*"],
       "@/hooks/*": ["hooks/*"],
-      "@/models/*": ["../models/*"],
+      "@/models/*": ["models/*"],
       "@/pages/*": ["pages/*"],
       "@/styles/*": ["styles/*"],
       "@/utils/*": ["utils/*"],
       "@/contexts/*": ["contexts/*"]
     }
   },
-  "include": ["src", "models/**/*"],
+  "include": ["src", "../models/**/*"],
   "exclude": ["node_modules"]
 }
