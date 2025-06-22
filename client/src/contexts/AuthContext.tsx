@@ -8,6 +8,9 @@ interface AuthContextType {
   logout: () => void;
   isLoading: boolean;
   currentRoute: string;
+  showLoginModal: boolean;
+  triggerLoginModal: () => void;
+  closeLoginModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,6 +30,7 @@ interface AuthProviderProps {
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
   const currentRoute = location.pathname;
 
@@ -50,6 +54,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     sessionStorage.removeItem('currentUser');
   };
 
+  const triggerLoginModal = () => setShowLoginModal(true);
+  const closeLoginModal = () => setShowLoginModal(false);
+
   const value = {
     user,
     setUser: (newUser: User | null) => {
@@ -63,6 +70,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isLoading,
     currentRoute,
+    showLoginModal,
+    triggerLoginModal,
+    closeLoginModal,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

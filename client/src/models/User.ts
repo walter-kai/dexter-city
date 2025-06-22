@@ -25,44 +25,39 @@ export interface TelegramUser {
 // Updated UserArgs interface
 export interface UserArgs {
   readonly dateCreated: Date;
-  readonly firstName: string; // Renamed from firstname
-  readonly lastName: string | null; // Renamed from lastname
-  readonly telegramHandle: string | null; // Renamed from handle
+  readonly username: string | null; // Can be temporarily null
   readonly lastLoggedIn: Date; // Date UTC string
   readonly referralId: string | null; // Renamed from referral
-  readonly telegramId: string; // Renamed from telegramid
+  readonly telegramId: string | null; // Renamed from telegramid
   readonly walletId: string; // Renamed from telegramid
-  readonly favoriteTokens: string[] | null;
-  readonly photoId: string | null;
-  readonly photoUrl: string | null;
 }
 
 // User class definition
 export default class User {
   dateCreated: Date;
-  firstName: string; // Changed from firstname
-  lastName: string | null; // Changed from lastname
-  telegramHandle: string | null; // Changed from handle
+  username: string | null; // Changed from firstname
+  // lastName: string | null; // Changed from lastname
+  // telegramHandle: string | null; // Changed from handle
   lastLoggedIn: Date;
   referralId: string | null; // Changed from referral
-  telegramId: string; // Changed from telegramid
+  telegramId: string | null; // Changed from telegramid
   walletId: string;
-  favoriteTokens: string[] | null;
+  // favoriteTokens: string[] | null;
   photoId?: string | null;
   photoUrl?: string | null;
 
   constructor(args: UserArgs) {
     this.dateCreated = args.dateCreated;
-    this.firstName = args.firstName; // Changed to firstName
-    this.lastName = args.lastName; // Changed to lastName
-    this.telegramHandle = args.telegramHandle; // Changed to telegramHandle
+    this.username = args.username; // Changed to firstName
+    // this.lastName = args.lastName; // Changed to lastName
+    // this.telegramHandle = args.telegramHandle; // Changed to telegramHandle
     this.lastLoggedIn = args.lastLoggedIn;
     this.referralId = args.referralId; // Changed to referralId
     this.telegramId = args.telegramId; // Changed to telegramId
     this.walletId = args.walletId; // Changed to telegramId
-    this.favoriteTokens = args.favoriteTokens;
-    this.photoId = args.photoId;
-    this.photoUrl = args.photoUrl;
+    // this.favoriteTokens = args.favoriteTokens;
+    // this.photoId = args.photoId;
+    // this.photoUrl = args.photoUrl;
   }
 }
 

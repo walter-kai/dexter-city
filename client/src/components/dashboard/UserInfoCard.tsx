@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { SiEthereum } from 'react-icons/si';
 import { FaCopy, FaChartLine } from 'react-icons/fa';
 import LoadingScreenDots from '../common/LoadingScreenDots';
-import StatusFooter from '../common/StatusFooter';
+import StatusPopup from '../common/StatusPopup';
 import { useBalances } from '../../contexts/BalanceProvider';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
 import User from '../../models/User';
@@ -89,7 +89,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
                 <div className="flex items-center gap-4 mb-4">
                   <img src={user?.photoUrl || undefined} className="h-16 w-16 rounded-full border-2 border-[#00ffe7]/40" alt="your icon" />
                   <div>
-                    <div className="text-xl font-bold text-[#00ffe7]">{user?.firstName || "Unknown User"}</div>
+                    <div className="text-xl font-bold text-[#00ffe7]">{user?.username || "Unknown User"}</div>
                     <div className="text-xs text-[#b8eaff] flex items-center gap-2">
                       Wallet: <span className="font-mono">{user?.walletId?.slice(0, 6)}...{user?.walletId?.slice(-4)}</span>
                       <button
@@ -104,8 +104,8 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
                 </div>
                 
                 <div className="space-y-2 mb-4">
-                  <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Username:</strong> {user?.telegramHandle || "Not set"}</p>
-                  <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Full Name:</strong> {user?.firstName} {user?.lastName || ""}</p>
+                  <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Username:</strong> {user?.username || "Not set"}</p>
+                  <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Referral:</strong> {user?.referralId || "Not set"}</p>
                   <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Last Login:</strong> {user?.lastLoggedIn ? timeSince(user.lastLoggedIn) : "Unknown"}</p>
                   <p className="text-[#e0e7ef]"><strong className="text-[#00ffe7]">Member Since:</strong> {user?.dateCreated ? timeSince(user.dateCreated) : "Unknown"}</p>
                 </div>
@@ -243,7 +243,7 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
       </div>
 
       {statusMessage && (
-        <StatusFooter
+        <StatusPopup
           type={statusMessage.type}
           message={statusMessage.message}
           onClose={closeStatusMessage}

@@ -13,13 +13,13 @@ export const updateUser = async (user: User): Promise<User> => {
   const userPayload: UserArgs = {
     telegramId: user.telegramId,
     walletId: user.walletId,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    telegramHandle: user.telegramHandle,
+    username: user.username,
+    // lastName: user.lastName,
+    // telegramHandle: user.telegramHandle,
     referralId: user.referralId,
-    photoId: user.photoId || '',
-    photoUrl: user.photoUrl || '',
-    favoriteTokens: user.favoriteTokens,
+    // photoId: user.photoId || '',
+    // photoUrl: user.photoUrl || '',
+    // favoriteTokens: user.favoriteTokens,
     lastLoggedIn: user.lastLoggedIn,
     dateCreated: user.dateCreated || new Date(),
   };
@@ -50,65 +50,17 @@ export const updateUser = async (user: User): Promise<User> => {
  * @returns {Promise<User>} The logged-in user.
  */
 
-export const login = async (walletId: string): Promise<User> => {
-
-  const{ user: telegramUser, referral } = (await getTelegram());
-
-  let res: Response = await fetch(`/api/auth/login`, {
+export const handleUserLogin = async (walletId: string, username?: string, referralId?: string): Promise<{ user: User, isNewUser: boolean }> => {
+  let res: Response = await fetch(`/api/user/login`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-    telegramId: telegramUser.id,
-    firstName: telegramUser.first_name,
-    lastName: telegramUser.last_name || undefined, // Optional field
-    telegramHandle: telegramUser.username || undefined, // Optional field
-    referralId: referral,
-    // // Optional fields from TelegramUser
-    // is_bot: telegramUser.is_bot,
-    // language_code: telegramUser.language_code,
-    // is_premium: telegramUser.is_premium,
-    // added_to_attachment_menu: telegramUser.added_to_attachment_menu,
-    // can_join_groups: telegramUser.can_join_groups,
-    // can_read_all_group_messages: telegramUser.can_read_all_group_messages,
-    // supports_inline_queries: telegramUser.supports_inline_queries,
-    // can_connect_to_business: telegramUser.can_connect_to_business,
-    // has_main_web_app: telegramUser.has_main_web_app,
-    walletId: walletId,
-    referral: referral || undefined, // Optional field
-    }),
+    body: JSON.stringify({ walletId, username, referralId }),
   });
-
-  // Handle response
   if (!res.ok) {
-    // Handle error, create user logic in backend
     throw new Error('Login failed');
   }
-
-  const user = (await res.json()) as User;
-
-  return user; // Return the user directly
-};
-
-/**
- * Get all users in the DB.
- *
- * @returns {Promise<ReadonlyArray<User>>} All Users in the DB
- */
-export const getUsers = async (): Promise<ReadonlyArray<User>> => {
-  const req = await fetch(`/api/users`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!req.ok) {
-    throw new Error("There was an error fetching the users.");
-  }
-
-  const { users } = (await req.json()) as { users: UserArgs[] };
-
-  return users.map((user) => new User(user));
+  const { user, isNewUser } = await res.json();
+  return { user: new User(user), isNewUser };
 };

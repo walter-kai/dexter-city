@@ -18,7 +18,7 @@ export const TokenProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const fetchPublicToken = async (): Promise<string | null> => {
     if (!publicToken || (pubExpiration && Date.now() > pubExpiration)) {
       try {
-        const response = await fetch("/api/auth");
+        const response = await fetch("/api/user/public-token");
         const data = await response.json();
   
         if (data.access_token && data.expires_in) {
@@ -42,7 +42,7 @@ export const TokenProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const fetchPrivateToken = async (authCode: string) => {
     if (!privateToken || (privateExpiration && Date.now() > privateExpiration)) {
       try {
-        const response = await fetch(`/api/auth/private?authCode=${encodeURIComponent(authCode)}`, {
+        const response = await fetch(`/api/user/private-token?authCode=${encodeURIComponent(authCode)}`, {
           method: 'GET',
           headers: {
             accept: 'application/json',

@@ -108,7 +108,7 @@ const BuildBot: React.FC = () => {
     }
     const payload = {
       ...formData,
-      creatorName: user.firstName,
+      creatorName: user.username,
       creatorWalletId: user.walletId,
       createdAt: new Date(),
     };

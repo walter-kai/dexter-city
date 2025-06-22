@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useSDK } from '@metamask/sdk-react';
-import { login } from './hooks/FirestoreUser';
-import NavBar from './components/common/OnlineNavBar';
+
 import Footer from './components/common/Footer';
-import SubNavBar from './components/common/SubNavBar';
+
 import Dashboard from './pages/i/Dashboard';
 import Shop from './pages/i/Shop';
 import Garage from './pages/i/Garage';
@@ -18,13 +17,16 @@ import NotFound from './pages/NotFound';
 import Settings from './pages/i/Settings';
 import DailyPoolActivity from './components/dashboard/DailyPoolActivity';
 import LandingPage from './pages/x/Landing';
-import OfflineNavbar from './components/common/OfflineNavbar';
+import OfflineNavbar from './components/common/navs/OfflineNavbar';
 import HowItWorks from './pages/x/HowItWorks';
 import TickerBar from './components/common/TickerBar';
 import TelegramSocialSection from './pages/x/Telegram';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import EnterCityNavBar from './components/common/EnterCityNavBar';
+import EnterCityNavBar from './components/common/navs/EnterCityNavBar';
 import CommissionsCard from './pages/x/Commissions';
+import { useAuth } from './contexts/AuthContext';
+import LoginModal from './components/common/LoginModal';
+import OnlineNavBar from './components/common/navs/OnlineNavBar';
 
 // Main App component
 const App: React.FC = () => {
@@ -37,6 +39,7 @@ const App: React.FC = () => {
   const [showFooterMenu, setShowFooterMenu] = useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
+  const { showLoginModal, closeLoginModal } = useAuth();
 
   // Reset scroll position on route change (except for hash navigation)
   useEffect(() => {
@@ -140,6 +143,9 @@ const App: React.FC = () => {
             />
           </>
         )}
+        {location.pathname.startsWith("/i/") && (
+          <OnlineNavBar />
+        )}
         <TransitionGroup component={null}>
           <CSSTransition key={location.pathname} classNames="fade" timeout={400}>
             <main className="flex-1 ">
@@ -177,8 +183,11 @@ const App: React.FC = () => {
             </main>
           </CSSTransition>
         </TransitionGroup>
+        {/* Always render LoginModal globally, not conditionally */}
+        <LoginModal isOpen={showLoginModal} onClose={closeLoginModal} />
         {!(location.pathname.startsWith("/x/") || location.pathname === "/") && (
-         <Footer />)}
+          <Footer />
+        )}
       </div>
     </div>
   );

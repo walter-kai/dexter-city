@@ -39,7 +39,7 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center animate-fadeIn w-full">
+    <div className="flex flex-col items-center animate-fadeIn w-full pt-28">
 
       {/* Combined User Info, Leaderboard and Market Data */}
       <div className="relative w-full max-w-7xl">

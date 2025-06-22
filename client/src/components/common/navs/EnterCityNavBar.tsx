@@ -1,21 +1,17 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../../contexts/AuthContext";
 import { useSDK } from "@metamask/sdk-react";
-import LoadingScreenDots from "./LoadingScreenDots";
+import LoadingScreenDots from "../LoadingScreenDots";
+import LoginModal from "../LoginModal";
 
 const EnterCityNavBar: React.FC = () => {
   const navigate = useNavigate();
   const { connecting, connected } = useSDK();
-  const { user } = useAuth();
+  const { triggerLoginModal } = useAuth();
 
   const handleEnterClick = () => {
-    if (user && connected) {
-      navigate("/i/dashboard");
-    } else {
-      // Optionally trigger login modal if needed
-      navigate("/"); // fallback to landing for login
-    }
+    triggerLoginModal();
   };
 
   return (
@@ -31,7 +27,7 @@ const EnterCityNavBar: React.FC = () => {
         disabled={connecting}
         className="btn-special px-8 py-3 text-lg font-bold"
       >
-        {connecting ? <LoadingScreenDots size={4} /> : "EnterDexter City"}
+        {connecting ? <LoadingScreenDots size={4} /> : "Enter Dexter City"}
       </button>
     </nav>
   );

@@ -153,7 +153,7 @@ const Shop = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-transparent flex flex-col items-center pt-20 pb-8 font-lato">
+		<div className="min-h-screen bg-transparent flex flex-col items-center pt-20 pb-8">
 			<div className="w-full max-w-[1600px] mx-auto px-2">
 				<div className="flex items-center justify-between mb-6">
 					<h1 className="text-3xl font-extrabold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] tracking-widest hud-title">

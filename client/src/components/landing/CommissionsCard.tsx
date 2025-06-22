@@ -1,13 +1,12 @@
 import React from 'react';
 
 const CommissionsCard: React.FC = () => (
-  <div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 bg-black/50">
-    <h1 className="text-5xl font-bold text-[#00ffe7] mb-8 text-center drop-shadow-[0_0_16px_#00ffe7] flex items-center justify-center gap-3">
-      <span role="img" aria-label="commission">💸</span>
+  <div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#0fffd7]/10 via-[#23263a]/80 to-[#faafe8]/10">
+    <h1 className="text-5xl font-bold text-[#00ffe7] mb-8 text-center drop-shadow-[0_0_16px_#00ffe7] tracking-wide">
       Commissions & Revenue Sharing
     </h1>
     <p className="text-xl text-[#faafe8] mb-12 text-center max-w-2xl">
-      Transparent, fair, and designed to reward performance for both bot users and creators on Dexter City.
+      Learn how commissions work for both bot users and creators on Dexter City. Transparent, fair, and designed to reward performance.
     </p>
     <div className="w-full max-w-4xl flex flex-col lg:flex-row gap-8 items-stretch">
       {/* Using a Bot Section */}

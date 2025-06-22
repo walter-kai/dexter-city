@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSDK } from "@metamask/sdk-react";
-import { useAuth } from '../../contexts/AuthContext';
-import { useBalances } from '../../contexts/BalanceProvider';
-import LoginModal from './LoginModal';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useBalances } from '../../../contexts/BalanceProvider';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaChartLine, FaChevronLeft } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
-import { formatLargeNumberEth } from '../../utils/formatEthNumber';
+import { formatLargeNumberEth } from '../../../utils/formatEthNumber';
 import { FaCity } from 'react-icons/fa6';
-import LoadingScreenDots from './LoadingScreenDots';
+import LoadingScreenDots from '../LoadingScreenDots';
 
 const featureSections = [
   { id: 'bot-shop', title: 'Bot Shop Marketplace', icon: <FaShoppingCart /> },
@@ -20,10 +19,9 @@ const NavBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { sdk, connected, connecting } = useSDK();
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showFeaturesSubDropdown, setShowFeaturesSubDropdown] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, triggerLoginModal } = useAuth();
   const { balances, ethPrice } = useBalances();
 
   // Close dropdown when clicking outside
@@ -47,14 +45,6 @@ const NavBar: React.FC = () => {
     setShowDropdown(false);
     console.log("Wallet disconnected");
     navigate('/');
-  };
-
-  const handleLoginClick = () => {
-    setShowLoginModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowLoginModal(false);
   };
 
   const handleNavigation = (path: string) => {
@@ -305,7 +295,7 @@ const NavBar: React.FC = () => {
           ) : (
             <div className="flex items-center gap-4">
               <button
-                onClick={handleLoginClick}
+                onClick={triggerLoginModal}
                 disabled={connecting}
                 className="btn-purple w-20 h-6 text-sm py-0"
               >
@@ -315,11 +305,6 @@ const NavBar: React.FC = () => {
           )}
         </div>
       </div>
-
-      <LoginModal 
-        isOpen={showLoginModal} 
-        onClose={handleCloseModal} 
-      />
     </>
   );
 };

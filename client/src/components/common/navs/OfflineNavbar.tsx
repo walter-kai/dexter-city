@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { FaChevronCircleUp } from 'react-icons/fa';
-import LoadingScreenDots from './LoadingScreenDots';
+import LoadingScreenDots from '../LoadingScreenDots';
 
 interface OfflineNavbarProps {
   navigate: (path: string) => void;

@@ -10,8 +10,7 @@ import ApiError from "../../utils/api-error";
 
 // import { collection, query, where, getDocs, addDoc } from "firebase/firestore"; 
 import { Timestamp } from '@google-cloud/firestore'; // Ensure this is correct
-
-import { Telegraf } from "telegraf";
+import type { Telegraf } from 'telegraf';
 import { PassThrough } from "stream";
 
 /**
@@ -67,12 +66,13 @@ async function updateUser(user: User, breadcrumb?: string): Promise<User> {
 /**
  * Creates a new user or returns the existing user if found.
  *
- * @param {Object} args - The user details to create.
- * @param {string} args.telegramid - Telegram ID of the user to create.
- * @param {string | undefined} [args.firstname] - First name of the user to create.
- * @param {string | undefined} [args.lastname] - Last name of the user to create.
- * @param {string | undefined} [args.handle] - Username of the user to create.
- * @param {string | undefined} [args.referral] - Telegram ID of the user who referred this user.
+ * @param {UserArgs} args - The user details to create.
+ * @param {string} args.walletId - Wallet ID of the user to create.
+ * @param {string | null} [args.telegramId] - Telegram ID of the user to create.
+ * @param {string} args.username - Username of the user to create.
+ * @param {string | null} [args.referralId] - Referral ID of the user who referred this user.
+ * @param {Date} args.dateCreated - Date the user was created.
+ * @param {Date} args.lastLoggedIn - Last login date.
  * @param {string | undefined} [breadcrumb] - Optional breadcrumb for logging.
  * @returns {Promise<User>} The created or found user object.
  */
@@ -80,11 +80,10 @@ async function createUser(
   args: UserArgs,
   breadcrumb?: string
 ): Promise<User> {
-  const newBreadcrumb = `createUser(${args.telegramId}):${breadcrumb}`;
+  const newBreadcrumb = `createUser(${args.walletId}):${breadcrumb}`;
   const timeNow = Timestamp.now();
 
   const usersRef = db.collection("users");
-  const bot = new Telegraf(process.env.TELEGRAM_BOT_TOKEN as string);
 
   logger.info(
     JSON.stringify({
@@ -115,27 +114,11 @@ async function createUser(
     });
   }
 
-  // Fetch the profile photo using Telegraf's bot.telegram
-  const profilePhotos = await bot.telegram.getUserProfilePhotos(
-    Number(args.telegramId)
-  );
-
-  // Safely handle the response and fetch profilePicId
-  const profilePicId = profilePhotos?.photos?.[0]?.[0]?.file_id || null;
-
-  // Download and upload the profile picture
-  const profilePicUrl = profilePicId
-    ? await downloadAndUploadToFirebase(bot, profilePicId, args.telegramId)
-    : null;
-
   // Set the `dateCreated` to the current timestamp for new users
   const userPayload: FireStoreUser = {
     ...args,
     dateCreated: timeNow, // Set current timestamp for new user creation
     lastLoggedIn: timeNow.toDate(),
-    photoId: profilePicId || null,
-    photoUrl: profilePicUrl || null,
-    favoriteTokens: null, // Ensure null for favoriteTokens
   };
 
   // Add a new document with an auto-generated ID
@@ -182,16 +165,10 @@ const getUserByWalletId = async (
   }
 
   const doc = querySnapshot.docs[0];
-  const queryData = doc.data() as User;
-
-  // Ensure photoId and photoUrl are defined or null
-  const photoId = queryData.photoId !== undefined ? queryData.photoId : null;
-  const photoUrl = queryData.photoUrl !== undefined ? queryData.photoUrl : null;
+  const queryData = doc.data() as FireStoreUser;
 
   const user = new User({
     ...queryData,
-    photoId, // Pass the photoId as either string or null
-    photoUrl,
     dateCreated: doc.createTime?.toDate() || new Date(),
   });
 

@@ -6,7 +6,6 @@ import LoadingScreenDots from '../../components/common/LoadingScreenDots';
 import { Player } from '@lottiefiles/react-lottie-player';
 import RandomRobohashCard from '../../components/common/RandomRobohashCard';
 import { FaBars, FaChevronCircleDown, FaChevronCircleRight, FaChevronCircleUp } from 'react-icons/fa';
-import LoginModal from '@/components/common/LoginModal';
 import TickerBar from '../../components/common/TickerBar';
 
 const landingFeatures = [
@@ -28,24 +27,19 @@ const landingFeatures = [
 ];
 
 const LandingPage: React.FC = () => {
-    const [showLoginModal, setShowLoginModal] = useState(false);
     const [showFooterMenu, setShowFooterMenu] = useState(false);
     const menuRef = React.useRef<HTMLDivElement>(null);
     const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
     const navigate = useNavigate();
     const { connecting, connected } = useSDK();
-    const { user } = useAuth();
+    const { user, triggerLoginModal } = useAuth();
 
     const handleEnterClick = () => {
         if (user && connected) {
             navigate('/i/dashboard');
         } else {
-            setShowLoginModal(true);
+            triggerLoginModal();
         }
-    };
-
-    const handleCloseModal = () => {
-        setShowLoginModal(false);
     };
 
     // Close on outside click or after 10 seconds
@@ -130,7 +124,7 @@ const LandingPage: React.FC = () => {
                                     disabled={connecting}
                                     className="btn-special px-10 py-4"
                                 >
-                                    {connecting ? <LoadingScreenDots size={5} /> : 'EnterDexter City'}
+                                    {connecting ? <LoadingScreenDots size={5} /> : 'Enter the city'}
                                 </button>
                             </div>
                         </div>
@@ -138,10 +132,6 @@ const LandingPage: React.FC = () => {
                 </div>
             </div>
             {/* Bottom HUD Navigation Bar removed, now handled in App.tsx */}
-            <LoginModal 
-                isOpen={showLoginModal} 
-                onClose={handleCloseModal} 
-            />
         </>
     );
 };

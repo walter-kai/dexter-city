@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BotConfig } from '../../models/Bot';
 import { Chart, LineElement, PointElement, LinearScale, CategoryScale, ArcElement, Tooltip, Legend } from 'chart.js';
-import StatusFooter from '../../components/common/StatusFooter';
+import StatusPopup from '../../components/common/StatusPopup';
 import BotCard from '../../components/garage/BotCard';
 import CreateBotCard from '../../components/garage/CreateBotCard';
 import BotDetails from '../../components/garage/BotDetails';
@@ -152,7 +152,7 @@ const Garage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent pt-8 pb-6 font-lato">
+    <div className="min-h-screen bg-transparent pt-8 pb-6">
       {/* Header - More compact */}
       <div className="w-full max-w-[1600px] mx-auto px-4 mb-3">
         <div className="flex items-center justify-between">
@@ -222,7 +222,7 @@ const Garage = () => {
       )}
 
       {statusFooter && (
-        <StatusFooter
+        <StatusPopup
           type={statusFooter.type}
           message={statusFooter.message}
           onClose={() => setStatusFooter(null)}

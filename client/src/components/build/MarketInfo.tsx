@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { CoinGecko } from "../../models/CoinGecko";
 import LoadingScreenDots from "../common/LoadingScreenDots";
 import { FaCoins, FaExchangeAlt, FaStar, FaTags, FaGlobe, FaLink, FaChartLine, FaChartBar, FaBook } from "react-icons/fa";
-import StatusFooter from "../common/StatusFooter";
+import StatusPopup from "../common/StatusPopup";
 
 interface MarketInfoProps {
   tokenAddress: string;
@@ -362,7 +362,7 @@ const MarketInfo: React.FC<MarketInfoProps> = ({ tokenAddress }) => {
 
       {/* Status Footer for copy notifications */}
       {statusMessage && (
-        <StatusFooter 
+        <StatusPopup 
           type={statusType}
           message={statusMessage}
           onClose={() => setStatusMessage(null)}

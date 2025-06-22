@@ -7,7 +7,7 @@ interface StatusFooterProps {
   onClose: () => void;
 }
 
-const StatusFooter: React.FC<StatusFooterProps> = ({ type, message, onClose }) => {
+const StatusPopup: React.FC<StatusFooterProps> = ({ type, message, onClose }) => {
   const getIcon = () => {
     switch (type) {
       case 'loading':
@@ -56,4 +56,4 @@ const StatusFooter: React.FC<StatusFooterProps> = ({ type, message, onClose }) =
   );
 };
 
-export default StatusFooter;
+export default StatusPopup;
