@@ -54,6 +54,12 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 COPY ./package*.json ./
 RUN apk add --no-cache nodejs npm && npm install --only=production
 
+# Set NODE_ENV to production for the final image
+ENV NODE_ENV=production
+
+# Ensure we are in /app before starting
+WORKDIR /app
+
 # Expose ports for Nginx and backend server
 EXPOSE 3001 443
 
