@@ -3,6 +3,9 @@ FROM node:20-alpine AS client-build
 
 WORKDIR /client
 
+# Install build dependencies for node-gyp
+RUN apk add --no-cache python3 make g++
+
 # Copy client dependencies and install
 COPY ./client/package*.json ./
 RUN npm install
@@ -30,19 +33,20 @@ RUN npm install --include=dev
 # Copy server source code and shared models/types
 COPY ./server/ ./server
 COPY ./client/models/ ./models
+COPY ./client/models/ ./client/models/
 
 # Build server TypeScript
 RUN npm run build
 
-# Stage 2: Final stage with Nginx and backend
+# Stage 2: Final stage with Nginx
 FROM nginx:stable-alpine
 
 WORKDIR /app
 
-# Copy React build files to Nginx HTML directory (frontend only)
+# Copy React build files to Nginx HTML directory
 COPY --from=client-build /client/dist /usr/share/nginx/html
 
-# Copy server build files and shared models/types (backend only)
+# Copy server build files and shared models/types
 COPY --from=server-build /server/dist ./dist
 COPY --from=server-build /server/models ./models
 
@@ -56,8 +60,10 @@ RUN apk add --no-cache nodejs npm && npm install --only=production
 # Set NODE_ENV to production for the final image
 ENV NODE_ENV=production
 
+# Ensure we are in /app before starting
 WORKDIR /app
 
+# Expose ports for Nginx and backend server
 EXPOSE 3001 443
 
 # Start Nginx and backend server using the start script in package.json
