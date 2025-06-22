@@ -24,6 +24,6 @@
       "@/contexts/*": ["contexts/*"]
     }
   },
-  "include": ["src", "models", "../models/User.ts", "../models/Uniswap.ts", "../models/TokenDetails.ts", "../models/Bot.ts", "../models/City.ts", "../models/CoinGecko.ts", "../models/CoinMarketCap.ts", "../models/Talkwalker.ts", "../models/Team.ts", "../.vscode/models/subgraph", "../models/subgraph/Pools.ts", "../models/subgraph/Swaps.ts"],
+  "include": ["src", "../models/**/*"],
   "exclude": ["node_modules"]
 }
