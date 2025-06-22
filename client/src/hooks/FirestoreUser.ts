@@ -12,12 +12,7 @@ export const updateUser = async (user: User): Promise<User> => {
     telegramId: user.telegramId,
     walletId: user.walletId,
     username: user.username,
-    // lastName: user.lastName,
-    // telegramHandle: user.telegramHandle,
     referralId: user.referralId,
-    // photoId: user.photoId || '',
-    // photoUrl: user.photoUrl || '',
-    // favoriteTokens: user.favoriteTokens,
     lastLoggedIn: user.lastLoggedIn,
     dateCreated: user.dateCreated || new Date(),
   };
