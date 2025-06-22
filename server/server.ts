@@ -20,10 +20,11 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 // Middleware
-app.use(morgan('combined')); // Logs HTTP requests
+app.use(morgan('combined'));
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../client/dist')));
+
+// API routes
 app.use("/api", routes);
 
 // 404 handler for API routes
@@ -35,15 +36,18 @@ app.post('/', (req: Request, res: Response) => {
   res.redirect('/');
 });
 
-// Serve React application
-app.get('*', (req: Request, res: Response) => {
-  const indexPath = path.join(__dirname, '../client/dist', 'index.html');
-  if (!require('fs').existsSync(indexPath)) {
-    res.status(500).send('index.html not found. Did you run the React build? (cd client && npm run build)');
-    return;
-  }
-  res.sendFile(indexPath);
-});
+// In development, serve static files and React app from Express
+if (process.env.NODE_ENV !== 'production') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+  app.get('*', (req: Request, res: Response) => {
+    const indexPath = path.join(__dirname, '../client/dist', 'index.html');
+    if (!require('fs').existsSync(indexPath)) {
+      res.status(500).send('index.html not found. Did you run the React build? (cd client && npm run build)');
+      return;
+    }
+    res.sendFile(indexPath);
+  });
+}
 
 // Start HTTP server
 const server = app.listen(port, () => {
