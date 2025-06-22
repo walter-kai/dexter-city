@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FaEnvelope, FaRobot, FaUser, FaBriefcase, FaComment, FaCheckCircle } from 'react-icons/fa';
 
 import StatusFooter from '@/components/common/StatusFooter';
-import SliderCaptcha from '@/components/guide/SliderCaptcha';
+import SliderCaptcha from '@/components/landing/contact/SliderCaptcha';
 
 interface FormData {
   name: string;
@@ -134,111 +134,111 @@ const ContactUs: React.FC = () => {
   // Render the form when everything is complete
   if (showForm) {
     return (
-      <div className="min-h-screen py-10 text-neon-light">
-        <div className="max-w-4xl mx-auto px-4 pt-6">
-          <div 
-            className="bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-6 opacity-0 animate-fade-in-up"
-            style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
-          >
-            <h1 className="text-2xl font-bold text-[#00ffe7] mb-6 text-center">
-              <FaEnvelope className="inline mr-2" />
-              Contact Us
+      <div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 bg-black/80 text-neon-light">
+        <div className="w-full max-w-4xl">
+          <div className="flex flex-col items-center">
+            <h1 className="text-5xl font-bold text-[#00ffe7] mb-8 text-center drop-shadow-[0_0_16px_#00ffe7] flex items-center justify-center gap-3">
+              <FaEnvelope className="text-[#00ffe7] text-5xl" />
+              Contact Form
             </h1>
-            
-            <form onSubmit={handleFormSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div 
+              className="w-full bg-[#181c23] border-2 border-[#00ffe7]/30 rounded-2xl shadow-[0_0_24px_#00ffe7]/20 p-8 opacity-0 animate-fade-in-up"
+              style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
+            >
+              <form onSubmit={handleFormSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[#e0e7ef] mb-2 font-semibold">
+                      <FaUser className="inline mr-2" />
+                      Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      disabled={isSubmitting}
+                      className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+                        isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      placeholder="Your full name"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-[#e0e7ef] mb-2 font-semibold">
+                      <FaEnvelope className="inline mr-2" />
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      disabled={isSubmitting}
+                      className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+                        isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      placeholder="your.email@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-[#e0e7ef] mb-2 font-semibold">
-                    <FaUser className="inline mr-2" />
-                    Name *
+                    <FaBriefcase className="inline mr-2" />
+                    Business/Organization
                   </label>
                   <input
                     type="text"
-                    name="name"
-                    value={formData.name}
+                    name="business"
+                    value={formData.business}
                     onChange={handleInputChange}
                     disabled={isSubmitting}
                     className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
                       isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
-                    placeholder="Your full name"
-                    required
+                    placeholder="Your company or organization (optional)"
                   />
                 </div>
-                
+
                 <div>
                   <label className="block text-[#e0e7ef] mb-2 font-semibold">
-                    <FaEnvelope className="inline mr-2" />
-                    Email *
+                    <FaComment className="inline mr-2" />
+                    Message *
                   </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
+                  <textarea
+                    name="message"
+                    value={formData.message}
                     onChange={handleInputChange}
                     disabled={isSubmitting}
-                    className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+                    rows={6}
+                    className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] resize-vertical ${
                       isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
-                    placeholder="your.email@example.com"
+                    placeholder="Tell us about your project, questions, or how we can help you..."
                     required
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-[#e0e7ef] mb-2 font-semibold">
-                  <FaBriefcase className="inline mr-2" />
-                  Business/Organization
-                </label>
-                <input
-                  type="text"
-                  name="business"
-                  value={formData.business}
-                  onChange={handleInputChange}
-                  disabled={isSubmitting}
-                  className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
-                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  placeholder="Your company or organization (optional)"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[#e0e7ef] mb-2 font-semibold">
-                  <FaComment className="inline mr-2" />
-                  Message *
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  disabled={isSubmitting}
-                  rows={6}
-                  className={`w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] resize-vertical ${
-                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  placeholder="Tell us about your project, questions, or how we can help you..."
-                  required
-                />
-              </div>
-
-              <div className="text-center">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`btn-green px-8 py-4 text-lg font-semibold flex items-center justify-center gap-2 mx-auto ${
-                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  <FaEnvelope />
-                  {isSubmitting ? 'Sending...' : 'Send Message'}
-                </button>
-              </div>
-            </form>
+                <div className="text-center">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`btn-green px-8 py-4 text-lg font-semibold flex items-center justify-center gap-2 mx-auto ${
+                      isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <FaEnvelope />
+                    {isSubmitting ? 'Sending...' : 'Send Message'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-        
         {showStatusFooter && (
           <StatusFooter
             type={statusType}
@@ -251,43 +251,31 @@ const ContactUs: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen text-neon-light">
-      <div className="max-w-7xl mx-auto px-4 pt-6">
-        <div 
-          className={`bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-8 transition-all duration-700 ease-in-out ${
-            showCaptcha ? 'max-w-2xl mx-auto' : 'max-w-4xl mx-auto'
-          }`}
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-[#0fffd7]/10 via-[#23263a]/80 to-[#faafe8]/10 text-neon-light">
+      <div className="w-full flex flex-col items-center px-4">
+        <div
+          className={`transition-all duration-700 ease-in-out opacity-0 animate-fade-in-up ${showCaptcha ? 'max-w-2xl p-8 min-h-[420px]' : 'max-w-3xl p-10 min-h-[280px]'} w-full bg-[#181c23] border-2 border-[#00ffe7]/30 rounded-2xl shadow-[0_0_24px_#00ffe7]/20`}
+          style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}
         >
-          <h1 className="text-2xl font-bold text-[#00ffe7] mb-8 text-center">
-            <FaEnvelope className="inline mr-2" />
-            Contact Us
+          <h1 className="text-4xl sm:text-5xl font-bold text-[#00ffe7] mb-6 text-center drop-shadow-[0_0_16px_#00ffe7] tracking-wide">
+            Contact Form
           </h1>
-          
+          <p className="text-lg sm:text-xl text-[#faafe8] mb-10 text-center max-w-2xl mx-auto">
+            We'd love to hear from you! Click the button below to get in touch with our team.
+          </p>
           {!showCaptcha ? (
-            <div 
-              className={`text-center transition-all duration-500 ${
-                showCaptcha ? 'opacity-0 scale-95' : 'opacity-100 scale-100'
-              }`}
-            >
-              <p className="text-[#e0e7ef] mb-6 text-lg">
-                We'd love to hear from you! Click the button below to get in touch with our team.
-              </p>
-              
+            <div className="text-center transition-all duration-500">
               <button
                 onClick={handleContactClick}
-                className="btn-green flex items-center justify-center gap-2 mx-auto px-8 py-4 text-lg font-semibold transform transition-all duration-300 hover:scale-105"
+                className="btn-green flex items-center justify-center gap-2 mx-auto px-8 py-4 text-lg font-semibold transform transition-all duration-300 hover:scale-105 shadow-lg"
               >
                 <FaEnvelope />
-                Contact Us
+                Start
               </button>
             </div>
           ) : showSuccess ? (
             // Success indicator
-            <div 
-              className={`text-center transition-all duration-500 ${
-                showSuccess ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-              }`}
-            >
+            <div className="text-center transition-all duration-500">
               <div className="bg-gradient-to-r from-green-500/20 to-green-500/10 border border-green-500/50 rounded-lg p-8">
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center animate-pulse">
@@ -300,29 +288,16 @@ const ContactUs: React.FC = () => {
             </div>
           ) : (
             // Captcha container
-            <div 
-              className={`transition-all duration-700 ease-in-out ${
-                showCaptcha && !captchaVerified ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-              }`}
-            >
-              <div className="bg-[#181a23] border border-[#00ffe7]/20 rounded-lg p-6">
+            <div className="transition-all duration-700 ease-in-out">
+              <div className="bg-[#23263a] border border-[#00ffe7]/20 rounded-lg p-6">
                 <h3 className="text-lg font-bold text-[#00ffe7] mb-4 text-center">
                   <FaRobot className="inline mr-2" />
                   Security Verification
                 </h3>
-                
                 <p className="text-[#e0e7ef] mb-4 text-center">
                   Complete the puzzle below to continue:
                 </p>
-                
-                <div 
-                  className={`transition-all duration-500 ${
-                    showCaptcha ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                  }`}
-                  style={{ 
-                    transitionDelay: showCaptcha ? '0.3s' : '0s',
-                  }}
-                >
+                <div className="transition-all duration-500">
                   <SliderCaptcha
                     width={320}
                     height={180}

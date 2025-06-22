@@ -1,76 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useSDK } from "@metamask/sdk-react";
 import LoadingScreenDots from '../../components/common/LoadingScreenDots';
 import { Player } from '@lottiefiles/react-lottie-player';
 import RandomRobohashCard from '../../components/common/RandomRobohashCard';
-import { FaBars } from 'react-icons/fa';
+import { FaBars, FaChevronCircleDown, FaChevronCircleRight, FaChevronCircleUp } from 'react-icons/fa';
 import LoginModal from '@/components/common/LoginModal';
-
-// LandingNav component for the ticker
-interface Coin {
-    item: {
-        id: string;
-        name: string;
-        symbol: string;
-        thumb: string;
-    };
-}
-
-const TickerBar: React.FC = () => {
-    const [trendingCoins, setTrendingCoins] = useState<Coin[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchTrendingCoins = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch('https://api.coingecko.com/api/v3/search/trending');
-                if (!response.ok) throw new Error('Failed to fetch');
-                const data = await response.json();
-                setTrendingCoins(data.coins);
-            } catch (error) {
-                console.error("Failed to fetch trending coins:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchTrendingCoins();
-    }, []);
-
-    const marqueeStyle = `
-        @keyframes marquee {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-            animation: marquee 60s linear infinite;
-            will-change: transform;
-        }
-    `;
-
-    return (
-        <>
-            <style>{marqueeStyle}</style>
-            <div className="bg-black/50 backdrop-blur-sm h-12 w-full fixed top-0 z-50 overflow-hidden">
-                <div className="flex animate-marquee whitespace-nowrap items-center h-full">
-                    {loading ? (
-                        <span className="text-white px-4">Loading trending tokens...</span>
-                    ) : (
-                        (trendingCoins.length > 0 ? [...trendingCoins, ...trendingCoins] : []).map((coin, index) => (
-                            <div key={index} className="flex items-center mx-4">
-                                <img src={coin.item.thumb} alt={coin.item.name} className="h-6 w-6 mr-2 rounded-full" />
-                                <span className="text-white font-semibold">{coin.item.name} ({coin.item.symbol.toUpperCase()})</span>
-                            </div>
-                        ))
-                    )}
-                </div>
-            </div>
-        </>
-    );
-};
-
+import TickerBar from '../../components/common/TickerBar';
 
 const landingFeatures = [
     {
@@ -90,10 +27,11 @@ const landingFeatures = [
     }
 ];
 
-const Landing: React.FC = () => {
+const LandingPage: React.FC = () => {
     const [showLoginModal, setShowLoginModal] = useState(false);
     const [showFooterMenu, setShowFooterMenu] = useState(false);
     const menuRef = React.useRef<HTMLDivElement>(null);
+    const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
     const navigate = useNavigate();
     const { connecting, connected } = useSDK();
     const { user } = useAuth();
@@ -114,12 +52,16 @@ const Landing: React.FC = () => {
     useEffect(() => {
         if (!showFooterMenu) return;
         const handleClick = (e: MouseEvent) => {
-            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-                setShowFooterMenu(false);
+            if (
+                (menuRef.current && menuRef.current.contains(e.target as Node)) ||
+                (toggleButtonRef.current && toggleButtonRef.current.contains(e.target as Node))
+            ) {
+                return;
             }
+            setShowFooterMenu(false);
         };
         document.addEventListener('mousedown', handleClick);
-        const timeout = setTimeout(() => setShowFooterMenu(false), 10000);
+        const timeout = setTimeout(() => setShowFooterMenu(false), 20000);
         return () => {
             document.removeEventListener('mousedown', handleClick);
             clearTimeout(timeout);
@@ -129,9 +71,8 @@ const Landing: React.FC = () => {
     return (
         <>
             <TickerBar />
-
             {/* HUD Foreground Content */}
-            <div className="relative z-10 flex flex-col items-center justify-center pt-24 pb-32">
+            <div className="relative z-10 flex flex-col items-center justify-center pt-52 pb-32">
                 <div className="z-20 backdrop-blur-lg mx-auto flex flex-col items-center ">
                     {/* HUD Video Game Background */}
                     <div className="relative z-20 backdrop-blur-lg mx-auto px-8 flex flex-col items-center">
@@ -167,7 +108,7 @@ const Landing: React.FC = () => {
                                     ))}
                                 </div>
                             </div>
-                            {/* DexterCity header vertically centered, docked right */}
+                            {/* Dexter Cityheader vertically centered, docked right */}
                             <div className='flex flex-col items-center justify-center w-2/5 space-y-6 bg-black/75 rounded-xl shadow-[0_0_10px_#faafe8]'>
                                 <p
                                     className="font-dafoe absolute top-16 right-[350px] text-[#faafe8] text-5xl max-w-2xl mx-auto text-center -rotate-12"
@@ -184,67 +125,19 @@ const Landing: React.FC = () => {
                                 <p className="text-[#faafe8] text-2xl max-w-2xl mx-auto mb-8 text-center" style={{ textShadow: "0 0 12px #faafe8" }}>
                                     Trading bots on the Ethereum Blockchain
                                 </p>
+                                <button
+                                    onClick={handleEnterClick}
+                                    disabled={connecting}
+                                    className="btn-special px-10 py-4"
+                                >
+                                    {connecting ? <LoadingScreenDots size={5} /> : 'EnterDexter City'}
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            {/* Bottom HUD Navigation Bar */}
-            <div className="fixed bottom-0 left-0 w-full z-30 flex justify-center items-center gap-6 py-4 bg-black/60 backdrop-blur-md border-t border-[#00ffe7]/20">
-                <button
-                    onClick={() => navigate('/x/blog')}
-                    className="btn-green px-8 py-3 text-lg font-bold rounded-xl shadow-[0_0_12px_#00ffe7]"
-                >
-                    Blog
-                </button>
-                <button
-                    onClick={() => navigate('/x/guide')}
-                    className="btn-green px-8 py-3 text-lg font-bold rounded-xl shadow-[0_0_12px_#00ffe7]"
-                >
-                    Guide
-                </button>
-                <button
-                    onClick={handleEnterClick}
-                    disabled={connecting}
-                    className="btn-special px-10 py-4"
-                >
-                    {connecting ? <LoadingScreenDots size={5} /> : 'Enter DexterCity'}
-                </button>
-                {/* Start Menu Button */}
-                <button
-                    className="fixed bottom-6 left-6 z-40 bg-[#23263a] border border-[#00ffe7]/40 rounded-full p-4 shadow-lg hover:bg-[#181a23] transition"
-                    onClick={() => setShowFooterMenu(v => !v)}
-                    aria-label="Open Start Menu"
-                >
-                    <FaBars className="text-[#00ffe7] text-2xl" />
-                </button>
-            </div>
-            {/* Drop-up Start Menu Footer */}
-            {showFooterMenu && (
-                <div ref={menuRef} className="fixed left-6 bottom-24 z-50 w-80 bg-[#181a23]/95 border border-[#00ffe7]/30 rounded-2xl shadow-2xl p-6 animate-fadeInUp">
-                    <img src="/logos/dexter3d.svg" className="h-10 mb-4" alt="DexterCity" />
-                    <p className="text-[#e0e7ef] text-sm mb-4">Trading made easy in the city.</p>
-                    <p className="text-[#e0e7ef] text-sm mb-4">© 2025 DexterCity. All rights reserved.</p>
-                    <div className="mb-4">
-                        <h3 className="text-[#00ffe7] font-bold mb-2">Quick Links</h3>
-                        <div className="space-y-2">
-                            <a href="https://docs.dextercity.com/whitepaper" target="_blank" rel="noopener noreferrer" className="flex items-center text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">
-                                Whitepaper <span className="ml-1">↗</span>
-                            </a>
-                            <button onClick={() => {navigate('/x/guide'); setShowFooterMenu(false);}} className="block text-left w-full text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">Guide</button>
-                            <button onClick={() => {navigate('/x/contact'); setShowFooterMenu(false);}} className="block text-left w-full text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">Contact us</button>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 className="text-[#00ffe7] font-bold mb-2">Legal</h3>
-                        <div className="space-y-2">
-                            <button onClick={() => {navigate('/legal/privacy-policy'); setShowFooterMenu(false);}} className="block text-left w-full text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">Privacy Policy</button>
-                            <button onClick={() => {navigate('/legal/terms-of-service'); setShowFooterMenu(false);}} className="block text-left w-full text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">Terms of Service</button>
-                            <button onClick={() => {navigate('/x/blog'); setShowFooterMenu(false);}} className="block text-left w-full text-[#e0e7ef] hover:text-[#00ffe7] transition text-sm">Blog</button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Bottom HUD Navigation Bar removed, now handled in App.tsx */}
             <LoginModal 
                 isOpen={showLoginModal} 
                 onClose={handleCloseModal} 
@@ -253,4 +146,4 @@ const Landing: React.FC = () => {
     );
 };
 
-export default Landing;
+export default LandingPage;

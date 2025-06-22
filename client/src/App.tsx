@@ -2,22 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useSDK } from '@metamask/sdk-react';
 import { login } from './hooks/FirestoreUser';
-import NavBar from './components/common/NavBar';
+import NavBar from './components/common/OnlineNavBar';
 import Footer from './components/common/Footer';
 import SubNavBar from './components/common/SubNavBar';
 import Dashboard from './pages/i/Dashboard';
 import Shop from './pages/i/Shop';
 import Garage from './pages/i/Garage';
 import BuildBot from './pages/i/Build';
-import Guide from './pages/x/Guide';
 import Blog from './pages/x/Blog';
 import ContactUs from './pages/x/ContactUs';
+import AboutUs from './pages/x/AboutUs';
 import PrivacyPolicy from './pages/x/legal/PrivacyPolicy';
 import TermsOfService from './pages/x/legal/TermsOfService';
 import NotFound from './pages/NotFound';
 import Settings from './pages/i/Settings';
 import DailyPoolActivity from './components/dashboard/DailyPoolActivity';
-import Landing from './pages/x/Landing';
+import LandingPage from './pages/x/Landing';
+import OfflineNavbar from './components/common/OfflineNavbar';
+import HowItWorks from './pages/x/HowItWorks';
+import TickerBar from './components/common/TickerBar';
+import TelegramSocialSection from './pages/x/Telegram';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import EnterCityNavBar from './components/common/EnterCityNavBar';
+import CommissionsCard from './pages/x/Commissions';
 
 // Main App component
 const App: React.FC = () => {
@@ -27,6 +34,9 @@ const App: React.FC = () => {
   const location = useLocation();
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [showFooterMenu, setShowFooterMenu] = useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
 
   // Reset scroll position on route change (except for hash navigation)
   useEffect(() => {
@@ -48,29 +58,6 @@ const App: React.FC = () => {
     img.onload = () => setBackgroundLoaded(true);
     img.src = '/bg/i/garage.png';
   }, []);
-
-  const connectWallet = async () => {
-    try {
-      if (!sdk) {
-        console.error('MetaMask SDK not initialized.');
-        return;
-      }
-      const accounts = await sdk.connect();
-      if (accounts && accounts.length > 0) {
-        const walletId = accounts[0];
-        console.log('Connected account:', walletId);
-
-        const user = await login(walletId);
-        sessionStorage.setItem('currentUser', JSON.stringify(user));
-        setUser(user);
-        navigate('/i/dashboard');
-      } else {
-        console.log('No accounts found.');
-      }
-    } catch (err) {
-      console.error('Failed to connect MetaMask:', err);
-    }
-  };
 
   // Handle scroll for parallax effect
   useEffect(() => {
@@ -136,43 +123,62 @@ const App: React.FC = () => {
       
       {/* Content Container */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        {location.pathname !== "/" && (
-        <>
-          <NavBar />
-          <SubNavBar />
-        </>  
+        {(location.pathname.startsWith("/x/") || location.pathname === "/") && (
+          <>
+            <TickerBar />
+            {(location.pathname !== "/") && (
+              <div className='mt-16'>
+                <EnterCityNavBar />
+              </div>
+            )}
+            <OfflineNavbar
+              navigate={navigate}
+              toggleButtonRef={toggleButtonRef}
+              showFooterMenu={showFooterMenu}
+              setShowFooterMenu={setShowFooterMenu}
+              menuRef={menuRef}
+            />
+          </>
         )}
-        
-        <main className="flex-1 pt-32">
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            
-            {/* Bot-related routes under /bots/ */}
-            <Route path="/i/dashboard" element={<Dashboard />} />
-            <Route path="/i/garage" element={<Garage />} />
-            <Route path="/i/garage/build" element={<BuildBot />} />
-            
-            {/* Backward compatibility routes */}
-            <Route path="/dash" element={<Dashboard />} />
-            <Route path="/build" element={<BuildBot />} />
-            <Route path="/bots" element={<Garage />} />
-            
-            {/* Other routes */}
-            <Route path="/i/shop" element={<Shop />} />
-            <Route path="/i/shop/:botId" element={<Shop />} />
-            <Route path="/x/pools" element={<DailyPoolActivity />} />
-            <Route path="/x/blog" element={<Blog />} />
-            <Route path="/x/contact" element={<ContactUs />} />
-            <Route path="/settings" element={<Settings />} />
-            
-            {/* Legal routes under /legal/ */}
-            <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/legal/terms-of-service" element={<TermsOfService />} />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-        {location.pathname !== "/" && <Footer />}
+        <TransitionGroup component={null}>
+          <CSSTransition key={location.pathname} classNames="fade" timeout={400}>
+            <main className="flex-1 ">
+              <Routes location={location}>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/x/about" element={<AboutUs />} />
+                <Route path="/x/how-it-works" element={<HowItWorks />} />
+                <Route path="/x/blog" element={<Blog />} />
+                <Route path="/x/contact" element={<ContactUs />} />
+                <Route path="/x/pools" element={<DailyPoolActivity />} />
+                <Route path="/x/telegram" element={<TelegramSocialSection />} />
+                <Route path="/x/commissions" element={<CommissionsCard />} />
+                
+                {/* Bot-related routes under /bots/ */}
+                <Route path="/i/dashboard" element={<Dashboard />} />
+                <Route path="/i/garage" element={<Garage />} />
+                <Route path="/i/garage/build" element={<BuildBot />} />
+                
+                {/* Backward compatibility routes */}
+                <Route path="/dash" element={<Dashboard />} />
+                <Route path="/build" element={<BuildBot />} />
+                <Route path="/bots" element={<Garage />} />
+                
+                {/* Other routes */}
+                <Route path="/i/shop" element={<Shop />} />
+                <Route path="/i/shop/:botId" element={<Shop />} />
+                <Route path="/settings" element={<Settings />} />
+                
+                {/* Legal routes under /legal/ */}
+                <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/legal/terms-of-service" element={<TermsOfService />} />
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </main>
+          </CSSTransition>
+        </TransitionGroup>
+        {!(location.pathname.startsWith("/x/") || location.pathname === "/") && (
+         <Footer />)}
       </div>
     </div>
   );

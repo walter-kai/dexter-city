@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FaExternalLinkAlt } from 'react-icons/fa';
 import LoadingScreenDots from '@/components/common/LoadingScreenDots';
-import NewsFetcher from '@/components/guide/NewsFetcher';
+import NewsFetcher from '@/components/landing/NewsFetcher';
 import LinkPreviewCard from '@/components/blog/LinkPreviewCard';
 
 interface PlatformUpdate {
@@ -80,17 +80,35 @@ const Blog: React.FC = () => {
     );
   }
 
+  // Header navigation scroll handler
+  const handleTabClick = (section: 'news' | 'updates') => {
+    setActiveSection(section);
+    const el = document.getElementById(section === 'news' ? 'news-section' : 'updates-section');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="min-h-screen pb-10 text-neon-light">
-      <div className="space-y-6 mb-8 relative max-w-7xl mx-auto pt-6">
+      {/* Blog Header */}
+      <div className="relative max-w-7xl mx-auto pt-24 mb-8 ">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+
+        </div>
+      </div>
+      <div className="space-y-6 mb-8 relative max-w-7xl mx-auto bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-6">
+          <div className='flex flex-col items-center text-center mb-6'>
+            <h1 className="text-4xl md:text-5xl font-bold text-[#00ffe7] drop-shadow-[0_0_12px_#00ffe7]">Dexter CityBlog</h1>
+            <p className="text-lg text-[#faafe8] mt-2">Latest news, platform updates, and community highlights</p>
+          </div>
         {/* Media News Section */}
         <div id="news-section">
           <NewsFetcher />
         </div>
-
         {/* Platform Updates Section */}
         <div id="updates-section">
-          <div className="bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-6">
+          <div className="">
             <div className="space-y-6">
               {platformUpdates.map((update, index) => (
                 <div key={index} className="bg-[#181a23] border border-[#00ffe7]/20 rounded-lg p-4 hover:shadow-[0_0_16px_#00ffe7]/30 transition-all duration-300">

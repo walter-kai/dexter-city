@@ -10,7 +10,7 @@ const TermsOfService: React.FC = () => {
       <div className="bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-6 text-[#e0e7ef] space-y-6">
         <div className="bg-[#ff005c]/20 border border-[#ff005c]/50 rounded-lg p-4 mb-6">
           <p className="text-[#ff005c] font-bold text-center">
-            ⚠️ IMPORTANT: By using DexterCity, you agree that our robots are cooler than you. 
+            ⚠️ IMPORTANT: By usingDexter City, you agree that our robots are cooler than you. 
             Deal with it. 😎
           </p>
         </div>
@@ -18,7 +18,7 @@ const TermsOfService: React.FC = () => {
         <section>
           <h2 className="text-xl font-bold text-[#00ffe7] mb-4">🤝 Acceptance of Terms</h2>
           <p>
-            By accessing and using DexterCity, you accept and agree to be bound by the terms 
+            By accessing and usingDexter City, you accept and agree to be bound by the terms 
             and provision of this agreement. You also accept that our bots have better trading 
             instincts than your uncle Larry who bought Dogecoin at the peak. 🐕💸
           </p>
@@ -30,7 +30,7 @@ const TermsOfService: React.FC = () => {
         <section>
           <h2 className="text-xl font-bold text-[#00ffe7] mb-4">📜 Use License (The Robot Rules)</h2>
           <ul className="list-disc list-inside space-y-2">
-            <li>Permission is granted to temporarily use DexterCity for personal, non-commercial use (unless you're a robot, then you're always welcome! 🤖)</li>
+            <li>Permission is granted to temporarily use Dexter Cityfor personal, non-commercial use (unless you're a robot, then you're always welcome! 🤖)</li>
             <li>This is the grant of a license, not a transfer of title (our robots remain ours, no kidnapping allowed)</li>
             <li>You may not modify or copy the materials (our code is like a fine wine - don't mess with perfection 🍷)</li>
             <li>You may not use the materials for any commercial purpose (unless you're selling memes about trading bots, that's totally fine 📈😂)</li>
@@ -60,7 +60,7 @@ const TermsOfService: React.FC = () => {
         <section>
           <h2 className="text-xl font-bold text-[#00ffe7] mb-4">🚫 Limitation of Liability (AKA "It's Not Our Fault")</h2>
           <p>
-            In no event shall DexterCity be liable for any damages arising out of the use or 
+            In no event shall Dexter Citybe liable for any damages arising out of the use or 
             inability to use the materials on our platform. This includes but is not limited to:
           </p>
           <ul className="list-disc list-inside mt-2 space-y-1">
@@ -116,7 +116,7 @@ const TermsOfService: React.FC = () => {
         <section>
           <h2 className="text-xl font-bold text-[#00ffe7] mb-4">🎉 The Fun Clause</h2>
           <p>
-            By using DexterCity, you acknowledge that trading should be approached with a sense of humor, 
+            By usingDexter City, you acknowledge that trading should be approached with a sense of humor, 
             realistic expectations, and the understanding that money is just numbers on a screen until 
             you try to buy coffee with it. ☕💰
           </p>

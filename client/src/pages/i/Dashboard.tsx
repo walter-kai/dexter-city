@@ -31,7 +31,7 @@ const Dashboard: React.FC = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-3xl font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] mb-4">
-          Welcome to DexterCity
+          Welcome to Dexter City
         </h1>
         <p className="text-[#e0e7ef] mb-8">Please connect your wallet to access the dashboard</p>
       </div>

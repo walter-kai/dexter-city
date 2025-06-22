@@ -85,7 +85,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         
         <div className="text-center mb-6">
           <p className="text-[#e0e7ef] mb-4">
-            Connect your MetaMask wallet to access DexterCity's trading bots and features.
+            Connect your MetaMask wallet to accessDexter City's trading bots and features.
           </p>
         </div>
         

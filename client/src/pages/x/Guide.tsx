@@ -2,12 +2,11 @@ import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from "@/contexts/AuthContext";
-import GuideSection, { featuresData } from "@/components/guide/Features";
-import Hero from "@/components/guide/Hero";
-import GetStarted from "@/components/guide/GetStarted";
-import FAQSection from "@/components/guide/FaqSection";
-import TestimonialCard from "@/components/guide/TestimonialCard";
-import TelegramSocialSection from "@/components/guide/TelegramSocialSection";
+import GuideSection, { featuresData } from "@/components/landing/Features";
+import Hero from "@/components/landing/Hero";
+import HowItWorks from "@/components/landing/HowItWorks";
+import TestimonialCard from "@/components/landing/TestimonialCard";
+import TelegramSocialSection from "@/pages/x/Telegram";
 
 const Guide: React.FC = () => {
 	const [visibleSections, setVisibleSections] = useState<{ [key: string]: boolean }>({});
@@ -52,7 +51,7 @@ const Guide: React.FC = () => {
 				<Hero />
 
 				{/* Getting Started Section */}
-				<GetStarted />
+				<HowItWorks />
 
 				{/* Robohash Gallery */}
 				<div 
@@ -119,19 +118,6 @@ const Guide: React.FC = () => {
 	
 						</div>
 					))}
-				</div>
-
-				{/* FAQ Section */}
-				<div 
-					ref={el => sectionRefs.current['faq-wrapper'] = el}
-					className={`transition-all duration-1000 ${
-						visibleSections['faq-wrapper'] 
-							? 'opacity-100 translate-y-0 scale-100' 
-							: 'opacity-0 translate-y-12 scale-95'
-					}`}
-					id="faq-wrapper"
-				>
-					<FAQSection />
 				</div>
 
 				{/* Telegram Social Section */}

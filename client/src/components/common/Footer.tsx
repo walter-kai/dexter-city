@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
               Trading made easy in the city.
             </p>
             <p className="text-[#e0e7ef] text-sm">
-            © 2025 DexterCity. All rights reserved.
+            © 2025 Dexter City. All rights reserved.
           </p>
           </div>
           <div>

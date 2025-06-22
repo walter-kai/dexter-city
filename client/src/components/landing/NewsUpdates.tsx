@@ -332,7 +332,7 @@ const NewsUpdates: React.FC = () => {
       {/* Header and Controls */}
       <div className="mb-2">
         <h2 className="text-center">
-          {contentType === 'news' ? 'Trading bots updates in the media' : 'DexterCity Platform Updates'}
+          {contentType === 'news' ? 'Trading bots updates in the media' : 'Dexter CityPlatform Updates'}
         </h2>
       </div>
 

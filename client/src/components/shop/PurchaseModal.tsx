@@ -34,7 +34,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
 
   // Pie chart data for hire breakdown
   const hireBreakdownData = {
-    labels: ['Your Share', 'DexterCity Fee', ...(bot.isPublic ? [] : ['Bot Creator Fee'])],
+    labels: ['Your Share', 'Dexter CityFee', ...(bot.isPublic ? [] : ['Bot Creator Fee'])],
     datasets: [
       {
         data: bot.isPublic ? [userShare, dexterCityFee] : [userShare, dexterCityFee, botOwnerFee],
@@ -162,7 +162,7 @@ const PurchaseModal: React.FC<PurchaseModalProps> = ({
                 </div>
                 <div className="space-y-1 text-xs">
                   <div className="flex justify-between">
-                    <span className="text-[#e0e7ef]">DexterCity Fee:</span>
+                    <span className="text-[#e0e7ef]">Dexter CityFee:</span>
                     <span className="text-[#ff005c]">{dexterCityFee}%</span>
                   </div>
                   {!bot.isPublic && (

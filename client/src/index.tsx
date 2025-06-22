@@ -8,6 +8,7 @@ import { MetaMaskProvider } from '@metamask/sdk-react';
 import { AuthProvider } from './contexts/AuthContext';
 import { BalanceProvider } from './contexts/BalanceProvider';
 import { PoolProvider } from './contexts/PoolContext';
+import { TrendingCoinsProvider } from './contexts/TrendingCoinsContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -27,7 +28,9 @@ root.render(
       <AuthProvider>
         <BalanceProvider>
           <PoolProvider>
-            <App />
+            <TrendingCoinsProvider>
+              <App />
+            </TrendingCoinsProvider>
           </PoolProvider>
         </BalanceProvider>
       </AuthProvider>

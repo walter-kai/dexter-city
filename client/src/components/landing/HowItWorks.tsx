@@ -10,7 +10,7 @@ export const gettingStartedSteps = [
     step: 1,
     icon: <FaWallet />,
     title: "Connect MetaMask Wallet",
-    description: "Securely connect your MetaMask wallet to access all DexterCity features",
+    description: "Securely connect your MetaMask wallet to access all Dexter Cityfeatures",
     detail: (
       <div className="bg-[#181a23] p-4 rounded-lg border border-[#00ffe7]/20 ">
         <div className="flex text-[#00ffe7] font-semibold bg-[#23263a] p-3 rounded border border-[#00ffe7]/10">
@@ -171,7 +171,7 @@ export const gettingStartedSteps = [
   }
 ];
 
-const GetStarted: React.FC = () => {
+const HowItWorks: React.FC = () => {
   const [strategyLevel, setStrategyLevel] = useState(50);
   const [visibleSteps, setVisibleSteps] = useState<boolean[]>([]);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -224,7 +224,7 @@ const GetStarted: React.FC = () => {
       className="bg-[#23263a]/70 border border-[#00ffe7]/30 rounded-xl shadow-lg p-8 mb-12 hover:shadow-[0_0_32px_rgba(0,255,231,0.2)] transition-all duration-300"
     >
       <h2 className="text-3xl font-bold text-[#00ffe7] mb-8 text-center drop-shadow-[0_0_8px_#00ffe7] opacity-0 animate-fade-in-up">
-        🚀 Getting Started with DexterCity
+        🚀 Getting Started withDexter City
       </h2>
       
       <div className="flex flex-col items-center">
@@ -310,11 +310,11 @@ const GetStarted: React.FC = () => {
           </div>
         </div>
         <div className="mt-4 text-sm text-neon-light">
-          <p><strong>Commission System:</strong> DexterCity operates on a performance-based commission structure. We only earn when your bots are profitable, aligning our success with yours.</p>
+          <p><strong>Commission System:</strong> Dexter Cityoperates on a performance-based commission structure. We only earn when your bots are profitable, aligning our success with yours.</p>
         </div>
       </div>
     </div>
   );
 };
 
-export default GetStarted;
+export default HowItWorks;
