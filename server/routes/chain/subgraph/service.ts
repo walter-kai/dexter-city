@@ -3,8 +3,8 @@ import admin from "firebase-admin";
 import logger from "../../../config/logger";
 import { fetchSwaps, fetchTopDailyPools } from "./UniswapV4";
 import { updateSwapsToPools } from "../../firebase/firebase.service";
-import { SwapDataV4 } from "@/models/subgraph/Swaps";
-import { PoolData } from "@/models/subgraph/Pools";
+import { SwapDataV4 } from ".types/subgraph/Swaps";
+import { PoolData } from ".types/subgraph/Pools";
 
 /**
  * Preload token symbols and their imgIds from tokens-cmc collection.

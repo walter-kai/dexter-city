@@ -8,7 +8,7 @@ import { fetchTopDailyPools } from "./UniswapV4";
 
 // Import the preloadTokenImages function from subgraph service
 import { preloadTokenImages } from "./service";
-import { PoolDayDataResponse } from "@/models/subgraph/Pools";
+import { PoolDayDataResponse } from ".types/subgraph/Pools";
 
 
 const getPools = async (req: Request, res: Response): Promise<Response> => {

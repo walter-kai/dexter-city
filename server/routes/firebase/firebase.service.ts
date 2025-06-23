@@ -3,9 +3,9 @@ import logger from "../../config/logger";
 import { db } from "../../config/firebase";
 
 import ApiError from "../../utils/api-error";
-import { PoolData } from "@/models/subgraph/Pools";
-import { TokenDetails } from "client/models/TokenDetails";
-import { SwapDataV4 } from "@/models/subgraph/Swaps";
+import { PoolData } from ".types/subgraph/Pools";
+import { TokenDetails } from ".types/TokenDetails";
+import { SwapDataV4 } from ".types/subgraph/Swaps";
 
 /**
  * Updates swaps in the Firestore database for the matching pool in dayPools-uniswap/2025-06-18.

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { CoinGecko } from "../../../models/CoinGecko";
+import { CoinGecko } from "../../../../.types/CoinGecko";
 import LoadingScreenDots from "../common/LoadingScreenDots";
 import { FaCoins, FaExchangeAlt, FaStar, FaTags, FaGlobe, FaLink, FaChartLine, FaChartBar, FaBook } from "react-icons/fa";
 import StatusPopup from "../common/StatusPopup";

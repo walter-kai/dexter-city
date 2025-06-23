@@ -3,17 +3,16 @@ FROM node:20-alpine AS client-build
 
 WORKDIR /client
 
-# Install build dependencies for node-gyp
-RUN apk add --no-cache python3 make g++
-
 # Copy client dependencies and install
 COPY ./client/package*.json ./
 RUN npm install
 
-# Copy client source code and shared models/types
+# Copy client source code and shared types
 COPY ./client/ ./
+COPY ./.types/ ../.types
 
 # Pass environment variables for the client build
+# Set the specific hostname for the production environment
 ARG VITE_SERVER_HOSTNAME
 ENV VITE_SERVER_HOSTNAME=${VITE_SERVER_HOSTNAME:-https://dexter-city-882290629693.us-central1.run.app}
 
@@ -21,19 +20,18 @@ ENV VITE_SERVER_HOSTNAME=${VITE_SERVER_HOSTNAME:-https://dexter-city-88229062969
 RUN npm run build
 
 # Stage 1: Build the server (Node/Express with TypeScript)
-FROM node:20-alpine AS server-build
+FROM node:20.8.0-alpine3.18 AS server-build
 
 WORKDIR /server
 
 # Copy root dependencies and install
 COPY ./package*.json ./
-COPY ./tsconfig.json ./
+COPY ./tsconfig.json ./tsconfig.json
 RUN npm install --include=dev
 
-# Copy server source code and shared models/types
+# Copy server source code and shared types
 COPY ./server/ ./server
-COPY ./client/models/ ./models
-COPY ./client/models/ ./client/models/
+COPY ./.types/ ./.types
 
 # Build server TypeScript
 RUN npm run build
@@ -46,9 +44,9 @@ WORKDIR /app
 # Copy React build files to Nginx HTML directory
 COPY --from=client-build /client/dist /usr/share/nginx/html
 
-# Copy server build files and shared models/types
+# Copy server build files and shared types
 COPY --from=server-build /server/dist ./dist
-COPY --from=server-build /server/models ./models
+COPY --from=server-build /server/.types ./.types
 
 # Copy Nginx configuration
 COPY ./nginx.conf /etc/nginx/nginx.conf
@@ -56,12 +54,6 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 # Install production dependencies for the server
 COPY ./package*.json ./
 RUN apk add --no-cache nodejs npm && npm install --only=production
-
-# Set NODE_ENV to production for the final image
-ENV NODE_ENV=production
-
-# Ensure we are in /app before starting
-WORKDIR /app
 
 # Expose ports for Nginx and backend server
 EXPOSE 3001 443

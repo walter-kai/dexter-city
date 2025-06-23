@@ -1,7 +1,7 @@
 import { createClient, cacheExchange, fetchExchange } from 'urql';
 
-import { PoolData, PoolDayDataResponse } from '@/models/subgraph/Pools';
-import { SwapDataV4 } from '@/models/subgraph/Swaps';
+import { PoolData, PoolDayDataResponse } from '.types/subgraph/Pools';
+import { SwapDataV4 } from '.types/subgraph/Swaps';
 
 // Define the interface for the returned pool day data
 

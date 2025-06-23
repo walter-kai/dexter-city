@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { BotForSale } from '../../../models/Bot';
-import { BotConfig } from '../../../models/Bot';
+import { BotForSale } from '../../../../.types/Bot';
+import { BotConfig } from '../../../../.types/Bot';
 import BotDetail from '../../components/shop/BotDetail';
 import BuyingTab from '../../components/shop/BuyingTab';
 import SellingTab from '../../components/shop/SellingTab';

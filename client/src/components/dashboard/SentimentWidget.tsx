@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { SentimentTopic } from "../../../models/Talkwalker";
+import { SentimentTopic } from "../../../../.types/Talkwalker";
 import LoadingScreenDots from "../common/LoadingScreenDots";
 
 const COLORS = {

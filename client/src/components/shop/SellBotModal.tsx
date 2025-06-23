@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BotConfig } from '../../../models/Bot';
+import { BotConfig } from '../../../../.types/Bot';
 import { generateLogoHash } from '../../hooks/Robohash';
 import { FaTimes, FaTag, FaDollarSign, FaFileAlt, FaCheckCircle } from 'react-icons/fa';
 
