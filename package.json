@@ -27,8 +27,8 @@
     "ws": "^8.18.0"
   },
   "scripts": {
+    "build": "rimraf dist && tsc",
     "start": "node dist/server/server.js",
-    "build": "rimraf dist && tsc --project tsconfig.json",
     "dev": "concurrently \"npm run dev-server\" \"npm run dev-client\"",
     "dev-server": "ts-node server/server.ts",
     "dev-client": "cd client && npm start"
