@@ -18,7 +18,8 @@ export default defineConfig({
     },
   },
   build: {
-
+    outDir: 'dist',
+    emptyOutDir: true,
   },
   esbuild: {
     sourcemap: true,

@@ -38,7 +38,12 @@ app.post('/', (req: Request, res: Response) => {
 // Serve React application  
 app.use(express.static(path.join(__dirname, '../client/dist')));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/dist', 'index.html'));
+  const indexPath = path.join(__dirname, '../client/dist', 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      res.status(404).send('index.html not found. Please build the client app.');
+    }
+  });
 });
 
 // Start HTTP server
