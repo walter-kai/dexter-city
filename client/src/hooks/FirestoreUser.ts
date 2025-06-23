@@ -1,4 +1,4 @@
-import User, { UserArgs, TelegramUser } from "../../../.types/User";
+import User, { UserArgs } from "../../../.types/User";
 
 /**
  * Updates an existing user based on the provided User object.
