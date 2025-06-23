@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
       "outDir": "./dist",  // Outputs the compiled JS here
+      "rootDir": ".", // Set rootDir to the project root to include both server and types
       "module": "commonjs",
       "target": "es6",
       "strict": true,
@@ -9,10 +10,8 @@
       "forceConsistentCasingInFileNames": true,
       "moduleResolution": "node",
       "baseUrl": ".", // Set the base URL for module resolution
-      "paths": {
-        "@/.types/*": ["client/.types/*"]
-      }
+
     },
-    "include": ["server/**/*.ts"],    // Include all your TypeScript files inside the src directory
-    "exclude": ["node_modules", "dist"]
+    "include": ["server/**/*.ts", ".types/**/*"], // Include both server and types directories
+    "exclude": ["node_modules"]
   }
