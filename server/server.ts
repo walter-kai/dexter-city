@@ -17,7 +17,7 @@ config({ path: '.env' });
 // }
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 // Middleware
 app.use(morgan('combined')); // Logs HTTP requests
@@ -43,6 +43,7 @@ app.get('*', (req, res) => {
 });
 
 // Start HTTP server
-app.listen(port, '127.0.0.1', () => {
-  console.log(`Server is running on http://127.0.0.1:${port}`);
+const server = app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
 });
+
