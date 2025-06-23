@@ -10,7 +10,7 @@
       "moduleResolution": "node",
       "baseUrl": ".", // Set the base URL for module resolution
       "paths": {
-        "@/models/*": ["client/models/*"]
+        "@/.types/*": ["client/.types/*"]
       }
     },
     "include": ["server/**/*.ts"],    // Include all your TypeScript files inside the src directory

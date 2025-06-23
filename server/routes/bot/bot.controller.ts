@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import botService from "./bot.service";
-// import botConfig from "../../client/src/models/Bot"
 
 const getBot = async (req: Request, res: Response): Promise<Response> => {
   try {

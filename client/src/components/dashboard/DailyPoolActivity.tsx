@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaChartBar, FaArrowUp, FaArrowDown, FaExchangeAlt } from 'react-icons/fa';
 
 import LoadingScreenDots from '../common/LoadingScreenDots';
-import { PoolData } from '@/models/subgraph/Pools';
+import { PoolData } from '../../../../.types/subgraph/Pools';
 import { usePools, DailyPoolsData } from '../../contexts/PoolContext';
 
 interface PoolWithChange extends PoolData {

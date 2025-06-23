@@ -11,6 +11,9 @@ RUN npm install
 COPY ./client/ ./
 COPY ./.types/ ../.types
 
+# Make sure .types is included in the Docker context and copied into the image
+COPY .types ./client/.types
+
 # Pass environment variables for the client build
 # Set the specific hostname for the production environment
 ARG VITE_SERVER_HOSTNAME
