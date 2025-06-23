@@ -60,3 +60,34 @@ EXPOSE 3001 443
 
 # Start Nginx and backend server using the start script in package.json
 CMD ["sh", "-c", "npm run start & nginx -g 'daemon off;'"]
+
+# Use official Node.js image
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+# Copy package files and install dependencies
+COPY client/package*.json ./client/
+WORKDIR /app/client
+RUN npm install
+
+# Copy source and build the app
+COPY client/. .
+RUN npm run build
+
+# Production image
+FROM node:20-alpine AS prod
+
+WORKDIR /app
+
+# Install serve to serve static files
+RUN npm install -g serve
+
+# Copy built frontend from build stage
+COPY --from=build /app/client/dist ./dist
+
+# Expose port 3000 (Cloud Run default)
+EXPOSE 3000
+
+# Serve the build folder
+CMD ["serve", "-s", "dist", "-l", "3000"]

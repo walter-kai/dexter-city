@@ -31,10 +31,6 @@ app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({ error: "API route not found" });
 });
 
-app.post('/', (req: Request, res: Response) => {
-  res.redirect('/');
-});
-
 // Serve React application  
 app.use(express.static(path.join(__dirname, '../client/dist')));
 app.get('*', (req, res) => {
