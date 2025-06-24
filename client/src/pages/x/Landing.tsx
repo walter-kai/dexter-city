@@ -66,10 +66,10 @@ const LandingPage: React.FC = () => {
         <>
             {/* HUD Foreground Content */}
             {/* <TickerBar /> */}
-            <div className="relative z-10 flex flex-col flex-1 min-h-screen px-4 py-16 ">
-                <div className="z-20 backdrop-blur-lg mx-auto flex flex-col items-center justify-center w-full h-full min-h-[80vh]">
+            <div className="relative z-10 flex flex-col flex-1 min-h px-4 py-auto  absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-1/3">
+                <div className="z-20 backdrop-blur-lg mx-auto flex flex-col items-center justify-center w-full h-full ">
                     {/* HUD Video Game Background */}
-                    <div className="relative z-20 backdrop-blur-lg mx-auto px-8 flex flex-col items-center justify-center w-full h-full">
+                    <div className="relative z-20 backdrop-blur-lg mx-auto px-8 flex flex-col items-center justify-center w-full h-full py-auto">
                         {/* Lottie Background Docked Right */}
                         <div className="absolute inset-y-0 right-0 sm:right-[2%] md:right-[4%] lg:right-[8%] flex items-center justify-end pointer-events-none select-none -z-10">
                             <Player
@@ -80,9 +80,9 @@ const LandingPage: React.FC = () => {
                                 speed={1}
                             />
                         </div>
-                        <div className="flex gap-8 w-full items-center justify-center">
+                        <div className="flex gap-8 w-full h-full items-center justify-center ">
                             {/* Features grid docked right, vertically aligned */}
-                            <div className="flex flex-col w-3/5 bg-black rounded-xl p-8 shadow-[0_0_10px_#faafe8] justify-center">
+                            <div className="flex flex-col w-3/5 bg-black rounded-xl p-8 shadow-[0_0_10px_#faafe8] justify-center ">
                                 <div className="gap-8 w-full flex flex-col justify-center">
                                     {landingFeatures.map((feature, index) => (
                                         <div
