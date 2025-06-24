@@ -141,6 +141,7 @@ const App: React.FC = () => {
               showFooterMenu={showFooterMenu}
               setShowFooterMenu={setShowFooterMenu}
               menuRef={menuRef}
+              currentPath={location.pathname} // <-- pass current path
             />
           </>
         )}

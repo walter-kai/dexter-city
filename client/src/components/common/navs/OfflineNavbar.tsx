@@ -8,9 +8,17 @@ interface OfflineNavbarProps {
   showFooterMenu: boolean;
   setShowFooterMenu: React.Dispatch<React.SetStateAction<boolean>>;
   menuRef: React.RefObject<HTMLDivElement>;
+  currentPath: string; // <-- add this prop
 }
 
-const OfflineNavbar: React.FC<OfflineNavbarProps> = ({ navigate, toggleButtonRef, showFooterMenu, setShowFooterMenu, menuRef }) => {
+const OfflineNavbar: React.FC<OfflineNavbarProps> = ({
+  navigate,
+  toggleButtonRef,
+  showFooterMenu,
+  setShowFooterMenu,
+  menuRef,
+  currentPath // <-- receive prop
+}) => {
   useEffect(() => {
     if (!showFooterMenu) return;
     const handleClick = (e: MouseEvent) => {
@@ -25,6 +33,24 @@ const OfflineNavbar: React.FC<OfflineNavbarProps> = ({ navigate, toggleButtonRef
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showFooterMenu, menuRef, toggleButtonRef, setShowFooterMenu]);
+
+  // Helper for active nav button
+  const navBtn = (label: string, path: string) => {
+    const isActive = currentPath === path;
+    return (
+      <button
+        onClick={() => navigate(path)}
+        className={`btn-link px-8 py-3 text-lg transition-all duration-150 rounded-lg
+          ${isActive
+            ? 'bg-[#00ffe7]/20 text-[#00ffe7] font-bold shadow-[0_0_8px_#00ffe7] underline underline-offset-4'
+            : 'hover:bg-[#23263a]/60 hover:text-[#00ffe7]'
+          }`}
+        aria-current={isActive ? "page" : undefined}
+      >
+        {label}
+      </button>
+    );
+  };
 
   return (
     <>
@@ -42,42 +68,13 @@ const OfflineNavbar: React.FC<OfflineNavbarProps> = ({ navigate, toggleButtonRef
           />
         </button>
         <div className='gap-4 flex'>
-          <button
-            onClick={() => navigate('/x/blog')}
-            className="btn-link px-8 py-3 text-lg"
-          >
-            Blog
-          </button>
-          <button
-            onClick={() => navigate('/x/about')}
-            className="btn-link px-8 py-3 text-lg"
-          >
-            About
-          </button>
-          <button
-            onClick={() => navigate('/x/how-it-works')}
-            className="btn-link px-8 py-3 text-lg"
-          >
-            How this works
-          </button>
-          <button
-            onClick={() => navigate('/x/contact')}
-            className="btn-link px-8 py-3 text-lg"
-          >
-            Contact
-          </button>
-          <button
-            onClick={() => navigate('/x/telegram')}
-            className="btn-link px-8 py-3 text-lg"
-          >
-            Telegram
-          </button>
-          <button
-            onClick={() => navigate('/x/commissions')}
-            className="btn-link px-8 py-3 text-lg"
-          >
-            Commissions
-          </button>
+          {navBtn('Home', '/')}
+          {navBtn('Blog', '/x/blog')}
+          {navBtn('About', '/x/about')}
+          {navBtn('How this works', '/x/how-it-works')}
+          {navBtn('Contact', '/x/contact')}
+          {navBtn('Telegram', '/x/telegram')}
+          {navBtn('Commissions', '/x/commissions')}
         </div>
       </div>
       {/* Drop-up Start Menu Footer */}
