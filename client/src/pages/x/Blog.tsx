@@ -134,7 +134,7 @@ const Blog: React.FC = () => {
               }
             `}
           </style>
-          <div className="pb-64 h-fit">
+          <div className=" h-fit">
             <div className="max-w-4xl w-full px-4 py-12 mx-auto ">
               <div className="bg-[#181a23]/80 border-2 border-[#00ffe7]/30 rounded-3xl shadow-[0_0_32px_#00ffe7]/20 backdrop-blur-md p-8 relative overflow-hidden">
                 {/* Neon border corners */}
@@ -240,6 +240,9 @@ const Blog: React.FC = () => {
               </div>
             </div>
           </div>
+              </div>
+            <div className="text-center text-[#e0e7ef] text-sm h-[200px] w-full">
+              
               </div>
             </div>
           </div>
