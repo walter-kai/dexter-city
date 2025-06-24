@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FaExternalLinkAlt, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaHome, FaChevronDown, FaShoppingCart, FaTools, FaChartLine, FaTrophy, FaCog, FaTachometerAlt, FaPlus } from 'react-icons/fa';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '../../../providers/AuthContext';
 
 interface NavLink {
   text: string;

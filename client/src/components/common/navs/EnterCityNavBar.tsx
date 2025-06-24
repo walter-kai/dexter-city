@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useAuth } from "../../../providers/AuthContext";
 import { useSDK } from "@metamask/sdk-react";
 import LoadingScreenDots from "../LoadingScreenDots";
 import LoginModal from "../LoginModal";

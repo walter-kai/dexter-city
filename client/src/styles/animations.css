@@ -124,3 +124,63 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Page Fade (was fading.css) */
+.animte-fade {
+  opacity: 0;
+  /* transform: translateY(16px); */
+}
+.fade-enter-active {
+  opacity: 1;
+  transform: none;
+  transition: opacity 400ms, transform 400ms;
+}
+.fade-exit {
+  opacity: 1;
+  transform: none;
+}
+.fade-exit-active {
+  opacity: 0;
+  /* transform: translateY(-16px); */
+  transition: opacity 400ms, transform 400ms;
+}
+
+/* Card diagonal fade-in/out: bottom-left to center (bl->c) */
+.fadeIn-bltc-enter {
+  opacity: 0;
+  transform: translateY(24px) translateX(-24px) scale(0.98);
+}
+.fadeIn-bltc-enter-active {
+  opacity: 1;
+  transform: none;
+  transition: opacity 400ms, transform 400ms;
+}
+.fadeIn-bltc-exit {
+  opacity: 1;
+  transform: none;
+}
+.fadeIn-bltc-exit-active {
+  opacity: 0;
+  transform: translateY(-24px) translateX(24px) scale(0.98);
+  transition: opacity 400ms, transform 400ms;
+}
+
+/* Card diagonal fade-in/out: top-right to center (tr->c) */
+.fadeIn-trtc-enter {
+  opacity: 0;
+  transform: translateY(-24px) translateX(24px) scale(0.98);
+}
+.fadeIn-trtc-enter-active {
+  opacity: 1;
+  transform: none;
+  transition: opacity 400ms, transform 400ms;
+}
+.fadeIn-trtc-exit {
+  opacity: 1;
+  transform: none;
+}
+.fadeIn-trtc-exit-active {
+  opacity: 0;
+  transform: translateY(24px) translateX(-24px) scale(0.98);
+  transition: opacity 400ms, transform 400ms;
+}

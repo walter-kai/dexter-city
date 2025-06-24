@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PoolData } from "../../../../.types/subgraph/Pools";
 import LoadingScreenDots from "../common/LoadingScreenDots";
 import { FaSearch, FaChevronDown } from "react-icons/fa";
-import { usePools } from "../../contexts/PoolContext";
+import { usePools } from "../../providers/PoolContext";
 
 interface PoolDropdownProps {
   selectedPool: PoolData | undefined;

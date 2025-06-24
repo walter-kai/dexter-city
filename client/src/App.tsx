@@ -24,9 +24,10 @@ import TelegramSocialSection from './pages/x/Telegram';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import EnterCityNavBar from './components/common/navs/EnterCityNavBar';
 import CommissionsCard from './pages/x/Commissions';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from './providers/AuthContext';
 import LoginModal from './components/common/LoginModal';
 import OnlineNavBar from './components/common/navs/OnlineNavBar';
+import Telegram from './pages/x/Telegram';
 
 // Main App component
 const App: React.FC = () => {
@@ -100,7 +101,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="App min-h-screen relative">
+    <div className="App min-h-screen overflow-x-hidden relative">
       {/* Background Container with Parallax */}
         
           <div className="fixed inset-0 z-0 overflow-hidden">
@@ -125,12 +126,12 @@ const App: React.FC = () => {
         {/* )} */}
       
       {/* Content Container */}
-      <div className="relative z-10 flex flex-col min-h-screen">
+      <div className="absolute z-10 flex flex-col min-h-screen w-screen">
         {(location.pathname.startsWith("/x/") || location.pathname === "/") && (
           <>
             <TickerBar />
             {(location.pathname !== "/") && (
-              <div className='mt-16'>
+              <div className=''>
                 <EnterCityNavBar />
               </div>
             )}
@@ -147,8 +148,18 @@ const App: React.FC = () => {
           <OnlineNavBar />
         )}
         <TransitionGroup component={null}>
-          <CSSTransition key={location.pathname} classNames="fade" timeout={400}>
-            <main className="flex-1 ">
+          <CSSTransition
+            key={location.pathname}
+            classNames="fade"
+            timeout={400}
+            unmountOnExit
+          >
+            {/* 
+              To ensure the previous route fades out before the new one comes in,
+              wrap <Routes> in a div with a fixed minHeight and position: absolute,
+              and set position: relative on the parent. This prevents stacking issues.
+            */}
+            <div style={{ position: 'absolute', minHeight: '100vh', width: '100%' }}>
               <Routes location={location}>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/x/about" element={<AboutUs />} />
@@ -156,7 +167,7 @@ const App: React.FC = () => {
                 <Route path="/x/blog" element={<Blog />} />
                 <Route path="/x/contact" element={<ContactUs />} />
                 <Route path="/x/pools" element={<DailyPoolActivity />} />
-                <Route path="/x/telegram" element={<TelegramSocialSection />} />
+                <Route path="/x/telegram" element={<Telegram />} />
                 <Route path="/x/commissions" element={<CommissionsCard />} />
                 
                 {/* Bot-related routes under /bots/ */}
@@ -180,7 +191,7 @@ const App: React.FC = () => {
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </main>
+            </div>
           </CSSTransition>
         </TransitionGroup>
         {/* Always render LoginModal globally, not conditionally */}

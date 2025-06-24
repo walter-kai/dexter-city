@@ -64,16 +64,7 @@ const AboutUs: React.FC = () => {
 					))}
 				</div>
 			</div>
-			<style>{`
-        .passport-card::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: repeating-linear-gradient(135deg, #23263a 0 2px, #181a23 2px 8px);
-          opacity: 0.12;
-          z-index: 0;
-        }
-      `}</style>
+			{/* .passport-card::before moved to cards.css */}
 		</div>
 	);
 };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import LoadingScreenDots from "../../components/common/LoadingScreenDots";
-import { useAuth } from "../../contexts/AuthContext";
-import { useBalances } from "../../contexts/BalanceProvider";
+import { useAuth } from "../../providers/AuthContext";
+import { useBalances } from "../../providers/BalanceProvider";
 import InvestmentOverview from "../../components/dashboard/InvestmentOverview";
 import UserInfoCard from "../../components/dashboard/UserInfoCard";
 import BotsList from "../../components/dashboard/BotsList";

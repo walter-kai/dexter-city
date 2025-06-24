@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSDK } from "@metamask/sdk-react";
-import { useAuth } from '../../../contexts/AuthContext';
-import { useBalances } from '../../../contexts/BalanceProvider';
+import { useAuth } from '../../../providers/AuthContext';
+import { useBalances } from '../../../providers/BalanceProvider';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaChartLine, FaChevronLeft } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
 import { formatLargeNumberEth } from '../../../utils/formatEthNumber';

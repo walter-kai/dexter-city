@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { FaExternalLinkAlt } from 'react-icons/fa';
-import LoadingScreenDots from '@/components/common/LoadingScreenDots';
-import NewsFetcher from '@/components/landing/NewsFetcher';
-import LinkPreviewCard from '@/components/blog/LinkPreviewCard';
+import LoadingScreenDots from '../../components/common/LoadingScreenDots';
+import NewsFetcher from '../../components/landing/NewsFetcher';
+import LinkPreviewCard from '../../components/blog/LinkPreviewCard';
 
 interface PlatformUpdate {
   version: string;
@@ -19,7 +19,6 @@ interface PlatformUpdate {
 const Blog: React.FC = () => {
   const [platformUpdates, setPlatformUpdates] = useState<PlatformUpdate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeSection, setActiveSection] = useState<'news' | 'updates'>('news');
 
   useEffect(() => {
     fetchPlatformUpdates();
@@ -74,44 +73,62 @@ const Blog: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen py-10 text-neon-light flex justify-center items-center">
-        <LoadingScreenDots />
+      <div
+        className="min-h-screen flex flex-col items-center justify-center bg-[#23263a]/70"
+        style={{
+          width: '100vw',
+          maxWidth: '100vw',
+          overflowX: 'clip',
+          boxSizing: 'border-box',
+          padding: 0,
+        }}
+      >
+        <div className="max-w-5xl w-full flex flex-col items-center px-4">
+          <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
+            Blog
+          </h1>
+          <LoadingScreenDots />
+        </div>
       </div>
     );
   }
 
-  // Header navigation scroll handler
-  const handleTabClick = (section: 'news' | 'updates') => {
-    setActiveSection(section);
-    const el = document.getElementById(section === 'news' ? 'news-section' : 'updates-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   return (
-    <div className="min-h-screen pb-10 text-neon-light">
-      {/* Blog Header */}
-      <div className="relative max-w-7xl mx-auto pt-24 mb-8 ">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-
-        </div>
-      </div>
-      <div className="space-y-6 mb-8 relative max-w-7xl mx-auto bg-[#23263a] border border-[#00ffe7]/30 rounded-lg p-6">
-          <div className='flex flex-col items-center text-center mb-6'>
-            <h1 className="text-4xl md:text-5xl font-bold text-[#00ffe7] drop-shadow-[0_0_12px_#00ffe7]">Dexter CityBlog</h1>
-            <p className="text-lg text-[#faafe8] mt-2">Latest news, platform updates, and community highlights</p>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center bg-[#23263a]/70"
+      style={{
+        width: '100vw',
+        maxWidth: '100vw',
+        overflowX: 'clip',
+        boxSizing: 'border-box',
+        padding: 0,
+      }}
+    >
+      <div className="max-w-5xl w-full flex flex-col items-center px-4">
+        <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
+          Blog
+        </h1>
+        <p className="text-xl text-[#faafe8] mb-12 text-center max-w-2xl">
+          Latest news, platform updates, and community highlights from Dexter City.
+        </p>
+        <div className="flex flex-col gap-10 w-full">
+          {/* News Section */}
+          <div className="w-full bg-[#23263a] border border-[#00ffe7]/30 rounded-2xl p-6 mb-8 passport-card overflow-hidden">
+            <h2 className="text-2xl font-bold text-[#00ffe7] mb-6 text-center drop-shadow-[0_0_8px_#00ffe7] tracking-wide">
+              Media & News
+            </h2>
+            <div>
+              <NewsFetcher />
+            </div>
           </div>
-        {/* Media News Section */}
-        <div id="news-section">
-          <NewsFetcher />
-        </div>
-        {/* Platform Updates Section */}
-        <div id="updates-section">
-          <div className="">
+          {/* Platform Updates Section */}
+          <div className="w-full bg-[#23263a] border border-[#00ffe7]/30 rounded-2xl p-6 passport-card overflow-hidden">
+            <h2 className="text-2xl font-bold text-[#00ffe7] mb-6 text-center drop-shadow-[0_0_8px_#00ffe7] tracking-wide">
+              Platform Updates
+            </h2>
             <div className="space-y-6">
               {platformUpdates.map((update, index) => (
-                <div key={index} className="bg-[#181a23] border border-[#00ffe7]/20 rounded-lg p-4 hover:shadow-[0_0_16px_#00ffe7]/30 transition-all duration-300">
+                <div key={index} className="relative bg-[#181a23] border border-[#00ffe7]/20 rounded-lg p-4 hover:shadow-[0_0_16px_#00ffe7]/30 transition-all duration-300 mb-4 passport-card overflow-hidden">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 ${getUpdateTypeColor(update.type)} rounded-lg flex items-center justify-center text-white font-bold`}>
@@ -120,7 +137,7 @@ const Blog: React.FC = () => {
                       <div>
                         <div className="flex items-center justify-between">
                           <h3 className="text-[#00ffe7] mr-2 text-left font-bold text-lg">{update.title}</h3>
-                            {getStatusBadge(update.status)}
+                          {getStatusBadge(update.status)}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
                           <span className="text-[#faafe8] font-semibold">{update.version}</span>
@@ -129,7 +146,6 @@ const Blog: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
                   {/* Always display description */}
                   <div className="mb-4">
                     {update.image ? (
@@ -149,7 +165,6 @@ const Blog: React.FC = () => {
                     ) : (
                       <p className="text-[#e0e7ef] leading-relaxed mb-4">{update.description}</p>
                     )}
-                    
                     {/* Display link preview or simple link */}
                     {update.link && (
                       <div className="mb-4">
@@ -168,21 +183,24 @@ const Blog: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
                   <div className="flex items-center gap-2">
                     <span className={`px-2 py-1 rounded text-xs text-white ${getUpdateTypeColor(update.type)}`}>
                       {update.type.toUpperCase()}
                     </span>
                   </div>
+                  {/* Neon HUD corners */}
+                  <span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-2xl opacity-60 animate-pulse" />
+                  <span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-2xl opacity-60 animate-pulse" />
+                  <span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-2xl opacity-60 animate-pulse" />
+                  <span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#00ffe7] rounded-br-2xl opacity-60 animate-pulse" />
                 </div>
               ))}
+              {platformUpdates.length === 0 && (
+                <div className="text-center py-8 text-[#e0e7ef]">
+                  No platform updates available.
+                </div>
+              )}
             </div>
-            
-            {platformUpdates.length === 0 && (
-              <div className="text-center py-8 text-[#e0e7ef]">
-                No platform updates available.
-              </div>
-            )}
           </div>
         </div>
       </div>

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useSDK } from "@metamask/sdk-react";
 import { handleUserLogin } from "../../hooks/FirestoreUser";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../contexts/AuthContext";
+import { useAuth } from "../../providers/AuthContext";
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
-import '../../styles/fading.css';
+// import '../../styles/fading.css';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -189,7 +189,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       required
                     />
                     {username && username.length > 0 && username.length < 5 && (
-                      <span className="text-xs text-red-500 ml-2">Username must be at least 5 characters</span>
+                        <span className="text-xs text-red-500 ml-2">
+                          Username must be at least 5 characters (😃🎉🦄 emojis🤖welcome! 🦕🧩🦚🦜)
+                        </span>
                     )}
                     {checkingUsername && username.length >= 5 && (
                       <span className="text-xs text-[#00ffe7] ml-2">Checking availability...</span>
@@ -202,7 +204,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     )}
                   </div>
                   <div>
-                    <label className="block text-[#e0e7ef] mb-2 font-semibold">Referral (optional)</label>
+                    <label className="block text-[#e0e7ef] mb-2 font-semibold">Referral (Get 1000 commission-free trades)</label>
                     <input
                       type="text"
                       value={referral}

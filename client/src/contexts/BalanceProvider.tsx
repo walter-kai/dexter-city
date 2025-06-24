@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useSDK } from "@metamask/sdk-react";
-import { useAuth } from './AuthContext';
+import { useAuth } from '../providers/AuthContext';
 
 interface Balance {
   symbol: string;

@@ -5,10 +5,10 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { MetaMaskProvider } from '@metamask/sdk-react';
-import { AuthProvider } from './contexts/AuthContext';
-import { BalanceProvider } from './contexts/BalanceProvider';
-import { PoolProvider } from './contexts/PoolContext';
-import { TrendingCoinsProvider } from './contexts/TrendingCoinsContext';
+import { AuthProvider } from './providers/AuthContext';
+import { BalanceProvider } from './providers/BalanceProvider';
+import { PoolProvider } from './providers/PoolContext';
+import { TrendingCoinsProvider } from './providers/TrendingCoinsContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

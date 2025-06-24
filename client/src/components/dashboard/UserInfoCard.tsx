@@ -3,7 +3,7 @@ import { SiEthereum } from 'react-icons/si';
 import { FaCopy, FaChartLine } from 'react-icons/fa';
 import LoadingScreenDots from '../common/LoadingScreenDots';
 import StatusPopup from '../common/StatusPopup';
-import { useBalances } from '../../contexts/BalanceProvider';
+import { useBalances } from '../../providers/BalanceProvider';
 import { formatLargeNumberEth } from '../../utils/formatEthNumber';
 import User from '../../../../.types/User';
 

@@ -3,7 +3,7 @@ import { FaChartBar, FaArrowUp, FaArrowDown, FaExchangeAlt } from 'react-icons/f
 
 import LoadingScreenDots from '../common/LoadingScreenDots';
 import { PoolData } from '../../../../.types/subgraph/Pools';
-import { usePools, DailyPoolsData } from '../../contexts/PoolContext';
+import { usePools, DailyPoolsData } from '../../providers/PoolContext';
 
 interface PoolWithChange extends PoolData {
   txCountChange?: number;

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { FaEnvelope, FaRobot, FaUser, FaBriefcase, FaComment, FaCheckCircle } from 'react-icons/fa';
 
-import StatusPopup from '@/components/common/StatusPopup';
-import SliderCaptcha from '@/components/landing/contact/SliderCaptcha';
+import StatusPopup from '../../components/common/StatusPopup';
+import SliderCaptcha from '../../components/landing/contact/SliderCaptcha';
 
 interface FormData {
   name: string;

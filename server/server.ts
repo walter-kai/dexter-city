@@ -17,7 +17,7 @@ config({ path: '.env' });
 // }
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
 // Middleware
 app.use(morgan('combined')); // Logs HTTP requests
@@ -29,6 +29,10 @@ app.use("/api", routes);
 // 404 handler for API routes
 app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({ error: "API route not found" });
+});
+
+app.post('/', (req: Request, res: Response) => {
+  res.redirect('/');
 });
 
 // Serve React application  
