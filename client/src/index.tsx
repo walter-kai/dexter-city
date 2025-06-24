@@ -20,7 +20,7 @@ root.render(
       debug={false}
       sdkOptions={{
         dappMetadata: {
-          name: "DexterCity",
+          name: "Dexter City",
           url: window.location.href,
         },
       }}
