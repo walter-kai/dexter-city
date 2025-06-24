@@ -55,18 +55,7 @@ const OfflineNavbar: React.FC<OfflineNavbarProps> = ({
   return (
     <>
       <div className="fixed bottom-0 left-0 w-full px-4 z-30 flex justify-between items-center gap-6 py-4 bg-black/60 backdrop-blur-md border-t border-[#00ffe7]/20">
-        {/* Start Menu Button */}
-        <button
-          type="button"
-          ref={toggleButtonRef}
-          className="bottom-6 left-6 z-40 bg-[#23263a] border border-[#00ffe7]/40 rounded-full p-4 shadow-lg hover:bg-[#181a23] transition"
-          onClick={e => { e.stopPropagation(); setShowFooterMenu(v => !v); }}
-          aria-label="Open Start Menu"
-        >
-          <FaChevronCircleUp
-            className={`text-[#00ffe7] text-2xl transition-transform duration-300 ${showFooterMenu ? 'rotate-0' : 'rotate-90'}`}
-          />
-        </button>
+        {/* Nav Buttons (now on the left) */}
         <div className='gap-4 flex'>
           {navBtn('Home', '/')}
           {navBtn('Blog', '/x/blog')}
@@ -76,10 +65,22 @@ const OfflineNavbar: React.FC<OfflineNavbarProps> = ({
           {navBtn('Telegram', '/x/telegram')}
           {navBtn('Commissions', '/x/commissions')}
         </div>
+        {/* Start Menu Button (now on the right) */}
+        <button
+          type="button"
+          ref={toggleButtonRef}
+          className="bottom-6 right-6 z-40 bg-[#23263a] border border-[#00ffe7]/40 rounded-full p-4 shadow-lg hover:bg-[#181a23] transition"
+          onClick={e => { e.stopPropagation(); setShowFooterMenu(v => !v); }}
+          aria-label="Open Start Menu"
+        >
+          <FaChevronCircleUp
+            className={`text-[#00ffe7] text-2xl transition-transform duration-300 ${showFooterMenu ? 'rotate-0' : '-rotate-90'}`}
+          />
+        </button>
       </div>
       {/* Drop-up Start Menu Footer */}
       {showFooterMenu && (
-        <div ref={menuRef} className="fixed left-6 bottom-24 z-50 w-80 bg-[#181a23]/95 border border-[#00ffe7]/30 rounded-2xl shadow-2xl p-6 animate-fadeInUp">
+        <div ref={menuRef} className="fixed right-6 bottom-24 z-50 w-80 bg-[#181a23]/95 border border-[#00ffe7]/30 rounded-2xl shadow-2xl p-6 animate-fadeInUp">
           <img src="/logos/dexter3d.svg" className="h-10 mb-4" alt="DexterCity" />
           <p className="text-[#e0e7ef] text-sm mb-4">Trading made easy in the city.</p>
           <p className="text-[#e0e7ef] text-sm mb-4">© 2025 Dexter City. All rights reserved.</p>
