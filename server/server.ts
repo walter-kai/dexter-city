@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import { Server as WebSocketServer } from 'ws'; // WebSocket library
 import subgraph from './routes/subgraph/service'; // Import getPairs function
 import routes from './routes';
+import cron from './cron/route';
 
 // Load environment variables - fix the path to be absolute
 config({ path: '.env' });
@@ -24,7 +25,25 @@ app.use(morgan('combined')); // Logs HTTP requests
 app.use(cors());
 app.use(express.json());
 // app.use(express.static(path.join(__dirname, '../client/build')));
+
+// Add this middleware before app.use("/api", routes);
+app.use("/api", (req, res, next) => {
+  const allowedOrigins = [
+    "https://dexter.city",
+    "https://dexter-city-882290629693.us-central1.run.app"
+  ];
+  const origin = req.headers.origin;
+  const referer = req.headers.referer;
+  if (
+    (origin && allowedOrigins.includes(origin)) ||
+    (referer && allowedOrigins.some(o => referer.startsWith(o)))
+  ) {
+    return next();
+  }
+  res.status(403).json({ error: "Forbidden" });
+});
 app.use("/api", routes);
+app.use("/cron", cron);
 
 // 404 handler for API routes
 app.use('/api/*', (req: Request, res: Response) => {

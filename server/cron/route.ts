@@ -1,6 +1,6 @@
 import express from "express";
-import subgraphController from "../subgraph/controller";
-import coinMarketCapController from "../cmc/controller";
+import subgraphController from "../routes/subgraph/controller";
+import coinMarketCapController from "../routes/cmc/controller";
 
 const router = express.Router();
 
