@@ -2,17 +2,24 @@ import express from "express";
 import subgraphController from "../subgraph/controller";
 import coinMarketCapController from "../cmc/controller";
 
-
-
 const router = express.Router();
 
 const asyncHandler = (fn: any) => (req: express.Request, res: express.Response, next: express.NextFunction) =>
   Promise.resolve(fn(req, res, next)).catch(next);
 
+// Inline CRON_PASSWORD middleware
+const checkCronPassword = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const passHeader = req.header('pass');
+  if (!passHeader || passHeader !== process.env.CRON_PASSWORD) {
+    res.status(403).json({ error: "Forbidden: invalid or missing pass header" });
+    return;
+  }
+  next();
+};
 
 // Endpoints for CRON jobs
-router.route("/reload/cmcTokens").put(asyncHandler(coinMarketCapController.reloadCmcTokens));
-router.route("/reload/dailyPools").put(asyncHandler(subgraphController.reloadDailyPools));
-router.route("/import/masterPool/:date").get(asyncHandler(subgraphController.importMasterPool));
+router.route("/reload/cmcTokens").put(checkCronPassword, asyncHandler(coinMarketCapController.reloadCmcTokens));
+router.route("/reload/dailyPools").put(checkCronPassword, asyncHandler(subgraphController.reloadDailyPools));
+router.route("/import/masterPool/:date").get(checkCronPassword, asyncHandler(subgraphController.importMasterPool));
 
 export default router;

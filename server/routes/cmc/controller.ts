@@ -24,13 +24,6 @@ const reloadTokens = async (req: Request, res: Response): Promise<Response> => {
 const reloadCmcTokens = async (req: Request, res: Response): Promise<Response> => {
   const startTime = Date.now();
 
-  // --- CRON_PASSWORD header check ---
-  const passHeader = req.header('pass');
-  if (!passHeader || passHeader !== process.env.CRON_PASSWORD) {
-    return res.status(403).json({ error: "Forbidden: invalid or missing pass header" });
-  }
-  // --- end CRON_PASSWORD check ---
-
   try {
     logger.info("Starting CoinMarketCap token reload...");
     await coinMarketCapService.reloadTokens();
