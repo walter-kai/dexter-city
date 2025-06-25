@@ -18,8 +18,8 @@ const checkCronPassword = (req: express.Request, res: express.Response, next: ex
 };
 
 // Endpoints for CRON jobs
-router.route("/reload/cmcTokens").put(checkCronPassword, asyncHandler(coinMarketCapController.reloadCmcTokens));
-router.route("/reload/dailyPools").put(checkCronPassword, asyncHandler(subgraphController.reloadDailyPools));
+router.route("/reload/cmcTokens").get(checkCronPassword, asyncHandler(coinMarketCapController.reloadCmcTokens));
+router.route("/reload/dailyPools").get(checkCronPassword, asyncHandler(subgraphController.reloadDailyPools));
 router.route("/import/masterPool/:date").get(checkCronPassword, asyncHandler(subgraphController.importMasterPool));
 
 export default router;
