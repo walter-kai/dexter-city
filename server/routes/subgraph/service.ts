@@ -1,8 +1,8 @@
-import { db } from "../../../config/firebase";
+import { db } from "../../config/firebase";
 import admin from "firebase-admin";
-import logger from "../../../config/logger";
+import logger from "../../config/logger";
 import { fetchSwaps, fetchTopDailyPools } from "./UniswapV4";
-import { updateSwapsToPools } from "../../firebase/firebase.service";
+import { updateSwapsToPools } from "../firebase/firebase.service";
 import { SwapDataV4 } from ".types/subgraph/Swaps";
 import { PoolData } from ".types/subgraph/Pools";
 

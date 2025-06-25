@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import subgraphService from "./service";
-import firebaseService from "../../firebase/firebase.service";
-import ApiError from "../../../utils/api-error";
-import { db } from "../../../config/firebase"; 
-import logger from "../../../config/logger";
+import firebaseService from "../firebase/firebase.service";
+import ApiError from "../../utils/api-error";
+import { db } from "../../config/firebase"; 
+import logger from "../../config/logger";
 import { fetchTopDailyPools } from "./UniswapV4";
 
 // Import the preloadTokenImages function from subgraph service
@@ -123,9 +123,16 @@ const getDailyPools = async (req: Request, res: Response): Promise<Response> => 
 /**
  * Reload daily pool data from Uniswap subgraph
  */
-const reloadPoolsDay = async (req: Request, res: Response): Promise<Response> => {
+const reloadDailyPools = async (req: Request, res: Response): Promise<Response> => {
   const startTime = Date.now();
-  
+
+  // --- CRON_PASSWORD header check ---
+  const passHeader = req.header('pass');
+  if (!passHeader || passHeader !== process.env.CRON_PASSWORD) {
+    return res.status(403).json({ error: "Forbidden: invalid or missing pass header" });
+  }
+  // --- end CRON_PASSWORD check ---
+
   try {
     logger.info("Starting Uniswap daily pools reload...");
     
@@ -298,6 +305,6 @@ export default {
   getPools,
   getSwaps,
   getDailyPools,
-  reloadPoolsDay,
+  reloadDailyPools,
   importMasterPool
 };

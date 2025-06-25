@@ -2,7 +2,9 @@ import express from "express";
 import botRoute from "./bot/bot.route";
 import userRoute from "./user/user.route";
 import telegramRoute from "./telegram/telegram.route";
-import chainRoute from "./chain/chain.route";
+import cmcRoute from "./cmc/route";
+import subgraphRoute from "./subgraph/route";
+import cronRoute from "./cron/route";
 import socialNewsRoute from "./socialNews/socialNews.route";
 import sentimentRoute from "./sentiment/sentiment.route";
 import linkRoute from "./link/link.route";
@@ -16,8 +18,16 @@ type RouteObj = {
 
 const defaultRoutes: ReadonlyArray<RouteObj> = [
   {
-    path: "/chain",
-    route: chainRoute,
+    path: "/cron",
+    route: cronRoute,
+  },
+  {
+    path: "/cmc",
+    route: cmcRoute,
+  },
+  {
+    path: "/subgraph",
+    route: subgraphRoute,
   },
   {
     path: "/bot",

@@ -134,7 +134,7 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
     const fetchSwaps = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/chain/uni/swaps/${pool.address}`);
+        const response = await fetch(`/api/subgraph/swaps/${pool.address}`);
         if (!response.ok) throw new Error(`Failed to fetch trades: ${response.statusText}`);
         const data = await response.json();
         if (!Array.isArray(data.data)) {

@@ -56,7 +56,7 @@ export const PoolProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       setLoading(true);
-      const response = await fetch("/api/chain/uni/pools");
+      const response = await fetch("/api/subgraph/pools");
       if (!response.ok) throw new Error("Failed to fetch pools");
       const data = await response.json();
       setAvailablePools(data.pools);
@@ -77,7 +77,7 @@ export const PoolProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     
     try {
       setDailyPoolsLoading(true);
-      const response = await fetch('/api/chain/uni/dailyPools');
+      const response = await fetch('/api/subgraph/dailyPools');
       if (!response.ok) throw new Error('Failed to fetch daily pools data');
       const data = await response.json();
       setDailyPoolsData(data);
