@@ -59,7 +59,7 @@ app.use("/api", (req, res, next) => {
 app.use("/api", routes);
 
 // Handle API cron endpoints under /api/cron (for backwards compatibility)
-app.use("/api/cron", cron);
+app.use("/cron", cron);
 
 // Error handling middleware
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
