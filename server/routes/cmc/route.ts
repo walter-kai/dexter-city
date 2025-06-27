@@ -1,5 +1,4 @@
 import express from "express";
-import subgraphController from "../subgraph/controller";
 import coinMarketCapController from "./controller";
 
 

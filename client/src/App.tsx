@@ -126,7 +126,7 @@ const App: React.FC = () => {
         {/* )} */}
       
       {/* Content Container */}
-      <div className="absolute z-10 flex flex-col min-h-screen w-screen">
+      <div className="relative z-10 flex flex-col min-h-screen w-screen">
         {(location.pathname.startsWith("/x/") || location.pathname === "/") && (
           <>
             <TickerBar />
@@ -148,53 +148,58 @@ const App: React.FC = () => {
         {location.pathname.startsWith("/i/") && (
           <OnlineNavBar />
         )}
-        <TransitionGroup component={null}>
-          <CSSTransition
-            key={location.pathname}
-            classNames="fade"
-            timeout={400}
-            unmountOnExit
-          >
-            {/* 
-              To ensure the previous route fades out before the new one comes in,
-              wrap <Routes> in a div with a fixed minHeight and position: absolute,
-              and set position: relative on the parent. This prevents stacking issues.
-            */}
-            <div style={{ position: 'absolute', minHeight: '100vh', width: '100%' }}>
-              <Routes location={location}>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/x/about" element={<AboutUs />} />
-                <Route path="/x/how-it-works" element={<HowItWorks />} />
-                <Route path="/x/blog" element={<Blog />} />
-                <Route path="/x/contact" element={<ContactUs />} />
-                <Route path="/x/pools" element={<DailyPoolActivity />} />
-                <Route path="/x/telegram" element={<Telegram />} />
-                <Route path="/x/commissions" element={<CommissionsCard />} />
-                
-                {/* Bot-related routes under /bots/ */}
-                <Route path="/i/dashboard" element={<Dashboard />} />
-                <Route path="/i/garage" element={<Garage />} />
-                <Route path="/i/garage/build" element={<BuildBot />} />
-                
-                {/* Backward compatibility routes */}
-                <Route path="/dash" element={<Dashboard />} />
-                <Route path="/build" element={<BuildBot />} />
-                <Route path="/bots" element={<Garage />} />
-                
-                {/* Other routes */}
-                <Route path="/i/shop" element={<Shop />} />
-                <Route path="/i/shop/:botId" element={<Shop />} />
-                <Route path="/settings" element={<Settings />} />
-                
-                {/* Legal routes under /legal/ */}
-                <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/legal/terms-of-service" element={<TermsOfService />} />
-                
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
-          </CSSTransition>
-        </TransitionGroup>
+        
+        {/* Main content area that grows to fill space */}
+        <div className="flex-1 relative">
+          <TransitionGroup component={null}>
+            <CSSTransition
+              key={location.pathname}
+              classNames="fade"
+              timeout={400}
+              unmountOnExit
+            >
+              {/* 
+                To ensure the previous route fades out before the new one comes in,
+                wrap <Routes> in a div with a fixed minHeight and position: absolute,
+                and set position: relative on the parent. This prevents stacking issues.
+              */}
+              <div style={{ minHeight: '100%', width: '100%' }}>
+                <Routes location={location}>
+                  <Route path="/" element={<LandingPage />} />
+                  <Route path="/x/about" element={<AboutUs />} />
+                  <Route path="/x/how-it-works" element={<HowItWorks />} />
+                  <Route path="/x/blog" element={<Blog />} />
+                  <Route path="/x/contact" element={<ContactUs />} />
+                  <Route path="/x/pools" element={<DailyPoolActivity />} />
+                  <Route path="/x/telegram" element={<Telegram />} />
+                  <Route path="/x/commissions" element={<CommissionsCard />} />
+                  
+                  {/* Bot-related routes under /bots/ */}
+                  <Route path="/i/dashboard" element={<Dashboard />} />
+                  <Route path="/i/garage" element={<Garage />} />
+                  <Route path="/i/garage/build" element={<BuildBot />} />
+                  
+                  {/* Backward compatibility routes */}
+                  <Route path="/dash" element={<Dashboard />} />
+                  <Route path="/build" element={<BuildBot />} />
+                  <Route path="/bots" element={<Garage />} />
+                  
+                  {/* Other routes */}
+                  <Route path="/i/shop" element={<Shop />} />
+                  <Route path="/i/shop/:botId" element={<Shop />} />
+                  <Route path="/settings" element={<Settings />} />
+                  
+                  {/* Legal routes under /legal/ */}
+                  <Route path="/legal/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/legal/terms-of-service" element={<TermsOfService />} />
+                  
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+            </CSSTransition>
+          </TransitionGroup>
+        </div>
+        
         {/* Always render LoginModal globally, not conditionally */}
         <LoginModal isOpen={showLoginModal} onClose={closeLoginModal} />
         {!(location.pathname.startsWith("/x/") || location.pathname === "/") && (

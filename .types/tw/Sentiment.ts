@@ -18,3 +18,5 @@ export interface SentimentTopic {
   histogram: SentimentHistogram;
   request_id: string;
 }
+
+

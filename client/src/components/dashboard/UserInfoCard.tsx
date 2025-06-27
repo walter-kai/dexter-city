@@ -87,7 +87,11 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
             <div className="flex flex-col h-full">
               <div className="flex-1">
                 <div className="flex items-center gap-4 mb-4">
-                  <img src={user?.photoUrl || undefined} className="h-16 w-16 rounded-full border-2 border-[#00ffe7]/40" alt="your icon" />
+                  <img 
+                    src={`https://robohash.org/${encodeURIComponent(user?.username || 'default')}?set=set3`} 
+                    className="h-16 w-16 rounded-full border-2 border-[#00ffe7]/40" 
+                    alt="your icon" 
+                  />
                   <div>
                     <div className="text-xl font-bold text-[#00ffe7]">{user?.username || "Unknown User"}</div>
                     <div className="text-xs text-[#b8eaff] flex items-center gap-2">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { SentimentTopic } from "../../../../.types/Talkwalker";
+import { SentimentTopic } from "../../../../.types/tw/Sentiment";
 import LoadingScreenDots from "../common/LoadingScreenDots";
 
 const COLORS = {
@@ -16,9 +16,9 @@ const GAUGE_SHADOW = "0 0 16px #00ffe7, 0 0 32px #00ffe7";
 const PANEL_SHADOW = "0 0 24px #00ffe755, 0 0 4px #00ffe7aa";
 
 const EMOJIS = {
-  POSITIVE: "🤖",
-  NEUTRAL: "🛰️",
-  NEGATIVE: "💀"
+  POSITIVE: "😊",
+  NEUTRAL: "😑",
+  NEGATIVE: "😪"
 };
 
 type TokenInfo = {
@@ -39,97 +39,102 @@ const SentimentGauge: React.FC<{
   percent: number[];
   dominant: string;
 }> = ({ percent, dominant }) => {
-  // Gauge is a segmented ring with neon glow, robotic style
-  const total = 100;
-  const radius = 16;
-  const stroke = 4;
-  const c = 2 * Math.PI * radius;
-  const segs = [
-    { color: COLORS.POSITIVE, val: percent[0] },
-    { color: COLORS.NEUTRAL, val: percent[1] },
-    { color: COLORS.NEGATIVE, val: percent[2] }
-  ];
-  let offset = 0;
+  // Horizontal bar with three sections perfectly aligned
+  const barWidth = 200;
+  const barHeight = 20;
+  const totalPositive = percent[0];
+  const totalNeutral = percent[1];
+  const totalNegative = percent[2];
+  
+  // Calculate exact widths for each section (they should add up to 100%)
+  const negativeWidth = (totalNegative / 100) * barWidth;
+  const neutralWidth = (totalNeutral / 100) * barWidth;
+  const positiveWidth = (totalPositive / 100) * barWidth;
+  
   return (
-    <svg
-      viewBox="0 0 44 44"
-      width={88}
-      height={88}
-      style={{
-        filter: "drop-shadow(0 0 8px rgba(255, 0, 0, 0.8))",
-        background: GAUGE_BG,
-        borderRadius: "50%",
-        boxShadow: GAUGE_SHADOW
-      }}
-    >
-      {/* Background ring */}
-      <circle
-        cx={22}
-        cy={22}
-        r={radius + stroke / 2}
-        fill="none"
-        stroke={GAUGE_RING_BG}
-        strokeWidth={stroke + 2}
-      />
-      {/* Segments */}
-      {segs.map((seg, i) => {
-        const dash = (seg.val / total) * c;
-        const segEl = (
-          <circle
-            key={i}
-            cx={22}
-            cy={22}
-            r={radius}
-            fill="none"
-            stroke={seg.color}
-            strokeWidth={stroke}
-            strokeDasharray={`${dash} ${c - dash}`}
-            strokeDashoffset={-offset}
-            style={{
-              filter: `drop-shadow(0 0 6px ${seg.color})`
-            }}
-            strokeLinecap="round"
-          />
-        );
-        offset += dash;
-        return segEl;
-      })}
-      {/* Futuristic ticks */}
-      {[...Array(12)].map((_, i) => (
-        <rect
-          key={i}
-          x={21}
-          y={3}
-          width={2}
-          height={4}
-          rx={1}
-          fill="#000000"
-          opacity={i % 3 === 0 ? 0.7 : 0.25}
-          transform={`rotate(${i * 30} 22 22)`}
-        />
-      ))}
-      {/* Center HUD */}
-      <circle
-        cx={22}
-        cy={22}
-        r={10}
-        fill="#10131a"
-        stroke={GAUGE_RING}
-        strokeWidth={1.5}
-        style={{ filter: "drop-shadow(0 0 4px #00ffe7)" }}
-      />
-      <text
-        x="22"
-        y="27"
-        textAnchor="middle"
-        fontSize="18"
-        fontWeight="bold"
-        fill="#00ffe7"
-        style={{ textShadow: "0 0 8px #00ffe7" }}
+    <div className="flex flex-col items-center">
+      <div 
+        className="relative rounded-full border-2 overflow-hidden"
+        style={{
+          width: barWidth,
+          height: barHeight,
+          background: GAUGE_BG,
+          borderColor: GAUGE_RING,
+          boxShadow: GAUGE_SHADOW
+        }}
       >
-        {EMOJIS[dominant as keyof typeof EMOJIS]}
-      </text>
-    </svg>
+        {/* Positive section (leftmost) */}
+        <div
+          className="absolute left-0 top-0 h-full"
+          style={{
+            width: positiveWidth,
+            background: COLORS.POSITIVE,
+            boxShadow: `inset 0 0 8px ${COLORS.POSITIVE}`,
+            borderTopLeftRadius: '10px',
+            borderBottomLeftRadius: '10px'
+          }}
+        />
+        
+        {/* Neutral section (middle) */}
+        <div
+          className="absolute top-0 h-full"
+          style={{
+            left: positiveWidth,
+            width: neutralWidth,
+            background: COLORS.NEUTRAL,
+            boxShadow: `inset 0 0 6px ${COLORS.NEUTRAL}`
+          }}
+        />
+
+        {/* Negative section (rightmost) */}
+        <div
+          className="absolute top-0 h-full"
+          style={{
+            left: positiveWidth + neutralWidth,
+            width: negativeWidth,
+            background: COLORS.NEGATIVE,
+            boxShadow: `inset 0 0 8px ${COLORS.NEGATIVE}`,
+            borderTopRightRadius: '10px',
+            borderBottomRightRadius: '10px'
+          }}
+        />
+        
+
+        
+        {/* Dividers between sections */}
+        {neutralWidth > 0 && (
+          <>
+            {/* Left divider */}
+            <div
+              className="absolute top-0 w-0.5 h-full bg-black opacity-30"
+              style={{ left: positiveWidth }}
+            />
+            {/* Right divider */}
+            <div
+              className="absolute top-0 w-0.5 h-full bg-black opacity-30"
+              style={{ left: positiveWidth + neutralWidth }}
+            />
+          </>
+        )}
+        
+        {/* Dominant sentiment emoji */}
+        <div
+          className="absolute -top-8 left-1/2 transform -translate-x-1/2 text-2xl"
+          style={{
+            filter: "drop-shadow(0 0 8px #00ffe7)"
+          }}
+        >
+          {EMOJIS[dominant as keyof typeof EMOJIS]}
+        </div>
+      </div>
+      
+      {/* Labels */}
+      <div className="flex justify-between w-full mt-2 px-2">
+        <span className="text-xs text-[#00ffe7]">POSITIVE</span>
+        <span className="text-xs text-[#e0e7ef]">NEUTRAL</span>
+        <span className="text-xs text-[#ff4d6d]">NEGATIVE</span>
+      </div>
+    </div>
   );
 };
 
@@ -250,12 +255,15 @@ const SentimentWidget: React.FC = () => {
               {/* Gauge */}
               <div className="flex flex-col items-center w-full">
                 <SentimentGauge percent={percent} dominant={dominant} />
-                <div className="flex flex-row gap-3 mt-2">
+                <div className="flex flex-row gap-4 mt-4 justify-center">
                   {labels.map((label, i) => (
                     <div key={label} className="flex flex-col items-center">
                       <span
-                        className="text-lg"
-                        style={{ color: COLORS[label as keyof typeof COLORS], textShadow: "0 0 6px #00ffe7" }}
+                        className="text-lg mb-1"
+                        style={{ 
+                          color: COLORS[label as keyof typeof COLORS], 
+                          filter: `drop-shadow(0 0 4px ${COLORS[label as keyof typeof COLORS]})` 
+                        }}
                       >
                         {EMOJIS[label as keyof typeof EMOJIS]}
                       </span>
@@ -264,10 +272,10 @@ const SentimentWidget: React.FC = () => {
                     </div>
                   ))}
                 </div>
-                <div className="mt-2 text-xs text-[#00ffe7] text-center w-full font-mono tracking-wide">
-                  {dominant === "POSITIVE" && "VIBES: OPTIMAL 🚀"}
-                  {dominant === "NEUTRAL" && "VIBES: STABLE 😎"}
-                  {dominant === "NEGATIVE" && "VIBES: ALERT! 😬"}
+                <div className="mt-3 text-xs text-[#00ffe7] text-center w-full font-mono tracking-wide">
+                  {dominant === "POSITIVE" && "VIBES: BULLISH �"}
+                  {dominant === "NEUTRAL" && "VIBES: STABLE �"}
+                  {dominant === "NEGATIVE" && "VIBES: BEARISH �"}
                 </div>
               </div>
             </div>
