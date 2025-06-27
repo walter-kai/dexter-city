@@ -27,7 +27,7 @@ const EnterCityNavBar: React.FC = () => {
         disabled={connecting}
         className="btn-special px-8 py-3 text-lg font-bold"
       >
-        {connecting ? <LoadingScreenDots size={4} /> : "Enter Dexter City"}
+        {connecting ? <LoadingScreenDots size={4} /> : "Enter the city"}
       </button>
     </nav>
   );
