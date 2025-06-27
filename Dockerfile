@@ -51,44 +51,12 @@ COPY --from=server-build /server/.types ./.types
 # Copy Nginx configuration
 COPY ./nginx.conf /etc/nginx/nginx.conf
 
-# Install required tools
-RUN apk add --no-cache nodejs npm curl bash netcat-openbsd
-
 # Install production dependencies for the server
 COPY ./package*.json ./
-RUN npm install --only=production
+RUN apk add --no-cache nodejs npm && npm install --only=production
 
-# Create startup script
-RUN echo '#!/bin/bash\n\
-echo "Starting backend server..."\n\
-node dist/server/server.js &\n\
-SERVER_PID=$!\n\
-\n\
-echo "Waiting for backend server to be ready..."\n\
-timeout=30\n\
-while [ $timeout -gt 0 ]; do\n\
-  if nc -z 127.0.0.1 3001; then\n\
-    echo "Backend server is ready!"\n\
-    break\n\
-  fi\n\
-  echo "Backend not ready yet, waiting... ($timeout seconds left)"\n\
-  sleep 1\n\
-  timeout=$((timeout-1))\n\
-done\n\
-\n\
-if [ $timeout -eq 0 ]; then\n\
-  echo "ERROR: Backend server failed to start within timeout period"\n\
-  exit 1\n\
-fi\n\
-\n\
-echo "Testing backend endpoints..."\n\
-curl -s http://localhost:3001/cron/health || echo "Warning: Cron health endpoint not responding"\n\
-\n\
-echo "Starting NGINX..."\n\
-exec nginx' > /start.sh && chmod +x /start.sh
-
-# Expose ports
+# Expose ports for Nginx and backend server
 EXPOSE 3001 443
 
-# Use the startup script
-CMD ["/start.sh"]
+# Start Nginx and backend server using the start script in package.json
+CMD ["sh", "-c", "npm run start & nginx -g 'daemon off;'"]
