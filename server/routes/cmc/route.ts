@@ -9,7 +9,7 @@ const asyncHandler = (fn: any) => (req: express.Request, res: express.Response, 
   Promise.resolve(fn(req, res, next)).catch(next);
 
 // Data fetch endpoints
-router.route("/cmc/tokens/:symbol").get(asyncHandler(coinMarketCapController.getTokenBySymbol));
+router.route("/tokens/:symbol").get(asyncHandler(coinMarketCapController.getTokenBySymbol));
 
 
 

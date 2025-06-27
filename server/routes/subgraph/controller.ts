@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import subgraphService from "./service";
 import firebaseService from "../firebase/firebase.service";
 import ApiError from "../../utils/api-error";
-import { db } from "../../config/firebase"; 
-import logger from "../../config/logger";
+import { db } from "../firebase/firebase.config"; 
+import logger from "../../utils/logger";
 import { fetchTopDailyPools } from "./UniswapV4";
 
 // Import the preloadTokenImages function from subgraph service

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import axios from "axios";
+import { db } from "../firebase/firebase.config";
 
 interface SentimentDataPoint {
   t: number;
@@ -28,50 +29,24 @@ interface SentimentApiResponse {
   total: number;
 }
 
-export const getSentiments = async (req: Request, res: Response) => {
+export async function getSentiments(req: Request, res: Response) {
   try {
-    const response = await axios.get<SentimentApiResponse>(
-      'https://talkwalker-collector-882290629693.us-central1.run.app/sentiment/all',
-      {
-        headers: {
-          'Accept': 'application/json',
-          'User-Agent': 'DexterCity-Backend/1.0'
-        },
-        timeout: 15000
-      }
-    );
-
-    res.json({
-      success: true,
-      data: response.data.data,
-      total: response.data.total
+    const snapshot = await db.collection('sentiment').get();
+    const sentiments: any[] = [];
+    snapshot.forEach((doc: any) => {
+      sentiments.push({ id: doc.id, ...doc.data() });
     });
-
+    res.status(200).json({
+      success: true,
+      data: sentiments,
+      total: sentiments.length
+    });
   } catch (error) {
-    console.error('Error fetching sentiments:', error);
-    
-    if (axios.isAxiosError(error)) {
-      if (error.code === 'ECONNABORTED') {
-        return res.status(504).json({
-          success: false,
-          error: 'Request timeout while fetching sentiment data'
-        });
-      } else if (error.response) {
-        return res.status(error.response.status).json({
-          success: false,
-          error: `External API error: ${error.response.statusText}`
-        });
-      } else if (error.request) {
-        return res.status(503).json({
-          success: false,
-          error: 'Unable to reach external sentiment API'
-        });
-      }
-    }
-    
+    const errorMessage = error instanceof Error ? error.message : String(error);
     res.status(500).json({
       success: false,
-      error: 'Internal server error while fetching sentiment data'
+      error: `Failed to fetch sentiments: ${errorMessage}`,
+      data: []
     });
   }
-};
+}

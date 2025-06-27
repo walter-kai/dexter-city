@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase-admin/firestore";
-import logger from "../../config/logger";
-import { db } from "../../config/firebase";
+import logger from "../../utils/logger";
+import { db } from "./firebase.config";
 
 import ApiError from "../../utils/api-error";
 import { PoolData } from ".types/subgraph/Pools";

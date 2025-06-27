@@ -1,6 +1,6 @@
 import { Timestamp } from "firebase-admin/firestore";
-import logger from "../../config/logger";
-import { db } from "../../config/firebase";
+import logger from "../../utils/logger";
+import { db } from "../firebase/firebase.config";
 import { BotConfig } from "../../../.types/Bot";
 
 /**

@@ -1,8 +1,8 @@
 import admin from "firebase-admin"; // Import admin SDK
 import User, { FireStoreUser, UserArgs} from "../../../.types/User";
 
-import logger from "../../config/logger";
-import { db } from "../../config/firebase";
+import logger from "../../utils/logger";
+import { db } from "../firebase/firebase.config";
 import ApiError from "../../utils/api-error";
 
 // Initialize Firestore using Firebase Admin SDK

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import coinMarketCapService from "./service";
-import logger from "../../config/logger";
+import logger from "../../utils/logger";
 
 
 const reloadTokens = async (req: Request, res: Response): Promise<Response> => {

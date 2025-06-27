@@ -1,7 +1,7 @@
-import { db } from "../../config/firebase";
+import { db } from "../firebase/firebase.config";
 // import admin from "firebase-admin";
 import { Timestamp, FieldPath } from "@google-cloud/firestore";
-import logger from "../../config/logger";
+import logger from "../../utils/logger";
 import { CoinMarketCap } from "../../../.types/CoinMarketCap"
 
 // Define the API base URL and endpoint
