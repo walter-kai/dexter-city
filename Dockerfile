@@ -14,7 +14,7 @@ COPY ./.types/ ../.types
 # Pass environment variables for the client build
 # Set the specific hostname for the production environment
 ARG VITE_SERVER_HOSTNAME
-ENV VITE_SERVER_HOSTNAME=${VITE_SERVER_HOSTNAME:-https://dexter-city-882290629693.us-central1.run.app}
+ENV VITE_SERVER_HOSTNAME=${VITE_SERVER_HOSTNAME:-https://dexter-city-128290252214.us-central1.run.app}
 
 # Build the React app
 RUN npm run build
