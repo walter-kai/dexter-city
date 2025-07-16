@@ -8,3 +8,4 @@ yarn.lock
 /server/node_modules
 /client/build
 /client/dist
+.DS_Store
