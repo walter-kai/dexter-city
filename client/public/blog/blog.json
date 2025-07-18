@@ -1,4 +1,14 @@
 [
+    {
+    "version": "Incubator Day 1",
+    "date": "2025-07-17",
+    "title": "Atrium Academy Uniswap Hook Incubator Begins",
+    "description": "Today marks the first day of the Atrium Academy Uniswap Hook Incubator! We're diving deep into the Uniswap V4 hook architecture, collaborating with top DeFi builders to push the boundaries of custom liquidity logic and dynamic fees. Follow our journey as we innovate on permissionless infrastructure and shape the future of Dexter City.",
+    "type": "roadmap",
+    "status": "released",
+    "link": "https://atrium.academy/uniswap",
+    "linkText": "See the Incubator Details"
+  },
   {
     "version": "Official",
     "date": "2025-06-07",
@@ -29,4 +39,5 @@
     "link": "https://atrium.academy/uniswap",
     "linkText": "Learn More"
   }
+  
 ]
