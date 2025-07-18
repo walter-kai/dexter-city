@@ -71,7 +71,7 @@ const LandingPage: React.FC = () => {
                     {/* HUD Video Game Background */}
                     <div className="relative z-20 backdrop-blur-lg mx-auto px-8 flex flex-col items-center justify-center w-4/5 h-full py-auto">
                         {/* Lottie Background Docked Right */}
-                        <div className="absolute inset-y-0 right-0 sm:right-[3%] md:right-[6%] lg:right-[10%] flex items-center justify-end pointer-events-none select-none -z-10">
+                        <div className="absolute inset-y-0 right-0 sm:right-[3%] md:right-[6%] lg:right-[10.5%] flex items-center justify-end pointer-events-none select-none -z-10">
                             <Player
                                 src="/lottie/blackBlocks.json"
                                 className="w-full h-full object-cover drop-shadow-[0_0_24px] opacity-40"
@@ -112,7 +112,7 @@ const LandingPage: React.FC = () => {
                                 </div>
                             </div>
                             {/* Dexter Cityheader vertically centered, docked right */}
-                            <div className='flex flex-col items-center justify-center w-3/5 p-10  bg-black/75 rounded-xl shadow-[0_0_10px_#faafe8]'>
+                            <div className='flex flex-col items-center justify-center w-3/5 p-10  bg-black/85 rounded-xl shadow-[0_0_10px_#faafe8]'>
                                     <img src="/logos/dexter3d.svg" className="absolute top-2 h-20 p-4 rounded-full shadow-[0_0_10px_#faafe8] bg-black" alt="DexterCity" />
                                 {/* Group Welcome and Logo together */}
                                 <div className='mt-6'>
