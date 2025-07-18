@@ -1,12 +1,16 @@
 import React from 'react';
 
 const CommissionsCard: React.FC = () => (
-  <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#23263a]/70 py-16 px-4">
-    <div className="max-w-5xl w-full flex flex-col items-center">
-      <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
-        Commissions
-      </h1>
-      <div className="flex flex-col md:flex-row gap-10 w-full justify-center items-center">
+  <div className="fixed inset-0 bg-[#23263a]/70 overflow-hidden animate-fade-in-up">
+    <div className="relative w-full h-full flex justify-center items-start">
+      <div className="w-full h-screen flex justify-center custom-scrollbar" style={{ overflowY: 'auto' }}>
+        <div className="h-fit">
+          <div className="max-w-5xl w-full px-4 py-16 mx-auto">
+            <div className="flex flex-col items-center">
+              <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
+                Commissions
+              </h1>
+              <div className="flex flex-col md:flex-row gap-10 w-full justify-center items-center">
         {/* Using a Bot Section */}
         <div className="relative flex flex-col items-center bg-[#181a23]/80 rounded-2xl shadow-[0_0_32px_#00ffe7aa] p-6 w-full max-w-xs border-2 border-[#00ffe7]/40 passport-card overflow-hidden">
           <h3 className="text-2xl font-bold mb-4 text-[#00ffe7] text-center drop-shadow-[0_0_8px_#00ffe7]">💸 Using a Bot</h3>
@@ -68,8 +72,12 @@ const CommissionsCard: React.FC = () => (
           <span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#faafe8] rounded-br-2xl opacity-60 animate-pulse" />
         </div>
       </div>
-    </div>
     {/* .passport-card::before moved to cards.css */}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 );
 

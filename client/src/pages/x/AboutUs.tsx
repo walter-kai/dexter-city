@@ -36,8 +36,12 @@ const experienceTiles = [
 
 const AboutUs: React.FC = () => {
 	return (
-		<div className="min-h-screen bg-[#23263a]/70 px-4 py-[200px]">
-			<div className="max-w-4xl mx-auto bg-[#181a23]/90 rounded-3xl border-2 border-[#00ffe7]/30 shadow-[0_0_32px_#00ffe7]/20 backdrop-blur-md overflow-hidden relative">
+		<div className="fixed inset-0 bg-[#23263a]/70 overflow-hidden animate-fade-in-up">
+			<div className="relative w-full h-full flex justify-center items-start">
+				<div className="w-full h-screen flex justify-center custom-scrollbar" style={{ overflowY: 'auto' }}>
+					<div className="h-fit">
+						<div className="max-w-4xl w-full px-4 py-[200px] mx-auto">
+							<div className="bg-[#181a23]/90 rounded-3xl border-2 border-[#00ffe7]/30 shadow-[0_0_32px_#00ffe7]/20 backdrop-blur-md overflow-hidden relative">
 				{/* Neon border corners */}
 				<span className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-3xl opacity-70 animate-pulse" />
 				<span className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-3xl opacity-70 animate-pulse" />
@@ -121,6 +125,10 @@ const AboutUs: React.FC = () => {
 								</div>
 							</div>
 						))}
+					</div>
+				</div>
+			</div>
+						</div>
 					</div>
 				</div>
 			</div>

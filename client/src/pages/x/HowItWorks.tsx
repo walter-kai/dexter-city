@@ -69,15 +69,19 @@ const HowItWorks: React.FC = () => {
   }, [trendingCoins]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#23263a]/70 py-16 px-4">
-      <div className="max-w-5xl w-full flex flex-col items-center">
-        <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
-          How does it work?
-        </h1>
-        <p className="text-xl text-[#faafe8] mb-12 text-center max-w-2xl">
-          Your guide to getting started with trading bots in Dexter City. Follow these steps to level up your trading game!
-        </p>
-        <div className="flex flex-col md:flex-row gap-10 w-full justify-center items-center">
+    <div className="fixed inset-0 bg-[#23263a]/70 overflow-hidden animate-fade-in-up">
+      <div className="relative w-full h-full flex justify-center items-start">
+        <div className="w-full h-screen flex justify-center custom-scrollbar" style={{ overflowY: 'auto' }}>
+          <div className="h-fit">
+            <div className="max-w-5xl w-full px-4 py-16 mx-auto">
+              <div className="flex flex-col items-center">
+                <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
+                  How does it work?
+                </h1>
+                <p className="text-xl text-[#faafe8] mb-12 text-center max-w-2xl">
+                  Your guide to getting started with trading bots in Dexter City. Follow these steps to level up your trading game!
+                </p>
+                <div className="flex flex-col md:flex-row gap-10 w-full justify-center items-center">
           <StepCard
             icon={<img src="/logos/metamask-logo.png" alt="Metamask" className="h-20 w-20 mb-2" />}
             step="Step 1"
@@ -135,6 +139,10 @@ const HowItWorks: React.FC = () => {
             buttonTextColor="text-[#181a23]"
             buttonHref="/x/telegram"
           />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -184,3 +184,22 @@
   transform: translateY(24px) translateX(-24px) scale(0.98);
   transition: opacity 400ms, transform 400ms;
 }
+
+/* Custom Scrollbar Styles (matches Blog page) */
+/* Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #00ffe7 #23263a;
+}
+/* Chrome, Edge, Safari */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #00ffe799;
+  border-radius: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #23263a;
+  border-radius: 8px;
+}

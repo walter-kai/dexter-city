@@ -94,7 +94,7 @@ const Blog: React.FC = () => {
   }
 
   return (
-    <div className="fixed py-32 inset-0 z-0 bg-[#181a23] bg-gradient-to-br from-[#181a23] via-[#23263a] to-[#1a1a2e] overflow-hidden">
+    <div className="fixed py-32 inset-0 z-0 bg-[#181a23] bg-gradient-to-br from-[#181a23] via-[#23263a] to-[#1a1a2e] overflow-hidden animate-fade-in-up">
       {/* Neon background glow */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[80vw] h-[60vh] bg-[#00ffe7]/10 blur-3xl rounded-full" />
@@ -105,35 +105,12 @@ const Blog: React.FC = () => {
         className="relative z-10 w-full h-full flex justify-center items-start"
       >
         <div
-          className="w-full h-screen flex justify-center "
+          className="w-full h-screen flex justify-center custom-scrollbar"
           style={{
             WebkitOverflowScrolling: 'touch',
             overflowY: 'auto',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#00ffe7 #23263a',
           }}
         >
-          <style>
-            {`
-              /* Firefox */
-              div[style*="overflow-y: auto"] {
-          scrollbar-width: thin;
-          scrollbar-color: #00ffe7 #23263a;
-              }
-              /* Chrome, Edge, Safari */
-              div[style*="overflow-y: auto"]::-webkit-scrollbar {
-          width: 8px;
-              }
-              div[style*="overflow-y: auto"]::-webkit-scrollbar-thumb {
-          background: #00ffe799;
-          border-radius: 8px;
-              }
-              div[style*="overflow-y: auto"]::-webkit-scrollbar-track {
-          background: #23263a;
-          border-radius: 8px;
-              }
-            `}
-          </style>
           <div className=" h-fit">
             <div className="max-w-4xl w-full px-4 py-12 mx-auto ">
               <div className="bg-[#181a23]/80 border-2 border-[#00ffe7]/30 rounded-3xl shadow-[0_0_32px_#00ffe7]/20 backdrop-blur-md p-8 relative overflow-hidden">

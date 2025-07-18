@@ -134,12 +134,16 @@ const ContactUs: React.FC = () => {
   // Render the form when everything is complete
   if (showForm) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#23263a]/70 py-16 px-4">
-        <div className="max-w-5xl w-full flex flex-col items-center">
-          <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
-            Contact Us
-          </h1>
-          <div className="flex flex-col w-full items-center justify-center">
+      <div className="fixed inset-0 bg-[#23263a]/70 overflow-hidden animate-fade-in-up">
+        <div className="relative w-full h-full flex justify-center items-start">
+          <div className="w-full h-screen flex justify-center custom-scrollbar" style={{ overflowY: 'auto' }}>
+            <div className="h-fit">
+              <div className="max-w-5xl w-full px-4 py-16 mx-auto">
+                <div className="flex flex-col items-center">
+                  <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
+                    Contact Us
+                  </h1>
+                  <div className="flex flex-col w-full items-center justify-center">
             <div className="relative bg-[#23263a] border-2 border-[#00ffe7]/30 rounded-2xl shadow-[0_0_32px_#00ffe7]/20 passport-card overflow-hidden p-8 w-full max-w-xl">
               <form onSubmit={handleFormSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -242,18 +246,26 @@ const ContactUs: React.FC = () => {
               onClose={() => setShowStatusFooter(false)}
             />
           )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#23263a]/70 py-16 px-4">
-      <div className="max-w-5xl w-full flex flex-col items-center">
-        <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
-          Contact Us
-        </h1>
-        <div className="flex flex-col w-full items-center justify-center">
+    <div className="fixed inset-0 bg-[#23263a]/70 overflow-hidden animate-fade-in-up">
+      <div className="relative w-full h-full flex justify-center items-start">
+        <div className="w-full h-screen flex justify-center custom-scrollbar" style={{ overflowY: 'auto' }}>
+          <div className="h-fit">
+            <div className="max-w-5xl w-full px-4 py-16 mx-auto">
+              <div className="flex flex-col items-center">
+                <h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
+                  Contact Us
+                </h1>
+                <div className="flex flex-col w-full items-center justify-center">
           <div className="relative bg-[#23263a] border-2 border-[#00ffe7]/30 rounded-2xl shadow-[0_0_32px_#00ffe7]/20 passport-card overflow-hidden p-8 w-full max-w-xl">
             {!showCaptcha ? (
               <div className="text-center">
@@ -310,6 +322,10 @@ const ContactUs: React.FC = () => {
             <span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-2xl opacity-60 animate-pulse" />
             <span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-2xl opacity-60 animate-pulse" />
             <span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#00ffe7] rounded-br-2xl opacity-60 animate-pulse" />
+          </div>
+        </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

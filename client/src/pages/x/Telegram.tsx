@@ -54,10 +54,10 @@ const TelegramCard: React.FC = () => (
       <FaTelegramPlane className="text-[#0088cc] text-5xl" />
       Dexter City on Telegram
     </h1>
-    <p className="text-xl text-[#faafe8] mb-12 text-center max-w-2xl animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+    <p className="text-xl text-[#faafe8] mb-12 text-center max-w-2xl animate-fade-in-up">
       Telegram is the heart of Dexter City's community. Connect, share, and stay updated with our channels, group, and bot!
     </p>
-    <div className="flex flex-col md:flex-row gap-10 w-full justify-center items-center animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+    <div className="flex flex-col md:flex-row gap-10 w-full justify-center items-center animate-fade-in-up">
       {telegramCards.map((card) => (
         <div
           key={card.title}
@@ -94,34 +94,21 @@ const TelegramCard: React.FC = () => (
         </div>
       ))}
     </div>
-    <style>{`
-      .animate-fade-in-up {
-        opacity: 0;
-        transform: translateY(24px);
-        animation: fadeInUp 0.7s cubic-bezier(.4,0,.2,1) forwards;
-      }
-      @keyframes fadeInUp {
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      .passport-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(135deg, #23263a 0 2px, #181a23 2px 8px);
-        opacity: 0.12;
-        z-index: 0;
-      }
-    `}</style>
   </div>
 );
 
 const Telegram: React.FC = () => (
-  <div className="min-h-screen flex flex-col items-center justify-center bg-[#23263a]/70 py-16 px-4">
-    <div className="max-w-5xl w-full flex flex-col items-center">
-      <TelegramCard />
+  <div className="fixed inset-0 bg-[#23263a]/70 overflow-hidden animate-fade-in-up">
+    <div className="relative w-full h-full flex justify-center items-start">
+      <div className="w-full h-screen flex justify-center custom-scrollbar" style={{ overflowY: 'auto' }}>
+        <div className="h-fit">
+          <div className="max-w-5xl w-full px-4 py-16 mx-auto">
+            <div className="flex flex-col items-center">
+              <TelegramCard />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 );
