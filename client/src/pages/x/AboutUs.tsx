@@ -1,70 +1,129 @@
 import React from "react";
+import { FaTwitter, FaLinkedin, FaExternalLinkAlt } from "react-icons/fa";
 
-const team = [
-    {
-        name: "Tyrone",
-        role: "Marketing Manager",
-        image: "https://robohash.org/tyrone?set=set1&size=200x200",
-        bio: "Fluent in Japanese and English, Tyrone is our marketing maestro. He crafts compelling narratives that resonate with our global community.",
-    },
+const experienceTiles = [
 	{
-		name: "Kai",
-		role: "Founder & Lead Developer",
-		image: "https://robohash.org/walt?set=set1&size=200x200",
-		bio: "Visionary, builder, and dedicated. Kai is the architect behindDexter City, passionate about providing the best trading tools.",
+		category: "Entertainment & Celebrities",
+		companies: ["Lady Gaga", "P!nk", "Jerry Bruckheimer", "Kim Kardashian"],
+		icon: "🎭",
+		color: "#ff6b9d"
 	},
 	{
-		name: "Wasim",
-		role: "Smart Contract Developer",
-		image: "https://robohash.org/wasim?set=set1&size=200x200",
-		bio: "Wasim is a wizard with Solidity. He never sleeps, ensuring the smart contracts are robust and secure.",
+		category: "Tech Giants",
+		companies: ["Microsoft", "Hootsuite"],
+		icon: "🏢",
+		color: "#4fc3f7"
 	},
+	{
+		category: "Blockchain & Gaming",
+		companies: ["TRON", "DLive.tv", "Evolution Gaming"],
+		icon: "⛓️",
+		color: "#9c27b0"
+	},
+	{
+		category: "Healthcare & Engineering",
+		companies: ["Eli Lilly", "Arup"],
+		icon: "🏥",
+		color: "#66bb6a"
+	},
+	{
+		category: "Education",
+		companies: ["MBA - NFT Industry Thesis"],
+		icon: "🎓",
+		color: "#ffa726"
+	}
 ];
 
 const AboutUs: React.FC = () => {
 	return (
-		<div className="min-h-screen flex flex-col items-center justify-center bg-[#23263a]/70 py-16 px-4">
-			<div className="max-w-5xl w-full flex flex-col items-center">
-				<h1 className="text-4xl font-bold text-[#00ffe7] mb-12 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center">
-					About Us
-				</h1>
-				<div className="flex flex-col md:flex-row gap-10 w-full justify-center items-center">
-					{team.map((member) => (
-						<div
-							key={member.name}
-							className="relative flex flex-col items-center bg-[#181a23]/70 rounded-2xl shadow-[0_0_32px_#00ffe7aa] p-6 w-full max-w-xs border-2 border-[#00ffe7]/40 passport-card overflow-hidden"
-						>
-							{/* Passport Photo */}
-							<div className="bg-[#23263a] rounded-full p-2 mt-6 mb-4 shadow-md border-4 border-[#00ffe7]/60">
-								<img
-									src={member.image}
-									alt={member.name}
-									className="w-28 h-28 rounded-full object-cover border-2 border-[#faafe8]/40"
-								/>
-							</div>
-							{/* Passport Info */}
-							<div className="w-full bg-gradient-to-br from-[#23263a]/80 to-[#181a23]/90 rounded-xl p-4 border border-[#00ffe7]/20 shadow-inner flex flex-col items-center relative">
-								<h2 className="text-2xl font-bold text-[#00ffe7] mb-1 text-center drop-shadow-[0_0_6px_#00ffe7] tracking-wide">
-									{member.name}
-								</h2>
-								<h3 className="text-lg text-[#faafe8] mb-2 text-center font-mono tracking-widest">
-									{member.role}
-								</h3>
-								<div className="w-10 h-1 bg-[#00ffe7] rounded-full mb-2 opacity-60" />
-								<p className="text-[#e0e7ef] text-center text-sm leading-relaxed font-mono">
-									{member.bio}
-								</p>
-							</div>
-							{/* Neon HUD corners */}
-							<span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-2xl opacity-60 animate-pulse" />
-							<span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-2xl opacity-60 animate-pulse" />
-							<span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-2xl opacity-60 animate-pulse" />
-							<span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#00ffe7] rounded-br-2xl opacity-60 animate-pulse" />
+		<div className="min-h-screen bg-[#23263a]/70 px-4 py-[200px]">
+			<div className="max-w-4xl mx-auto bg-[#181a23]/90 rounded-3xl border-2 border-[#00ffe7]/30 shadow-[0_0_32px_#00ffe7]/20 backdrop-blur-md overflow-hidden relative">
+				{/* Neon border corners */}
+				<span className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-3xl opacity-70 animate-pulse" />
+				<span className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-3xl opacity-70 animate-pulse" />
+				<span className="absolute bottom-0 left-0 w-10 h-10 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-3xl opacity-70 animate-pulse" />
+				<span className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-[#00ffe7] rounded-br-3xl opacity-70 animate-pulse" />
+				{/* Header Profile Section */}
+				<div className="px-6 pt-8 pb-4">
+					{/* Profile Picture */}
+					<div className="flex justify-center mb-4">
+						<div className="relative">
+							<img
+								src="https://robohash.org/walt?set=set1&size=200x200"
+								alt="Walt"
+								className="w-24 h-24 rounded-full border-4 border-[#00ffe7]/60 shadow-[0_0_16px_#00ffe7aa]"
+							/>
+							<div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#00ffe7] rounded-full border-2 border-[#181a23]"></div>
 						</div>
-					))}
+					</div>
+
+					{/* Profile Info */}
+					<div className="text-center mb-4">
+						<h1 className="text-2xl font-bold text-[#00ffe7] mb-1">Walt</h1>
+						<p className="text-[#faafe8] text-sm mb-2">Tech Visionary & DexterCity Founder</p>
+						<p className="text-[#e0e7ef] text-sm leading-relaxed">
+							Almost 20 years in the tech industry. Building the future of automated trading.
+						</p>
+					</div>
+
+					{/* Link in Bio */}
+					<div className="mb-4">
+						<a 
+							href="https://dexter.city" 
+							className="flex items-center justify-center gap-2 bg-[#00ffe7]/10 border border-[#00ffe7]/30 rounded-xl py-2 px-4 text-[#00ffe7] text-sm hover:bg-[#00ffe7]/20 transition-colors"
+						>
+							<FaExternalLinkAlt className="w-3 h-3" />
+							dexter.city
+						</a>
+					</div>
+
+					{/* Social Media Icons */}
+					<div className="flex justify-center gap-4 mb-6">
+						<a 
+							href="#" 
+							className="w-10 h-10 bg-[#1da1f2]/20 border border-[#1da1f2]/40 rounded-xl flex items-center justify-center hover:bg-[#1da1f2]/30 transition-colors"
+						>
+							<FaTwitter className="w-5 h-5 text-[#1da1f2]" />
+						</a>
+						<a 
+							href="#" 
+							className="w-10 h-10 bg-[#0077b5]/20 border border-[#0077b5]/40 rounded-xl flex items-center justify-center hover:bg-[#0077b5]/30 transition-colors"
+						>
+							<FaLinkedin className="w-5 h-5 text-[#0077b5]" />
+						</a>
+					</div>
+				</div>
+
+				{/* Experience Grid */}
+				<div className="px-6 pb-8">
+					<h2 className="text-lg font-semibold text-[#00ffe7] mb-4 text-center">Experience Highlights</h2>
+					<div className="grid grid-cols-3 gap-3">
+						{experienceTiles.map((tile, index) => (
+							<div
+								key={index}
+								className="bg-[#23263a]/80 rounded-2xl p-4 border border-[#00ffe7]/20 hover:border-[#00ffe7]/40 transition-colors group"
+							>
+								<div className="text-center mb-3">
+									<span className="text-2xl mb-2 block">{tile.icon}</span>
+									<h3 className="text-xs font-semibold text-[#00ffe7] mb-2 leading-tight">
+										{tile.category}
+									</h3>
+								</div>
+								<div className="space-y-1">
+									{tile.companies.map((company, companyIndex) => (
+										<div
+											key={companyIndex}
+											className="text-xs text-[#e0e7ef] bg-[#181a23]/60 rounded-lg px-2 py-1 text-center"
+										>
+											{company}
+										</div>
+									))}
+								</div>
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
-			{/* .passport-card::before moved to cards.css */}
 		</div>
 	);
 };

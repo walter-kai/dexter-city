@@ -106,7 +106,7 @@ const App: React.FC = () => {
         
           <div className="fixed inset-0 z-0 overflow-hidden">
             <div 
-              className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+              className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out bg-black"
               style={{
                 backgroundImage: getBackgroundImage(),
                 transform: getParallaxTransform(0.5),
@@ -116,7 +116,14 @@ const App: React.FC = () => {
               }}
             />
             <div 
-              className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-90"
+              className="absolute inset-0 bg-gradient-to-br from-neon-cyan via-neon-darker to-neon-purple opacity-100"
+              style={{
+                transform: getParallaxTransform(0.3),
+                willChange: 'transform',
+              }}
+            />
+            <div 
+              className="absolute inset-0 bg-black opacity-70"
               style={{
                 transform: getParallaxTransform(0.3),
                 willChange: 'transform',

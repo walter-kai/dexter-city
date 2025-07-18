@@ -9,7 +9,7 @@ module.exports = {
       fontFamily: {
         lato: ['Lato'],
         savate: ['Savate'],
-        dafoe: ['Mr Dafoe'],
+        marck: ['Marck Script'],
       },
       colors: {
         // Neon theme color presets

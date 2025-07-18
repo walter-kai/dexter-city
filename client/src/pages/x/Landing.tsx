@@ -5,23 +5,23 @@ import { useSDK } from "@metamask/sdk-react";
 import LoadingScreenDots from '../../components/common/LoadingScreenDots';
 import { Player } from '@lottiefiles/react-lottie-player';
 import RandomRobohashCard from '../../components/common/RandomRobohashCard';
-import { FaBars, FaChevronCircleDown, FaChevronCircleRight, FaChevronCircleUp } from 'react-icons/fa';
+import { FaBars, FaChevronCircleDown, FaChevronCircleRight, FaChevronCircleUp, FaEthereum } from 'react-icons/fa';
 import TickerBar from '../../components/common/TickerBar';
 
 const landingFeatures = [
     {
-        icon: "/icons/landing/decentralized.svg",
-        title: "Automated and decentralized trading, directly on the Ethereum blockchain",
+        icon: <img src="/logos/eth-logo.svg" alt="Eth logo" className="h-16 w-16" />,
+        title: "Automated DEX trading on Ethereum, made easy",
         color: "text-[#00ffe7]"
     },
     {
-        icon: "/icons/landing/lock.svg",
+        icon: <img src="/logos/uniswap-logo.png" alt="Uniswap logo" className="h-16 w-16" />,
         title: "Direct and secure transactions through Uniswap's trading pools",
         color: "text-[#faafe8]"
     },
     {
-        icon: "/icons/landing/buySell.svg",
-        title: "Sell your strategies and get commissions off each trade",
+        icon: "/icons/building-info.svg",
+        title: "Experience the city of the future with Dexter City",
         color: "text-[#ffb347]"
     }
 ];
@@ -67,11 +67,11 @@ const LandingPage: React.FC = () => {
             {/* HUD Foreground Content */}
             {/* <TickerBar /> */}
             <div className="relative z-10 flex flex-col flex-1 min-h px-4 py-auto  absolute left-1/2 top-1/2 -translate-x-1/2 translate-y-1/3">
-                <div className="z-20 backdrop-blur-lg mx-auto flex flex-col items-center justify-center w-full h-full ">
+                <div className="z-20 mx-auto flex flex-col items-center justify-center w-full h-full ">
                     {/* HUD Video Game Background */}
-                    <div className="relative z-20 backdrop-blur-lg mx-auto px-8 flex flex-col items-center justify-center w-full h-full py-auto">
+                    <div className="relative z-20 backdrop-blur-lg mx-auto px-8 flex flex-col items-center justify-center w-4/5 h-full py-auto">
                         {/* Lottie Background Docked Right */}
-                        <div className="absolute inset-y-0 right-0 sm:right-[2%] md:right-[4%] lg:right-[8%] flex items-center justify-end pointer-events-none select-none -z-10">
+                        <div className="absolute inset-y-0 right-0 sm:right-[3%] md:right-[6%] lg:right-[10%] flex items-center justify-end pointer-events-none select-none -z-10">
                             <Player
                                 src="/lottie/blackBlocks.json"
                                 className="w-full h-full object-cover drop-shadow-[0_0_24px] opacity-40"
@@ -89,9 +89,13 @@ const LandingPage: React.FC = () => {
                                             key={index}
                                             className="bg-[#23263a] p-4 rounded-xl border border-[#00ffe7]/30 z-10 hover:shadow-[0_0_32px_rgba(0,255,231,0.25)] transition-all duration-300 flex items-center text-left"
                                         >
-                                            <div className="flex items-center justify-center gap-2 w-1/3 min-w-[100px]">
+                                            <div className="flex items-center justify-center gap-2 min-w-[100px]">
                                                 <div className='flex items-center justify-center bg-[#2e3147] rounded-full p-3 px-5 shadow-lg'>
-                                                    <img src={feature.icon} alt={`${feature.title} icon`} className="h-16 w-16" />
+                                                    {typeof feature.icon === 'string' ? (
+                                                        <img src={feature.icon} alt={`${feature.title} icon`} className="h-16 w-16" />
+                                                    ) : (
+                                                        feature.icon
+                                                    )}
                                                 </div>
                                             </div>
                                             {/* Divider */}
@@ -108,25 +112,26 @@ const LandingPage: React.FC = () => {
                                 </div>
                             </div>
                             {/* Dexter Cityheader vertically centered, docked right */}
-                            <div className='flex flex-col items-center justify-center w-2/5 p-10 space-y-6 bg-black/75 rounded-xl shadow-[0_0_10px_#faafe8]'>
+                            <div className='flex flex-col items-center justify-center w-3/5 p-10  bg-black/75 rounded-xl shadow-[0_0_10px_#faafe8]'>
+                                    <img src="/logos/dexter3d.svg" className="absolute top-2 h-20 p-4 rounded-full shadow-[0_0_10px_#faafe8] bg-black" alt="DexterCity" />
                                 {/* Group Welcome and Logo together */}
-                                <div className="relative flex flex-col items-center justify-center w-full">
+                                <div className='mt-6'>
                                     <p
-                                        className="font-dafoe absolute z-10 left-3 top-0 text-[#faafe8] text-5xl max-w-2xl mx-auto text-center -rotate-12"
+                                        className="font-marck  z-10 left-3 top-0 text-[#faafe8] text-5xl max-w-2xl mx-auto text-center -rotate-3"
                                         style={{ textShadow: "0 0 12px #faafe8" }}
                                     >
                                         Welcome to
                                     </p>
-                                    <img src="/logos/dexter3d.svg" className="h-28 mx-auto drop-shadow-[0_0_16px_#00ffe7]" alt="DexterCity" />
+                                    <span
+                                        className="neon-text text-7xl tracking-widest font-savate mb-2 text-center italic"
+                                    >
+                                        D<span className='text-5xl'>EXTER</span>C<span className='text-5xl'>ITY</span>
+                                    </span>
                                 </div>
-                                <span
-                                    className="neon-text text-7xl tracking-widest font-savate mb-2 text-center"
-                                >
-                                    D<span className='text-5xl'>EXTER</span>C<span className='text-5xl'>ITY</span>
-                                </span>
-                                <p className="text-[#faafe8] text-2xl max-w-2xl mx-auto mb-8 text-center" style={{ textShadow: "0 0 12px #faafe8" }}>
-                                    Trading bots on the Ethereum Blockchain
-                                </p>
+                                <div className='my-6'>
+                                    <RandomRobohashCard />
+                                </div>
+                                
                                 <button
                                     onClick={handleEnterClick}
                                     disabled={connecting}

@@ -2,7 +2,7 @@
 /* @import url('https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap'); */
 @import url('https://fonts.googleapis.com/css2?family=Savate:ital,wght@0,200..900;1,200..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Sansation:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700');
-@import url('https://fonts.googleapis.com/css2?family=Mr+Dafoe&family=Open+Sans:ital,wght@0,300..800;1,300..800');
+@import url('https://fonts.googleapis.com/css2?family=Marck+Script&display=swap');
 @import './animations.css';
 @import './buttons.css';
 @import './cards.css';
@@ -36,7 +36,7 @@ h2 {
 }
 
 h3 {
-  @apply text-xl text-center font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7]
+  @apply text-xl text-center font-bold text-[#00ffe7] 
 }
 
 ul {
