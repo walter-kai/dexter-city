@@ -61,7 +61,7 @@ const NavBar: React.FC = () => {
   // Get navigation options based on authentication status
   const getNavLinks = () => {
     // Only show app navigation links if user is logged in
-    if (connected && user) {
+    // if (connected && user) {
       return [
         { text: 'DASHBOARD', to: '/i/dashboard', icon: <FaTachometerAlt /> },
         { text: 'SHOP', to: '/i/shop', icon: <FaShoppingCart /> },
@@ -73,7 +73,7 @@ const NavBar: React.FC = () => {
         { text: 'FRONT PAGE', to: '/', icon: <FaRocket /> },
         { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> },
       ];
-    }
+    // }
     
     return [];
   };
@@ -162,7 +162,7 @@ const NavBar: React.FC = () => {
         
         {/* Right section - Logo/Profile Dropdown */}
         <div className="flex items-center space-x-4">
-          {connected && user ? (
+          {/* {connected && user ? ( */}
             <div className="relative z-50 dropdown-container">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
@@ -291,7 +291,7 @@ const NavBar: React.FC = () => {
                 </div>
               )}
             </div>
-          ) : (
+          {/* ) : (
             <div className="flex items-center gap-4">
               <button
                 onClick={triggerLoginModal}
@@ -301,7 +301,7 @@ const NavBar: React.FC = () => {
                 {connecting ? <LoadingScreenDots size={2} />: 'Enter'}
               </button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </>

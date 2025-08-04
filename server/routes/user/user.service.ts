@@ -45,15 +45,13 @@ async function updateUser(user: User, breadcrumb?: string): Promise<User> {
 
   // Update data directly in the update call
   try {
-    const q = usersRef.where("walletId", "==", user.walletId);
-    const querySnapshot = await q.get();
+    // Use walletId as document ID directly
+    const userDocRef = usersRef.doc(user.walletId);
+    const userDoc = await userDocRef.get();
 
-    if (querySnapshot.empty) {
+    if (!userDoc.exists) {
       throw new ApiError(404, `User with walletId ${user.walletId} not found.`);
     }
-
-    const existingUserDoc = querySnapshot.docs[0];
-    const existingUserRef = usersRef.doc(existingUserDoc.id);
 
     // Convert Date objects to Firestore Timestamps before storing
     const updateData = {
@@ -62,11 +60,11 @@ async function updateUser(user: User, breadcrumb?: string): Promise<User> {
       lastLoggedIn: Timestamp.fromDate(user.lastLoggedIn),
     };
 
-    await existingUserRef.update(updateData);
+    await userDocRef.update(updateData);
 
-    logger.info(`Updated user with telegramId ${user.telegramId}.`);
+    logger.info(`Updated user with walletId ${user.walletId}.`);
 
-    const updatedUserSnapshot = await existingUserRef.get();
+    const updatedUserSnapshot = await userDocRef.get();
     const updatedUserData = updatedUserSnapshot.data() as FireStoreUser;
 
     // Convert Firestore Timestamps to Date objects
@@ -114,13 +112,12 @@ async function createUser(
   );
 
   // Check if a user with the same walletId already exists
-  const q = usersRef.where("walletId", "==", args.walletId);
-  const querySnapshot = await q.get();
+  const userDocRef = usersRef.doc(args.walletId);
+  const userDoc = await userDocRef.get();
 
-  if (!querySnapshot.empty) {
+  if (userDoc.exists) {
     // User exists, return existing user data
-    const existingUserDoc = querySnapshot.docs[0];
-    const existingUserData = existingUserDoc.data() as FireStoreUser;
+    const existingUserData = userDoc.data() as FireStoreUser;
 
     logger.info(`User with walletId ${args.walletId} already exists.`);
 
@@ -142,16 +139,15 @@ async function createUser(
     lastLoggedIn: Timestamp.fromDate(args.lastLoggedIn), // Convert Date to Firestore Timestamp
   };
 
-  // Add a new document with an auto-generated ID
-  const newUserRef = await usersRef.add(userPayload);
+  // Create a new document with walletId as the document ID
+  await userDocRef.set(userPayload);
 
-  logger.info(`Created new user with auto-generated ID: ${newUserRef.id}.`);
+  logger.info(`Created new user with walletId as document ID: ${args.walletId}.`);
 
   // Retrieve the newly created user's data
-  const newUserSnapshot = await newUserRef.get();
+  const newUserSnapshot = await userDocRef.get();
   const newUserData = newUserSnapshot.data() as FireStoreUser;
 
-  // Convert Firestore Timestamp to Date object for `dateCreated`
   // Convert Firestore Timestamps to Date objects
   const newDateCreated = convertTimestampToDate(newUserData.dateCreated);
   const newLastLoggedIn = convertTimestampToDate(newUserData.lastLoggedIn);
@@ -175,18 +171,18 @@ const getUserByWalletId = async (
   }
 
   const usersCollection = db.collection("users");
-  const q = usersCollection.where("walletId", "==", walletId).limit(1);
-  const querySnapshot = await q.get();
+  // Use walletId as document ID directly for better performance
+  const userDocRef = usersCollection.doc(walletId);
+  const userDoc = await userDocRef.get();
 
-  // logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, querySnapshotSize: querySnapshot.size }));
+  // logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, docExists: userDoc.exists }));
 
-  if (querySnapshot.empty) {
+  if (!userDoc.exists) {
     logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, message: "No user found." }));
     return null;
   }
 
-  const doc = querySnapshot.docs[0];
-  const queryData = doc.data() as FireStoreUser;
+  const queryData = userDoc.data() as FireStoreUser;
 
   // Convert Firestore Timestamps to Date objects
   const lastLoggedIn = convertTimestampToDate(queryData.lastLoggedIn);

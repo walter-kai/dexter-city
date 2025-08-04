@@ -126,23 +126,40 @@
 }
 
 /* Page Fade (was fading.css) */
-.animte-fade {
+/* Page transition fade effects */
+.fade-enter {
   opacity: 0;
-  /* transform: translateY(16px); */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
 }
 .fade-enter-active {
   opacity: 1;
-  transform: none;
-  transition: opacity 400ms, transform 400ms;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  transition: opacity 250ms ease-in-out;
 }
 .fade-exit {
   opacity: 1;
-  transform: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
 }
 .fade-exit-active {
   opacity: 0;
-  /* transform: translateY(-16px); */
-  transition: opacity 400ms, transform 400ms;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  transition: opacity 100ms ease-in-out;
 }
 
 /* Card diagonal fade-in/out: bottom-left to center (bl->c) */

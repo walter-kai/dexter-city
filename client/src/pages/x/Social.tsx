@@ -97,7 +97,7 @@ const TelegramCard: React.FC = () => (
   </div>
 );
 
-const Telegram: React.FC = () => (
+const Social: React.FC = () => (
   <div className="fixed inset-0 bg-[#23263a]/70 overflow-hidden animate-fade-in-up">
     <div className="relative w-full h-full flex justify-center items-start">
       <div className="w-full h-screen flex justify-center custom-scrollbar" style={{ overflowY: 'auto' }}>
@@ -113,4 +113,4 @@ const Telegram: React.FC = () => (
   </div>
 );
 
-export default Telegram;
+export default Social;

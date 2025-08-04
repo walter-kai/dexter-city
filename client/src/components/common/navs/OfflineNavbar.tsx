@@ -62,7 +62,7 @@ const OfflineNavbar: React.FC<OfflineNavbarProps> = ({
           {navBtn('About', '/x/about')}
           {navBtn('How this works', '/x/how-it-works')}
           {navBtn('Contact', '/x/contact')}
-          {navBtn('Telegram', '/x/telegram')}
+          {navBtn('Telegram', '/x/social')}
           {navBtn('Commissions', '/x/commissions')}
         </div>
         {/* Start Menu Button (now on the right) */}

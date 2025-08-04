@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useSDK } from "@metamask/sdk-react";
-import { handleUserLogin } from "../../hooks/FirestoreUser";
+import { handleUserLogin, updateUser } from "../../hooks/FirestoreUser";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../providers/AuthContext";
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
@@ -25,6 +25,8 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameCheckTimeout, setUsernameCheckTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [waitingForUser, setWaitingForUser] = useState(false);
+  const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -46,9 +48,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setError("MetaMask SDK not initialized.");
         return;
       }
+      setWaitingForUser(true);
       const accounts = await sdk.connect();
-      if (accounts && accounts.length > 0) {
-        const walletId = accounts[0];
+      if (accounts && Array.isArray(accounts) && accounts.length > 0) {
+        const walletId = accounts[0] as string;
         setWalletId(walletId);
         const { user, isNewUser } = await handleUserLogin(walletId);
         if (isNewUser || !user.username) {
@@ -62,8 +65,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       } else {
         setError("No accounts found.");
       }
-    } catch (err) {
-      setError("Failed to connect MetaMask.");
+    } catch (err: any) {
+      console.error('MetaMask connection error:', err);
+      // Use the actual error message if available, otherwise fall back to a generic message
+      const errorMessage = err?.message || err?.toString() || "Failed to connect MetaMask.";
+      setError(errorMessage);
+    } finally {
+      setWaitingForUser(false);
     }
   };
 
@@ -86,7 +94,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         photoId: user?.photoId || null,
         photoUrl: user?.photoUrl || null,
       };
-      const updatedUser = await import('../../hooks/FirestoreUser').then(m => m.updateUser(userPayload));
+      const updatedUser = await updateUser(userPayload);
       setUser(updatedUser);
       navigate("/i/dashboard");
       onClose();
@@ -116,7 +124,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         setCheckingUsername(false);
       }
     }, 1000);
-    setUsernameCheckTimeout(timeout);
+    setUsernameCheckTimeout(timeout as unknown as NodeJS.Timeout);
     // Cleanup
     return () => clearTimeout(timeout);
   }, [username]);
@@ -138,8 +146,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             classNames="fade"
             timeout={400}
             unmountOnExit
+            nodeRef={nodeRef}
           >
-            <div>
+            <div ref={nodeRef}>
               {step === 'connect' && (
                 <>
                   <h2 className="text-2xl font-bold text-center text-[#00ffe7] mb-6 drop-shadow-[0_0_8px_#00ffe7]">
@@ -147,15 +156,19 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   </h2>
                   <div className="text-center mb-6">
                     <p className="text-[#e0e7ef] mb-4">
-                      Connect your MetaMask wallet to accessDexter City's trading bots and features.
+                      Connect your MetaMask wallet to access Dexter City's trading bots and features.
                     </p>
                   </div>
                   <button
                     onClick={connectWallet}
-                    disabled={connecting}
-                    className="w-full bg-[#00ffe7] text-[#181a23] font-bold py-3 px-6 rounded hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c] transition disabled:opacity-50"
+                    disabled={connecting || waitingForUser}
+                    className={`w-full font-bold py-3 px-6 rounded transition-all duration-500 ${
+                      waitingForUser 
+                        ? "bg-orange-500 text-white shadow-[0_0_8px_orange] hover:shadow-[0_0_16px_orange]"
+                        : "bg-[#00ffe7] text-[#181a23] hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c]"
+                    } disabled:opacity-50`}
                   >
-                    {connecting ? "Connecting..." : "Connect MetaMask"}
+                    {waitingForUser ? "Waiting for user input..." : connecting ? "Connecting..." : "Connect MetaMask"}
                   </button>
                   <div className="mt-4 text-center">
                     <p className="text-[#e0e7ef] text-sm">
@@ -188,18 +201,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       placeholder="Choose a username"
                       required
                     />
-                    {username && username.length > 0 && username.length < 5 && (
-                        <span className="text-xs text-red-500 ml-2">
-                          Username must be at least 5 characters (😃🎉🦄 emojis🤖welcome! 🦕🧩🦚🦜)
+                    {!checkingUsername && username.length < 3 && (
+                        <span className="text-xs text-white ml-2">
+                          Username must be at least 3 characters (example: 🦄🦕🤖)
                         </span>
-                    )}
-                    {checkingUsername && username.length >= 5 && (
+                    )}                    {checkingUsername && username.length >= 3 && (
                       <span className="text-xs text-[#00ffe7] ml-2">Checking availability...</span>
                     )}
-                    {username && username.length >= 5 && usernameAvailable === false && !checkingUsername && (
+                    {username && username.length >= 3 && usernameAvailable === false && !checkingUsername && (
                       <span className="text-xs text-red-500 ml-2">Username is taken</span>
                     )}
-                    {username && username.length >= 5 && usernameAvailable === true && !checkingUsername && (
+                    {username && username.length >= 3 && usernameAvailable === true && !checkingUsername && (
                       <span className="text-xs text-green-400 ml-2">Username is available</span>
                     )}
                   </div>
@@ -216,7 +228,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   <button
                     type="submit"
                     className="w-full bg-[#00ffe7] text-[#181a23] font-bold py-3 px-6 rounded hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c] transition"
-                    disabled={!username || username.length < 5 || checkingUsername || usernameAvailable !== true}
+                    disabled={!username || username.length < 3 || checkingUsername || usernameAvailable !== true}
                   >
                     Continue
                   </button>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useSDK } from '@metamask/sdk-react';
 
@@ -20,18 +20,18 @@ import LandingPage from './pages/x/Landing';
 import OfflineNavbar from './components/common/navs/OfflineNavbar';
 import HowItWorks from './pages/x/HowItWorks';
 import TickerBar from './components/common/TickerBar';
-import TelegramSocialSection from './pages/x/Telegram';
+import TelegramSocialSection from './pages/x/Social';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import EnterCityNavBar from './components/common/navs/EnterCityNavBar';
 import CommissionsCard from './pages/x/Commissions';
 import { useAuth } from './providers/AuthContext';
 import LoginModal from './components/common/LoginModal';
 import OnlineNavBar from './components/common/navs/OnlineNavBar';
-import Telegram from './pages/x/Telegram';
+import Social from './pages/x/Social';
+import { connect } from 'http2';
 
 // Main App component
 const App: React.FC = () => {
-  const [user, setUser] = useState<any>(null);
   const { connected, sdk } = useSDK();
   const navigate = useNavigate();
   const location = useLocation();
@@ -40,7 +40,8 @@ const App: React.FC = () => {
   const [showFooterMenu, setShowFooterMenu] = useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
-  const { showLoginModal, closeLoginModal } = useAuth();
+  const { showLoginModal, closeLoginModal, user, isLoading } = useAuth();
+  const nodeRef = useRef<HTMLDivElement>(null);
 
   // Reset scroll position on route change (except for hash navigation)
   useEffect(() => {
@@ -48,13 +49,6 @@ const App: React.FC = () => {
       window.scrollTo(0, 0);
     }
   }, [location.pathname]);
-
-  useEffect(() => {
-    const storedUser = sessionStorage.getItem('currentUser');
-    if (storedUser && storedUser !== 'undefined') {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
 
   // Preload garage background image
   useEffect(() => {
@@ -144,15 +138,15 @@ const App: React.FC = () => {
             )}
             <OfflineNavbar
               navigate={navigate}
-              toggleButtonRef={toggleButtonRef}
+              toggleButtonRef={toggleButtonRef as React.RefObject<HTMLButtonElement>}
               showFooterMenu={showFooterMenu}
               setShowFooterMenu={setShowFooterMenu}
-              menuRef={menuRef}
+              menuRef={menuRef as React.RefObject<HTMLDivElement>}
               currentPath={location.pathname} // <-- pass current path
             />
           </>
         )}
-        {location.pathname.startsWith("/i/") && (
+        {location.pathname.startsWith("/i/") && user && (
           <OnlineNavBar />
         )}
         
@@ -162,15 +156,22 @@ const App: React.FC = () => {
             <CSSTransition
               key={location.pathname}
               classNames="fade"
-              timeout={400}
+              timeout={300}
               unmountOnExit
+              nodeRef={nodeRef}
             >
               {/* 
-                To ensure the previous route fades out before the new one comes in,
-                wrap <Routes> in a div with a fixed minHeight and position: absolute,
-                and set position: relative on the parent. This prevents stacking issues.
+                Ensure absolute positioning for smooth transitions
+                and prevent route stacking during fade
               */}
-              <div style={{ minHeight: '100%', width: '100%' }}>
+              <div ref={nodeRef} style={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                width: '100%',
+                minHeight: '100%'
+              }}>
                 <Routes location={location}>
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/x/about" element={<AboutUs />} />
@@ -178,7 +179,7 @@ const App: React.FC = () => {
                   <Route path="/x/blog" element={<Blog />} />
                   <Route path="/x/contact" element={<ContactUs />} />
                   <Route path="/x/pools" element={<DailyPoolActivity />} />
-                  <Route path="/x/telegram" element={<Telegram />} />
+                  <Route path="/x/social" element={<Social />} />
                   <Route path="/x/commissions" element={<CommissionsCard />} />
                   
                   {/* Bot-related routes under /bots/ */}

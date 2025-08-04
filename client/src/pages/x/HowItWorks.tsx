@@ -133,11 +133,11 @@ const HowItWorks: React.FC = () => {
             title="Deploy & Monitor"
             titleColor="text-[#00ffe7]"
             borderColor="border-[#faafe8]/30"
-            description={<span>The best bots are the ones that are monitored! Use <a href="/x/telegram" className="text-[#00ffe7] underline hover:text-[#faafe8]">Telegram notifications</a> to stay on top of things.</span>}
+            description={<span>The best bots are the ones that are monitored! Use <a href="/x/social" className="text-[#00ffe7] underline hover:text-[#faafe8]">Telegram notifications</a> to stay on top of things.</span>}
             buttonText="Get Telegram Alerts"
             buttonColor="bg-[#faafe8] hover:bg-[#00ffe7]"
             buttonTextColor="text-[#181a23]"
-            buttonHref="/x/telegram"
+            buttonHref="/x/social"
           />
                 </div>
               </div>
