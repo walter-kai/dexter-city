@@ -67,5 +67,21 @@ a:hover {
 .neon-text {
   @apply text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] transition-all duration-300 ease-in-out;
   text-shadow: 0px 0 3px #00ffe7;
+}
 
+.page-wrapper {
+  @apply fixed inset-0 overflow-hidden;
+}
+
+.page-content {
+  @apply relative w-full h-full flex justify-center items-start;
+}
+
+.page-scroll {
+  @apply w-full h-screen flex justify-center custom-scrollbar;
+  overflow-y: auto;
+}
+
+.page-inner {
+  @apply h-fit;
 }

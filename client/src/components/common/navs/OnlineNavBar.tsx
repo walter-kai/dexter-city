@@ -51,7 +51,7 @@ const NavBar: React.FC = () => {
     if (!path.startsWith('#')) {
       window.scrollTo({
         top: 0,
-        behavior: 'smooth'
+        behavior: 'instant' // Use instant to avoid conflicts with transitions
       });
     }
     setShowDropdown(false);

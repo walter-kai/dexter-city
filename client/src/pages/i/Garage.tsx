@@ -152,18 +152,22 @@ const Garage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-transparent pt-8 pb-6">
-      {/* Header - More compact */}
-      <div className="w-full max-w-[1600px] mx-auto px-4 mb-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-extrabold text-[#00ffe7] drop-shadow-[0_0_16px_#00ffe7] tracking-widest hud-title">
-            BOT GARAGE
-          </h1>
-          <div className="hud-bar bg-[#00ffe7]/30 border-2 border-[#00ffe7] rounded-lg px-4 py-1 shadow-[0_0_24px_#00ffe7] text-[#181a23] font-bold text-base uppercase tracking-wider">
-            <span className="text-[#00ffe7]">BOTS:</span> <span className="text-green-400"> {bots.length}</span>
-          </div>
-        </div>
-      </div>
+    <div className="page-wrapper">
+      <div className="page-content">
+        <div className="page-scroll">
+          <div className="page-inner">
+            <div className="w-full px-4 py-24 mx-auto animate-fade-in-up">
+              {/* Header - More compact */}
+              <div className="w-full max-w-[1600px] mx-auto px-4 mb-3">
+                <div className="flex items-center justify-between">
+                  <h1 className="text-4xl font-extrabold text-[#00ffe7] drop-shadow-[0_0_16px_#00ffe7] tracking-widest hud-title">
+                    BOT GARAGE
+                  </h1>
+                  <div className="hud-bar bg-[#00ffe7]/30 border-2 border-[#00ffe7] rounded-lg px-4 py-1 shadow-[0_0_24px_#00ffe7] text-[#181a23] font-bold text-base uppercase tracking-wider">
+                    <span className="text-[#00ffe7]">BOTS:</span> <span className="text-green-400"> {bots.length}</span>
+                  </div>
+                </div>
+              </div>
 
       <div className="w-full max-w-[1600px] mx-auto px-4 space-y-3">
         {/* Top Section - Bot Details (when selected) */}
@@ -228,6 +232,10 @@ const Garage = () => {
           onClose={() => setStatusFooter(null)}
         />
       )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

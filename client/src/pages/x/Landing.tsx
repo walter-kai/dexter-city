@@ -35,7 +35,9 @@ const LandingPage: React.FC = () => {
     const { user, triggerLoginModal } = useAuth();
 
     const handleEnterClick = () => {
-        if (user && connected) {
+        // If user is already authenticated, take them to dashboard
+        // Don't require MetaMask to be connected as it might reconnect automatically
+        if (user) {
             navigate('/i/dashboard');
         } else {
             triggerLoginModal();

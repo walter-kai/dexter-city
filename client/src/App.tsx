@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useSDK } from '@metamask/sdk-react';
 
-import Footer from './components/common/Footer';
+import OnlineFooterNavBar from './components/common/navs/OnlineFooterNavBar';
 
 import Dashboard from './pages/i/Dashboard';
 import Shop from './pages/i/Shop';
@@ -17,7 +17,7 @@ import NotFound from './pages/NotFound';
 import Settings from './pages/i/Settings';
 import DailyPoolActivity from './components/dashboard/DailyPoolActivity';
 import LandingPage from './pages/x/Landing';
-import OfflineNavbar from './components/common/navs/OfflineNavbar';
+import OfflineFooterNavBar from './components/common/navs/OfflineFooterNavBar';
 import HowItWorks from './pages/x/HowItWorks';
 import TickerBar from './components/common/TickerBar';
 import TelegramSocialSection from './pages/x/Social';
@@ -38,8 +38,11 @@ const App: React.FC = () => {
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [showFooterMenu, setShowFooterMenu] = useState(false);
+  const [showOnlineFooterMenu, setShowOnlineFooterMenu] = useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const onlineMenuRef = React.useRef<HTMLDivElement>(null);
   const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
+  const onlineToggleButtonRef = React.useRef<HTMLButtonElement>(null);
   const { showLoginModal, closeLoginModal, user, isLoading } = useAuth();
   const nodeRef = useRef<HTMLDivElement>(null);
 
@@ -136,7 +139,7 @@ const App: React.FC = () => {
                 <EnterCityNavBar />
               </div>
             )}
-            <OfflineNavbar
+            <OfflineFooterNavBar
               navigate={navigate}
               toggleButtonRef={toggleButtonRef as React.RefObject<HTMLButtonElement>}
               showFooterMenu={showFooterMenu}
@@ -147,7 +150,17 @@ const App: React.FC = () => {
           </>
         )}
         {location.pathname.startsWith("/i/") && user && (
-          <OnlineNavBar />
+          <>
+            <OnlineNavBar />
+            <OnlineFooterNavBar 
+              navigate={navigate}
+              toggleButtonRef={onlineToggleButtonRef as React.RefObject<HTMLButtonElement>}
+              showFooterMenu={showOnlineFooterMenu}
+              setShowFooterMenu={setShowOnlineFooterMenu}
+              menuRef={onlineMenuRef as React.RefObject<HTMLDivElement>}
+              currentPath={location.pathname}
+            />
+          </>
         )}
         
         {/* Main content area that grows to fill space */}
@@ -156,7 +169,7 @@ const App: React.FC = () => {
             <CSSTransition
               key={location.pathname}
               classNames="fade"
-              timeout={300}
+              timeout={10}
               unmountOnExit
               nodeRef={nodeRef}
             >
@@ -170,7 +183,8 @@ const App: React.FC = () => {
                 left: 0,
                 right: 0,
                 width: '100%',
-                minHeight: '100%'
+                minHeight: '100%',
+                zIndex: 1
               }}>
                 <Routes location={location}>
                   <Route path="/" element={<LandingPage />} />
@@ -203,16 +217,14 @@ const App: React.FC = () => {
                   
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+
               </div>
             </CSSTransition>
           </TransitionGroup>
         </div>
-        
         {/* Always render LoginModal globally, not conditionally */}
         <LoginModal isOpen={showLoginModal} onClose={closeLoginModal} />
-        {!(location.pathname.startsWith("/x/") || location.pathname === "/") && (
-          <Footer />
-        )}
+        
       </div>
     </div>
   );

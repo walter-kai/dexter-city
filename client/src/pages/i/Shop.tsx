@@ -153,21 +153,24 @@ const Shop = () => {
 	};
 
 	return (
-		<div className="min-h-screen bg-transparent flex flex-col items-center pt-20 pb-8">
-			<div className="w-full max-w-[1600px] mx-auto px-2">
-				<div className="flex items-center justify-between mb-6">
-					<h1 className="text-3xl font-extrabold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] tracking-widest hud-title">
-						BOT MARKETPLACE
-					</h1>
-					{/* Tab Navigation */}
-					<div className="gap-2 flex">
-						<button
-							onClick={() => setActiveTab('buying')}
-							className={`px-6 py-3 rounded-lg font-bold border-2 transition-all duration-200 ${
-								activeTab === 'buying'
-									? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7] shadow-[0_0_8px_#00ffe7]'
-									: 'bg-[#23263a] text-[#e0e7ef] border-[#00ffe7]/40 hover:bg-[#00ffe7]/20'
-							}`}
+		<div className="page-wrapper">
+			<div className="page-content">
+				<div className="page-scroll">
+					<div className="page-inner">
+						<div className="w-full max-w-[1600px] mx-auto px-4 py-20 animate-fade-in-up">
+							<div className="flex items-center justify-between mb-6">
+								<h1 className="text-3xl font-extrabold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] tracking-widest hud-title">
+									BOT MARKETPLACE
+								</h1>
+								{/* Tab Navigation */}
+								<div className="gap-2 flex">
+									<button
+										onClick={() => setActiveTab('buying')}
+										className={`px-6 py-3 rounded-lg font-bold border-2 transition-all duration-200 ${
+											activeTab === 'buying'
+												? 'bg-[#00ffe7] text-[#181a23] border-[#00ffe7] shadow-[0_0_8px_#00ffe7]'
+												: 'bg-[#23263a] text-[#e0e7ef] border-[#00ffe7]/40 hover:bg-[#00ffe7]/20'
+										}`}
 						>
 							<FaShoppingCart className="inline mr-2" />
 							BUYING
@@ -233,6 +236,9 @@ const Shop = () => {
 				type={purchaseType}
 				onConfirm={handlePurchaseConfirm}
 			/>
+					</div>
+				</div>
+			</div>
 		</div>
 	);
 };

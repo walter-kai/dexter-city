@@ -1,16 +1,40 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../providers/AuthContext";
 import { useSDK } from "@metamask/sdk-react";
 import LoadingScreenDots from "../LoadingScreenDots";
-import LoginModal from "../LoginModal";
 
 const EnterCityNavBar: React.FC = () => {
-  const navigate = useNavigate();
+  const [isTriggering, setIsTriggering] = useState(false);
+
   const { connecting, connected } = useSDK();
   const { triggerLoginModal } = useAuth();
 
+  useEffect(() => {
+    if (connected && isTriggering) {
+      setIsTriggering(false);
+    }
+  }, [connected, isTriggering]);
+
+  useEffect(() => {
+    if (isTriggering) {
+      // Reset after 10 seconds if still triggering (modal closed manually)
+      const timeout = setTimeout(() => {
+        setIsTriggering(false);
+      }, 10000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isTriggering]);
+
+  useEffect(() => {
+    // Reset when connecting goes from true to false (connection attempt ended)
+    if (!connecting && isTriggering) {
+      setIsTriggering(false);
+    }
+  }, [connecting, isTriggering]);
+
   const handleEnterClick = () => {
+    setIsTriggering(true);
     triggerLoginModal();
   };
 
@@ -27,7 +51,7 @@ const EnterCityNavBar: React.FC = () => {
         disabled={connecting}
         className="btn-special px-8 py-3 text-lg font-bold"
       >
-        {connecting ? <LoadingScreenDots size={4} /> : "Enter the city"}
+        {isTriggering ? <LoadingScreenDots size={4} /> : "Enter the city"}
       </button>
     </nav>
   );

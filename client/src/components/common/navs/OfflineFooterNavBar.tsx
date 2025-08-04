@@ -11,7 +11,7 @@ interface OfflineNavbarProps {
   currentPath: string; // <-- add this prop
 }
 
-const OfflineNavbar: React.FC<OfflineNavbarProps> = ({
+const OfflineFooterNavBar: React.FC<OfflineNavbarProps> = ({
   navigate,
   toggleButtonRef,
   showFooterMenu,
@@ -101,4 +101,4 @@ const OfflineNavbar: React.FC<OfflineNavbarProps> = ({
   );
 };
 
-export default OfflineNavbar;
+export default OfflineFooterNavBar;

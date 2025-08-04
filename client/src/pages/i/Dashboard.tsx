@@ -29,41 +29,54 @@ const Dashboard: React.FC = () => {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-3xl font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] mb-4">
-          Welcome to Dexter City
-        </h1>
-        <p className="text-[#e0e7ef] mb-8">Please connect your wallet to access the dashboard</p>
+      <div className="page-wrapper">
+        <div className="page-content">
+          <div className="flex flex-col items-center justify-center">
+            <h1 className="text-3xl font-bold text-[#00ffe7] drop-shadow-[0_0_8px_#00ffe7] mb-4">
+              Welcome to Dexter City
+            </h1>
+            <p className="text-[#e0e7ef] mb-8">Please connect your wallet to access the dashboard</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center animate-fadeIn w-full pt-28">
+    <div className="page-wrapper">
+      <div className="page-content">
+        <div className="page-scroll">
+          <div className="page-inner">
+            <div className="w-full px-4 py-28 mx-auto animate-fade-in-up">
+              <div className="flex flex-col items-center">
 
-      {/* Combined User Info, Leaderboard and Market Data */}
-      <div className="relative w-full max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mx-6">
-          <UserInfoCard user={user} />
-          <LeaderboardCard leaderboardData={leaderboardData} userStats={userStats} />
-          {/* <div className="grid grid-cols- gap-6"> */}
-          {/* </div> */}
-        </div>
-        <div className="flex flex-col lg:flex-row gap-6">
-          <SentimentWidget />
-          <DailyPoolActivity />
+                {/* Combined User Info, Leaderboard and Market Data */}
+                <div className="relative w-full max-w-7xl">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mx-6">
+                    <UserInfoCard user={user} />
+                    <LeaderboardCard leaderboardData={leaderboardData} userStats={userStats} />
+                    {/* <div className="grid grid-cols- gap-6"> */}
+                    {/* </div> */}
+                  </div>
+                  <div className="flex flex-col lg:flex-row gap-6">
+                    <SentimentWidget />
+                    <DailyPoolActivity />
+                  </div>
+                </div>
+                {/* Investment Overview with Chart */}
+                <InvestmentOverview 
+                  statRange={statRange}
+                  onStatRangeChange={setStatRange}
+                />
+
+                {/* Bots List with Status Tracking */}
+                <BotsList />
+
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      {/* Investment Overview with Chart */}
-      <InvestmentOverview 
-        statRange={statRange}
-        onStatRangeChange={setStatRange}
-      />
-
-      {/* Bots List with Status Tracking */}
-      <BotsList />
-
-
     </div>
   );
 };
