@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import TelegramBot from 'node-telegram-bot-api';
+import { Telegraf } from 'telegraf';
 
 
 export const sendTelegramMessage = async (
@@ -11,12 +11,12 @@ export const sendTelegramMessage = async (
 ): Promise<{ success: boolean; error?: string; messageId?: number }> => {
   try {
     // Create bot instance with the access token
-    const bot = new TelegramBot(accessToken, { polling: false });
+    const bot = new Telegraf(accessToken);
     
     // Prepare inline keyboard options if link is provided
-    const options: any = {};
+    const extra: any = {};
     if (link && link) {
-      options.reply_markup = {
+      extra.reply_markup = {
         inline_keyboard: [[{
           text: link,
           url: link
@@ -28,11 +28,11 @@ export const sendTelegramMessage = async (
 
     if (imageUrl) {
       // Send photo with caption and optional inline keyboard
-      options.caption = message;
-      result = await bot.sendPhoto(chatId, imageUrl, options);
+      extra.caption = message;
+      result = await bot.telegram.sendPhoto(chatId, imageUrl, extra);
     } else {
       // Send text message with optional inline keyboard
-      result = await bot.sendMessage(chatId, message, options);
+      result = await bot.telegram.sendMessage(chatId, message, extra);
     }
 
     return {
@@ -45,13 +45,8 @@ export const sendTelegramMessage = async (
     
     // Handle Telegram API specific errors
     let errorMessage = 'Unknown error occurred';
-    if (error.response?.body) {
-      try {
-        const errorData = JSON.parse(error.response.body);
-        errorMessage = errorData.description || errorMessage;
-      } catch {
-        errorMessage = error.response.body;
-      }
+    if (error.response?.data) {
+      errorMessage = error.response.data.description || errorMessage;
     } else if (error.message) {
       errorMessage = error.message;
     }

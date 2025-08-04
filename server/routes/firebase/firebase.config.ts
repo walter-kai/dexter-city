@@ -1,5 +1,12 @@
 import admin from 'firebase-admin';
 
+// Debug: Check if environment variables are loaded
+console.log('Firebase env check:', {
+  project_id: process.env.FIREBASE_PROJECT_ID ? 'loaded' : 'missing',
+  client_email: process.env.FIREBASE_CLIENT_EMAIL ? 'loaded' : 'missing',
+  private_key: process.env.FIREBASE_PRIVATE_KEY ? 'loaded' : 'missing'
+});
+
 // Service account details for Firebase Admin SDK from environment variables
 const serviceAccount = {
   "type": "service_account",

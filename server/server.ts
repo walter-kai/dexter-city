@@ -1,15 +1,14 @@
-import express, { Request, Response } from 'express';
+// Load environment variables FIRST before any other imports
 import { config } from 'dotenv';
-import cors from 'cors';
 import path from 'path';
+config({ path: path.join(__dirname, '..', '.env') });
+
+import express, { Request, Response } from 'express';
+import cors from 'cors';
 import morgan from 'morgan';
 import { Server as WebSocketServer } from 'ws'; // WebSocket library
 import subgraph from './routes/subgraph/service'; // Import getPairs function
 import routes from './routes';
-
-
-// Load environment variables - fix the path to be absolute
-config({ path: '.env' });
 
 // // Add debug logging to verify the API key is loaded
 // console.log('THEGRAPH_API_KEY loaded:', process.env.THEGRAPH_API_KEY ? 'YES' : 'NO');
