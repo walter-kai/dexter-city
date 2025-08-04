@@ -26,8 +26,26 @@ const UserInfoCard: React.FC<UserInfoCardProps> = ({ user }) => {
   });
 
   const timeSince = (date: string | Date) => {
+    console.log("timeSince received date:", date, "type:", typeof date);
+    console.log("date constructor:", date?.constructor?.name);
+    
     const now = new Date();
-    const lastLogin = typeof date === "string" ? new Date(date) : date;
+    let lastLogin: Date;
+    
+    if (typeof date === "string") {
+      lastLogin = new Date(date);
+    } else if (date instanceof Date) {
+      lastLogin = date;
+    } else if (date && typeof date === 'object') {
+      // Handle any object format
+      console.log("Date is an object with keys:", Object.keys(date));
+      return "Object date detected";
+    } else {
+      console.log("Unknown date format");
+      return "Unknown";
+    }
+    
+    console.log("lastLogin after conversion:", lastLogin);
     const seconds = Math.floor((now.getTime() - lastLogin.getTime()) / 1000);
     if (seconds < 60) return `${seconds} seconds ago`;
     const minutes = Math.floor(seconds / 60);

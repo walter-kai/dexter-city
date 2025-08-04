@@ -3,6 +3,7 @@ import userService from "./user.service";
 import ApiError from "../../utils/api-error";
 import catchAsync from "../../utils/catch-async";
 import User, { UserArgs } from "../../../.types/User";
+import { db } from "../firebase/firebase.config";
 
 const setUserChatId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   if (req.params.telegramId == null) {
@@ -84,7 +85,7 @@ const checkUsernameAvailability = catchAsync(async (req: Request, res: Response)
     throw new ApiError(400, 'Missing or invalid username in query');
   }
   // Query users collection for username (case-insensitive)
-  const usersRef = require('../../config/firebase').db.collection('users');
+  const usersRef = db.collection('users');
   const q = usersRef.where('username', '==', username);
   const snapshot = await q.get();
   const available = snapshot.empty;

@@ -14,6 +14,24 @@ import type { Telegraf } from 'telegraf';
 import { PassThrough } from "stream";
 
 /**
+ * Helper function to convert Firestore Timestamp (in any format) to JavaScript Date
+ */
+function convertTimestampToDate(timestamp: any): Date {
+  if (timestamp instanceof Timestamp) {
+    return timestamp.toDate();
+  } else if (timestamp && typeof timestamp === 'object') {
+    // Handle serialized Timestamp format
+    const seconds = timestamp._seconds || timestamp.seconds;
+    const nanoseconds = timestamp._nanoseconds || timestamp.nanoseconds || 0;
+    if (seconds !== undefined) {
+      return new Date(seconds * 1000 + nanoseconds / 1000000);
+    }
+  }
+  // Fallback to current date if timestamp is invalid
+  return new Date();
+}
+
+/**
  * Updates an existing user in the Firestore database by their Telegram ID.
  *
  * @param {User} user - The user object containing updated details.
@@ -22,7 +40,6 @@ import { PassThrough } from "stream";
  */
 async function updateUser(user: User, breadcrumb?: string): Promise<User> {
   const newBreadcrumb = `updateUser(${user.walletId}):${breadcrumb}`;
-  // const timeNow = Timestamp.now();
 
   const usersRef = db.collection('users');
 
@@ -38,19 +55,23 @@ async function updateUser(user: User, breadcrumb?: string): Promise<User> {
     const existingUserDoc = querySnapshot.docs[0];
     const existingUserRef = usersRef.doc(existingUserDoc.id);
 
-    await existingUserRef.update({
-      ...user
-      // lastLoggedIn: timeNow, // Store as Firestore Timestamp
-    });
+    // Convert Date objects to Firestore Timestamps before storing
+    const updateData = {
+      ...user,
+      dateCreated: Timestamp.fromDate(user.dateCreated),
+      lastLoggedIn: Timestamp.fromDate(user.lastLoggedIn),
+    };
+
+    await existingUserRef.update(updateData);
 
     logger.info(`Updated user with telegramId ${user.telegramId}.`);
 
     const updatedUserSnapshot = await existingUserRef.get();
     const updatedUserData = updatedUserSnapshot.data() as FireStoreUser;
 
-    // Convert Firestore Timestamp to Date object for dateCreated and lastLoggedIn
-    const dateCreated = (updatedUserData.dateCreated instanceof Timestamp) ? updatedUserData.dateCreated.toDate() : new Date();
-    const lastLoggedIn = (updatedUserData.lastLoggedIn instanceof Timestamp) ? updatedUserData.lastLoggedIn.toDate() : new Date();
+    // Convert Firestore Timestamps to Date objects
+    const dateCreated = convertTimestampToDate(updatedUserData.dateCreated);
+    const lastLoggedIn = convertTimestampToDate(updatedUserData.lastLoggedIn);
 
     return new User({
       ...updatedUserData,
@@ -103,22 +124,22 @@ async function createUser(
 
     logger.info(`User with walletId ${args.walletId} already exists.`);
 
-    const existingDateCreated = new Timestamp(
-      existingUserData.dateCreated.seconds,
-      existingUserData.dateCreated.nanoseconds
-    ).toDate();
+    // Convert Firestore Timestamps to Date objects
+    const existingDateCreated = convertTimestampToDate(existingUserData.dateCreated);
+    const existingLastLoggedIn = convertTimestampToDate(existingUserData.lastLoggedIn);
 
     return new User({
       ...existingUserData,
       dateCreated: existingDateCreated, // Keep the original creation date
+      lastLoggedIn: existingLastLoggedIn,
     });
   }
 
   // Set the `dateCreated` to the current timestamp for new users
   const userPayload: FireStoreUser = {
     ...args,
-    dateCreated: timeNow, // Set current timestamp for new user creation
-    lastLoggedIn: timeNow.toDate(),
+    dateCreated: Timestamp.fromDate(args.dateCreated), // Convert Date to Firestore Timestamp
+    lastLoggedIn: Timestamp.fromDate(args.lastLoggedIn), // Convert Date to Firestore Timestamp
   };
 
   // Add a new document with an auto-generated ID
@@ -131,14 +152,14 @@ async function createUser(
   const newUserData = newUserSnapshot.data() as FireStoreUser;
 
   // Convert Firestore Timestamp to Date object for `dateCreated`
-  const newDateCreated = new Timestamp(
-    newUserData.dateCreated.seconds,
-    newUserData.dateCreated.nanoseconds
-  ).toDate();
+  // Convert Firestore Timestamps to Date objects
+  const newDateCreated = convertTimestampToDate(newUserData.dateCreated);
+  const newLastLoggedIn = convertTimestampToDate(newUserData.lastLoggedIn);
 
   return new User({
     ...newUserData,
     dateCreated: newDateCreated,
+    lastLoggedIn: newLastLoggedIn,
   });
 }
 
@@ -167,9 +188,14 @@ const getUserByWalletId = async (
   const doc = querySnapshot.docs[0];
   const queryData = doc.data() as FireStoreUser;
 
+  // Convert Firestore Timestamps to Date objects
+  const lastLoggedIn = convertTimestampToDate(queryData.lastLoggedIn);
+  const dateCreated = convertTimestampToDate(queryData.dateCreated);
+
   const user = new User({
     ...queryData,
-    dateCreated: doc.createTime?.toDate() || new Date(),
+    dateCreated,
+    lastLoggedIn,
   });
 
   logger.info(JSON.stringify({ breadcrumb: newBreadcrumb, user }));
@@ -282,10 +308,16 @@ const getAllUsers = async (breadcrumb?: string): Promise<ReadonlyArray<User>> =>
 
   return snapshot.docs.map((el) => {
     const firestoreUser = el.data() as FireStoreUser;
+    
+    // Convert Firestore Timestamps to Date objects
+    const lastLoggedIn = convertTimestampToDate(firestoreUser.lastLoggedIn);
+    const dateCreated = convertTimestampToDate(firestoreUser.dateCreated);
+
     return new User({
       ...firestoreUser,
       // id: el.id,
-      dateCreated: el.createTime?.toDate(),  // Using Firestore timestamp
+      dateCreated,
+      lastLoggedIn,
     });
   });
 };
@@ -329,10 +361,16 @@ const getUsers = async (
 
   return snapshot.docs.map((el) => {
     const firestoreUser = el.data() as FireStoreUser;
+    
+    // Convert Firestore Timestamps to Date objects
+    const lastLoggedIn = convertTimestampToDate(firestoreUser.lastLoggedIn);
+    const dateCreated = convertTimestampToDate(firestoreUser.dateCreated);
+
     return new User({
       ...firestoreUser,
       // id: el.id,
-      dateCreated: el.createTime?.toDate(),  // Using Firestore timestamp
+      dateCreated,
+      lastLoggedIn,
     });
   });
 };

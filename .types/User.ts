@@ -46,12 +46,20 @@ export default class User {
   photoId?: string | null;
   photoUrl?: string | null;
 
-  constructor(args: UserArgs) {
-    this.dateCreated = args.dateCreated;
+  constructor(args: UserArgs | any) {
+    // Handle date conversion for both server-side and client-side usage
+    this.dateCreated = args.dateCreated instanceof Date 
+      ? args.dateCreated 
+      : new Date(args.dateCreated);
+    
     this.username = args.username; // Changed to firstName
     // this.lastName = args.lastName; // Changed to lastName
     // this.telegramHandle = args.telegramHandle; // Changed to telegramHandle
-    this.lastLoggedIn = args.lastLoggedIn;
+    
+    this.lastLoggedIn = args.lastLoggedIn instanceof Date 
+      ? args.lastLoggedIn 
+      : new Date(args.lastLoggedIn);
+      
     this.referralId = args.referralId; // Changed to referralId
     this.telegramId = args.telegramId; // Changed to telegramId
     this.walletId = args.walletId; // Changed to telegramId
@@ -62,8 +70,12 @@ export default class User {
 }
 
 // FireStoreUser interface definition
-export interface FireStoreUser extends Omit<UserArgs, "dateCreated"> {
+export interface FireStoreUser extends Omit<UserArgs, "dateCreated" | "lastLoggedIn"> {
   readonly dateCreated: {
+    readonly seconds: number;
+    readonly nanoseconds: number;
+  };
+  readonly lastLoggedIn: {
     readonly seconds: number;
     readonly nanoseconds: number;
   };
