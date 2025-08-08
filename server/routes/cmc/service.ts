@@ -36,7 +36,7 @@ const reloadTokens = async (
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const json = await response.json();
+      const json = await response.json() as CoinMarketCap.ApiResponse<CoinMarketCap.RawTokenData[]>;
 
       if (json.status.error_code !== 0) {
         throw new Error(json.status.error_message || "Unknown API error");
@@ -50,7 +50,7 @@ const reloadTokens = async (
       let skippedCount = 0;
 
       // Check existing tokens in batch to avoid individual reads
-      const tokenIds = json.data.map((token: any) => {
+      const tokenIds = json.data.map((token: CoinMarketCap.RawTokenData) => {
         const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
         const modifiedSymbol = token.symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
         return token.id.toString() + ":" + modifiedSymbol + ":" + modifiedName;
@@ -67,7 +67,7 @@ const reloadTokens = async (
         chunkSnapshot.docs.forEach(doc => existingTokenIds.add(doc.id));
       }
 
-      json.data.forEach((token: any) => {
+      json.data.forEach((token: CoinMarketCap.RawTokenData) => {
         const modifiedName = token.name.trim().replace(/\s+/g, "").replace(/\//g, "|");
         const modifiedSymbol = token.symbol.trim().replace(/\s+/g, "").replace(/\//g, "|");
         const docId = token.id.toString() + ":" + modifiedSymbol + ":" + modifiedName;

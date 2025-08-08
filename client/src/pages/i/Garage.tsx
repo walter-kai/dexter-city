@@ -16,7 +16,6 @@ const Garage = () => {
 
   const [bots, setBots] = useState<BotConfig[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<{ walletId: string } | null>(null);
   const [selectedBotId, setSelectedBotId] = useState<string | null>(null);
   const [botToDelete, setBotToDelete] = useState<string | null>(null);
@@ -37,7 +36,6 @@ const Garage = () => {
       if (!user?.walletId) return;
 
       setLoading(true);
-      setError(null);
 
       try {
         const response = await fetch(`/api/bot/mine?walletId=${user.walletId}`);
@@ -50,7 +48,6 @@ const Garage = () => {
         setBots(data);
       } catch (error) {
         console.error('Error fetching bots:', error);
-        setError('Failed to load your bots. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -98,7 +95,7 @@ const Garage = () => {
       handleDeleteModalClose();
     } catch (error) {
       console.error('Error deleting bot:', error);
-      setError('Failed to delete the bot. Please try again later.');
+      setStatusFooter({ type: 'error', message: 'Failed to delete the bot. Please try again later.' });
     }
   };
 
@@ -119,7 +116,7 @@ const Garage = () => {
       );
     } catch (error) {
       console.error('Error starting bot:', error);
-      setError('Failed to start the bot. Please try again later.');
+      setStatusFooter({ type: 'error', message: 'Failed to start the bot. Please try again later.' });
     }
   };
 
@@ -140,7 +137,7 @@ const Garage = () => {
       );
     } catch (error) {
       console.error('Error stopping bot:', error);
-      setError('Failed to stop the bot. Please try again later.');
+      setStatusFooter({ type: 'error', message: 'Failed to stop the bot. Please try again later.' });
     }
   };
 
@@ -184,9 +181,8 @@ const Garage = () => {
         {/* Bottom Section - Bot Gallery */}
         <div className="w-full">
           {loading && <p className="text-center text-[#00ffe7]">Loading your bots...</p>}
-          {error && <p className="text-red-500 text-center">{error}</p>}
           
-          {!loading && !error && bots.length === 0 && (
+          {!loading && bots.length === 0 && (
             <EmptyState isSelected={false} onCreateBot={handleTriggerBuildModal} />
           )}
           
@@ -196,7 +192,7 @@ const Garage = () => {
             </div>
           )}
           
-          {!loading && !error && bots.length > 0 && (
+          {!loading && bots.length > 0 && (
             <div className="mt-8 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10 gap-3">
               <CreateBotCard onClick={handleTriggerBuildModal} />
               {bots.map((bot) => (
