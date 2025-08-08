@@ -16,6 +16,7 @@ interface AuthContextType {
   showLoginModal: boolean;
   triggerLoginModal: () => void;
   closeLoginModal: () => void;
+  forceDisconnectMetaMask: () => Promise<void>;
   authError: string | null;
 }
 
@@ -41,7 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const currentRoute = location.pathname;
   
   // MetaMask authentication hook
-  const { isConnecting, connectWallet: connectMetaMask, disconnectWallet, error: authError } = useMetaMaskAuth();
+  const { isConnecting, connectWallet: connectMetaMask, disconnectWallet, resetConnectionState, forceDisconnectMetaMask, error: authError } = useMetaMaskAuth();
 
   useEffect(() => {
     // Listen to Firebase auth state changes
@@ -90,7 +91,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const triggerLoginModal = () => setShowLoginModal(true);
-  const closeLoginModal = () => setShowLoginModal(false);
+  const closeLoginModal = () => {
+    setShowLoginModal(false);
+    // Reset connection state when modal is closed to prevent hanging
+    resetConnectionState();
+  };
 
   const value = {
     user,
@@ -110,6 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     showLoginModal,
     triggerLoginModal,
     closeLoginModal,
+    forceDisconnectMetaMask,
     authError,
   };
 

@@ -14,14 +14,15 @@
       "baseUrl": ".",
       "sourceMap": true,
       "inlineSourceMap": false,
-      "inlineSources": false,
+      "inlineSources": true,
       "declaration": false,
       "removeComments": false,
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
       "resolveJsonModule": true,
       "allowJs": true,
-      "checkJs": false
+      "checkJs": false,
+      "sourceRoot": "/"
     },
     "include": [
       "server/**/*.ts",
@@ -35,7 +36,10 @@
     "ts-node": {
       "compilerOptions": {
         "sourceMap": true,
-        "inlineSourceMap": false
-      }
+        "inlineSourceMap": false,
+        "inlineSources": true
+      },
+      "transpileOnly": false,
+      "files": true
     }
   }

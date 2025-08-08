@@ -1,5 +1,4 @@
 import express from "express";
-import authRoute from "./auth/auth.route";
 import botRoute from "./bot/bot.route";
 import userRoute from "./user/user.route";
 import telegramRoute from "./telegram/telegram.route";
@@ -8,6 +7,7 @@ import subgraphRoute from "./subgraph/route";
 import socialNewsRoute from "./socialNews/socialNews.route";
 import sentimentRoute from "./sentiment/sentiment.route";
 import linkRoute from "./link/link.route";
+import authRoute from "./auth/auth.route";
 
 const router = express.Router();
 

@@ -2,23 +2,27 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Firebase configuration - hardcoded for dexter-city-de124 project
+// Firebase configuration from environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyBVW5wB4jLNx2vSyGqhv5mVqJiZfX0kzZs",
-  authDomain: "dexter-city-de124.firebaseapp.com",
-  projectId: "dexter-city-de124",
-  storageBucket: "dexter-city-de124.firebasestorage.app",
-  messagingSenderId: "295613383826",
-  appId: "1:295613383826:web:b020b465887d7cd277d24b",
-  measurementId: "G-DWBB5W7H1Y"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
-// Log configuration for debugging
+// Validate required config
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  throw new Error('Missing required Firebase configuration. Please check your environment variables.');
+}
+
+// Log configuration for debugging (don't log sensitive data in production)
 console.log('Firebase config:', {
   projectId: firebaseConfig.projectId,
   authDomain: firebaseConfig.authDomain,
-  hasApiKey: !!firebaseConfig.apiKey,
-  apiKey: firebaseConfig.apiKey.substring(0, 20) + '...' // Show first 20 chars for debugging
+  hasApiKey: !!firebaseConfig.apiKey
 });
 
 // Initialize Firebase

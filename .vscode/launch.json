@@ -13,23 +13,26 @@
         },
         {
             "type": "node",
-            "request": "launch",
-            "name": "Debug Server Simple",
-            "program": "${workspaceFolder}/node_modules/.bin/ts-node",
-            "args": ["${workspaceFolder}/server/server.ts"],
-            "env": {
-                "NODE_ENV": "development"
-            },
-            "envFile": "${workspaceFolder}/.env",
+            "request": "attach",
+            "name": "Attach to Server",
+            "port": 9229,
+            "restart": true,
+            "localRoot": "${workspaceFolder}/server",
+            "remoteRoot": "${workspaceFolder}/server",
             "sourceMaps": true,
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
+            "skipFiles": ["<node_internals>/**"]
         }
     ],
     "compounds": [
         {
-            "name": "Debug Full Stack",
-            "configurations": ["Debug Server Simple", "Launch Chrome against localhost"]
+            "name": "Debug Full Stack (Attach)",
+            "configurations": ["Attach to Server", "Launch Chrome against localhost"],
+            "stopAll": true,
+            "presentation": {
+                "hidden": false,
+                "group": "",
+                "order": 1
+            }
         }
     ]
 }

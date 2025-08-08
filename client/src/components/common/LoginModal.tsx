@@ -16,7 +16,7 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const { sdk, connected, connecting } = useSDK();
   const navigate = useNavigate();
-  const { setUser, user, connectWallet: authConnectWallet, isConnecting, authError } = useAuth();
+  const { setUser, user, connectWallet: authConnectWallet, isConnecting, authError, forceDisconnectMetaMask } = useAuth();
 
   const [show, setShow] = useState(false);
   const [step, setStep] = useState<'connect' | 'form'>('connect');
@@ -40,12 +40,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       setError('');
     } else {
       setShow(false);
-      // Disconnect MetaMask if modal is closed and not authenticated
-      if (connected && !user) {
+      // Force disconnect MetaMask if modal is closed and not authenticated
+      if ((connected || isConnecting) && !user) {
+        forceDisconnectMetaMask();
         sdk?.terminate();
       }
+      // Reset any error states when modal is closed
+      setError('');
     }
-  }, [isOpen, connected, user, sdk]);
+  }, [isOpen, connected, isConnecting, user, sdk, forceDisconnectMetaMask]);
 
   // Update error state when authError changes
   useEffect(() => {
@@ -88,6 +91,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     } catch (err: any) {
       console.error('MetaMask connection error:', err);
       
+      // Force disconnect MetaMask on any error to prevent hanging states
+      try {
+        await forceDisconnectMetaMask();
+      } catch (disconnectErr) {
+        console.error('Error force disconnecting:', disconnectErr);
+      }
+      
       // Handle specific error cases
       if (err?.code === 4001) {
         setError('Connection rejected by user');
@@ -114,12 +124,17 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       const userToUpdate: User = {
         ...user!,
         username: username.trim(),
-        referralId: referral.trim() || undefined,
+        ...(referral.trim() && { referralId: referral.trim() }),
       };
+
+      // Filter out undefined values before saving to Firestore
+      const dataToSave = Object.fromEntries(
+        Object.entries(userToUpdate).filter(([_, value]) => value !== undefined)
+      );
 
       // Update in Firestore
       const userDocRef = doc(db, 'users', walletId);
-      await setDoc(userDocRef, userToUpdate, { merge: true });
+      await setDoc(userDocRef, dataToSave, { merge: true });
 
       // Update local state
       setUser(userToUpdate);

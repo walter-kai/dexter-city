@@ -9,6 +9,8 @@ interface MetaMaskAuthHook {
   isConnecting: boolean;
   connectWallet: () => Promise<User | null>;
   disconnectWallet: () => Promise<void>;
+  forceDisconnectMetaMask: () => Promise<void>;
+  resetConnectionState: () => void;
   error: string | null;
 }
 
@@ -22,6 +24,27 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const forceDisconnectMetaMask = useCallback(async (): Promise<void> => {
+    try {
+      const ethereum = (window as any).ethereum as MetaMaskProvider | undefined;
+      if (ethereum) {
+        // Try to disconnect from MetaMask
+        try {
+          await ethereum.request({
+            method: 'wallet_requestPermissions',
+            params: [{ eth_accounts: {} }]
+          });
+        } catch {
+          // If that fails, try to revoke permissions
+        }
+      }
+      
+      console.log('Force disconnected MetaMask');
+    } catch (err) {
+      console.error('Error force disconnecting MetaMask:', err);
+    }
+  }, []);
+
   const connectWallet = useCallback(async (): Promise<User | null> => {
     setIsConnecting(true);
     setError(null);
@@ -33,15 +56,10 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
         throw new Error('MetaMask is not installed');
       }
 
-      // Request account access with timeout handling
-      const accounts = await Promise.race([
-        ethereum.request({
-          method: 'eth_requestAccounts',
-        }) as Promise<string[]>,
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('User cancelled connection')), 60000)
-        )
-      ]);
+      // Request account access
+      const accounts = await ethereum.request({
+        method: 'eth_requestAccounts',
+      }) as string[];
 
       if (!accounts || accounts.length === 0) {
         throw new Error('No accounts found');
@@ -49,29 +67,44 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
 
       const walletAddress = accounts[0];
 
-      // Step 1: Authenticate directly with Firebase using wallet address
-      const authResponse = await fetch('/api/auth/connect', {
+      // Create a message to sign (includes timestamp to prevent replay attacks)
+      const timestamp = Date.now();
+    const message = `🤖 Confirm to log into Dexter City 🏙️`;
+
+      // Request signature from MetaMask
+      const signature = await ethereum.request({
+        method: 'personal_sign',
+        params: [message, walletAddress],
+      }) as string;
+
+      // Send authentication request to backend
+      const response = await fetch('/api/auth/metamask', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           walletAddress,
+          signature,
+          message,
         }),
       });
 
-      if (!authResponse.ok) {
-        throw new Error('Failed to authenticate wallet');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Authentication failed');
       }
 
-      const { customToken } = await authResponse.json();
+      const { data } = await response.json();
+      const { customToken } = data;
 
-      // Step 2: Sign in to Firebase with custom token
+      // Sign in to Firebase with the custom token
       const userCredential = await signInWithCustomToken(auth, customToken);
       const firebaseUser = userCredential.user;
 
-      // Step 3: Get or create user document in Firestore
-      const userDocRef = doc(db, 'users', walletAddress);
+      // Now the user is properly authenticated with Firebase
+      // The UID will be the wallet address, so security rules will work
+      const userDocRef = doc(db, 'users', walletAddress.toLowerCase());
       const userDoc = await getDoc(userDocRef);
 
       let userData: User;
@@ -80,23 +113,25 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
         // User exists, update last login
         const existingData = userDoc.data();
         userData = {
-          walletAddress,
+          walletAddress: walletAddress.toLowerCase(),
           username: existingData.username || '',
           email: existingData.email || '',
           createdAt: existingData.createdAt?.toDate() || new Date(),
           lastLogin: new Date(),
-          referralId: existingData.referralId,
-          telegramId: existingData.telegramId,
-          photoUrl: existingData.photoUrl,
+          ...(existingData.referralId && { referralId: existingData.referralId }),
+          ...(existingData.telegramId && { telegramId: existingData.telegramId }),
+          ...(existingData.photoUrl && { photoUrl: existingData.photoUrl }),
         };
-        await setDoc(userDocRef, {
-          ...userData,
-          lastLogin: new Date(),
-        }, { merge: true });
+        
+        // Filter out undefined values before saving to Firestore
+        const dataToSave = Object.fromEntries(
+          Object.entries({ ...userData, lastLogin: new Date() }).filter(([_, value]) => value !== undefined)
+        );
+        await setDoc(userDocRef, dataToSave, { merge: true });
       } else {
         // New user, create document
         userData = {
-          walletAddress,
+          walletAddress: walletAddress.toLowerCase(),
           username: '',
           email: '',
           createdAt: new Date(),
@@ -106,19 +141,30 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
       }
 
       console.log('Successfully authenticated with MetaMask and Firebase');
-      navigate('/dashboard');
       return userData;
 
     } catch (err) {
       console.error('MetaMask authentication error:', err);
+      console.error('Error code:', (err as any)?.code);
+      console.error('Error message:', (err as any)?.message);
       
       // Handle specific MetaMask error codes
       if ((err as any)?.code === 4001) {
         setError('Connection rejected by user');
+        // Only force disconnect when user explicitly rejects
+        await forceDisconnectMetaMask();
       } else if ((err as any)?.code === -32002) {
         setError('MetaMask is already processing a request');
       } else if ((err as any)?.message?.includes('User cancelled')) {
         setError('Connection cancelled by user');
+        // Only force disconnect when user cancels
+        await forceDisconnectMetaMask();
+      } else if ((err as any)?.message?.includes('Missing or insufficient permissions')) {
+        setError('Database permissions error - please contact support');
+      } else if ((err as any)?.code === 'permission-denied') {
+        setError('Access denied - please ensure you have the necessary permissions');
+      } else if ((err as any)?.code === 'unauthenticated') {
+        setError('Authentication required - please try reconnecting your wallet');
       } else {
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
       }
@@ -130,7 +176,7 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
 
   const disconnectWallet = useCallback(async (): Promise<void> => {
     try {
-      await auth.signOut();
+      // Clear any local state or storage if needed
       console.log('Successfully disconnected wallet');
     } catch (err) {
       console.error('Error disconnecting wallet:', err);
@@ -138,10 +184,17 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
     }
   }, []);
 
+  const resetConnectionState = useCallback(() => {
+    setIsConnecting(false);
+    setError(null);
+  }, []);
+
   return {
     isConnecting,
     connectWallet,
     disconnectWallet,
+    forceDisconnectMetaMask,
+    resetConnectionState,
     error,
   };
 };

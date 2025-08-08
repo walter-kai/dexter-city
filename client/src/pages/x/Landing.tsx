@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../providers/AuthContext';
-import { useSDK } from "@metamask/sdk-react";
 import LoadingScreenDots from '../../components/common/LoadingScreenDots';
 import { Player } from '@lottiefiles/react-lottie-player';
 import RandomRobohashCard from '../../components/common/RandomRobohashCard';
@@ -31,8 +30,7 @@ const LandingPage: React.FC = () => {
     const menuRef = React.useRef<HTMLDivElement>(null);
     const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
     const navigate = useNavigate();
-    const { connecting, connected } = useSDK();
-    const { user, triggerLoginModal } = useAuth();
+    const { user, triggerLoginModal, isConnecting } = useAuth();
 
     const handleEnterClick = () => {
         // If user is already authenticated, take them to dashboard
@@ -136,10 +134,10 @@ const LandingPage: React.FC = () => {
                                 
                                 <button
                                     onClick={handleEnterClick}
-                                    disabled={connecting}
+                                    disabled={isConnecting}
                                     className="btn-special px-10 py-4"
                                 >
-                                    {connecting ? <LoadingScreenDots size={5} /> : 'Enter the city'}
+                                    {isConnecting ? <LoadingScreenDots size={5} /> : 'Enter the city'}
                                 </button>
                             </div>
                         </div>
