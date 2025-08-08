@@ -3,9 +3,12 @@ FROM node:20-alpine AS client-build
 
 WORKDIR /client
 
+# Install Python and build dependencies needed for native modules
+RUN apk add --no-cache python3 py3-pip make g++
+
 # Copy client dependencies and install
 COPY ./client/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy client source code and shared types
 COPY ./client/ ./
