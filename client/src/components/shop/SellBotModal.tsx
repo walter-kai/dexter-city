@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BotConfig } from '../../../../.types/Bot';
-import { generateLogoHash } from '../../hooks/Robohash';
+import { generateLogoHash } from '../../hooks/useRobohash';
 import { FaTimes, FaTag, FaDollarSign, FaFileAlt, FaCheckCircle } from 'react-icons/fa';
 
 interface SellBotModalProps {

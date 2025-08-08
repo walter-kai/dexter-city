@@ -1,16 +1,22 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import User from '../../../.types/User';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../config/firebase';
+import { User } from '../types/User';
+import { useMetaMaskAuth } from '../hooks/useMetaMaskAuth';
 
 interface AuthContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   logout: () => void;
+  connectWallet: () => Promise<User | null>;
   isLoading: boolean;
+  isConnecting: boolean;
   currentRoute: string;
   showLoginModal: boolean;
   triggerLoginModal: () => void;
   closeLoginModal: () => void;
+  authError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,8 +39,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
   const currentRoute = location.pathname;
+  
+  // MetaMask authentication hook
+  const { isConnecting, connectWallet: connectMetaMask, disconnectWallet, error: authError } = useMetaMaskAuth();
 
   useEffect(() => {
+    // Listen to Firebase auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in with Firebase, but we need the full user data
+        // The user data should already be set by the MetaMask connect flow
+        console.log('Firebase user authenticated:', firebaseUser.uid);
+      } else {
+        // User is signed out
+        setUser(null);
+        sessionStorage.removeItem('currentUser');
+      }
+      setIsLoading(false);
+    });
+
     // Check for stored user on app initialization
     const storedUser = sessionStorage.getItem('currentUser');
     if (storedUser && storedUser !== 'undefined') {
@@ -46,10 +69,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         sessionStorage.removeItem('currentUser');
       }
     }
-    setIsLoading(false);
+
+    return () => unsubscribe();
   }, []);
 
-  const logout = () => {
+  const connectWallet = async (): Promise<User | null> => {
+    const userData = await connectMetaMask();
+    if (userData) {
+      setUser(userData);
+      sessionStorage.setItem('currentUser', JSON.stringify(userData));
+      setShowLoginModal(false);
+    }
+    return userData;
+  };
+
+  const logout = async () => {
+    await disconnectWallet();
     setUser(null);
     sessionStorage.removeItem('currentUser');
   };
@@ -68,11 +103,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     },
     logout,
+    connectWallet,
     isLoading,
+    isConnecting,
     currentRoute,
     showLoginModal,
     triggerLoginModal,
     closeLoginModal,
+    authError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

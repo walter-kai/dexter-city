@@ -1,7 +1,7 @@
 import React from "react";
 
 import { BotConfig } from "../../../../.types/Bot";
-import { generateLogoHash } from "../../hooks/Robohash";
+import { generateLogoHash } from "../../hooks/useRobohash";
 
 interface BotDetailsPageProps {
   bot: BotConfig | null;

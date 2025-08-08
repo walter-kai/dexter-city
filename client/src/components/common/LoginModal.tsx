@@ -1,8 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSDK } from "@metamask/sdk-react";
-import { handleUserLogin, updateUser } from "../../hooks/FirestoreUser";
 import { useNavigate } from "react-router-dom";
+import { doc, setDoc } from 'firebase/firestore';
 import { useAuth } from "../../providers/AuthContext";
+import { User } from "../../types/User";
+import { db } from "../../config/firebase";
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 // import '../../styles/fading.css';
 
@@ -14,7 +16,7 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const { sdk, connected, connecting } = useSDK();
   const navigate = useNavigate();
-  const { setUser, user } = useAuth();
+  const { setUser, user, connectWallet: authConnectWallet, isConnecting, authError } = useAuth();
 
   const [show, setShow] = useState(false);
   const [step, setStep] = useState<'connect' | 'form'>('connect');
@@ -25,7 +27,6 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameCheckTimeout, setUsernameCheckTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [waitingForUser, setWaitingForUser] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,95 +40,131 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       setError('');
     } else {
       setShow(false);
+      // Disconnect MetaMask if modal is closed and not authenticated
+      if (connected && !user) {
+        sdk?.terminate();
+      }
+    }
+  }, [isOpen, connected, user, sdk]);
+
+  // Update error state when authError changes
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
+
+  // Reset connection state when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      // Reset any pending connection states when modal closes
+      setError('');
     }
   }, [isOpen]);
 
   const connectWallet = async () => {
     try {
-      if (!sdk) {
-        setError("MetaMask SDK not initialized.");
-        return;
-      }
-      setWaitingForUser(true);
-      const accounts = await sdk.connect();
-      if (accounts && Array.isArray(accounts) && accounts.length > 0) {
-        const walletId = accounts[0] as string;
-        setWalletId(walletId);
-        const { user, isNewUser } = await handleUserLogin(walletId);
-        if (isNewUser || !user.username) {
+      setError('');
+      
+      // Add a timeout to handle cases where MetaMask modal is closed
+      const connectPromise = authConnectWallet();
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Connection timeout - please try again')), 30000);
+      });
+      
+      const authenticatedUser = await Promise.race([connectPromise, timeoutPromise]) as User | null;
+      
+      if (authenticatedUser) {
+        if (!authenticatedUser.username) {
+          // New user or user without username - show form
+          setWalletId(authenticatedUser.walletAddress);
           setStep('form');
-          setUser(user);
         } else {
-          setUser(user);
+          // Existing user with username - redirect to dashboard
           navigate("/i/dashboard");
           onClose();
         }
-      } else {
-        setError("No accounts found.");
       }
     } catch (err: any) {
       console.error('MetaMask connection error:', err);
-      // Use the actual error message if available, otherwise fall back to a generic message
-      const errorMessage = err?.message || err?.toString() || "Failed to connect MetaMask.";
-      setError(errorMessage);
-    } finally {
-      setWaitingForUser(false);
+      
+      // Handle specific error cases
+      if (err?.code === 4001) {
+        setError('Connection rejected by user');
+      } else if (err?.message?.includes('timeout')) {
+        setError('Connection timed out - please try again');
+      } else if (err?.message?.includes('User rejected')) {
+        setError('Connection cancelled by user');
+      } else {
+        const errorMessage = err?.message || err?.toString() || "Failed to connect MetaMask.";
+        setError(errorMessage);
+      }
     }
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!walletId || !username) {
-      setError('Username is required.');
+      setError('Wallet ID and username are required');
       return;
     }
+
     try {
-      // Ensure all required fields are present for updateUser
-      const userPayload = {
-        ...user,
-        username,
-        referralId: referral,
-        walletId: walletId || user?.walletId || '',
-        dateCreated: user?.dateCreated || new Date(),
-        lastLoggedIn: user?.lastLoggedIn || new Date(),
-        telegramId: user?.telegramId || null,
-        photoId: user?.photoId || null,
-        photoUrl: user?.photoUrl || null,
+      // Update user with username via direct Firestore update
+      const userToUpdate: User = {
+        ...user!,
+        username: username.trim(),
+        referralId: referral.trim() || undefined,
       };
-      const updatedUser = await updateUser(userPayload);
-      setUser(updatedUser);
+
+      // Update in Firestore
+      const userDocRef = doc(db, 'users', walletId);
+      await setDoc(userDocRef, userToUpdate, { merge: true });
+
+      // Update local state
+      setUser(userToUpdate);
       navigate("/i/dashboard");
       onClose();
-    } catch (err) {
-      setError('Failed to update user.');
+    } catch (err: any) {
+      console.error('Error updating user:', err);
+      setError(err?.message || 'Failed to update user profile');
+    }
+  };
+  const checkUsernameAvailability = async (usernameToCheck: string) => {
+    if (usernameToCheck.length < 3) {
+      setUsernameAvailable(null);
+      return;
+    }
+
+    setCheckingUsername(true);
+    try {
+      const response = await fetch(`/api/user/check-username/${usernameToCheck}`);
+      const data = await response.json();
+      setUsernameAvailable(data.available);
+    } catch (error) {
+      console.error('Error checking username:', error);
+      setUsernameAvailable(null);
+    } finally {
+      setCheckingUsername(false);
     }
   };
 
-  // Debounced username check
-  useEffect(() => {
-    if (!username || (username.length < 5 && username.length > 64)) {
-      setUsernameAvailable(null);
-      setCheckingUsername(false);
-      return;
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUsername = e.target.value;
+    setUsername(newUsername);
+
+    // Clear previous timeout
+    if (usernameCheckTimeout) {
+      clearTimeout(usernameCheckTimeout);
     }
-    setCheckingUsername(true);
-    setUsernameAvailable(null);
-    if (usernameCheckTimeout) clearTimeout(usernameCheckTimeout);
-    const timeout = setTimeout(async () => {
-      try {
-        const res = await fetch(`/api/user/checkName?username=${encodeURIComponent(username)}`);
-        const data = await res.json();
-        setUsernameAvailable(data.available);
-      } catch (e) {
-        setUsernameAvailable(false);
-      } finally {
-        setCheckingUsername(false);
-      }
-    }, 1000);
-    setUsernameCheckTimeout(timeout as unknown as NodeJS.Timeout);
-    // Cleanup
-    return () => clearTimeout(timeout);
-  }, [username]);
+
+    // Set new timeout for username check
+    const timeout = setTimeout(() => {
+      checkUsernameAvailability(newUsername);
+    }, 500);
+
+    setUsernameCheckTimeout(timeout);
+  };
 
   if (!isOpen) return null;
 
@@ -161,14 +198,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   </div>
                   <button
                     onClick={connectWallet}
-                    disabled={connecting || waitingForUser}
+                    disabled={isConnecting}
                     className={`w-full font-bold py-3 px-6 rounded transition-all duration-500 ${
-                      waitingForUser 
+                      isConnecting 
                         ? "bg-orange-500 text-white shadow-[0_0_8px_orange] hover:shadow-[0_0_16px_orange]"
                         : "bg-[#00ffe7] text-[#181a23] hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c]"
                     } disabled:opacity-50`}
                   >
-                    {waitingForUser ? "Waiting for user input..." : connecting ? "Connecting..." : "Connect MetaMask"}
+                    {isConnecting ? "Connecting..." : "Connect MetaMask"}
                   </button>
                   <div className="mt-4 text-center">
                     <p className="text-[#e0e7ef] text-sm">
@@ -196,7 +233,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                     <input
                       type="text"
                       value={username}
-                      onChange={e => setUsername(e.target.value)}
+                      onChange={handleUsernameChange}
                       className="w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7]"
                       placeholder="Choose a username"
                       required

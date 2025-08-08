@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { BotConfig } from "../../../../.types/Bot";
 import { PoolData } from "../../../../.types/subgraph/Pools";
 import User from "../../../../.types/User";
-import { generateLogoHash } from "../../hooks/Robohash";
+import { generateLogoHash } from "../../hooks/useRobohash";
 import PairChart from "../../components/build/chart/PairChart";
 import TokenInfo from "../../components/build/MarketInfo";
 import LoadingScreenDots from "../../components/common/LoadingScreenDots";

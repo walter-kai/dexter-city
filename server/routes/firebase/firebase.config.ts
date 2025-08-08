@@ -26,8 +26,7 @@ const serviceAccount = {
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET
+    storageBucket: `${process.env.FIREBASE_PROJECT_ID}.firebasestorage.app`
   });
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BotConfig } from '../../../../.types/Bot';
-import { generateLogoHash } from '../../hooks/Robohash';
+import { generateLogoHash } from '../../hooks/useRobohash';
 import { FaPlay, FaStop, FaClone, FaTrash } from 'react-icons/fa';
 
 interface BotCardProps {
