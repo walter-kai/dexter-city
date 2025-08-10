@@ -4,6 +4,7 @@ import { signInWithCustomToken } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { User } from '../types/User';
+import { clearMetaMaskSession, checkForMetaMaskState } from '../utils/metamaskSession';
 
 interface MetaMaskAuthHook {
   isConnecting: boolean;
@@ -26,6 +27,9 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
 
   const forceDisconnectMetaMask = useCallback(async (): Promise<void> => {
     try {
+      // Clear all MetaMask session storage
+      clearMetaMaskSession();
+      
       const ethereum = (window as any).ethereum as MetaMaskProvider | undefined;
       if (ethereum) {
         // Try to disconnect from MetaMask
@@ -35,11 +39,11 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
             params: [{ eth_accounts: {} }]
           });
         } catch {
-          // If that fails, try to revoke permissions
+          // If that fails, we've already cleared storage
         }
       }
       
-      console.log('Force disconnected MetaMask');
+      console.log('Force disconnected MetaMask and cleared all session data');
     } catch (err) {
       console.error('Error force disconnecting MetaMask:', err);
     }
@@ -50,13 +54,23 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
     setError(null);
 
     try {
+      // Clear any persistent MetaMask state to ensure fresh authentication
+      clearMetaMaskSession();
+      
+      // Warn if there's still persistent state
+      if (checkForMetaMaskState()) {
+        console.warn('MetaMask state still present after clearing - this should not happen');
+      }
+
       // Check if MetaMask is installed
       const ethereum = (window as any).ethereum as MetaMaskProvider | undefined;
       if (!ethereum) {
         throw new Error('MetaMask is not installed');
       }
 
-      // Request account access
+      console.log('Requesting fresh MetaMask connection...');
+
+      // Explicitly request fresh account access (no auto-connection)
       const accounts = await ethereum.request({
         method: 'eth_requestAccounts',
       }) as string[];
@@ -67,15 +81,20 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
 
       const walletAddress = accounts[0];
 
-      // Create a message to sign (includes timestamp to prevent replay attacks)
+      // Create a unique message for this session (no persistence)
       const timestamp = Date.now();
-    const message = `🤖 Confirm to log into Dexter City 🏙️`;
+      const sessionId = Math.random().toString(36).substring(7);
+      const message = `🤖 Confirm to log into Dexter City 🏙️ (Session: ${sessionId})`;
+
+      console.log('Requesting signature for fresh authentication...');
 
       // Request signature from MetaMask
       const signature = await ethereum.request({
         method: 'personal_sign',
         params: [message, walletAddress],
       }) as string;
+
+      console.log('Signature received, authenticating with server...');
 
       // Send authentication request to backend
       const response = await fetch('/api/auth/metamask', {
@@ -98,9 +117,13 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
       const { data } = await response.json();
       const { customToken } = data;
 
+      console.log('Custom token received, signing into Firebase...');
+
       // Sign in to Firebase with the custom token
       const userCredential = await signInWithCustomToken(auth, customToken);
       const firebaseUser = userCredential.user;
+
+      console.log('Firebase authentication successful for:', firebaseUser.uid);
 
       // Now the user is properly authenticated with Firebase
       // The UID will be the wallet address, so security rules will work
