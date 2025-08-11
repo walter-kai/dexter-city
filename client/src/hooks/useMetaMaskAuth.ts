@@ -1,8 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithCustomToken } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../config/firebase';
+import { jwtStorage } from '../utils/jwtStorage';
 import { User } from '../types/User';
 import { clearMetaMaskSession, checkForMetaMaskState } from '../utils/metamaskSession';
 
@@ -115,55 +113,28 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
       }
 
       const { data } = await response.json();
-      const { customToken } = data;
+      const { accessToken, user, expiresIn } = data;
 
-      console.log('Custom token received, signing into Firebase...');
+      console.log('JWT token received, storing securely...');
 
-      // Sign in to Firebase with the custom token
-      const userCredential = await signInWithCustomToken(auth, customToken);
-      const firebaseUser = userCredential.user;
+      // Store JWT token
+      jwtStorage.setToken(accessToken, expiresIn);
 
-      console.log('Firebase authentication successful for:', firebaseUser.uid);
+      console.log('Authentication successful for:', user.walletAddress);
 
-      // Now the user is properly authenticated with Firebase
-      // The UID will be the wallet address, so security rules will work
-      const userDocRef = doc(db, 'users', walletAddress.toLowerCase());
-      const userDoc = await getDoc(userDocRef);
+      // Return user data from auth response (no additional API call needed)
+      const userData: User = {
+        walletAddress: user.walletAddress,
+        username: user.username || '',
+        email: user.email || '',
+        createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+        lastLogin: user.lastLogin ? new Date(user.lastLogin) : new Date(),
+        ...(user.referralId && { referralId: user.referralId }),
+        ...(user.telegramId && { telegramId: user.telegramId }),
+        ...(user.photoUrl && { photoUrl: user.photoUrl }),
+      };
 
-      let userData: User;
-
-      if (userDoc.exists()) {
-        // User exists, update last login
-        const existingData = userDoc.data();
-        userData = {
-          walletAddress: walletAddress.toLowerCase(),
-          username: existingData.username || '',
-          email: existingData.email || '',
-          createdAt: existingData.createdAt?.toDate() || new Date(),
-          lastLogin: new Date(),
-          ...(existingData.referralId && { referralId: existingData.referralId }),
-          ...(existingData.telegramId && { telegramId: existingData.telegramId }),
-          ...(existingData.photoUrl && { photoUrl: existingData.photoUrl }),
-        };
-        
-        // Filter out undefined values before saving to Firestore
-        const dataToSave = Object.fromEntries(
-          Object.entries({ ...userData, lastLogin: new Date() }).filter(([_, value]) => value !== undefined)
-        );
-        await setDoc(userDocRef, dataToSave, { merge: true });
-      } else {
-        // New user, create document
-        userData = {
-          walletAddress: walletAddress.toLowerCase(),
-          username: '',
-          email: '',
-          createdAt: new Date(),
-          lastLogin: new Date(),
-        };
-        await setDoc(userDocRef, userData);
-      }
-
-      console.log('Successfully authenticated with MetaMask and Firebase');
+      console.log('Successfully authenticated with MetaMask and JWT');
       return userData;
 
     } catch (err) {

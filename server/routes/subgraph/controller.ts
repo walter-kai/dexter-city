@@ -16,7 +16,7 @@ const getPools = async (req: Request, res: Response): Promise<Response> => {
 
   try {
     // Fetch the cryptocurrency id by symbol using the service's get method
-    const poolList = await firebaseService.getPoolsUniswap();
+    const poolList = await subgraphService.getPoolsUniswap();
 
     if (poolList === null) {
       return res.status(404).json({ error: `Dex list not found` });

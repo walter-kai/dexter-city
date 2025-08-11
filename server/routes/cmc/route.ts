@@ -9,6 +9,7 @@ const asyncHandler = (fn: any) => (req: express.Request, res: express.Response, 
 
 // Data fetch endpoints
 router.route("/tokens/:symbol").get(asyncHandler(coinMarketCapController.getTokenBySymbol));
+router.route("/tokensReload/").get(asyncHandler(coinMarketCapController.reloadTokens));
 
 
 

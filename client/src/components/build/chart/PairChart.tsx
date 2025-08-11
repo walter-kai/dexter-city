@@ -9,6 +9,7 @@ import { SwapDataV4 } from "../../../../../.types/subgraph/Swaps";
 import LoadingScreenDots from "../../common/LoadingScreenDots";
 import { BotConfig } from "../../../../../.types/Bot";
 import { generateOHLCData, fillMissingDays, generateSafetyOrderAndProfitLines } from "./ChartUtil";
+import { authenticatedFetch } from "../../../utils/jwtStorage";
 
 const calculatePercentChange = (currentPrice: number, previousPrice: number) => {
   if (!previousPrice) return 0;
@@ -134,7 +135,7 @@ const PairChart: React.FC<PairDetailsProps> = ({ botForm, pool, className }) => 
     const fetchSwaps = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/subgraph/swaps/${pool.address}`);
+        const response = await authenticatedFetch(`/api/subgraph/swaps/${pool.address}`);
         if (!response.ok) throw new Error(`Failed to fetch trades: ${response.statusText}`);
         const data = await response.json();
         if (!Array.isArray(data.data)) {

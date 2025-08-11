@@ -23,7 +23,6 @@
     "chartjs-plugin-annotation": "^3.1.0",
     "chartjs-plugin-zoom": "^2.2.0",
     "ethers": "^6.15.0",
-    "firebase": "^12.1.0",
     "leaflet": "^1.9.4",
     "react": "^18.3.1",
     "react-chartjs-2": "^5.3.0",

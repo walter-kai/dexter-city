@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { jwtStorage } from '../utils/jwtStorage';
 import { User } from '../types/User';
 import { useMetaMaskAuth } from '../hooks/useMetaMaskAuth';
 
@@ -42,52 +41,77 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const currentRoute = location.pathname;
   
   // MetaMask authentication hook
-  const { isConnecting, connectWallet: connectMetaMask, disconnectWallet, resetConnectionState, forceDisconnectMetaMask, error: authError } = useMetaMaskAuth();
+  const { isConnecting, connectWallet: connectMetaMask, resetConnectionState, forceDisconnectMetaMask, error: authError } = useMetaMaskAuth();
 
+  // Check for existing JWT token on app load
   useEffect(() => {
-    // Listen to Firebase auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      if (firebaseUser) {
-        // User is signed in with Firebase, but we need the full user data
-        // The user data should already be set by the MetaMask connect flow
-        console.log('Firebase user authenticated:', firebaseUser.uid);
-      } else {
-        // User is signed out
-        setUser(null);
-        sessionStorage.removeItem('currentUser');
-      }
-      setIsLoading(false);
-    });
-
-    // Check for stored user on app initialization
-    const storedUser = sessionStorage.getItem('currentUser');
-    if (storedUser && storedUser !== 'undefined') {
+    const initializeAuth = async () => {
+      setIsLoading(true);
+      
       try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
+        // Check if user has valid JWT token
+        if (jwtStorage.isAuthenticated()) {
+          console.log('Found existing JWT token - user session restored');
+          
+          // Fetch current user profile to restore session
+          try {
+            const response = await fetch('/api/user/profile', {
+              headers: {
+                'Authorization': `Bearer ${jwtStorage.getToken()}`
+              }
+            });
+            
+            if (response.ok) {
+              const { user } = await response.json();
+              setUser(user);
+              console.log('User session restored:', user.walletAddress);
+            } else {
+              console.log('Failed to restore user session, clearing token');
+              jwtStorage.clearToken();
+            }
+          } catch (error) {
+            console.error('Error fetching user profile:', error);
+            jwtStorage.clearToken();
+          }
+        } else {
+          console.log('No valid JWT token found');
+        }
       } catch (error) {
-        console.error('Error parsing stored user:', error);
-        sessionStorage.removeItem('currentUser');
+        console.error('Error initializing auth:', error);
+        jwtStorage.clearToken();
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
 
-    return () => unsubscribe();
+    initializeAuth();
   }, []);
 
   const connectWallet = async (): Promise<User | null> => {
     const userData = await connectMetaMask();
     if (userData) {
       setUser(userData);
-      sessionStorage.setItem('currentUser', JSON.stringify(userData));
       setShowLoginModal(false);
+      console.log('User authenticated and logged in:', userData.walletAddress);
     }
     return userData;
   };
 
   const logout = async () => {
-    await disconnectWallet();
-    setUser(null);
-    sessionStorage.removeItem('currentUser');
+    try {
+      // Clear JWT token
+      jwtStorage.clearToken();
+      
+      // Clear user state
+      setUser(null);
+      
+      // Force disconnect MetaMask
+      await forceDisconnectMetaMask();
+      
+      console.log('User logged out successfully');
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const triggerLoginModal = () => setShowLoginModal(true);
@@ -101,11 +125,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     setUser: (newUser: User | null) => {
       setUser(newUser);
-      if (newUser) {
-        sessionStorage.setItem('currentUser', JSON.stringify(newUser));
-      } else {
-        sessionStorage.removeItem('currentUser');
-      }
     },
     logout,
     connectWallet,

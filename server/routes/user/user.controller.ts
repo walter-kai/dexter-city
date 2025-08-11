@@ -4,6 +4,7 @@ import ApiError from "../../utils/api-error";
 import catchAsync from "../../utils/catch-async";
 import User, { UserArgs } from "../../../.types/User";
 import { db } from "../firebase/firebase.config";
+import { AuthenticatedRequest } from "../../middleware/auth";
 
 const setUserChatId = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   if (req.params.telegramId == null) {
@@ -14,31 +15,55 @@ const setUserChatId = catchAsync(async (req: Request, res: Response): Promise<Re
   return res.json({ chatId: await userService.setUserChatId(req.params.telegramId, req.params.chatId) });
 });
 
-const updateUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
-  // Directly use the data from req.body, assuming it's of type User
-  const userData: User = req.body;
-
-  if (!userData.walletId) {
-    throw new ApiError(400, "Missing walletId in request body");
+const updateUser = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  if (!req.user) {
+    throw new ApiError(401, "Authentication required");
   }
 
-  // Convert date strings to Date objects if they are strings
-  if (typeof userData.lastLoggedIn === 'string') {
-    userData.lastLoggedIn = new Date(userData.lastLoggedIn);
-  }
-  
-  if (typeof userData.dateCreated === 'string') {
-    userData.dateCreated = new Date(userData.dateCreated);
-  }
+  const walletAddress = req.user.walletAddress;
+  const { username, email, referralId, telegramId, photoUrl } = req.body;
 
-  // Call the userService.updateUser method, passing the User object directly
-  const updatedUser = await userService.updateUser(userData);
+  try {
+    // Get current user document
+    const userDocRef = db.collection('users').doc(walletAddress);
+    const userDoc = await userDocRef.get();
+    
+    if (!userDoc.exists) {
+      throw new ApiError(404, "User not found");
+    }
 
-  if (!updatedUser) {
-    throw new ApiError(404, `User with telegramId ${userData.telegramId} not found`);
+    // Prepare update data (only include defined fields)
+    const updateData: any = {};
+    if (username !== undefined) updateData.username = username;
+    if (email !== undefined) updateData.email = email;
+    if (referralId !== undefined) updateData.referralId = referralId;
+    if (telegramId !== undefined) updateData.telegramId = telegramId;
+    if (photoUrl !== undefined) updateData.photoUrl = photoUrl;
+
+    // Update the document
+    await userDocRef.update(updateData);
+
+    // Get updated document
+    const updatedDoc = await userDocRef.get();
+    const updatedData = updatedDoc.data();
+
+    // Format response
+    const user = {
+      walletAddress,
+      username: updatedData?.username || '',
+      email: updatedData?.email || '',
+      createdAt: updatedData?.createdAt?.toDate() || new Date(),
+      lastLogin: updatedData?.lastLogin?.toDate() || new Date(),
+      referralId: updatedData?.referralId || null,
+      telegramId: updatedData?.telegramId || null,
+      photoUrl: updatedData?.photoUrl || null,
+    };
+
+    return res.json({ message: "User updated successfully", user });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw new ApiError(500, "Failed to update user profile");
   }
-
-  return res.json({ message: "User updated successfully", user: updatedUser });
 });
 
 const createUser = catchAsync(async (req: Request, res: Response): Promise<Response> => {
@@ -82,14 +107,52 @@ const login = catchAsync(async (req: Request, res: Response): Promise<Response> 
 const checkUsernameAvailability = catchAsync(async (req: Request, res: Response): Promise<Response> => {
   const { username } = req.query;
   if (!username || typeof username !== 'string') {
-    throw new ApiError(400, 'Missing or invalid username in query');
+    throw new ApiError(400, "Username is required");
   }
-  // Query users collection for username (case-insensitive)
   const usersRef = db.collection('users');
   const q = usersRef.where('username', '==', username);
   const snapshot = await q.get();
   const available = snapshot.empty;
   return res.json({ available });
+});
+
+/**
+ * Get current user profile based on JWT token
+ */
+const getCurrentUserProfile = catchAsync(async (req: AuthenticatedRequest, res: Response): Promise<Response> => {
+  if (!req.user) {
+    throw new ApiError(401, "Authentication required");
+  }
+
+  const walletAddress = req.user.walletAddress;
+  
+  try {
+    // Get user from Firestore using Admin SDK
+    const userDoc = await db.collection('users').doc(walletAddress).get();
+    
+    if (!userDoc.exists) {
+      throw new ApiError(404, "User profile not found");
+    }
+
+    const userData = userDoc.data();
+    
+    // Convert Firestore timestamps to dates
+    const user = {
+      walletAddress,
+      username: userData?.username || '',
+      email: userData?.email || '',
+      createdAt: userData?.createdAt?.toDate() || new Date(),
+      lastLogin: userData?.lastLogin?.toDate() || new Date(),
+      referralId: userData?.referralId || null,
+      telegramId: userData?.telegramId || null,
+      photoUrl: userData?.photoUrl || null,
+    };
+
+    return res.json({ user });
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    throw new ApiError(500, "Failed to get user profile");
+  }
 });
 
 export default {
@@ -98,4 +161,5 @@ export default {
   createUser,
   login,
   checkUsernameAvailability,
+  getCurrentUserProfile,
 };

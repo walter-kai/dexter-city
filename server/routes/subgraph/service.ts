@@ -1,10 +1,116 @@
 import { db } from "../firebase/firebase.config";
 import admin from "firebase-admin";
 import logger from "../../utils/logger";
-import { fetchSwaps, fetchTopDailyPools } from "./UniswapV4";
+import { fetchSwaps, fetchPools } from "./UniswapV4";
 import { updateSwapsToPools } from "../firebase/firebase.service";
 import { SwapDataV4 } from ".types/subgraph/Swaps";
 import { PoolData } from ".types/subgraph/Pools";
+
+
+/**
+ * Get top pools from Uniswap subgraph, filtered by liquidity and fee tiers.
+ * Similar to getSwapsV4, this fetches data directly from the subgraph.
+ */
+const getPoolsUniswap = async (): Promise<PoolData[] | null> => {
+  try {
+    /**
+     * Fetch pools from the subgraph.
+     * This will attempt to fetch the data multiple times if needed.
+     */
+    const fetchPoolsFromSubgraph = async (): Promise<PoolData[]> => {
+      let skip = 0;
+      let allPools: PoolData[] = [];
+
+      try {
+        // Fetch pools (can be done multiple times if needed)
+        for (let i = 0; i < 1; i++) {
+          const pools = await fetchPools(skip, 1000);
+
+          // Convert the subgraph response to our PoolData format
+          const convertedPools: PoolData[] = pools.map((pool: any) => ({
+            name: `${pool.token0.symbol}/${pool.token1.symbol}`,
+            lastUpdated: new Date().toISOString(),
+            createdAtTimestamp: Date.now().toString(),
+            network: "Ethereum" as const,
+            address: pool.id,
+            volumeUSD: pool.volumeUSD || "0",
+            txCount: pool.txCount || "0",
+            date: new Date().toISOString().split('T')[0],
+            feeTier: pool.feeTier || "0",
+            liquidity: pool.totalValueLockedUSD || "0",
+            token0Price: "0", // Not available in this query
+            token0: {
+              address: pool.token0.id,
+              symbol: pool.token0.symbol,
+              name: pool.token0.symbol, // Using symbol as name fallback
+              decimals: Number(pool.token0.decimals) || 18,
+              txCount: 0, // Not available in this query
+              imgId: 0, // Will be populated by preloadTokenImages if needed
+              volume: 0, // Not available in this query
+              price: 0, // Not available in this query
+              date_added: new Date().toISOString(),
+              tags: [],
+            },
+            token1Price: "0", // Not available in this query
+            token1: {
+              address: pool.token1.id,
+              symbol: pool.token1.symbol,
+              name: pool.token1.symbol, // Using symbol as name fallback
+              decimals: Number(pool.token1.decimals) || 18,
+              txCount: 0, // Not available in this query
+              imgId: 0, // Will be populated by preloadTokenImages if needed
+              volume: 0, // Not available in this query
+              price: 0, // Not available in this query
+              date_added: new Date().toISOString(),
+              tags: [],
+            },
+          }));
+
+          allPools = allPools.concat(convertedPools);
+
+          // Stop fetching if fewer than 1000 items are returned
+          if (pools.length < 1000) {
+            break;
+          }
+
+          skip += 1000;
+          logger.info(`Downloading pools: ${skip} of 5000`);
+        }
+
+        return allPools;
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          logger.error(`Error fetching pools from subgraph: ${err.message}`);
+        } else {
+          logger.error("Unknown error occurred while fetching pools from subgraph.");
+        }
+        return [];
+      }
+    };
+
+    // Fetch all pools directly from the subgraph
+    const pools = await fetchPoolsFromSubgraph();
+
+    if (!pools || pools.length === 0) {
+      logger.warn("No pools found from the subgraph.");
+      return [];
+    }
+
+    // Sort pools by volumeUSD in descending order, then take top 500
+    const sortedByVolume = pools.sort((a, b) => Number(b.volumeUSD) - Number(a.volumeUSD));
+    const top500Pools = sortedByVolume.slice(0, 500);
+
+    logger.info(`Successfully fetched ${top500Pools.length} pools from subgraph`);
+    return top500Pools;
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      logger.error(`Error fetching pools from subgraph: ${err.message}`);
+    } else {
+      logger.error("Unknown error occurred while fetching pools from subgraph.");
+    }
+    return null;
+  }
+};
 
 /**
  * Preload token symbols and their imgIds from tokens-cmc collection.
@@ -112,6 +218,7 @@ export const getSwapsV4 = async (contractAddress: string): Promise<SwapDataV4[] 
 
 
 export default {
+  getPoolsUniswap,
   getSwapsV4,
   preloadTokenImages
 };

@@ -1,4 +1,5 @@
 import admin from 'firebase-admin';
+import jwt from 'jsonwebtoken';
 import ApiError from '../../utils/api-error';
 import logger from '../../utils/logger';
 
@@ -9,11 +10,19 @@ export interface AuthRequest {
 }
 
 export interface AuthResponse {
-  customToken: string;
+  accessToken: string;
   user: {
     walletAddress: string;
     uid: string;
+    username: string;
+    email: string;
+    createdAt: Date;
+    lastLogin: Date;
+    referralId?: string;
+    telegramId?: string;
+    photoUrl?: string;
   };
+  expiresIn: number;
 }
 
 /**
@@ -43,45 +52,78 @@ export async function authenticateWithMetaMask(authRequest: AuthRequest): Promis
       throw new ApiError(401, 'Invalid message');
     }
 
-    // Use wallet address as Firebase UID
+    // Use wallet address as user ID
     const uid = walletAddress.toLowerCase();
 
-    // Create custom claims
-    const customClaims = {
+    // Create JWT payload
+    const payload = {
+      uid,
       walletAddress: walletAddress.toLowerCase(),
-      authMethod: 'metamask'
+      authMethod: 'metamask',
+      iat: Math.floor(Date.now() / 1000),
     };
 
-    // Create custom token
-    const customToken = await admin.auth().createCustomToken(uid, customClaims);
-
-    // Create or update user record in Firebase Auth
-    try {
-      await admin.auth().getUser(uid);
-      // User exists, update if needed
-      await admin.auth().updateUser(uid, {
-        displayName: `User ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`,
-      });
-    } catch (error: any) {
-      if (error.code === 'auth/user-not-found') {
-        // Create new user
-        await admin.auth().createUser({
-          uid,
-          displayName: `User ${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`,
-        });
-      } else {
-        throw error;
+    // Create JWT (expires in 24 hours)
+    const expiresIn = 24 * 60 * 60; // 24 hours in seconds
+    const accessToken = jwt.sign(
+      payload,
+      process.env.JWT_SECRET || 'fallback-secret-change-in-production',
+      { 
+        expiresIn,
+        issuer: 'dexter-city',
+        audience: 'dexter-city-users'
       }
+    );
+
+    // Create or update user in Firestore using Admin SDK
+    const userDocRef = admin.firestore().collection('users').doc(uid);
+    const userDoc = await userDocRef.get();
+
+    let userData;
+
+    if (!userDoc.exists) {
+      // Create new user document
+      userData = {
+        walletAddress: walletAddress.toLowerCase(),
+        username: '',
+        email: '',
+        createdAt: new Date(),
+        lastLogin: new Date(),
+      };
+      
+      await userDocRef.set({
+        ...userData,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    } else {
+      // Update last login and get existing data
+      await userDocRef.update({
+        lastLogin: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      
+      const existingData = userDoc.data();
+      userData = {
+        walletAddress: walletAddress.toLowerCase(),
+        username: existingData?.username || '',
+        email: existingData?.email || '',
+        createdAt: existingData?.createdAt?.toDate() || new Date(),
+        lastLogin: new Date(),
+        ...(existingData?.referralId && { referralId: existingData.referralId }),
+        ...(existingData?.telegramId && { telegramId: existingData.telegramId }),
+        ...(existingData?.photoUrl && { photoUrl: existingData.photoUrl }),
+      };
     }
 
-    logger.info(`User authenticated: ${walletAddress}`);
+    logger.info(`User authenticated with JWT: ${walletAddress}`);
 
     return {
-      customToken,
+      accessToken,
       user: {
-        walletAddress: walletAddress.toLowerCase(),
+        ...userData,
         uid
-      }
+      },
+      expiresIn
     };
 
   } catch (error) {

@@ -1,28 +1,28 @@
 import { Request, Response } from "express";
 import botService from "./bot.service";
 
-const getBot = async (req: Request, res: Response): Promise<Response> => {
-  try {
-    // Ensure botName is provided in the request query
-    const { botName } = req.query;
+// const getBot = async (req: Request, res: Response): Promise<Response> => {
+//   try {
+//     // Ensure botName is provided in the request query
+//     const { botName } = req.query;
 
-    if (!botName) {
-      return res.status(400).json({ error: "botName is required" });
-    }
+//     if (!botName) {
+//       return res.status(400).json({ error: "botName is required" });
+//     }
 
-    // Fetch bot by botName using the botService's get method
-    const bot = await botService.get(botName as string); // Ensure botName is treated as a string
+//     // Fetch bot by botName using the botService's get method
+//     const bot = await botService.get(botName as string); // Ensure botName is treated as a string
 
-    if (!bot) {
-      return res.status(404).json({ error: "Bot not found" });
-    }
+//     if (!bot) {
+//       return res.status(404).json({ error: "Bot not found" });
+//     }
 
-    return res.json(bot);
-  } catch (error) {
-    console.error("Error fetching bot:", error);
-    return res.status(500).json({ error: "Internal server error" });
-  }
-};
+//     return res.json(bot);
+//   } catch (error) {
+//     console.error("Error fetching bot:", error);
+//     return res.status(500).json({ error: "Internal server error" });
+//   }
+// };
 
 const getMyBots = async (req: Request, res: Response): Promise<Response> => {
   try {
@@ -145,7 +145,7 @@ const stopBot = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export default {
-  getBot,
+  // getBot,
   createBot,
   getMyBots,
   killBot,

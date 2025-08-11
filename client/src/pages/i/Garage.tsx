@@ -8,6 +8,7 @@ import CreateBotCard from '../../components/garage/CreateBotCard';
 import BotDetails from '../../components/garage/BotDetails';
 import DeleteModal from '../../components/garage/DeleteModal';
 import EmptyState from '../../components/garage/EmptyState';
+import { authenticatedFetch } from '../../utils/jwtStorage';
 
 Chart.register(LineElement, PointElement, LinearScale, CategoryScale, ArcElement, Tooltip, Legend);
 
@@ -38,7 +39,7 @@ const Garage = () => {
       setLoading(true);
 
       try {
-        const response = await fetch(`/api/bot/mine?walletId=${user.walletId}`);
+        const response = await authenticatedFetch(`/api/bot/mine?walletId=${user.walletId}`);
 
         if (!response.ok) {
           throw new Error(`Failed to fetch bots: ${response.statusText}`);
@@ -83,7 +84,7 @@ const Garage = () => {
     if (!botToDelete) return;
 
     try {
-      const response = await fetch(`/api/bot?botName=${botToDelete}`, {
+      const response = await authenticatedFetch(`/api/bot?botName=${botToDelete}`, {
         method: 'DELETE',
       });
 
@@ -101,7 +102,7 @@ const Garage = () => {
 
   const handleStartBot = async (botName: string) => {
     try {
-      const response = await fetch(`/api/bot/start?botName=${botName}`, {
+      const response = await authenticatedFetch(`/api/bot/start?botName=${botName}`, {
         method: 'PUT',
       });
 
@@ -122,7 +123,7 @@ const Garage = () => {
 
   const handleStopBot = async (botName: string) => {
     try {
-      const response = await fetch(`/api/bot/stop?botName=${botName}`, {
+      const response = await authenticatedFetch(`/api/bot/stop?botName=${botName}`, {
         method: 'PUT',
       });
 

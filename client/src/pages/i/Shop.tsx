@@ -7,6 +7,7 @@ import BuyingTab from '../../components/shop/BuyingTab';
 import SellingTab from '../../components/shop/SellingTab';
 import PurchaseModal from '../../components/shop/PurchaseModal';
 import { FaTimes, FaShoppingCart, FaTag } from 'react-icons/fa';
+import { authenticatedFetch } from '../../utils/jwtStorage';
 
 // Helper to generate random bots
 const categoriesList = [
@@ -125,7 +126,7 @@ const Shop = () => {
 			if (!user?.walletId) return;
 
 			try {
-				const response = await fetch(`/api/bot/mine?walletId=${user.walletId}`);
+				const response = await authenticatedFetch(`/api/bot/mine?walletId=${user.walletId}`);
 				if (response.ok) {
 					const data = await response.json();
 					setMyBots(data);

@@ -47,43 +47,7 @@ export async function updateSwapsToPools(address: string, swaps: SwapDataV4[]): 
 }
 
 
-/**
- * Get top 100 pools from Firestore, sorted by volumeUSD in descending order first,
- * then sorted by token0.symbol in descending order.
- */
-const getPoolsUniswap = async (): Promise<PoolData[] | null> => {
-    try {
-      const poolsCollection = db.collection("masterPool-uniswap");
-  
-      // Fetch all pools first (potentially large)
-      const poolSnapshot = await poolsCollection.get();
-  
-      if (poolSnapshot.empty) {
-        logger.warn("No pools found in Firestore.");
-        return [];
-      }
-  
-      // Extract data and sort by volumeUSD (descending)
-      const sortedByTxCount: PoolData[] = poolSnapshot.docs
-        .map((doc) => doc.data() as PoolData)
-        .sort((a, b) => Number(b.txCount) - Number(a.txCount));
-  
-      // Take the top 500 by volume
-      const top500Pools = sortedByTxCount.slice(0, 500);
-  
-      // Sort the top 100 pools by token0.symbol in descending order
-      // top500Pools.sort((a, b) => b.token0.symbol.localeCompare(a.token0.symbol));
-  
-      return top500Pools;
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        logger.error(`Error fetching pools from Firestore: ${err.message}`);
-      } else {
-        logger.error("Unknown error occurred while fetching pools from Firestore.");
-      }
-      return null;
-    }
-  };
+
 
 /**
  * Fetch a single token from Firestore by its contract address.
@@ -111,6 +75,5 @@ export const getTokenByAddress = async (tokenAddress: string): Promise<TokenDeta
 
 
 export default {
-    getPoolsUniswap,
     getTokenByAddress, // Export the renamed function
 };

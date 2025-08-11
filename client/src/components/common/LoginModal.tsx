@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useSDK } from "@metamask/sdk-react";
 import { useNavigate } from "react-router-dom";
-import { doc, setDoc } from 'firebase/firestore';
 import { useAuth } from "../../providers/AuthContext";
+import { userApi } from "../../utils/userApi";
 import { User } from "../../types/User";
-import { db } from "../../config/firebase";
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 // import '../../styles/fading.css';
 
@@ -26,7 +25,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [error, setError] = useState('');
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
-  const [usernameCheckTimeout, setUsernameCheckTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [usernameCheckTimeout, setUsernameCheckTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -120,24 +119,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     }
 
     try {
-      // Update user with username via direct Firestore update
-      const userToUpdate: User = {
-        ...user!,
+      // Update user with username via server API
+      const updatedUser = await userApi.updateUser({
         username: username.trim(),
         ...(referral.trim() && { referralId: referral.trim() }),
-      };
-
-      // Filter out undefined values before saving to Firestore
-      const dataToSave = Object.fromEntries(
-        Object.entries(userToUpdate).filter(([_, value]) => value !== undefined)
-      );
-
-      // Update in Firestore
-      const userDocRef = doc(db, 'users', walletId);
-      await setDoc(userDocRef, dataToSave, { merge: true });
+      });
 
       // Update local state
-      setUser(userToUpdate);
+      setUser(updatedUser);
       navigate("/i/dashboard");
       onClose();
     } catch (err: any) {
@@ -153,7 +142,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
 
     setCheckingUsername(true);
     try {
-      const response = await fetch(`/api/user/check-username/${usernameToCheck}`);
+      const response = await fetch(`/api/user/checkName?username=${usernameToCheck}`);
       const data = await response.json();
       setUsernameAvailable(data.available);
     } catch (error) {

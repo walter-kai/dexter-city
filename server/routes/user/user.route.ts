@@ -1,13 +1,16 @@
 import express from "express";
 import userController from "./user.controller";
+import { authenticateJWT } from "../../middleware/auth";
+
 const router = express.Router();
 
-// router.route(":/telegramId/picks").get(userController.getUsersPicks);
-// router.route("/scores").get(userController.getUsersPickScores);
-router.route("/:telegramId/setChatId/:chatId").put(userController.setUserChatId);
-// router.route("/:telegramId/missions").get(userController.getUsersMissions);
+// Public routes (no auth required)
 router.route("/checkName").get(userController.checkUsernameAvailability);
-router.route("/update").put(userController.updateUser);
-router.route("/login").post(userController.login); // Add login route here
+router.route("/login").post(userController.login);
+
+// Protected routes (JWT auth required)
+router.route("/profile").get(authenticateJWT, userController.getCurrentUserProfile);
+router.route("/update").put(authenticateJWT, userController.updateUser);
+router.route("/:telegramId/setChatId/:chatId").put(authenticateJWT, userController.setUserChatId);
 
 export default router;

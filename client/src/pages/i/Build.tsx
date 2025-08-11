@@ -10,6 +10,7 @@ import LoadingScreenDots from "../../components/common/LoadingScreenDots";
 import { FaCheckCircle, FaExclamationTriangle, FaRobot, FaArrowLeft } from "react-icons/fa";
 import { CoinGecko } from "../../../../.types/CoinGecko";
 import PoolDropdown from "../../components/build/PoolDropdown";
+import { authenticatedFetch } from "../../utils/jwtStorage";
 
 const hudPanel =
   "bg-[#181a23]/90 border-4 border-[#00ffe7]/40 rounded-2xl shadow-[0_0_32px_#00ffe7] p-6 md:p-10 flex flex-col items-center relative";
@@ -79,7 +80,7 @@ const BuildBot: React.FC = () => {
   const checkBotNameAvailability = async (botName: string) => {
     if (botName.length > 0) {
       try {
-        const response = await fetch(`/api/bot?botName=${botName}`);
+        const response = await authenticatedFetch(`/api/bot?botName=${botName}`);
         if (response.status !== 404) setBotNameError("Bot name taken. Please try again.");
         else setBotNameError(null);
       } catch {
@@ -113,9 +114,8 @@ const BuildBot: React.FC = () => {
       createdAt: new Date(),
     };
     try {
-      const response = await fetch("/api/bot", {
+      const response = await authenticatedFetch("/api/bot", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
       if (!response.ok) {
