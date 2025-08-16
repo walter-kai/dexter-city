@@ -9,3 +9,4 @@ yarn.lock
 /client/build
 /client/dist
 .DS_Store
+client/package-lock.json

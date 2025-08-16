@@ -12,7 +12,8 @@
     "start": "node --enable-source-maps dist/server/server.js",
     "clean": "rimraf dist",
     "debug": "node --inspect-brk=9229 --enable-source-maps --require ts-node/register --require source-map-support/register server/server.ts",
-    "debug-built": "node --inspect-brk=9229 --enable-source-maps dist/server/server.js"
+    "debug-built": "node --inspect-brk=9229 --enable-source-maps dist/server/server.js",
+    "docker": "docker build -t dexter-city-test ."
   },
   "dependencies": {
     "@types/cors": "^2.8.17",

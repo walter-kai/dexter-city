@@ -3,9 +3,12 @@ FROM node:20-alpine AS client-build
 
 WORKDIR /client
 
+# Install Python and build tools needed for native modules
+RUN apk add --no-cache python3 make g++
+
 # Copy client dependencies and install
 COPY ./client/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy client source code and shared types
 COPY ./client/ ./
@@ -24,10 +27,13 @@ FROM node:20.8.0-alpine3.18 AS server-build
 
 WORKDIR /server
 
+# Install Python and build tools needed for native modules
+RUN apk add --no-cache python3 make g++
+
 # Copy root dependencies and install
 COPY ./package*.json ./
 COPY ./tsconfig.json ./tsconfig.json
-RUN npm install --include=dev
+RUN npm install --include=dev --legacy-peer-deps
 
 # Copy server source code and shared types
 COPY ./server/ ./server

@@ -6,7 +6,7 @@
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@lottiefiles/lottie-player": "^2.0.4",
     "@lottiefiles/react-lottie-player": "^3.5.4",
-    "@metamask/sdk-react": "^0.14.1",
+    "@metamask/sdk-react": "^0.33.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
@@ -61,6 +61,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@metamask/sdk-react": {
+      "react": "^18.3.1",
+      "react-dom": "^18.3.1"
+    }
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
