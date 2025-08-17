@@ -1,12 +1,12 @@
 import { useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { jwtStorage } from '../utils/jwtStorage';
 import { User } from '../types/User';
 import { clearMetaMaskSession, checkForMetaMaskState } from '../utils/metamaskSession';
 
 interface MetaMaskAuthHook {
   isConnecting: boolean;
-  connectWallet: () => Promise<User | null>;
+  connectMetaMask: () => Promise<User | null>;
   disconnectWallet: () => Promise<void>;
   forceDisconnectMetaMask: () => Promise<void>;
   resetConnectionState: () => void;
@@ -21,7 +21,7 @@ interface MetaMaskProvider {
 export const useMetaMaskAuth = (): MetaMaskAuthHook => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const forceDisconnectMetaMask = useCallback(async (): Promise<void> => {
     try {
@@ -51,7 +51,7 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
     }
   }, []);
 
-  const connectWallet = useCallback(async (): Promise<User | null> => {
+  const connectMetaMask = useCallback(async (): Promise<User | null> => {
     setIsConnecting(true);
     setError(null);
 
@@ -189,7 +189,7 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
 
   return {
     isConnecting,
-    connectWallet,
+    connectMetaMask,
     disconnectWallet,
     forceDisconnectMetaMask,
     resetConnectionState,

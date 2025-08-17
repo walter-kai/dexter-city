@@ -2,19 +2,15 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { useLocation } from 'react-router-dom';
 import { jwtStorage } from '../utils/jwtStorage';
 import { User } from '../types/User';
-import { useMetaMaskAuth } from '../hooks/useMetaMaskAuth';
 
 interface AuthContextType {
   user: User | null;
   setUser: (user: User | null) => void;
   logout: () => void;
-  connectWallet: () => Promise<User | null>;
   currentRoute: string;
   showLoginModal: boolean;
   triggerLoginModal: () => void;
   closeLoginModal: () => void;
-  forceDisconnectMetaMask: () => Promise<void>;
-  authError: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,9 +32,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
   const currentRoute = location.pathname;
-  
-  // MetaMask authentication hook
-  const { connectWallet: connectMetaMask, resetConnectionState, forceDisconnectMetaMask, error: authError } = useMetaMaskAuth();
 
   // Check for existing JWT token on app load
   useEffect(() => {
@@ -80,16 +73,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const connectWallet = async (): Promise<User | null> => {
-    const userData = await connectMetaMask();
-    if (userData) {
-      setUser(userData);
-      setShowLoginModal(false);
-      console.log('User authenticated and logged in:', userData.walletAddress);
-    }
-    return userData;
-  };
-
   const logout = async () => {
     try {
       // Clear JWT token
@@ -97,9 +80,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Clear user state
       setUser(null);
-      
-      // Force disconnect MetaMask
-      await forceDisconnectMetaMask();
       
       console.log('User logged out successfully');
     } catch (error) {
@@ -110,8 +90,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const triggerLoginModal = () => setShowLoginModal(true);
   const closeLoginModal = () => {
     setShowLoginModal(false);
-    // Reset connection state when modal is closed to prevent hanging
-    resetConnectionState();
   };
 
   const value = {
@@ -120,13 +98,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(newUser);
     },
     logout,
-    connectWallet,
     currentRoute,
     showLoginModal,
     triggerLoginModal,
     closeLoginModal,
-    forceDisconnectMetaMask,
-    authError,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

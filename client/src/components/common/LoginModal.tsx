@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useSDK } from "@metamask/sdk-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../providers/AuthContext";
+import { useMetaMaskAuth } from "../../hooks/useMetaMaskAuth";
 import { userApi } from "../../utils/userApi";
 import { User } from "../../types/User";
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
@@ -15,7 +16,10 @@ interface LoginModalProps {
 const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const { sdk, connected } = useSDK();
   const navigate = useNavigate();
-  const { setUser, user, connectWallet: authConnectWallet, authError, forceDisconnectMetaMask, closeLoginModal } = useAuth();
+  const { setUser, user, closeLoginModal } = useAuth();
+  
+  // Use MetaMask hook directly in the modal
+  const { connectMetaMask, forceDisconnectMetaMask, error: authError, resetConnectionState } = useMetaMaskAuth();
 
   const [show, setShow] = useState(false);
   const [step, setStep] = useState<'connect' | 'form'>('connect');
@@ -38,19 +42,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       setUsername('');
       setReferral('');
       setError('');
-      setIsConnecting(false); // Reset connecting state when opening
+      setIsConnecting(false);
     } else {
       setShow(false);
-      // Force disconnect MetaMask if modal is closed and not authenticated
-      if ((connected || isConnecting) && !user) {
-        forceDisconnectMetaMask();
-        sdk?.terminate();
-      }
-      // Reset any error states and connection state when modal is closed
       setError('');
       setIsConnecting(false);
+      // Reset MetaMask connection state when modal closes
+      resetConnectionState();
     }
-  }, [isOpen, connected, isConnecting, user, sdk, forceDisconnectMetaMask]);
+  }, [isOpen, resetConnectionState]);
 
   // Update error state when authError changes
   useEffect(() => {
@@ -65,7 +65,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       setIsConnecting(true);
       
       // Add a timeout to handle cases where MetaMask modal is closed
-      const connectPromise = authConnectWallet();
+      const connectPromise = connectMetaMask();
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Connection timeout - please try again')), 30000);
       });
@@ -73,6 +73,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       const authenticatedUser = await Promise.race([connectPromise, timeoutPromise]) as User | null;
       
       if (authenticatedUser) {
+        // Update context state
+        setUser(authenticatedUser);
+        closeLoginModal();
+        
         if (!authenticatedUser.username) {
           // New user or user without username - show form
           setWalletId(authenticatedUser.walletAddress);
