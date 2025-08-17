@@ -33,7 +33,7 @@ const LandingPage: React.FC = () => {
     const menuRef = React.useRef<HTMLDivElement>(null);
     const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
     const navigate = useNavigate();
-    const { user, triggerLoginModal, isConnecting } = useAuth();
+    const { user, triggerLoginModal } = useAuth();
 
     const handleEnterClick = () => {
         // If user is already authenticated, take them to dashboard
@@ -199,10 +199,10 @@ const LandingPage: React.FC = () => {
                                 
                                 <button
                                     onClick={handleEnterClick}
-                                    disabled={isConnecting}
+                                    // disabled={walletModalOpen}
                                     className="btn-special px-10 py-4"
                                 >
-                                    {isConnecting ? <LoadingScreenDots size={5} /> : 'Enter the city'}
+                                    Enter the city
                                 </button>
                             </div>
                         </div>

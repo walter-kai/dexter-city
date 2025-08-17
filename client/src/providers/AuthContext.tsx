@@ -9,8 +9,6 @@ interface AuthContextType {
   setUser: (user: User | null) => void;
   logout: () => void;
   connectWallet: () => Promise<User | null>;
-  isLoading: boolean;
-  isConnecting: boolean;
   currentRoute: string;
   showLoginModal: boolean;
   triggerLoginModal: () => void;
@@ -35,19 +33,16 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
   const currentRoute = location.pathname;
   
   // MetaMask authentication hook
-  const { isConnecting, connectWallet: connectMetaMask, resetConnectionState, forceDisconnectMetaMask, error: authError } = useMetaMaskAuth();
+  const { connectWallet: connectMetaMask, resetConnectionState, forceDisconnectMetaMask, error: authError } = useMetaMaskAuth();
 
   // Check for existing JWT token on app load
   useEffect(() => {
     const initializeAuth = async () => {
-      setIsLoading(true);
-      
       try {
         // Check if user has valid JWT token
         if (jwtStorage.isAuthenticated()) {
@@ -79,8 +74,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } catch (error) {
         console.error('Error initializing auth:', error);
         jwtStorage.clearToken();
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -128,8 +121,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     },
     logout,
     connectWallet,
-    isLoading,
-    isConnecting,
     currentRoute,
     showLoginModal,
     triggerLoginModal,

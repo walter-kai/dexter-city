@@ -41,6 +41,10 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
         }
       }
       
+      // Reset local connection state
+      setIsConnecting(false);
+      setError(null);
+      
       console.log('Force disconnected MetaMask and cleared all session data');
     } catch (err) {
       console.error('Error force disconnecting MetaMask:', err);

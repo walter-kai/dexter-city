@@ -43,7 +43,7 @@ const App: React.FC = () => {
   const onlineMenuRef = React.useRef<HTMLDivElement>(null);
   const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
   const onlineToggleButtonRef = React.useRef<HTMLButtonElement>(null);
-  const { showLoginModal, closeLoginModal, user, isLoading } = useAuth();
+  const { showLoginModal, closeLoginModal, user } = useAuth();
   const nodeRef = useRef<HTMLDivElement>(null);
 
   // Reset scroll position on route change (except for hash navigation)
