@@ -1,5 +1,6 @@
 import admin from 'firebase-admin';
 import jwt from 'jsonwebtoken';
+import { ethers } from 'ethers';
 import ApiError from '../../utils/api-error';
 import logger from '../../utils/logger';
 
@@ -26,17 +27,32 @@ export interface AuthResponse {
 }
 
 /**
- * Verify MetaMask signature and create Firebase custom token
- * For now, we'll do basic verification and rely on the frontend signature process
- * In production, you'd want proper cryptographic verification
+ * Verify MetaMask signature and authenticate user
  */
 export async function authenticateWithMetaMask(authRequest: AuthRequest): Promise<AuthResponse> {
   const { walletAddress, signature, message } = authRequest;
 
   try {
-    // Basic validation - in production you'd verify the signature cryptographically
+    // Basic validation
     if (!walletAddress || !signature || !message) {
       throw new ApiError(400, 'Missing required authentication data');
+    }
+
+    // Validate wallet address format
+    if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+      throw new ApiError(401, 'Invalid wallet address format');
+    }
+
+    // Optional: Verify the signature matches the wallet address
+    try {
+      const recoveredAddress = ethers.utils.verifyMessage(message, signature);
+      if (recoveredAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+        throw new ApiError(401, 'Signature does not match wallet address');
+      }
+      logger.info(`Signature verified for wallet: ${walletAddress}`);
+    } catch (verifyError) {
+      logger.error('Signature verification failed:', verifyError);
+      throw new ApiError(401, 'Invalid signature');
     }
 
     // Validate wallet address format (basic check)

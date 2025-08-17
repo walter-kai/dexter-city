@@ -7,7 +7,7 @@ import { userApi } from "../../utils/userApi";
 import { User } from "../../types/User";
 import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import StatusPopup from './StatusPopup';
-// import '../../styles/fading.css';
+import '../../styles/fading.css';
 
 interface LoginModalProps {
   isOpen: boolean;

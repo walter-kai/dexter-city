@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSDK } from "@metamask/sdk-react";
 import { jwtStorage } from '../utils/jwtStorage';
 import { User } from '../types/User';
@@ -26,12 +26,10 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { sdk, connected, connecting } = useSDK();
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const forceDisconnectMetaMask = useCallback(async (): Promise<void> => {
     try {
-      console.log('Starting force disconnect from MetaMask...');
-      
       // 1. Clear JWT authentication tokens first
       jwtStorage.forceLogout();
       
@@ -39,9 +37,8 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
       if (sdk && connected) {
         try {
           await sdk.disconnect();
-          console.log('MetaMask SDK disconnected');
         } catch (sdkError) {
-          console.warn('SDK disconnect failed:', sdkError);
+          // Silent fail
         }
       }
       
@@ -57,7 +54,6 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
             method: 'wallet_revokePermissions',
             params: [{ eth_accounts: {} }]
           });
-          console.log('MetaMask permissions revoked');
         } catch (revokeError) {
           // Fallback: Try to request fresh permissions (forces reconnection)
           try {
@@ -65,9 +61,8 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
               method: 'wallet_requestPermissions',
               params: [{ eth_accounts: {} }]
             });
-            console.log('Requested fresh MetaMask permissions');
           } catch (permError) {
-            console.warn('Could not revoke or refresh permissions:', permError);
+            // Silent fail
           }
         }
       }
@@ -82,14 +77,11 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
           // Remove all listeners that might be attached
           ethereum.removeAllListeners?.();
         } catch (listenerError) {
-          console.warn('Could not remove ethereum listeners:', listenerError);
+          // Silent fail
         }
       }
       
-      console.log('✅ Force disconnect completed - all MetaMask data cleared');
-      
     } catch (err) {
-      console.error('❌ Error during force disconnect:', err);
       // Even if there's an error, ensure local state is cleared
       setIsConnecting(false);
       setError(null);
@@ -106,7 +98,7 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
       
       // Warn if there's still persistent state
       if (checkForMetaMaskState()) {
-        console.warn('MetaMask state still present after clearing - this should not happen');
+        // Silent check
       }
 
       // Check if MetaMask is installed
@@ -115,13 +107,9 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
         throw new Error('MetaMask is not installed');
       }
 
-      console.log('Requesting fresh MetaMask connection...');
-      // let message = `🌃 🤖Dexter City needs your wallet ID🦾 🏙️`;
-
-      // First, request account access from MetaMask (this will prompt user if not connected)
+      // First, request account access from MetaMask
       const accounts = await ethereum.request({
         method: 'eth_requestAccounts',
-        // params: [message, ],
       }) as string[];
 
       if (!accounts || accounts.length === 0) {
@@ -129,30 +117,22 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
       }
 
       // Create a unique message for this session (no persistence)
-      const timestamp = Date.now();
-      const sessionId = Math.random().toString(36).substring(7);
       const message = `🌃 Confirm to enter Dexter City 🦾🤖`;
-
-      console.log('Requesting signature for authentication...');
 
       // Request signature from MetaMask using the connected account
       const signature = await ethereum.request({
         method: 'personal_sign',
-        params: [message, accounts[0]], // Use the first connected account
+        params: [message, accounts[0]], // Need to specify the account for personal_sign
       }) as string;
 
-      console.log('Signature received, authenticating with server...');
-
-      // Prepare request body
+      // Prepare request body - include wallet address for simplicity
       const requestBody = {
         walletAddress: accounts[0],
         signature,
         message,
       };
 
-      console.log('Sending auth request with:', requestBody);
-
-      // Send authentication request to backend with wallet address, signature, and message
+      // Send authentication request to backend
       const response = await fetch('/api/auth/metamask', {
         method: 'POST',
         headers: {
@@ -169,12 +149,8 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
       const { data } = await response.json();
       const { accessToken, user, expiresIn } = data;
 
-      console.log('JWT token received, storing securely...');
-
       // Store JWT token
       jwtStorage.setToken(accessToken, expiresIn);
-
-      console.log('Authentication successful for:', user.walletAddress);
 
       // Return user data from auth response (no additional API call needed)
       const userData: User = {
@@ -188,14 +164,12 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
         ...(user.photoUrl && { photoUrl: user.photoUrl }),
       };
 
-      console.log('Successfully authenticated with MetaMask and JWT');
+      // Redirect to dashboard on successful authentication
+      
+
       return userData;
 
     } catch (err) {
-      console.error('MetaMask authentication error:', err);
-      console.error('Error code:', (err as any)?.code);
-      console.error('Error message:', (err as any)?.message);
-      
       // Handle specific MetaMask error codes
       if ((err as any)?.code === 4001) {
         setError('Connection rejected by user');
@@ -220,12 +194,10 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
     } finally {
       setIsConnecting(false);
     }
-  }, []);
+  }, [navigate]);
 
   const disconnectWallet = useCallback(async (): Promise<void> => {
     try {
-      console.log('Disconnecting wallet...');
-      
       // Clear JWT tokens
       jwtStorage.clearToken();
       
@@ -236,9 +208,7 @@ export const useMetaMaskAuth = (): MetaMaskAuthHook => {
       setIsConnecting(false);
       setError(null);
       
-      console.log('✅ Wallet disconnected successfully');
     } catch (err) {
-      console.error('❌ Error disconnecting wallet:', err);
       setError(err instanceof Error ? err.message : 'Failed to disconnect');
     }
   }, []);

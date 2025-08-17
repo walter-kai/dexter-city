@@ -1,4 +1,5 @@
 /* This file has been moved to animations.css. You can delete this file. */
+.fade-enter {
   opacity: 0;
   /* transform: translateY(16px); */
 }
