@@ -27,6 +27,9 @@ const landingFeatures = [
 
 const LandingPage: React.FC = () => {
     const [showFooterMenu, setShowFooterMenu] = useState(false);
+    const [assetsLoaded, setAssetsLoaded] = useState(false);
+    const [animateWelcome, setAnimateWelcome] = useState(false);
+    const [animateFeatures, setAnimateFeatures] = useState(false);
     const menuRef = React.useRef<HTMLDivElement>(null);
     const toggleButtonRef = React.useRef<HTMLButtonElement>(null);
     const navigate = useNavigate();
@@ -62,6 +65,47 @@ const LandingPage: React.FC = () => {
         };
     }, [showFooterMenu]);
 
+    // Track asset loading
+    useEffect(() => {
+        const imagePromises = [
+            '/logos/eth-logo.svg',
+            '/logos/uniswap-logo.png',
+            '/icons/building-info.svg',
+            '/logos/dexter3d.svg',
+            '/lottie/blackBlocks.json'
+        ].map((src) => {
+            if (src.endsWith('.json')) {
+                // For Lottie files, just resolve immediately
+                return Promise.resolve();
+            }
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = src;
+            });
+        });
+
+        Promise.all(imagePromises)
+            .then(() => {
+                setAssetsLoaded(true);
+                // Start welcome animation first
+                setTimeout(() => {
+                    setAnimateWelcome(true);
+                    // Then start features animation after welcome completes
+                    setTimeout(() => setAnimateFeatures(true), 800);
+                }, 100);
+            })
+            .catch(() => {
+                // Even if some assets fail, show the content
+                setAssetsLoaded(true);
+                setTimeout(() => {
+                    setAnimateWelcome(true);
+                    setTimeout(() => setAnimateFeatures(true), 800);
+                }, 100);
+            });
+    }, []);
+
     return (
         <>
             {/* HUD Foreground Content */}
@@ -82,12 +126,27 @@ const LandingPage: React.FC = () => {
                         </div>
                         <div className="flex gap-8 w-full h-full items-center justify-center ">
                             {/* Features grid docked right, vertically aligned */}
-                            <div className="flex flex-col w-3/5 bg-black rounded-xl p-8 shadow-[0_0_10px_#faafe8] justify-center ">
+                            <div className={`flex flex-col w-3/5 bg-black rounded-xl p-8 shadow-[0_0_10px_#faafe8] justify-center transition-all duration-1000 ease-out ${
+                                !assetsLoaded 
+                                    ? 'opacity-0 scale-75 -translate-x-20' 
+                                    : animateFeatures 
+                                        ? 'opacity-100 scale-100 translate-x-0' 
+                                        : 'opacity-0 scale-75 -translate-x-20'
+                            }`}>
                                 <div className="gap-8 w-full flex flex-col justify-center">
                                     {landingFeatures.map((feature, index) => (
                                         <div
                                             key={index}
-                                            className="bg-[#23263a] p-4 rounded-xl border border-[#00ffe7]/30 z-10 hover:shadow-[0_0_32px_rgba(0,255,231,0.25)] transition-all duration-300 flex items-center text-left"
+                                            className={`bg-[#23263a] p-4 rounded-xl border border-[#00ffe7]/30 z-10 hover:shadow-[0_0_32px_rgba(0,255,231,0.25)] transition-all duration-700 ease-out flex items-center text-left ${
+                                                !assetsLoaded 
+                                                    ? 'opacity-0 scale-75 -translate-x-16' 
+                                                    : animateFeatures 
+                                                        ? 'opacity-100 scale-100 translate-x-0' 
+                                                        : 'opacity-0 scale-75 -translate-x-16'
+                                            }`}
+                                            style={{ 
+                                                transitionDelay: animateFeatures ? `${index * 150}ms` : '0ms'
+                                            }}
                                         >
                                             <div className="flex items-center justify-center gap-2 min-w-[100px]">
                                                 <div className='flex items-center justify-center bg-[#2e3147] rounded-full p-3 px-5 shadow-lg'>
@@ -112,8 +171,14 @@ const LandingPage: React.FC = () => {
                                 </div>
                             </div>
                             {/* Dexter Cityheader vertically centered, docked right */}
-                            <div className='flex flex-col items-center justify-center w-3/5 p-10  bg-black/85 rounded-xl shadow-[0_0_10px_#faafe8]'>
-                                    <img src="/logos/dexter3d.svg" className="absolute top-2 h-20 p-4 rounded-full shadow-[0_0_10px_#faafe8] bg-black" alt="DexterCity" />
+                            <div className={`flex flex-col items-center justify-center w-3/5 p-10 bg-black/85 rounded-xl shadow-[0_0_10px_#faafe8] transition-all duration-1000 ease-out ${
+                                !assetsLoaded 
+                                    ? 'opacity-0 scale-75 translate-y-20' 
+                                    : animateWelcome 
+                                        ? 'opacity-100 scale-100 translate-y-0' 
+                                        : 'opacity-0 scale-75 translate-y-20'
+                            }`}>
+                                <img src="/logos/dexter3d.svg" className="absolute top-2 h-20 p-4 rounded-full shadow-[0_0_10px_#faafe8] bg-black" alt="DexterCity" />
                                 {/* Group Welcome and Logo together */}
                                 <div className='mt-6'>
                                     <p
