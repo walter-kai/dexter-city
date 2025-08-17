@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaCheckCircle, FaExclamationTriangle, FaTimes, FaSpinner } from 'react-icons/fa';
 
 interface StatusFooterProps {
@@ -8,6 +8,17 @@ interface StatusFooterProps {
 }
 
 const StatusPopup: React.FC<StatusFooterProps> = ({ type, message, onClose }) => {
+  useEffect(() => {
+    // Only set timeout for non-loading types
+    if (type !== 'loading') {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 30000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [type, onClose]);
+
   const getIcon = () => {
     switch (type) {
       case 'loading':

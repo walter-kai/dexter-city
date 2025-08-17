@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import LoadingScreenDots from "../../components/common/LoadingScreenDots";
 import { useAuth } from "../../providers/AuthContext";
-import { useBalances } from "../../providers/BalanceProvider";
 import InvestmentOverview from "../../components/dashboard/InvestmentOverview";
 import UserInfoCard from "../../components/dashboard/UserInfoCard";
 import BotsList from "../../components/dashboard/BotsList";
@@ -11,7 +10,6 @@ import DailyPoolActivity from "../../components/dashboard/DailyPoolActivity";
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const { balancesLoaded } = useBalances();
   const [statRange, setStatRange] = useState<'1d' | '7d' | '30d'>('1d');
 
   const [leaderboardData] = useState([

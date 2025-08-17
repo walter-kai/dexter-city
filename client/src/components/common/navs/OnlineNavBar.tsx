@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSDK } from "@metamask/sdk-react";
 import { useAuth } from '../../../providers/AuthContext';
-import { useBalances } from '../../../providers/BalanceProvider';
 import { FaChevronDown, FaSignOutAlt, FaTachometerAlt, FaShoppingCart, FaTools, FaCog, FaPlus, FaNewspaper, FaRocket, FaBolt, FaEnvelope, FaChartLine, FaChevronLeft } from 'react-icons/fa';
-import { SiEthereum } from 'react-icons/si';
-import { formatLargeNumberEth } from '../../../utils/formatEthNumber';
 import { FaCity } from 'react-icons/fa6';
 import LoadingScreenDots from '../LoadingScreenDots';
 
@@ -22,7 +19,6 @@ const NavBar: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showFeaturesSubDropdown, setShowFeaturesSubDropdown] = useState(false);
   const { user, logout, triggerLoginModal } = useAuth();
-  const { balances, ethPrice } = useBalances();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -169,35 +165,6 @@ const NavBar: React.FC = () => {
                 className="flex items-center gap-2 bg-[#23263a] hover:bg-[#00ffe7]/20 text-[#00ffe7] font-bold py-2 px-3 rounded border border-[#00ffe7]/40 transition-all duration-200"
               >
                 <img src="/logos/dexter.svg" className="h-4 drop-shadow-[0_0_8px_#00ffe7]" alt="Profile" />
-                {balances.length > 0 && (
-                  <div className="flex items-center gap-1 text-xs">
-                    {(() => {
-                      const ethBalance = balances.find(b => b.symbol === "ETH");
-                      if (!ethBalance) return null;
-                      
-                      const formatted = formatLargeNumberEth(ethBalance.balance);
-                      return (
-                        <div className="flex flex-col items-end">
-                          <div className="flex items-center gap-1">
-                            {formatted.hasSubscript && formatted.subscriptParts ? (
-                              <span className="font-mono">
-                                {formatted.subscriptParts.before}
-                                <sub className="text-[8px]">{formatted.subscriptParts.subscript}</sub>
-                                {formatted.subscriptParts.after}
-                              </span>
-                            ) : (
-                              <span className="font-mono">{formatted.formatted}</span>
-                            )}
-                            <SiEthereum className="w-3 h-3 text-[#627eea]" />
-                          </div>
-                          {/* {ethBalance.usdValue && (
-                            <span className="text-[#b8eaff] text-[10px]">${ethBalance.usdValue}</span>
-                          )} */}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
                 <FaChevronDown className={`text-xs transition-transform duration-200 ${showDropdown ? 'rotate-180' : ''}`} />
               </button>
               

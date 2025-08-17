@@ -6,7 +6,6 @@ import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { MetaMaskProvider } from '@metamask/sdk-react';
 import { AuthProvider } from './providers/AuthContext';
-import { BalanceProvider } from './providers/BalanceProvider';
 import { PoolProvider } from './providers/PoolContext';
 import { TrendingCoinsProvider } from './providers/TrendingCoinsContext';
 
@@ -66,13 +65,11 @@ root.render(
       }}
     >
       <AuthProvider>
-        <BalanceProvider>
-          <PoolProvider>
-            <TrendingCoinsProvider>
-              <App />
-            </TrendingCoinsProvider>
-          </PoolProvider>
-        </BalanceProvider>
+        <PoolProvider>
+          <TrendingCoinsProvider>
+            <App />
+          </TrendingCoinsProvider>
+        </PoolProvider>
       </AuthProvider>
     </MetaMaskProvider>
   </Router>

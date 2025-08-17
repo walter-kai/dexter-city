@@ -51,14 +51,14 @@ const LoadingStateMessage: React.FC<LoadingStateMessageProps> = ({
         <div className="flex flex-col items-center">
           <LoadingScreenDots size={3} />
           <p className="text-[#e0e7ef] font-semibold mt-2 mb-1">Please wait</p>
-          <p className="text-[#e0e7ef]/60 text-sm">Loading your balance data...</p>
+          <p className="text-[#e0e7ef]/60 text-sm">Loading your data...</p>
         </div>
       ) : (
         <div className="flex flex-col items-center">
           <FaClock className="text-[#ffcc00] text-2xl mb-3 animate-pulse" />
           <p className="text-[#e0e7ef] font-semibold mb-1">⏱️ Taking longer than expected...</p>
           <p className="text-[#e0e7ef]/60 text-xs mt-1">
-            If you're using MetaMask Mobile, you may need to open the app to refresh balances.
+            Please wait while we load your data.
           </p>
         </div>
       )}

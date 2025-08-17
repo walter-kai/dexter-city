@@ -1,7 +1,6 @@
 import React from 'react';
 import { FaEye, FaShoppingCart, FaHandshake, FaTag, FaTrash } from 'react-icons/fa';
 import { SiEthereum } from 'react-icons/si';
-import { formatLargeNumberEth } from '../../utils/formatEthNumber';
 
 interface BotCardProps {
   bot: {

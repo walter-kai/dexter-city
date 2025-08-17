@@ -35,6 +35,13 @@ export const jwtStorage = {
     localStorage.removeItem(JWT_EXPIRY_KEY);
   },
 
+  // Force clear all authentication data
+  forceLogout: () => {
+    localStorage.removeItem(JWT_STORAGE_KEY);
+    localStorage.removeItem(JWT_EXPIRY_KEY);
+    console.log('JWT tokens cleared during force logout');
+  },
+
   // Check if user is authenticated
   isAuthenticated: (): boolean => {
     return jwtStorage.getToken() !== null;
