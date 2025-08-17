@@ -5,9 +5,7 @@ import { useAuth } from "../../providers/AuthContext";
 import { useMetaMaskAuth } from "../../hooks/useMetaMaskAuth";
 import { userApi } from "../../utils/userApi";
 import { User } from "../../types/User";
-import { CSSTransition, SwitchTransition } from 'react-transition-group';
 import StatusPopup from './StatusPopup';
-import '../../styles/fading.css';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -23,7 +21,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const { connectMetaMask, forceDisconnectMetaMask, error: authError, resetConnectionState } = useMetaMaskAuth();
 
   const [show, setShow] = useState(false);
-  const [step, setStep] = useState<'connect' | 'form'>('connect');
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [walletId, setWalletId] = useState<string | null>(null);
   const [username, setUsername] = useState('');
   const [referral, setReferral] = useState('');
@@ -32,22 +30,28 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   const [checkingUsername, setCheckingUsername] = useState(false);
   const [usernameCheckTimeout, setUsernameCheckTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [citizenshipFormFilled, setCitizenshipFormFilled] = useState(false);
+  const [profilePictureId, setProfilePictureId] = useState<number>(Math.floor(Math.random() * 10000));
   const nodeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
       setShow(false);
       setTimeout(() => setShow(true), 10);
-      setStep('connect');
+      setShowRegistrationForm(false);
       setWalletId(null);
       setUsername('');
       setReferral('');
       setStatusMessage(null);
       setIsConnecting(false);
+      setCitizenshipFormFilled(false);
+      setProfilePictureId(Math.floor(Math.random() * 10000));
     } else {
       setShow(false);
       setStatusMessage(null);
       setIsConnecting(false);
+      setShowRegistrationForm(false);
+      setCitizenshipFormFilled(false);
       // Reset MetaMask connection state when modal closes
       resetConnectionState();
     }
@@ -61,6 +65,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   }, [authError]);
 
   const connectWallet = async () => {
+    // Check if citizenship form is filled before allowing connection
+    if (!citizenshipFormFilled || !username || username.length < 3 || usernameAvailable !== true) {
+      setStatusMessage({ 
+        type: 'error', 
+        message: 'Please complete the citizenship registration form first' 
+      });
+      return;
+    }
+
     try {
       setStatusMessage(null);
       setIsConnecting(true);
@@ -70,14 +83,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
       if (authenticatedUser) {
         // Update context state
         setUser(authenticatedUser);
-        closeLoginModal();
         
         if (!authenticatedUser.username) {
-          // New user or user without username - show form
-          setWalletId(authenticatedUser.walletAddress);
-          setStep('form');
+          // New user - update with citizenship form data
+          try {
+            const updatedUser = await userApi.updateUser({
+              username: username.trim(),
+              ...(referral.trim() && { referralId: referral.trim() }),
+            });
+            setUser(updatedUser);
+            closeLoginModal();
+            navigate("/i/dashboard");
+            onClose();
+          } catch (updateErr: any) {
+            console.error('Error updating user:', updateErr);
+            setStatusMessage({ type: 'error', message: updateErr?.message || 'Failed to update user profile' });
+          }
         } else {
-          // Existing user with username - redirect to dashboard
+          // Existing user with username - close modal and redirect to dashboard
+          closeLoginModal();
           navigate("/i/dashboard");
           onClose();
         }
@@ -165,119 +189,159 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     setUsernameCheckTimeout(timeout);
   };
 
+  // Check if citizenship form is complete
+  useEffect(() => {
+    const isComplete = username.length >= 3 && usernameAvailable === true && !checkingUsername;
+    setCitizenshipFormFilled(isComplete);
+  }, [username, usernameAvailable, checkingUsername]);
+
+  const regenerateProfilePicture = () => {
+    setProfilePictureId(Math.floor(Math.random() * 10000));
+  };
+
   if (!isOpen) return null;
 
   return (
     <>
       <div className={`fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center z-[30] transition-opacity duration-500 ${show ? 'opacity-100' : 'opacity-0'}`}>
-        <div className="bg-[#23263a] w-full max-w-md rounded-lg p-8 relative border border-[#00ffe7]/30 shadow-[0_0_24px_#00ffe7]">
+        <div className="bg-[#23263a] w-full max-w-lg rounded-lg p-8 relative border border-[#00ffe7]/30 shadow-[0_0_24px_#00ffe7]">
           <button
             onClick={() => {
               forceDisconnectMetaMask();
-              closeLoginModal(); // This resets the connection state
-              onClose(); // This triggers the parent component's close handler
+              closeLoginModal();
+              onClose();
             }}
             className="absolute z-10 top-4 right-4 bg-[#181a23] p-2 rounded-full hover:bg-[#00ffe7] hover:text-[#181a23] text-[#00ffe7] shadow-[0_0_8px_#00ffe7] transition"
           >
             ✕
           </button>
-          <SwitchTransition mode="out-in">
-            <CSSTransition
-              key={step}
-              classNames="fade"
-              timeout={400}
-              unmountOnExit
-              nodeRef={nodeRef}
-            >
-              <div ref={nodeRef}>
-                {step === 'connect' && (
-                  <>
-                    <h2 className="text-2xl font-bold text-center text-[#00ffe7] mb-6 drop-shadow-[0_0_8px_#00ffe7]">
-                      Connect Your Wallet
-                    </h2>
-                    <div className="text-center mb-6">
-                      <p className="text-[#e0e7ef] mb-4">
-                        Connect your MetaMask wallet to access Dexter City's trading bots and features.
-                      </p>
+          
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-center text-[#00ffe7] mb-6 drop-shadow-[0_0_8px_#00ffe7]">
+              Dexter City Homeland Security
+            </h2>
+
+            {/* Citizenship Registration Form */}
+            <div className="space-y-6">
+              <h3 className="text-xl font-semibold text-center text-[#e0e7ef] border-b border-[#00ffe7]/30 pb-2">
+                Citizenship
+              </h3>
+              
+              {/* Driver's License/Passport Style Card */}
+              <div className="bg-gradient-to-r from-[#181a23] to-[#23263a] border border-[#00ffe7]/50 rounded-lg p-6 shadow-[0_0_16px_#00ffe7/20]">
+                <div className="flex items-start space-x-4">
+                  {/* Profile Picture */}
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <img
+                        src={`https://robohash.org/dextercity-${username}?set=set1&size=300x400`}
+                        alt={`Citizen ${profilePictureId}`}
+                        className="w-30 h-40 rounded-lg border-2 border-[#00ffe7] shadow-lg bg-[#181a23] transition-all duration-500"
+                      />
+
                     </div>
-                    <button
-                      onClick={connectWallet}
-                      disabled={isConnecting}
-                      className={`w-full font-bold py-3 px-6 rounded transition-all duration-500 ${
-                        isConnecting 
-                          ? "bg-orange-500 text-white shadow-[0_0_8px_orange] hover:shadow-[0_0_16px_orange]"
-                          : "bg-[#00ffe7] text-[#181a23] hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c]"
-                      } disabled:opacity-50`}
-                    >
-                      {isConnecting ? "Connecting..." : "Connect MetaMask"}
-                    </button>
-                    <div className="mt-4 text-center">
-                      <p className="text-[#e0e7ef] text-sm">
-                        Don't have MetaMask?
-                        <a
-                          href="https://metamask.io/download/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#00ffe7] hover:text-[#ff005c] transition ml-1"
-                        >
-                          Download here
-                        </a>
-                      </p>
-                    </div>
-                  </>
-                )}
-                {step === 'form' && (
-                  <form onSubmit={handleFormSubmit} className="space-y-6">
-                    <h2 className="text-2xl font-bold text-center text-[#00ffe7] mb-6 drop-shadow-[0_0_8px_#00ffe7]">
-                      Set up your Dexter City account
-                    </h2>
+                  </div>
+
+                  {/* Form Fields */}
+                  <div className="flex-1 space-y-4">
                     <div>
-                      <label className="block text-[#e0e7ef] mb-2 font-semibold">Username</label>
+                      <label className="block text-[#e0e7ef] text-sm font-semibold mb-1">CITIZEN NAME</label>
                       <input
                         type="text"
                         value={username}
                         onChange={handleUsernameChange}
-                        className="w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7]"
-                        placeholder="Choose a username"
+                        className="w-full px-3 py-2 bg-[#0f1015] border border-[#00ffe7]/30 rounded text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] text-sm"
+                        placeholder="Enter your citizen name"
                         required
                       />
-                      {!checkingUsername && username.length < 3 && (
-                          <span className="text-xs text-white ml-2">
-                            Username must be at least 3 characters (example: 🦄🦕🤖)
-                          </span>
+                      {username.length < 3 && (
+                        <span className="text-xs text-orange-400">
+                          Minimum 3 characters required
+                        </span>
                       )}
                       {checkingUsername && username.length >= 3 && (
-                        <span className="text-xs text-[#00ffe7] ml-2">Checking availability...</span>
+                        <span className="text-xs text-[#00ffe7]">Verifying availability...</span>
                       )}
                       {username && username.length >= 3 && usernameAvailable === false && !checkingUsername && (
-                        <span className="text-xs text-red-500 ml-2">Username is taken</span>
+                        <span className="text-xs text-red-400">❌ Name unavailable</span>
                       )}
                       {username && username.length >= 3 && usernameAvailable === true && !checkingUsername && (
-                        <span className="text-xs text-green-400 ml-2">Username is available</span>
+                        <span className="text-xs text-green-400">✅ Name available</span>
                       )}
                     </div>
+
                     <div>
-                      <label className="block text-[#e0e7ef] mb-2 font-semibold">Referral (Get 1000 commission-free trades)</label>
+                      <label className="block text-[#e0e7ef] text-sm font-semibold mb-1">REFERRAL CODE</label>
                       <input
                         type="text"
                         value={referral}
                         onChange={e => setReferral(e.target.value)}
-                        className="w-full px-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7]"
-                        placeholder="Referral code or username (optional)"
+                        className="w-full px-3 py-2 bg-[#0f1015] border border-[#00ffe7]/30 rounded text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] text-sm"
+                        placeholder="Optional referral code"
                       />
+                      <span className="text-xs text-[#00ffe7]">Get 1000 commission-free trades</span>
                     </div>
-                    <button
-                      type="submit"
-                      className="w-full bg-[#00ffe7] text-[#181a23] font-bold py-3 px-6 rounded hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c] transition"
-                      disabled={!username || username.length < 3 || checkingUsername || usernameAvailable !== true}
-                    >
-                      Continue
-                    </button>
-                  </form>
-                )}
+
+                    {/* Status Badge */}
+                    <div className="flex items-center justify-between mt-4">
+                      <div className="text-xs text-[#e0e7ef]">
+                        <div>CITIZENSHIP STATUS:</div>
+                        <div className={`font-bold ${citizenshipFormFilled ? 'text-green-400' : 'text-orange-400'}`}>
+                          {citizenshipFormFilled ? '✅ APPROVED' : '⏳ PENDING'}
+                        </div>
+                      </div>
+                      <div className="text-xs text-[#e0e7ef] text-right">
+                        <div>ISSUED BY:</div>
+                        <div className="font-bold text-[#00ffe7]">DEXTER CITY</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </CSSTransition>
-          </SwitchTransition>
+
+              {/* Connect MetaMask Button */}
+              <div className="space-y-4">
+                <button
+                  onClick={connectWallet}
+                  disabled={isConnecting || !citizenshipFormFilled}
+                  className={`w-full font-bold py-3 px-6 rounded transition-all duration-500 ${
+                    !citizenshipFormFilled
+                      ? "bg-gray-600 text-gray-300 cursor-not-allowed"
+                      : isConnecting 
+                        ? "bg-orange-500 text-white shadow-[0_0_8px_orange] hover:shadow-[0_0_16px_orange]"
+                        : "bg-[#00ffe7] text-[#181a23] hover:bg-[#ff005c] hover:text-white shadow-[0_0_8px_#00ffe7] hover:shadow-[0_0_16px_#ff005c]"
+                  } disabled:opacity-50`}
+                >
+                  {!citizenshipFormFilled 
+                    ? "Complete Citizenship Form First"
+                    : isConnecting 
+                      ? "Connecting..." 
+                      : "Connect MetaMask & Enter City"
+                  }
+                </button>
+
+                {/* {!citizenshipFormFilled && (
+                  <div className="text-center text-xs text-orange-400">
+                    ⚠️ Complete the citizenship registration above to proceed
+                  </div>
+                )} */}
+
+                <div className="text-center">
+                  <p className="text-[#e0e7ef] text-sm">
+                    Don't have MetaMask?
+                    <a
+                      href="https://metamask.io/download/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#00ffe7] hover:text-[#ff005c] transition ml-1"
+                    >
+                      Download here
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
