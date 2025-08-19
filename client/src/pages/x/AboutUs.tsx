@@ -203,280 +203,282 @@ const AboutUs: React.FC = () => {
 		<div className="fixed inset-0 bg-[#23263a]/70 overflow-hidden animate-fade-in-up">
 			<div className="relative w-full h-full flex justify-center items-start">
 				<div className="w-full h-screen flex justify-center custom-scrollbar" style={{ overflowY: 'auto' }}>
-					<div className="h-fit">
-						<div className="max-w-4xl w-full px-4 py-[200px] mx-auto">
-							<div className="bg-[#181a23]/90 rounded-3xl border-2 border-[#00ffe7]/30 shadow-[0_0_32px_#00ffe7]/20 backdrop-blur-md overflow-hidden relative">
-				{/* Neon border corners */}
-				<span className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-3xl opacity-70 animate-pulse" />
-				<span className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-3xl opacity-70 animate-pulse" />
-				<span className="absolute bottom-0 left-0 w-10 h-10 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-3xl opacity-70 animate-pulse" />
-				<span className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-[#00ffe7] rounded-br-3xl opacity-70 animate-pulse" />
-				{/* Header Profile Section */}
-				<div className="px-6 pt-8 pb-4">
-					{/* Profile Picture */}
-					<div className="flex justify-center mb-4">
-						<div className="relative">
-							<img
-								src="https://robohash.org/walt?set=set1&size=200x200"
-								alt="Walt"
-								className="w-24 h-24 rounded-full border-4 border-[#00ffe7]/60 shadow-[0_0_16px_#00ffe7aa]"
-							/>
-							<div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[#00ffe7] rounded-full border-2 border-[#181a23]"></div>
-						</div>
-					</div>
+					<div className="max-w-7xl mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-5 gap-8">
+						{/* Profile Card - Centered */}
+						<div className="flex justify-center mb-48 col-span-2">
+							<div className="bg-[#181a23]/90 rounded-3xl border-2 border-[#00ffe7]/30 shadow-[0_0_32px_#00ffe7]/20 backdrop-blur-md overflow-hidden relative h-fit max-w-md w-full">
+								{/* Neon border corners */}
+								<span className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-3xl opacity-70 animate-pulse" />
+								<span className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-3xl opacity-70 animate-pulse" />
+								<span className="absolute bottom-0 left-0 w-10 h-10 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-3xl opacity-70 animate-pulse" />
+								<span className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-[#00ffe7] rounded-br-3xl opacity-70 animate-pulse" />
+								{/* Header Profile Section */}
+								<div className="px-4 pt-6 pb-3">
+									{/* Profile Picture */}
+									<div className="flex justify-center mb-3">
+										<div className="relative">
+											<img
+												src="https://robohash.org/dextercity-walt?set=set1&size=200x200"
+												alt="Walt"
+												className="w-20 h-20 rounded-full border-4 border-[#00ffe7]/60 shadow-[0_0_16px_#00ffe7aa]"
+											/>
+											<div className="absolute -bottom-1 -right-1 w-5 h-5 bg-[#00ffe7] rounded-full border-2 border-[#181a23]"></div>
+										</div>
+									</div>
 
-					{/* Profile Info */}
-					<div className="text-center mb-4">
-						<h1 className="text-2xl font-bold text-[#00ffe7] mb-1">Walt</h1>
-						<p className="text-[#faafe8] text-sm mb-2">Tech Visionary & DexterCity Founder</p>
-						<p className="text-[#e0e7ef] text-sm leading-relaxed">
-							Almost 20 years in the tech industry. Building the future of automated trading.
-						</p>
-					</div>
+									{/* Profile Info */}
+									<div className="text-center mb-3">
+										<h1 className="text-xl font-bold text-[#00ffe7] mb-1">Walt</h1>
+										<p className="text-[#faafe8] text-xs mb-1">Tech Visionary & DexterCity Founder</p>
+										<p className="text-[#e0e7ef] text-xs leading-relaxed">
+											Almost 20 years in the tech industry. Building the future of automated trading.
+										</p>
+									</div>
 
-					{/* Link in Bio */}
-					<div className="mb-4">
-						<a 
-							href="https://dexter.city" 
-							className="flex items-center justify-center gap-2 bg-[#00ffe7]/10 border border-[#00ffe7]/30 rounded-xl py-2 px-4 text-[#00ffe7] text-sm hover:bg-[#00ffe7]/20 transition-colors"
-						>
-							<FaExternalLinkAlt className="w-3 h-3" />
-							dexter.city
-						</a>
-					</div>
-
-					{/* Social Media Icons */}
-					<div className="flex justify-center gap-4 mb-6">
-						<a 
-							href="#" 
-							className="w-10 h-10 bg-[#1da1f2]/20 border border-[#1da1f2]/40 rounded-xl flex items-center justify-center hover:bg-[#1da1f2]/30 transition-colors"
-						>
-							<FaTwitter className="w-5 h-5 text-[#1da1f2]" />
-						</a>
-						<a 
-							href="#" 
-							className="w-10 h-10 bg-[#0077b5]/20 border border-[#0077b5]/40 rounded-xl flex items-center justify-center hover:bg-[#0077b5]/30 transition-colors"
-						>
-							<FaLinkedin className="w-5 h-5 text-[#0077b5]" />
-						</a>
-					</div>
-				</div>
-
-				{/* Experience Grid */}
-				<div className="px-6 pb-8">
-					<h2 className="text-lg font-semibold text-[#00ffe7] mb-4 text-center">Experience Highlights</h2>
-					<div className="grid grid-cols-3 gap-3">
-						{experienceTiles.map((tile, index) => (
-							<div
-								key={index}
-								className="bg-[#23263a]/80 rounded-2xl p-4 border border-[#00ffe7]/20 hover:border-[#00ffe7]/40 transition-colors group"
-							>
-								<div className="text-center mb-3">
-									<span className="text-2xl mb-2 block">{tile.icon}</span>
-									<h3 className="text-xs font-semibold text-[#00ffe7] mb-2 leading-tight">
-										{tile.category}
-									</h3>
-								</div>
-								<div className="space-y-1">
-									{tile.companies.map((company, companyIndex) => (
-										<div
-											key={companyIndex}
-											className="text-xs text-[#e0e7ef] bg-[#181a23]/60 rounded-lg px-2 py-1 text-center"
+									{/* Link in Bio */}
+									<div className="mb-3">
+										<a 
+											href="https://dexter.city" 
+											className="flex items-center justify-center gap-2 bg-[#00ffe7]/10 border border-[#00ffe7]/30 rounded-xl py-1.5 px-3 text-[#00ffe7] text-xs hover:bg-[#00ffe7]/20 transition-colors"
 										>
-											{company}
-										</div>
-									))}
-								</div>
-							</div>
-						))}
-					</div>
-				</div>
-			</div>
+											<FaExternalLinkAlt className="w-2.5 h-2.5" />
+											dexter.city
+										</a>
+									</div>
 
-			{/* Telegram Social Section */}
-			<div className="mt-16 w-full">
-				<h2 className="text-3xl font-bold text-[#00ffe7] mb-8 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center flex items-center justify-center gap-3">
-					<FaTelegramPlane className="text-[#0088cc] text-4xl" />
-					Join Our Community
-				</h2>
-				<p className="text-lg text-[#faafe8] mb-8 text-center max-w-2xl mx-auto">
-					Telegram is the heart of Dexter City's community. Connect, share, and stay updated with our channels, group, and bot!
-				</p>
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-					{telegramCards.map((card) => (
-						<div
-							key={card.title}
-							className={`relative flex flex-col items-center bg-[#181c23] border-2 ${card.borderColor} rounded-2xl shadow-[0_0_32px_#00ffe7]/20 p-6 passport-card overflow-hidden`}
-						>
-							<div className="flex flex-col items-center mb-4">
-								<div className="h-16 flex items-center justify-center mb-2">
-									{card.icon}
+									{/* Social Media Icons */}
+									<div className="flex justify-center gap-3 mb-4">
+										<a 
+											href="#" 
+											className="w-8 h-8 bg-[#1da1f2]/20 border border-[#1da1f2]/40 rounded-xl flex items-center justify-center hover:bg-[#1da1f2]/30 transition-colors"
+										>
+											<FaTwitter className="w-4 h-4 text-[#1da1f2]" />
+										</a>
+										<a 
+											href="#" 
+											className="w-8 h-8 bg-[#0077b5]/20 border border-[#0077b5]/40 rounded-xl flex items-center justify-center hover:bg-[#0077b5]/30 transition-colors"
+										>
+											<FaLinkedin className="w-4 h-4 text-[#0077b5]" />
+										</a>
+									</div>
 								</div>
-								<h3 className={`text-xl font-bold ${card.titleColor} mb-2 text-center`}>
-									{card.title}
-								</h3>
-								<p className="text-[#e0e7ef] text-sm text-center mb-4">
-									{card.desc}
-								</p>
+
+								{/* Experience Grid */}
+								<div className="px-4 pb-6">
+									<h2 className="text-base font-semibold text-[#00ffe7] mb-3 text-center">Experience Highlights</h2>
+									<div className="grid grid-cols-2 gap-2">
+										{experienceTiles.map((tile, index) => (
+											<div
+												key={index}
+												className="bg-[#23263a]/80 rounded-xl p-3 border border-[#00ffe7]/20 hover:border-[#00ffe7]/40 transition-colors group"
+											>
+												<div className="text-center mb-2">
+													<span className="text-lg mb-1 block">{tile.icon}</span>
+													<h3 className="text-xs font-semibold text-[#00ffe7] mb-1 leading-tight">
+														{tile.category}
+													</h3>
+												</div>
+												<div className="space-y-1">
+													{tile.companies.map((company, companyIndex) => (
+														<div
+															key={companyIndex}
+															className="text-xs text-[#e0e7ef] bg-[#181a23]/60 rounded-lg px-1.5 py-0.5 text-center"
+														>
+															{company}
+														</div>
+													))}
+												</div>
+											</div>
+										))}
+									</div>
+								</div>
 							</div>
-							<div className="mt-auto w-full flex justify-center">
-								<a
-									href={card.href}
-									target="_blank"
-									rel="noopener noreferrer"
-									className={`inline-block w-full px-4 py-2 ${card.buttonColor} ${card.buttonTextColor} font-bold rounded-lg shadow transition text-center text-sm`}
-								>
-									{card.buttonText}
-								</a>
-							</div>
-							{/* Neon HUD corners */}
-							<span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-2xl opacity-60 animate-pulse" />
-							<span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-2xl opacity-60 animate-pulse" />
-							<span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-2xl opacity-60 animate-pulse" />
-							<span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#00ffe7] rounded-br-2xl opacity-60 animate-pulse" />
 						</div>
-					))}
-				</div>
-			</div>
 
-			{/* Contact Section */}
-			<div className="mt-16 w-full">
-				<h2 className="text-3xl font-bold text-[#faafe8] mb-8 drop-shadow-[0_0_8px_#faafe8] tracking-widest text-center">
-					Get In Touch
-				</h2>
-				<div className="flex justify-center">
-					<div className="relative bg-[#23263a] border-2 border-[#00ffe7]/30 rounded-2xl shadow-[0_0_32px_#00ffe7]/20 passport-card overflow-hidden p-8 w-full max-w-2xl">
-						{!showCaptcha ? (
-							<div className="text-center">
-								<p className="text-[#e0e7ef] mb-6 text-lg">
-									We'd love to hear from you! Click the button below to get in touch with our team.
-								</p>
-								<button
-									onClick={handleContactClick}
-									className="btn-green flex items-center justify-center gap-2 mx-auto px-8 py-4 text-lg font-semibold transform transition-all duration-300 hover:scale-105"
-								>
-									<FaEnvelope />
-									Contact Us
-								</button>
-							</div>
-						) : showSuccess ? (
-							<div className="text-center">
-								<div className="bg-gradient-to-r from-green-500/20 to-green-500/10 border border-green-500/50 rounded-lg p-8">
-									<FaCheckCircle className="text-green-500 text-6xl mx-auto mb-4" />
-									<h3 className="text-green-500 text-xl font-bold mb-2">Verification Successful!</h3>
-									<p className="text-[#e0e7ef]">Loading contact form...</p>
-								</div>
-							</div>
-						) : showForm ? (
-							<form onSubmit={handleFormSubmit} className="space-y-6">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-									<div>
-										<div className="relative">
-											<FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00ffe7]/60" />
-											<input
-												type="text"
-												name="name"
-												value={formData.name}
-												onChange={handleInputChange}
-												disabled={isSubmitting}
-												className={`w-full pl-10 pr-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
-													isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-												}`}
-												placeholder="Your name"
-												required
-											/>
-										</div>
-									</div>
-									<div>
-										<div className="relative">
-											<FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00ffe7]/60" />
-											<input
-												type="email"
-												name="email"
-												value={formData.email}
-												onChange={handleInputChange}
-												disabled={isSubmitting}
-												className={`w-full pl-10 pr-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
-													isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-												}`}
-												placeholder="Your email"
-												required
-											/>
-										</div>
-									</div>
-								</div>
-								<div>
-									<div className="relative">
-										<FaBriefcase className="absolute left-3 top-4 text-[#00ffe7]/60" />
-										<input
-											type="text"
-											name="business"
-											value={formData.business}
-											onChange={handleInputChange}
-											disabled={isSubmitting}
-											className={`w-full pl-10 pr-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
-												isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-											}`}
-											placeholder="Your company or organization (optional)"
-										/>
-									</div>
-								</div>
-								<div>
-									<div className="relative">
-										<FaComment className="absolute left-3 top-4 text-[#00ffe7]/60" />
-										<textarea
-											name="message"
-											value={formData.message}
-											onChange={handleInputChange}
-											disabled={isSubmitting}
-											rows={6}
-											className={`w-full pl-10 pr-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] resize-vertical ${
-												isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-											}`}
-											placeholder="Tell us about your project, questions, or how we can help you..."
-											required
-										/>
-									</div>
-								</div>
-								<div className="text-center">
-									<button
-										type="submit"
-										disabled={isSubmitting}
-										className={`btn-green px-8 py-3 text-lg font-semibold transform transition-all duration-300 ${
-											isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
-										}`}
+						{/* Telegram Social Section */}
+						<div className="mb-16 col-span-3">
+							<h2 className="text-3xl font-bold text-[#00ffe7] mb-8 drop-shadow-[0_0_8px_#00ffe7] tracking-widest text-center flex items-center justify-center gap-3">
+								<FaTelegramPlane className="text-[#0088cc] text-4xl" />
+								Join Our Community
+							</h2>
+							<p className="text-lg text-[#faafe8] mb-8 text-center max-w-2xl mx-auto">
+								Telegram is the heart of Dexter City's community. Connect, share, and stay updated with our channels, group, and bot!
+							</p>
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+								{telegramCards.map((card) => (
+									<div
+										key={card.title}
+										className={`relative flex flex-col items-center bg-[#181c23] border-2 ${card.borderColor} rounded-2xl shadow-[0_0_32px_#00ffe7]/20 p-6 passport-card overflow-hidden`}
 									>
-										{isSubmitting ? 'Sending...' : 'Send Message'}
-									</button>
-								</div>
-							</form>
-						) : (
-							<div>
-								<h3 className="text-xl font-bold text-[#00ffe7] mb-4 text-center">Please complete the verification</h3>
-								<SliderCaptcha
-									onSuccess={handleCaptchaSuccess}
-									onFail={handleCaptchaFail}
-									onRefresh={handleCaptchaRefresh}
-								/>
+										<div className="flex flex-col items-center mb-4">
+											<div className="h-16 flex items-center justify-center mb-2">
+												{card.icon}
+											</div>
+											<h3 className={`text-xl font-bold ${card.titleColor} mb-2 text-center`}>
+												{card.title}
+											</h3>
+											<p className="text-[#e0e7ef] text-sm text-center mb-4">
+												{card.desc}
+											</p>
+										</div>
+										<div className="mt-auto w-full flex justify-center">
+											<a
+												href={card.href}
+												target="_blank"
+												rel="noopener noreferrer"
+												className={`inline-block w-full px-4 py-2 ${card.buttonColor} ${card.buttonTextColor} font-bold rounded-lg shadow transition text-center text-sm`}
+											>
+												{card.buttonText}
+											</a>
+										</div>
+										{/* Neon HUD corners */}
+										<span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-2xl opacity-60 animate-pulse" />
+										<span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-2xl opacity-60 animate-pulse" />
+										<span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-2xl opacity-60 animate-pulse" />
+										<span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#00ffe7] rounded-br-2xl opacity-60 animate-pulse" />
+									</div>
+								))}
 							</div>
-						)}
-						{/* Neon HUD corners */}
-						<span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-2xl opacity-60 animate-pulse" />
-						<span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-2xl opacity-60 animate-pulse" />
-						<span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-2xl opacity-60 animate-pulse" />
-						<span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#00ffe7] rounded-br-2xl opacity-60 animate-pulse" />
-					</div>
-				</div>
-			</div>
-
-			{showStatusFooter && (
-				<StatusPopup
-					type={statusType}
-					message={statusMessage}
-					onClose={() => setShowStatusFooter(false)}
-				/>
-			)}
+						{/* Contact Section */}
+						<div className="w-full mt-12">
+							<h2 className="text-3xl font-bold text-[#faafe8] mb-8 drop-shadow-[0_0_8px_#faafe8] tracking-widest text-center">
+								Get In Touch
+							</h2>
+							<div className="flex justify-center">
+								<div className="relative bg-[#23263a] border-2 border-[#00ffe7]/30 rounded-2xl shadow-[0_0_32px_#00ffe7]/20 passport-card overflow-hidden p-8 w-full max-w-2xl">
+									{/* Contact form content */}
+									{!showCaptcha ? (
+										<div className="text-center">
+											<p className="text-[#e0e7ef] mb-6 text-lg">
+												We'd love to hear from you! Click the button below to get in touch with our team.
+											</p>
+											<button
+												onClick={handleContactClick}
+												className="btn-green flex items-center justify-center gap-2 mx-auto px-8 py-4 text-lg font-semibold transform transition-all duration-300 hover:scale-105"
+											>
+												<FaEnvelope />
+												Contact Us
+											</button>
+										</div>
+									) : showSuccess ? (
+										<div className="text-center">
+											<div className="bg-gradient-to-r from-green-500/20 to-green-500/10 border border-green-500/50 rounded-lg p-8">
+												<FaCheckCircle className="text-green-500 text-6xl mx-auto mb-4" />
+												<h3 className="text-green-500 text-xl font-bold mb-2">Verification Successful!</h3>
+												<p className="text-[#e0e7ef]">Loading contact form...</p>
+											</div>
+										</div>
+									) : showForm ? (
+										<form onSubmit={handleFormSubmit} className="space-y-6">
+											<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+												<div>
+													<div className="relative">
+														<FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00ffe7]/60" />
+														<input
+															type="text"
+															name="name"
+															value={formData.name}
+															onChange={handleInputChange}
+															disabled={isSubmitting}
+															className={`w-full pl-10 pr-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+																isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+															}`}
+															placeholder="Your name"
+															required
+														/>
+													</div>
+												</div>
+												<div>
+													<div className="relative">
+														<FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#00ffe7]/60" />
+														<input
+															type="email"
+															name="email"
+															value={formData.email}
+															onChange={handleInputChange}
+															disabled={isSubmitting}
+															className={`w-full pl-10 pr-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+																isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+															}`}
+															placeholder="Your email"
+															required
+														/>
+													</div>
+												</div>
+											</div>
+											<div>
+												<div className="relative">
+													<FaBriefcase className="absolute left-3 top-4 text-[#00ffe7]/60" />
+													<input
+														type="text"
+														name="business"
+														value={formData.business}
+														onChange={handleInputChange}
+														disabled={isSubmitting}
+														className={`w-full pl-10 pr-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] ${
+															isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+														}`}
+														placeholder="Your company or organization (optional)"
+													/>
+												</div>
+											</div>
+											<div>
+												<div className="relative">
+													<FaComment className="absolute left-3 top-4 text-[#00ffe7]/60" />
+													<textarea
+														name="message"
+														value={formData.message}
+														onChange={handleInputChange}
+														disabled={isSubmitting}
+														rows={6}
+														className={`w-full pl-10 pr-4 py-3 bg-[#181a23] border border-[#00ffe7]/30 rounded-lg text-[#e0e7ef] focus:outline-none focus:border-[#00ffe7] focus:ring-1 focus:ring-[#00ffe7] resize-vertical ${
+															isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+														}`}
+														placeholder="Tell us about your project, questions, or how we can help you..."
+														required
+													/>
+												</div>
+											</div>
+											<div className="text-center">
+												<button
+													type="submit"
+													disabled={isSubmitting}
+													className={`btn-green px-8 py-3 text-lg font-semibold transform transition-all duration-300 ${
+														isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'
+													}`}
+												>
+													{isSubmitting ? 'Sending...' : 'Send Message'}
+												</button>
+											</div>
+										</form>
+									) : (
+										<div>
+											<h3 className="text-xl font-bold text-[#00ffe7] mb-4 text-center">Please complete the verification</h3>
+											<SliderCaptcha
+												onSuccess={handleCaptchaSuccess}
+												onFail={handleCaptchaFail}
+												onRefresh={handleCaptchaRefresh}
+											/>
+										</div>
+									)}
+									{/* Neon HUD corners */}
+									<span className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-2xl opacity-60 animate-pulse" />
+									<span className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#00ffe7] rounded-tr-2xl opacity-60 animate-pulse" />
+									<span className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-2xl opacity-60 animate-pulse" />
+									<span className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#00ffe7] rounded-br-2xl opacity-60 animate-pulse" />
+								</div>
+							</div>
 						</div>
+						</div>
+
+
+						{showStatusFooter && (
+							<StatusPopup
+								type={statusType}
+								message={statusMessage}
+								onClose={() => setShowStatusFooter(false)}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

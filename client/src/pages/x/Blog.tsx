@@ -94,7 +94,7 @@ const Blog: React.FC = () => {
   }
 
   return (
-    <div className="fixed py-32 inset-0 z-0 bg-[#181a23] bg-gradient-to-br from-[#181a23] via-[#23263a] to-[#1a1a2e] overflow-hidden animate-fade-in-up">
+    <div className="fixed inset-0 z-0 bg-[#181a23] bg-gradient-to-br from-[#181a23] via-[#23263a] to-[#1a1a2e] overflow-hidden animate-fade-in-up">
       {/* Neon background glow */}
       <div className="pointer-events-none fixed inset-0 z-0">
         <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[80vw] h-[60vh] bg-[#00ffe7]/10 blur-3xl rounded-full" />
@@ -112,7 +112,7 @@ const Blog: React.FC = () => {
           }}
         >
           <div className=" h-fit">
-            <div className="max-w-4xl w-full px-4 py-12 mx-auto ">
+            <div className="max-w-6xl w-full px-4 py-12 my-12 mx-auto ">
               <div className="bg-[#181a23]/80 border-2 border-[#00ffe7]/30 rounded-3xl shadow-[0_0_32px_#00ffe7]/20 backdrop-blur-md p-8 relative overflow-hidden">
                 {/* Neon border corners */}
                 <span className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-[#00ffe7] rounded-tl-3xl opacity-70 animate-pulse" />
@@ -120,10 +120,10 @@ const Blog: React.FC = () => {
                 <span className="absolute bottom-0 left-0 w-10 h-10 border-b-2 border-l-2 border-[#00ffe7] rounded-bl-3xl opacity-70 animate-pulse" />
                 <span className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-[#00ffe7] rounded-br-3xl opacity-70 animate-pulse" />
                 <h1 className="text-5xl font-extrabold text-[#00ffe7] mb-10 drop-shadow-[0_0_16px_#00ffe7] tracking-widest text-center neon-text">
-            Blog
+                  Blog
                 </h1>
                 <p className="text-2xl text-[#faafe8] mb-10 text-center max-w-2xl mx-auto font-medium">
-            Latest news, platform updates, and community highlights from Dexter City.
+                  Latest news, platform updates, and community highlights from Dexter City.
                 </p>
                 <div className="flex flex-col gap-12 w-full">
             {/* News Section */}
@@ -217,9 +217,6 @@ const Blog: React.FC = () => {
               </div>
             </div>
           </div>
-              </div>
-            <div className="text-center text-[#e0e7ef] text-sm h-[200px] w-full">
-              
               </div>
             </div>
           </div>

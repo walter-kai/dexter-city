@@ -62,7 +62,7 @@ const defaultBots: (BotForSale & {
 		buyPrice: buyPrice,
 		hirePrice: 0,
 		isPublic,
-		image: `https://robohash.org/${encodeURIComponent(name)}?size=120x120`,
+		image: `https://robohash.org/dextercity-${encodeURIComponent(name)}?size=120x120`,
 		stats: {
 			trades: totalTrades,
 			tradesPerDay: Math.round(totalTrades / Math.max(age, 1)),

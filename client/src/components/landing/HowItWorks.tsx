@@ -231,7 +231,7 @@ const HowItWorks: React.FC = () => {
         {gettingStartedSteps.map((step, index) => (
           <React.Fragment key={step.step}>
             <div 
-              ref={el => stepRefs.current[index] = el}
+              ref={el => { stepRefs.current[index] = el; }}
               className={`w-full max-w-3xl p-6 bg-[#181a23]/50 rounded-lg border border-[#00ffe7]/20 hover:border-[#00ffe7]/40 transition-all duration-700 mb-4 ${
                 visibleSteps[index] ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
               }`}

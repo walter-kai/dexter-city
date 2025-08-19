@@ -15,7 +15,7 @@ const RandomRobohashCard: React.FC = () => {
     <div className="bg-neon-darker border border-neon-cyan/30 rounded-xl shadow-[0_0_16px_#faafe8] max-w-xs mx-auto">
         {/* <div className="relative"> */}
           <img
-            src={`https://robohash.org/dextercity-${currentId}?set=set1&size=150x150`}
+            src={`https://robohash.org/${currentId}?set=set1&size=150x150`}
             alt={`Random bot ${currentId}`}
             className="w-16 h-16 mx-auto rounded-lg border-2 border-neon-cyan shadow-md bg-neon-dark transition-all duration-500"
           />
