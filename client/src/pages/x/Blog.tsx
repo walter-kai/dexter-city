@@ -127,14 +127,14 @@ const Blog: React.FC = () => {
                 </p>
                 <div className="flex flex-col gap-12 w-full">
             {/* News Section */}
-            <div className="w-full bg-[#23263a]/80 border border-[#00ffe7]/20 rounded-2xl p-6 mb-8 shadow-[0_0_12px_#00ffe7]/10 passport-card overflow-hidden backdrop-blur-sm">
+            {/* <div className="w-full bg-[#23263a]/80 border border-[#00ffe7]/20 rounded-2xl p-6 mb-8 shadow-[0_0_12px_#00ffe7]/10 passport-card overflow-hidden backdrop-blur-sm">
               <h2 className="text-2xl font-bold text-[#00ffe7] mb-6 text-center drop-shadow-[0_0_8px_#00ffe7] tracking-wide">
                 Media & News
               </h2>
               <div>
                 <NewsFetcher />
               </div>
-            </div>
+            </div> */}
             {/* Platform Updates Section */}
             <div className="w-full bg-[#23263a]/80 border border-[#00ffe7]/20 rounded-2xl p-6 shadow-[0_0_12px_#00ffe7]/10 passport-card overflow-hidden backdrop-blur-sm">
               <h2 className="text-2xl font-bold text-[#00ffe7] mb-6 text-center drop-shadow-[0_0_8px_#00ffe7] tracking-wide">

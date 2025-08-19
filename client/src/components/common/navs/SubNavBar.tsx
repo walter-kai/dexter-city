@@ -88,21 +88,21 @@ const SubNavBar: React.FC = () => {
           { text: 'BLOG', to: '/x/blog', icon: <FaNewspaper /> },
           { text: 'GET STARTED', to: '#getting-started', isHash: true, icon: <FaRocket /> },
           { text: 'FEATURES', to: '#features', isHash: true, icon: <FaBolt />, hasDropdown: true },
-          { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> }
+          { text: 'CONTACT US', to: '/x/about', icon: <FaEnvelope /> }
         ];
       case '/x/blog':
         return [
           { text: 'Home', to: '/', icon: <FaHome /> },
           { text: 'GET STARTED', to: '/#getting-started', isHash: true, icon: <FaRocket /> },
           { text: 'FEATURES', to: '/#features', isHash: true, icon: <FaBolt />, hasDropdown: true },
-          { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> }
+          { text: 'CONTACT US', to: '/x/about', icon: <FaEnvelope /> }
         ];
       default:
         return [
           { text: 'Home', to: '/', icon: <FaHome /> },
           { text: 'GET STARTED', to: '/#getting-started', isHash: true, icon: <FaRocket /> },
           { text: 'FEATURES', to: '/#features', isHash: true, icon: <FaBolt />, hasDropdown: true },
-          { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> }
+          { text: 'CONTACT US', to: '/x/about', icon: <FaEnvelope /> }
         ];
     }
   };

@@ -9,7 +9,6 @@ import Shop from './pages/i/Shop';
 import Garage from './pages/i/Garage';
 import BuildBot from './pages/i/Build';
 import Blog from './pages/x/Blog';
-import ContactUs from './pages/x/ContactUs';
 import AboutUs from './pages/x/AboutUs';
 import PrivacyPolicy from './pages/x/legal/PrivacyPolicy';
 import TermsOfService from './pages/x/legal/TermsOfService';
@@ -20,14 +19,10 @@ import LandingPage from './pages/x/Landing';
 import OfflineFooterNavBar from './components/common/navs/OfflineFooterNavBar';
 import HowItWorks from './pages/x/HowItWorks';
 import TickerBar from './components/common/TickerBar';
-import TelegramSocialSection from './pages/x/Social';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import EnterCityNavBar from './components/common/navs/EnterCityNavBar';
-import CommissionsCard from './pages/x/Commissions';
 import { useAuth } from './providers/AuthContext';
 import LoginModal from './components/common/LoginModal';
 import OnlineNavBar from './components/common/navs/OnlineNavBar';
-import Social from './pages/x/Social';
 import { connect } from 'http2';
 
 // Main App component
@@ -45,6 +40,13 @@ const App: React.FC = () => {
   const onlineToggleButtonRef = React.useRef<HTMLButtonElement>(null);
   const { showLoginModal, closeLoginModal, user } = useAuth();
   const nodeRef = useRef<HTMLDivElement>(null);
+
+  // Redirect unauthenticated users from /i/ routes
+  useEffect(() => {
+    if (location.pathname.startsWith('/i/') && !user) {
+      navigate('/');
+    }
+  }, [location.pathname, user, navigate]);
 
   // Reset scroll position on route change (except for hash navigation)
   useEffect(() => {
@@ -134,11 +136,6 @@ const App: React.FC = () => {
         {(location.pathname.startsWith("/x/") || location.pathname === "/") && (
           <>
             <TickerBar />
-            {(location.pathname !== "/") && (
-              <div className=''>
-                <EnterCityNavBar />
-              </div>
-            )}
             <OfflineFooterNavBar
               navigate={navigate}
               toggleButtonRef={toggleButtonRef as React.RefObject<HTMLButtonElement>}
@@ -191,10 +188,7 @@ const App: React.FC = () => {
                   <Route path="/x/about" element={<AboutUs />} />
                   <Route path="/x/how-it-works" element={<HowItWorks />} />
                   <Route path="/x/blog" element={<Blog />} />
-                  <Route path="/x/contact" element={<ContactUs />} />
                   <Route path="/x/pools" element={<DailyPoolActivity />} />
-                  <Route path="/x/social" element={<Social />} />
-                  <Route path="/x/commissions" element={<CommissionsCard />} />
                   
                   {/* Bot-related routes under /bots/ */}
                   <Route path="/i/dashboard" element={<Dashboard />} />

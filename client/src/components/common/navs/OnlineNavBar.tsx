@@ -67,7 +67,7 @@ const NavBar: React.FC = () => {
         { text: 'SEPARATOR' }, // Special separator item
         { text: 'BLOG', to: '/x/blog', icon: <FaNewspaper /> },
         { text: 'FRONT PAGE', to: '/', icon: <FaRocket /> },
-        { text: 'CONTACT US', to: '/x/contact', icon: <FaEnvelope /> },
+        { text: 'CONTACT US', to: '/x/about', icon: <FaEnvelope /> },
       ];
     // }
     

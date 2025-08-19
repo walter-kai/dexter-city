@@ -133,7 +133,7 @@ const OnlineFooterNavBar: React.FC<OnlineFooterNavBarProps> = ({
           <div className="space-y-2 mb-4">
             {dropdownNavBtn('BLOG', '/x/blog', <FaNewspaper />)}
             {dropdownNavBtn('FRONT PAGE', '/', <FaRocket />)}
-            {dropdownNavBtn('CONTACT US', '/x/contact', <FaEnvelope />)}
+            {dropdownNavBtn('CONTACT US', '/x/about', <FaEnvelope />)}
           </div>
           
           <div className="border-t border-[#00ffe7]/20 my-4"></div>

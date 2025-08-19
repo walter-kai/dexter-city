@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { FaRedo, FaArrowRight } from 'react-icons/fa';
+import LoadingScreenDots from '../../common/LoadingScreenDots';
 
 interface SliderCaptchaProps {
   width?: number;
@@ -357,6 +358,16 @@ const SliderCaptcha: React.FC<SliderCaptchaProps> = ({
         height={height}
         className="border border-[#00ffe7]/30 rounded-lg block"
       />
+      
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 bg-black/80 border border-[#00ffe7]/30 rounded-lg flex items-center justify-center backdrop-blur-sm">
+          <div className="text-center">
+            <LoadingScreenDots size={4} />
+            <p className="text-[#e0e7ef] text-sm mt-4">{loadingText}</p>
+          </div>
+        </div>
+      )}
       
       {/* Refresh button */}
       <button

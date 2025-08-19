@@ -1,6 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FaChevronCircleUp } from 'react-icons/fa';
 import LoadingScreenDots from '../LoadingScreenDots';
+import { useAuth } from "../../../providers/AuthContext";
+import { useSDK } from "@metamask/sdk-react";
 
 interface OfflineNavbarProps {
   navigate: (path: string) => void;
@@ -19,6 +21,38 @@ const OfflineFooterNavBar: React.FC<OfflineNavbarProps> = ({
   menuRef,
   currentPath // <-- receive prop
 }) => {
+  const [isTriggering, setIsTriggering] = useState(false);
+  const { connecting, connected } = useSDK();
+  const { triggerLoginModal } = useAuth();
+
+  useEffect(() => {
+    if (connected && isTriggering) {
+      setIsTriggering(false);
+    }
+  }, [connected, isTriggering]);
+
+  useEffect(() => {
+    if (isTriggering) {
+      // Reset after 10 seconds if still triggering (modal closed manually)
+      const timeout = setTimeout(() => {
+        setIsTriggering(false);
+      }, 10000);
+
+      return () => clearTimeout(timeout);
+    }
+  }, [isTriggering]);
+
+  useEffect(() => {
+    // Reset when connecting goes from true to false (connection attempt ended)
+    if (!connecting && isTriggering) {
+      setIsTriggering(false);
+    }
+  }, [connecting, isTriggering]);
+
+  const handleEnterClick = () => {
+    setIsTriggering(true);
+    triggerLoginModal();
+  };
   useEffect(() => {
     if (!showFooterMenu) return;
     const handleClick = (e: MouseEvent) => {
@@ -58,25 +92,37 @@ const OfflineFooterNavBar: React.FC<OfflineNavbarProps> = ({
         {/* Nav Buttons (now on the left) */}
         <div className='gap-4 flex'>
           {navBtn('Home', '/')}
-          {navBtn('Blog', '/x/blog')}
-          {navBtn('About', '/x/about')}
           {navBtn('How this works', '/x/how-it-works')}
-          {navBtn('Contact', '/x/contact')}
-          {navBtn('Telegram', '/x/social')}
-          {navBtn('Commissions', '/x/commissions')}
+          {navBtn('About', '/x/about')}
+          {navBtn('Blog', '/x/blog')}
         </div>
-        {/* Start Menu Button (now on the right) */}
-        <button
-          type="button"
-          ref={toggleButtonRef}
-          className="bottom-6 right-6 z-40 bg-[#23263a] border border-[#00ffe7]/40 rounded-full p-4 shadow-lg hover:bg-[#181a23] transition"
-          onClick={e => { e.stopPropagation(); setShowFooterMenu(v => !v); }}
-          aria-label="Open Start Menu"
-        >
-          <FaChevronCircleUp
-            className={`text-[#00ffe7] text-2xl transition-transform duration-300 ${showFooterMenu ? 'rotate-0' : '-rotate-90'}`}
-          />
-        </button>
+        
+        {/* Right side buttons */}
+        <div className="flex items-center gap-4">
+          {/* Enter the city button */}
+          <button
+            onClick={handleEnterClick}
+            disabled={connecting}
+            className="btn-special px-6 py-2 text-base font-bold animate-pulse hover:animate-none transition-all duration-150 rounded-lg"
+          >
+            {isTriggering ? <LoadingScreenDots size={3} /> : "Enter the city"}
+          </button>
+          
+          {/* Start Menu Button with Dexter logo */}
+          <button
+            type="button"
+            ref={toggleButtonRef}
+            className=" rounded-full p-3 shadow-lg hover:bg-[#181a23] transition"
+            onClick={e => { e.stopPropagation(); setShowFooterMenu(v => !v); }}
+            aria-label="Open Start Menu"
+          >
+            <img 
+              src="/logos/dexter3d.svg" 
+              alt="DexterCity" 
+              className={`h-6 w-6 transition-transform duration-300 drop-shadow-[0_0_4px_#00ffe7] `}
+            />
+          </button>
+        </div>
       </div>
       {/* Drop-up Start Menu Footer */}
       {showFooterMenu && (
