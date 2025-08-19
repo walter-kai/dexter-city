@@ -33,10 +33,10 @@ const TickerBar: React.FC = () => {
     const marqueeStyle = `
         @keyframes marquee {
             0% { transform: translateX(0%); }
-            100% { transform: translateX(-50%); }
+            100% { transform: translateX(-100%); }
         }
         .animate-marquee {
-            animation: marquee 60s linear infinite;
+            animation: marquee 120s linear infinite;
             will-change: transform;
         }
     `;
@@ -49,8 +49,9 @@ const TickerBar: React.FC = () => {
                     {loading ? (
                         <span className="text-white px-4">Loading trending tokens...</span>
                     ) : (
-                        (trendingCoins.length > 0 ? [...trendingCoins, ...trendingCoins] : []).map((coin, index) => (
-                            <div key={index} className="flex items-center mx-4">
+                        // Triple the array for seamless looping
+                        [...trendingCoins, ...trendingCoins, ...trendingCoins].map((coin, index) => (
+                            <div key={index} className="flex items-center mx-8 flex-shrink-0">
                                 <img src={coin.item.thumb} alt={coin.item.name} className="h-6 w-6 mr-2 rounded-full" />
                                 <span className="text-white font-semibold">{coin.item.name} ({coin.item.symbol.toUpperCase()})</span>
                             </div>
