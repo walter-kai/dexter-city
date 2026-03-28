@@ -1,46 +1,185 @@
-# Getting Started with Create React App
+# Dexter City
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Dexter City is a full-stack crypto app that was intended to become a marketplace for trading bot strategies.
 
-## Available Scripts
+The original product direction was:
 
-In the project directory, you can run:
+- strategy marketplace (buy/sell/hire bots)
+- custom bot creation with DCA-style parameters
+- charting and pool analytics using Uniswap network data
+- execution vision centered on Uniswap v4 hooks
 
-### `yarn start`
+This repository contains the web platform and API layer for that vision.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+---
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## What this codebase currently includes
 
-### `yarn test`
+### 1) Strategy marketplace UX
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Bot marketplace screens for buying and selling
+- Bot detail modals and filtering UI
+- Listing flow for user-owned bots
 
-### `yarn build`
+Note: parts of the marketplace are currently UI/prototype behavior with placeholder purchase actions.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### 2) Bot builder with DCA-oriented settings
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Users can create bots with parameters such as:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- `initialOrderSize`
+- `priceDeviation`
+- `safetyOrders`
+- `safetyOrderGapMultiplier`
+- `safetyOrderSizeMultiplier`
+- `takeProfit`
+- `trailingTakeProfit`
+- `cooldownPeriod`
 
-### `yarn eject`
+Bots are stored in Firestore and can be started/stopped/killed through API endpoints.
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### 3) Uniswap data integration for charts and pool activity
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Fetches pools and swap data from the Uniswap v4 subgraph via The Graph
+- Builds candlestick chart data for pair analysis
+- Supports daily pool activity snapshots and comparisons
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### 4) Wallet authentication
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- MetaMask signature flow on the client
+- JWT issuance and protected server routes
+- user profile fetch/update endpoints
 
-## Learn More
+### 5) Supporting utilities
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- CoinMarketCap token metadata syncing
+- social/news and sentiment endpoints
+- link preview endpoint
+- Telegram contact-message relay endpoint
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
+
+## Architecture
+
+- Frontend: React + TypeScript + Vite + Tailwind
+- Backend: Express + TypeScript
+- Auth: MetaMask signature + JWT
+- Data: Firebase Firestore (and storage bucket)
+- Market data: Uniswap v4 subgraph (The Graph), CoinMarketCap token metadata
+
+Project layout:
+
+- `client/` — React app
+- `server/` — Express API
+- `.types/` — shared TypeScript interfaces
+
+---
+
+## Local development
+
+### Prerequisites
+
+- Node.js 20+
+- npm
+- MetaMask browser extension
+- Firebase project/service account credentials
+- The Graph API key for Uniswap subgraph access
+
+### 1) Install dependencies
+
+From repository root:
+
+- `npm install`
+
+Then install client dependencies:
+
+- `cd client && npm install`
+
+### 2) Configure environment variables
+
+Create a root `.env` file with values used by the server.
+
+Required/commonly used:
+
+- `PORT` (default server is `3001`)
+- `JWT_SECRET`
+- `THEGRAPH_API_KEY`
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_PRIVATE_KEY_ID`
+- `FIREBASE_PRIVATE_KEY`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_CLIENT_ID`
+- `FIREBASE_CLIENT_X509_CERT_URL`
+
+Optional:
+
+- `TELEGRAM_BOT_TOKEN`
+- `MY_TELEGRAM_CHAT_ID`
+
+### 3) Run in development
+
+From root:
+
+- `npm run dev`
+
+This starts:
+
+- API server on `http://localhost:3001`
+- client app on `http://localhost:3000`
+
+The Vite dev server proxies `/api` requests to the backend.
+
+---
+
+## Build and run (production mode)
+
+### Build TypeScript server output
+
+- `npm run build`
+
+### Start compiled server
+
+- `npm run start`
+
+The server serves the built client from `client/dist`.
+
+---
+
+## API surface (high-level)
+
+Base path: `/api`
+
+- `/auth` — MetaMask authentication
+- `/user` — profile and user updates
+- `/bot` — create/manage user bots
+- `/subgraph` — pools/swaps/daily pool snapshots
+- `/cmc` — token metadata utilities
+- `/social-news` — social/news feed endpoint
+- `/sentiment` — sentiment endpoint
+- `/link` — URL preview endpoint
+- `/telegram` — send contact messages to Telegram
+
+Many bot and subgraph routes require JWT auth.
+
+---
+
+## Product status and intent
+
+Dexter City is best understood as a strong prototype of a bot-strategy marketplace platform.
+
+The intended core idea remains:
+
+1. discover and trade bot strategies,
+2. create your own bot and DCA strategy,
+3. analyze markets with Uniswap-derived charts,
+4. execute through a Uniswap-hook-driven architecture.
+
+The execution-contract layer for hook-based order settlement is not implemented in this repository as a complete production trading engine.
+
+---
+
+## Notes
+
+- This repo contains active prototype code and some legacy paths.
+- Treat secrets and API keys as sensitive; do not commit real credentials.
+- Review and harden auth, validation, and production config before public deployment.
